@@ -1,0 +1,1 @@
+dpkg -i /linux-*.deb

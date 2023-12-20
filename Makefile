@@ -1,0 +1,87 @@
+IMAGE_SIZE=10
+UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/20231207/jammy-server-cloudimg-amd64.img
+KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
+CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
+
+.PHONY: build_firmware setup_guest_net del_guest_net
+
+#Build OVMF Firmware
+build_firmware:
+	git submodule init; git submodule update
+	cd edk2/; git submodule init; git submodule update
+	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 make -j16 -C BaseTools/
+	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 build -a X64 -b DEBUG -t GCC5 -D DEBUG_ON_SERIAL_PORT -D DEBUG_VERBOSE -p OvmfPkg/OvmfPkgX64.dsc
+	mkdir -p firmware
+	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
+	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
+
+firmware/OVMF_CODE.fd: build_firmware
+firmware/OVMF_VARS.fd: build_firmware
+
+#Build guest image
+tmp.qcow2:
+	wget ${UBUNTU_IMAGE} -O $@
+
+config: tmp.qcow2
+	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
+	mv config-5.15.0-89-generic config
+
+guest.qcow2: tmp.qcow2
+	bash ./scripts/build_image.sh tmp guest linux ${IMAGE_SIZE}
+
+$(addsuffix .config,$(KERNEL_DIRS)): %: config
+	cp config $@
+
+#Build container to build svsm kernel image
+.buildcontainer: container/Dockerfile container/build.sh container/user.sh
+	cd container; docker build -f Dockerfile -t vmplbuild .
+	touch .buildcontainer
+
+$(addprefix build/,${KERNEL_DIRS}): build/%: .buildcontainer %.config
+	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) $*"
+
+setup_guest_net: #131.159.254.1
+	sudo ip tuntap add tap0 mode tap
+	sudo ip addr add 192.168.120.1/24 dev tap0
+	sudo ip link set up dev tap0
+	sudo iptables -t nat -A POSTROUTING -o enp2s0f0np0 -j MASQUERADE
+
+del_guest_net:
+	sudo ip link delete tap0
+	sudo iptables -t nat -D POSTROUTING -o enp2s0f0np0 -j MASQUERADE
+	echo ""
+
+prepair: #rustup override set nightly 
+	rustup toolchain install nightly
+	rustup target add x86_64-unknown-none
+	
+svsm/svsm.bin: build_svsm
+
+build_svsm:
+	cd svsm; make FEATURES=enable-gdb
+
+clean:
+	#rm -r ./build/
+	#rm -f ./*.qcow2
+
+run_svsm:
+	qemu-system-x86_64 \
+	-enable-kvm \
+	-cpu EPYC-v4,host-phys-bits=true  \
+	-machine q35,confidential-guest-support=sev0,memory-backend=ram1,kvm-type=protected \
+	-object memory-backend-memfd-private,id=ram1,size=8G,share=true \
+	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,svsm=on \
+	-smp 8 \
+	-no-reboot \
+	-drive if=pflash,format=raw,unit=0,file=firmware/OVMF_CODE.fd,readonly=on \
+	-drive if=pflash,format=raw,unit=1,file=firmware/OVMF_VARS.fd,snapshot=on \
+	-drive if=pflash,format=raw,unit=2,file=svsm/svsm.bin,readonly=on \
+	-drive file=guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=off \
+	-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on \
+	-device scsi-hd,drive=disk0,bootindex=0 \
+	-netdev tap,ifname=tap0,id=net0,script=no,downscript=no -device e1000,netdev=net0 \
+	-serial stdio \
+	-serial pty
+
+ssh:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.120.10
