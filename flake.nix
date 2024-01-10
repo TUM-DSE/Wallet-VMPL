@@ -55,6 +55,10 @@
           "--disable-sdl-image"
         ];
       });
+
+	vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
+
+
     };
 
     devShells = let 
@@ -91,6 +95,7 @@
           llvmPackages.bintools
           rustup
           man
+          git-lfs
         ] ++ common_deps ++ [ self.packages.x86_64-linux.qemu-coconut ];
         hardeningDisable = [ "all" ];
         # prevent clangStdenv from overriding the fixed clang-tools binaries from nixos

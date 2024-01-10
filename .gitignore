@@ -1,0 +1,15 @@
+build/*dbg*
+**/*.cmd
+**/*.o
+**/*.mod*
+**/*.ko
+**/*.symvers
+**/*.order
+**/*.out
+**/test
+/.buildcontainer
+/.toolchain
+tmp.qcow2
+guest.qcow2
+tmp
+guest

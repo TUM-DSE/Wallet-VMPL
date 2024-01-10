@@ -1,0 +1,28 @@
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index bdc6f8946269..22c822413b0d 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -644,6 +644,23 @@ static int svsm_protocol(struct svsm_call *call)
+ 	return ret;
+ }
+ 
++int do_svsm_protocol(struct svsm_call * call){
++	
++	unsigned long flags;
++	int ret;
++
++	local_irq_save(flags);
++
++	call->caa = this_cpu_read(svsm_caa);
++
++	ret = svsm_protocol(call);
++
++	local_irq_restore(flags);
++
++	return ret;
++}
++EXPORT_SYMBOL(do_svsm_protocol);
++
+ void noinstr __sev_es_nmi_complete(void)
+ {
+ 	struct ghcb_state state;

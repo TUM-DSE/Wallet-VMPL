@@ -2,10 +2,10 @@
 	path = edk2
 	url = https://github.com/coconut-svsm/edk2.git
 	branch = svsm
-[submodule "svsm"]
-	path = svsm
-	url = https://github.com/coconut-svsm/svsm.git
-[submodule "kernel/linux"]
-	path = kernel/linux
+[submodule "linux"]
+	path = linux
 	url = https://github.com/coconut-svsm/linux.git
 	branch = svsm
+[submodule "svsm"]
+	path = svsm
+	url = git@github.com:TUM-DSE/svsm.git

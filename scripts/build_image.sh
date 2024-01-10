@@ -1,4 +1,5 @@
 #!/bin/bash
+#mount -t 9p -o trans=virtio  mo mod/ -oversion=9p2000.L
 set -x
 shopt -s extglob
 qemu-img create -f qcow2 -o preallocation=metadata $2.qcow2 ${4}G
@@ -15,6 +16,7 @@ for filename in container/guestkeys/*; do
 done
 virt-copy-in -a $2.qcow2 container/guestkeys/ /
 virt-copy-in -a $2.qcow2 container/sshd_config /etc/ssh/
+virt-copy-in -a $2.qcow2 container/fstab /etc/
 virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable systemd-timesyncd"\
              --run-command "chmod 700 /etc/netplan/99_config.yaml"\
              --run-command "chown root:root /root/.ssh/*"\
@@ -23,4 +25,5 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --run-command "apt autoremove --purge snapd -y"\
              --run-command "apt-mark hold snapd"\
              --run-command "dpkg -i /linux-*.deb"\
-             --install "gcc"
+             --install "gcc" \
+             --install "make"
