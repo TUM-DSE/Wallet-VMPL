@@ -1,5 +1,10 @@
 # Schal: Secure layering framework for confidential VMs
 
+## Prerequisite
+- Schal requires AMD SEV-SNP VMPL
+- git-lfs is required for this repository
+
+
 ## Usage
 Initial Setup:
 ```bash
