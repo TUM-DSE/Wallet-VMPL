@@ -2,7 +2,7 @@ ROOT_PATH?=$(shell pwd)
 MODULE_PATH?=${ROOT_PATH}/module/
 KERNEL_PATH?=${ROOT_PATH}/linux/
 KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
-USER=$(shell whoami)
+USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 
 IMAGE_SIZE=10
@@ -37,6 +37,10 @@ config: tmp.qcow2
 guest.qcow2: tmp.qcow2 scripts/build_image.sh
 	bash ./scripts/build_image.sh tmp guest linux ${IMAGE_SIZE}
 
+make update_guest:
+	bash ./scripts/update_image.sh guest linux
+
+
 linux/.config:
 	cp config linux/.config
 
@@ -47,6 +51,8 @@ linux/.config:
 
 build/kernel/linux/linux:
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
+	#sleep 1
+	#docker logs -f kernelbuild > kernelbuildlog
 
 setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
@@ -82,7 +88,7 @@ prepare_all: submodules prepare build_svsm guest.qcow2 setup_guest_net
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
 run_svsm:
-	qemu-system-x86_64 \
+	sudo qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu EPYC-v4,host-phys-bits=true  \
 	-machine q35,confidential-guest-support=sev0,memory-backend=ram1,kvm-type=protected \
@@ -100,8 +106,7 @@ run_svsm:
 	-serial stdio \
 	-serial pty \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough
-
-
+	
 #### Does not work
 run_svsm2:
 	qemu-system-x86_64 \

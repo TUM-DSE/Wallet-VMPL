@@ -3,7 +3,7 @@ KVERSION = $(shell uname -r)
 
 all:
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules
-	gcc test.c -o test
+	gcc -std=c11 test.c -lpthread -o test
 clean:
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
 	rm test
@@ -15,4 +15,5 @@ reload:
 test: reload
 	./test
 
-	
+asm: test.asm
+	nasm -f bin test.asm -o bin

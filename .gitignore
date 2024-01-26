@@ -7,6 +7,7 @@ build/*dbg*
 **/*.order
 **/*.out
 **/test
+/.vscode/**
 /.buildcontainer
 /.toolchain
 tmp.qcow2

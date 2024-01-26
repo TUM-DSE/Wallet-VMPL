@@ -1,4 +1,5 @@
 #include <linux/module.h>
+#include <linux/mm.h>
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -10,26 +11,58 @@
 #include <linux/percpu-defs.h> 
 #include <asm/sev.h>
 
-#define VMPL_WR _IOWR('a','a',struct svsm_call)
+#include <asm/io.h>
+#include <linux/mm.h>
+#include <asm/tlbflush.h>
+
+#include "vmpl.h"
 
 
 dev_t dev = 0;
 static struct class *dev_class;
 static struct cdev cdev;
-/*
-struct svsm_call {
-	struct svsm_caa *caa;
-	u64 rax;
-	u64 rcx;
-	u64 rdx;
-	u64 r8;
-	u64 r9;
-};*/
 
 extern int do_svsm_protocol(struct svsm_call * call);
 /*
 rax := protocol_number:call_identifier
 */
+
+static void* pagewalk(void* vaddr, struct mm_struct* mm){
+	u64 addr = (u64)vaddr;
+
+	pgd_t* pgd = pgd_offset(mm, addr);
+	if (pgd_none(*pgd) || pgd_bad(*pgd)) {
+		printk( KERN_INFO "Invalid pgd\n");
+		return NULL;
+	}
+	p4d_t* p4d = p4d_offset(pgd,addr);
+	if (p4d_none(*p4d) || p4d_bad(*p4d)){
+		printk( KERN_INFO "Invalid p4d\n");
+		return NULL;
+	}
+	pud_t *pud = pud_offset(p4d, addr);
+	if (pud_none(*pud) || pud_bad(*pud)){
+		printk( KERN_INFO "Invalid pud\n");
+		return NULL;
+	}
+	pmd_t *pmd = pmd_offset(pud, addr);
+	if (pmd_none(*pmd) || pmd_bad(*pmd)){
+		printk( KERN_INFO "Invalid pmd\n");
+		return NULL;
+	}
+	pte_t *pte = pte_offset_kernel(pmd, addr);
+	if (pte_none(*pte)) {
+		printk( KERN_INFO "Invalid pte\n");
+		pte_unmap(pte);
+		return NULL;	
+	}
+	
+	struct page *pg = pte_page(*pte);
+	pte_unmap(pte);
+	return (void*)page_to_phys(pg);
+
+	
+}
 
 
 static int vmpl_open(struct inode *inode, struct file *file){
@@ -42,31 +75,83 @@ static int vmpl_release(struct inode *inode, struct file * file){
 	return 0;	
 }
 
-static long vmpl_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
-	struct svsm_call user_call;
+static long vmpl_request(struct file *file, unsigned int cmd, unsigned long arg){
+	return 0;
+}
+
+static long vmpl_req(struct file *file, unsigned int cmd, unsigned long arg){
+	return 0;
+}
+
+
+static long vmpl_req2(struct file *file, unsigned int cmd, unsigned long arg){
+	struct mem memory;
 	void* __user arg_user = (void*)arg;
-	printk(KERN_INFO "IOCTL call\n");
+
+	if(copy_from_user(&memory,arg_user, sizeof(struct mem))){
+		printk(KERN_ERR "Copy from user error\n");
+		return -1;
+	}
+
+	printk(KERN_INFO "Addresses: %llu %llu %llu\n",(u64)memory.pages, (u64)memory.stack, (u64)memory.vmsa);
+
+	void* puserpages = NULL;
+	void* puserstack = NULL;
+	void* puservmsa = NULL;
+
+	puserpages = pagewalk(memory.pages, current->mm);
+	if(puserpages == NULL){
+		printk(KERN_ERR "Failed to parse page address 1\n");
+		return -1;
+	}
+
+	puserstack = pagewalk(memory.stack, current->mm);
+	if(puserstack == NULL){
+		printk(KERN_ERR "Failed to parse page address 2\n");
+		return -1;
+	}
+
+	puservmsa = pagewalk(memory.vmsa, current->mm);
+	if(puservmsa == NULL){
+		printk(KERN_ERR "Failed to parse page address 3\n");
+		return -1;
+	}
+
+	struct svsm_call call;
+	call.rax = (((u64)5) << 32) | 1;
+	call.rcx = (u64)puserpages;
+	call.rdx = (u64)puserstack;
+	call.r8 = (u64)puservmsa;
 	
+	int res = do_svsm_protocol(&call);
+	
+	if(res != 0){
+		printk(KERN_ERR "Failed to alloc new env\n");
+	}
+	
+	return 0;
+
+}
+
+
+
+
+
+static long vmpl_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
+
 	switch(cmd){
 		case VMPL_WR:
-			if(copy_from_user(&user_call,arg_user, sizeof(struct svsm_call))){
-				printk(KERN_ERR "Copy from user error\n");
-				return -1;
-			}
-			if(((user_call.rax & 0xffffffff00000000) >>32) != 5){
-				printk(KERN_ERR "Invalid Message type\n");
-				return -1;
-			}
-			printk(KERN_INFO "SVMS Protocol Message: \n	rax: %llu\n	rcx: %llu\n	rdx: %llu\n", user_call.rax, user_call.rcx, user_call.rdx);
-			int res = do_svsm_protocol(&user_call);
-			user_call.rcx = res;
-			if(copy_to_user(arg_user, &user_call, sizeof(struct svsm_call))){
-				printk(KERN_ERR "Copy to user error\n");
-				return -1;
-			}
-			break;
+			return vmpl_request(file,cmd,arg);
+
+		case VMPL_W:
+			return vmpl_req(file,cmd,arg);
+
+		case VMPL_W2:
+			return vmpl_req2(file,cmd,arg);
+
 		default:
 			printk(KERN_INFO "Nothing\n");
+		
 
 	}
 
@@ -81,8 +166,10 @@ static struct file_operations fileops = {
 };
 
 
+
 static int __init vmpl_start(void)
 {
+
 
 	int ret = alloc_chrdev_region(&dev, 0, 1, "vmpls");
 	if(ret < 0){
@@ -112,6 +199,9 @@ static int __init vmpl_start(void)
 		unregister_chrdev_region(dev,1);
 		return -1;
 	}
+
+
+
 
 	printk(KERN_INFO "VMPL Driver Initilized\n");
 
