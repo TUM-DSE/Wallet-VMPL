@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 5.15.0-89-generic Kernel Configuration
+# Linux/x86 5.15.0-92-generic Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0"
 CONFIG_CC_IS_GCC=y
@@ -48,7 +48,7 @@ CONFIG_HAVE_KERNEL_ZSTD=y
 CONFIG_KERNEL_ZSTD=y
 CONFIG_DEFAULT_INIT=""
 CONFIG_DEFAULT_HOSTNAME="(none)"
-CONFIG_VERSION_SIGNATURE="Ubuntu 5.15.0-89.99-generic 5.15.126"
+CONFIG_VERSION_SIGNATURE="Ubuntu 5.15.0-92.102-generic 5.15.131"
 CONFIG_SWAP=y
 CONFIG_SYSVIPC=y
 CONFIG_SYSVIPC_SYSCTL=y
@@ -4038,7 +4038,7 @@ CONFIG_IEEE802154_HWSIM=m
 #
 # Wireless WAN
 #
-CONFIG_WWAN=y
+CONFIG_WWAN=m
 CONFIG_WWAN_HWSIM=m
 CONFIG_MHI_WWAN_CTRL=m
 CONFIG_MHI_WWAN_MBIM=m
@@ -9400,7 +9400,6 @@ CONFIG_QCOM_VADC_COMMON=m
 CONFIG_QCOM_SPMI_IADC=m
 CONFIG_QCOM_SPMI_VADC=m
 CONFIG_QCOM_SPMI_ADC5=m
-CONFIG_STX104=m
 CONFIG_TI_ADC081C=m
 CONFIG_TI_ADC0832=m
 CONFIG_TI_ADC084S021=m
@@ -9419,6 +9418,12 @@ CONFIG_TWL6030_GPADC=m
 CONFIG_VIPERBOARD_ADC=m
 CONFIG_XILINX_XADC=m
 # end of Analog to digital converters
+
+#
+# Analog to digital and digital to analog converters
+#
+CONFIG_STX104=m
+# end of Analog to digital and digital to analog converters
 
 #
 # Analog Front Ends

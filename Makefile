@@ -6,7 +6,9 @@ USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 
 IMAGE_SIZE=10
-UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/20231207/jammy-server-cloudimg-amd64.img
+#UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/20231207/jammy-server-cloudimg-amd64.img
+UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+CONFIG_FILE=config-5.15.0-92-generic
 KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 
@@ -31,8 +33,8 @@ tmp.qcow2:
 	wget ${UBUNTU_IMAGE} -O $@
 
 config: tmp.qcow2
-	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
-	mv config-5.15.0-89-generic config
+	virt-copy-out -a tmp.qcow2 /boot/${CONFIG_FILE} .
+	mv ${CONFIG_FILE} config
 
 guest.qcow2: tmp.qcow2 scripts/build_image.sh
 	bash ./scripts/build_image.sh tmp guest linux ${IMAGE_SIZE}
