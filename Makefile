@@ -51,8 +51,6 @@ linux/.config:
 
 build/kernel/linux/linux:
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
-	#sleep 1
-	#docker logs -f kernelbuild > kernelbuildlog
 
 setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
@@ -106,7 +104,7 @@ run_svsm:
 	-serial stdio \
 	-serial pty \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough
-	
+
 #### Does not work
 run_svsm2:
 	qemu-system-x86_64 \

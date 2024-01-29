@@ -12,8 +12,14 @@ reload:
 	rmmod vmpl.ko | true
 	insmod vmpl.ko
 	
-test: reload
-	./test
+test: reload bin
+	./test "./bin"
 
-asm: test.asm
+test2: reload bin2
+	./test "./bin2"
+
+bin: test.asm
 	nasm -f bin test.asm -o bin
+
+bin2: test2.asm
+	nasm -f bin test.asm -o bin2

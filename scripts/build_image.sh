@@ -26,4 +26,5 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --run-command "apt-mark hold snapd"\
              --run-command "dpkg -i /linux-*.deb"\
              --install "gcc" \
-             --install "make"
+             --install "make" \
+	     --install "nasm"

@@ -58,8 +58,8 @@ void alloc_memory(){
         ((uint8_t*)memory.vmsa)[i] = i;
 }
 
-void read_bin(){
-    FILE* bin = fopen("./bin", "rb");
+void read_bin(char* path){
+    FILE* bin = fopen(path, "rb");
     memset(memory.pages,0,sysconf(_SC_PAGESIZE));
     int res = fread(memory.pages, 1, sysconf(_SC_PAGESIZE),bin);
     fclose(bin);
@@ -99,7 +99,7 @@ int call_svsm(void* args){
 
 
 
-int main()
+int main(int argc, char** argv)
 {
         
         int32_t value, number;
@@ -110,7 +110,7 @@ int main()
         }
         
         alloc_memory();
-        read_bin();
+        read_bin(argv[1]);
 
 
         thrd_t print_thread, svsm_thread;

@@ -13,7 +13,7 @@ make prepare_all
 
 Run CVM:
 ```bash
-sudo make run_svsm
+make run_svsm
 ```
 
 Connect via SSH:
