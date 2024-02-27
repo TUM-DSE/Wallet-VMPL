@@ -1,13 +1,33 @@
-{ pkgs, lib, modulesPath, ... }:
+{ pkgs, lib, modulesPath, fetchurl,... }:
 let
   keys = map (key: "${builtins.getEnv "HOME"}/.ssh/${key}")
     [ "id_rsa.pub" "id_ecdsa.pub" "id_ed25519.pub" ];
-  #  kernel-vmpl = pkgs.linuxKernel.customPackage {
-  #	version = "6.5.0-vmpl";
-  #	configfile = /scratch/patrick/vmpl/.config;
-  #	#patch = /scratch/patick/wkernel.patch;
-  #	src =  "linuxsrc";
-  #};
+  vmplkernel = let
+      linux_vmpl_pkg = { fetchurl, buildLinux, ... } @ args:
+
+        buildLinux (args // rec {
+          version = "6.5.0";
+          modDirVersion = version;
+
+          src = pkgs.fetchurl {
+            url = "https://github.com/coconut-svsm/linux/archive/e1335c6f029281db280945e084ec2d079934e744.tar.gz";
+            hash = "sha256-iIgv8CrksuydkevTk31b9D/BcXAXeO+JqaxZcRkCDo4=";
+          };
+          kernelPatches = [ {
+            name = "svsm_calls";
+            patch = ./kernel.patch;
+            extraConfig = '''';     
+          }];
+
+          extraConfig = ''
+          '';
+
+          extraMeta.branch = "6.5.0";
+        } // (args.argsOverride or {}));
+      linux_vmpl = pkgs.callPackage linux_vmpl_pkg{};
+    in 
+      pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux_vmpl);
+
 in
 {
   imports = [
@@ -29,32 +49,23 @@ in
   # slows things down
   systemd.services.systemd-networkd-wait-online.enable = false;
 
+  boot.loader = {
+    efi = {
+      canTouchEfiVariables = true;
+      #efiSysMountPoint = "/boot/efi";
+    };
+    grub = {
+      efiSupport = true;
+      device = "nodev";
+      enable = true;
+    };
+  };
   #boot.loader.grub.enable = true;
   boot.initrd.enable = true;
-  boot.kernelPackages =
-    let
-      linux-vmpl = { fetchurl, buildLinux, ... } @ args:
-        buildLinux (args // rec {
-          version = "6.5.0-vmpl";
-          modDirVersion = "6.5.0";
-          src = fetchurl {
-            url = "https://github.com/coconut-svsm/linux/archive/e1335c6f029281db280945e084ec2d079934e744.tar.gz";
-            hash = "sha256-iIgv8CrksuydkevTk31b9D/BcXAXeO+JqaxZcRkCDo4=";
-          };
-          kernelPatches = [
+  
 
-            {
-              name = "vmpl";
-              patch = ./kernel.patch;
-              extraConfig = ''
-              '';
-            }
-          ];
-          extraMeta.branch = "6.5";
-        } // (args.argsOverride or { }));
-      linux-vmpl-build = pkgs.callPackage linux-vmpl { };
-    in
-    pkgs.recurseIntoAttrs (pkgs.linuxPackagesFor linux-vmpl-build);
+    
+  boot.kernelPackages = vmplkernel;
   #boot.loader.initScript.enable = true;
   ## login with empty password
   users.extraUsers.root.initialHashedPassword = "";

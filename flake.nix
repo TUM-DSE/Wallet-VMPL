@@ -12,8 +12,6 @@
     nixpkgs-2111.url = "github:NixOS/nixpkgs/nixos-21.11";
     nixpkgs-2305.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixpkgs-2311.url = "github:NixOS/nixpkgs/nixos-23.11";
-    nixpkgs-unstable.url =
-      "github:NixOS/nixpkgs/269028fe51e7832507cd33afa1891bccbf32be48";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:Sabanic-P/rust-overlay";
     nixos-generators = {
@@ -28,8 +26,8 @@
     };
   };
 
-  outputs =
-    { self, nixpkgs, flake-utils, nixos-generators, rust-overlay, bpftrace, ... }@args:
+  outputs = { self, nixpkgs, flake-utils, nixos-generators, rust-overlay
+    , bpftrace, ... }@args:
     (flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -37,17 +35,15 @@
         pkgs2111 = args.nixpkgs-2111.legacyPackages.${system};
         pkgs2305 = args.nixpkgs-2305.legacyPackages.${system};
         pkgs2311 = args.nixpkgs-2311.legacyPackages.${system};
-        pkgsunstable = args.nixpkgs-unstable.legacyPackages.${system};
         flakepkgs = self.packages.${system};
         selfpkgs = self.packages.${system};
         overlays = [ (import rust-overlay) ];
-        pkgsrust = import nixpkgs {
-          inherit system overlays;
-        };
-      in 
-      {
+        pkgsrust = import nixpkgs { inherit system overlays; };
+      in {
         packages = {
-          rustdev = pkgsrust.rust-bin.nightly."2024-01-10".default.override {targets = [ "x86_64-unknown-none" ];};
+          rustdev = pkgsrust.rust-bin.nightly."2024-01-10".default.override {
+            targets = [ "x86_64-unknown-none" ];
+          };
           qemu-coconut = pkgs2311.qemu.overrideAttrs (new: old: {
             src = self.inputs.qemu-coconut-src;
             version = "8.0.0";
@@ -60,11 +56,11 @@
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
+          gcc = pkgs.callPackage ./nix/gcc.nix { };
         };
 
         devShells = let
           common_deps = with pkgs; [
-            just
             nixos-generators.packages.${system}.nixos-generate
             ccls # c lang serv
             meson
@@ -74,17 +70,14 @@
             cloud-utils
           ];
         in {
-          # use clang over gcc because it has __builtin_dump_struct()
           default = pkgs.stdenv.mkDerivation {
             name = "devshell";
             buildInputs = with pkgs;
               [
-                # dependencies for libvfio-user
                 meson
                 ninja
                 cmake
                 json_c
-                cmocka
                 pkg-config
                 libuuid
                 nasm
@@ -97,15 +90,24 @@
                 llvmPackages.bintools
                 man
                 git-lfs
-              ] ++ common_deps ++ [ self.packages.x86_64-linux.qemu-coconut ]
-              ++ [ self.packages.x86_64-linux.rustdev ] ++ [ self.packages.x86_64-linux.bpftrace ];
+                zstd
+                yq
+              ] ++ common_deps ++ [ self.packages.${system}.qemu-coconut ]
+              ++ [ self.packages.${system}.rustdev ]
+              ++ [ self.packages.${system}.bpftrace ] ++ [ pkgs2311.docker ];
             hardeningDisable = [ "all" ];
-            # prevent clangStdenv from overriding the fixed clang-tools binaries from nixos
             shellHook = ''
               PATH="${pkgs.clang-tools}/bin:$PATH"
+              if [ ! -f "./container/99_config.yaml" ]; then
+                ./container/netconf.sh
+              fi;
             '';
           };
 
+        };
+        apps.gcc = {
+          type = "app";
+          program = "${self.packages.${system}.gcc}/bin/x86_64-elf-gcc";
         };
       }));
 }

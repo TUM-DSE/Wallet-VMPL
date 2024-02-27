@@ -5,11 +5,16 @@ KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
 USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 
+
+SOURCE_IMAGE=tmp
+IMAGE_NAME=guest
+
+
 IMAGE_SIZE=10
-UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/20231207/jammy-server-cloudimg-amd64.img
+UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
-
+USERADDR = $(shell expr $(shell id -u) - 1000)
 
 .PHONY: build_firmware setup_guest_net del_guest_net
 
@@ -27,16 +32,17 @@ firmware/OVMF_CODE.fd: build_firmware
 firmware/OVMF_VARS.fd: build_firmware
 
 #Get guest image
-tmp.qcow2:
+${SOURCE_IMAGE}.qcow2:
 	wget ${UBUNTU_IMAGE} -O $@
+	rm ${IMAGE_NAME}.qcow2
 
 config: tmp.qcow2
 	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
 	mv config-5.15.0-89-generic config
 
-guest.qcow2: tmp.qcow2 scripts/build_image.sh
-	bash ./scripts/build_image.sh tmp guest linux ${IMAGE_SIZE}
-
+guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb
+	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
+	
 make update_guest:
 	bash ./scripts/update_image.sh guest linux
 
@@ -49,12 +55,15 @@ linux/.config:
 	cd container; docker build -f Dockerfile -t vmplbuild .
 	touch .buildcontainer
 
+cargo:
+	cargo --version
+
 build/kernel/linux/linux:
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
 
 setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
-	sudo ip addr add 192.168.120.1/24 dev tap0_${USER}
+	sudo ip addr add 192.168.${USERADDR}.1/24 dev tap0_${USER}
 	sudo ip link set up dev tap0_${USER}
 	sudo iptables -t nat -A POSTROUTING -o enp2s0f0np0 -j MASQUERADE
 
@@ -132,7 +141,7 @@ run_svsm2:
 
 
 ssh:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.120.10
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
 
 
 #module/test.ko: module/test.ko 

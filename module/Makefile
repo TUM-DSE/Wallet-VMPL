@@ -23,3 +23,10 @@ bin: test.asm
 
 bin2: test2.asm
 	nasm -f bin test.asm -o bin2
+
+ctest:
+	gcc -c testcode.c -o testcode.o
+	objcopy -O binary -j .text testcode.o binfile
+	
+page: reload bin
+	./test -p
