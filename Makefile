@@ -36,9 +36,9 @@ ${SOURCE_IMAGE}.qcow2:
 	wget ${UBUNTU_IMAGE} -O $@
 	rm ${IMAGE_NAME}.qcow2
 
-config: tmp.qcow2
-	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
-	mv config-5.15.0-89-generic config
+#config: tmp.qcow2#
+#	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
+#	mv config-5.15.0-89-generic config
 
 guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
@@ -58,7 +58,7 @@ linux/.config:
 cargo:
 	cargo --version
 
-build/kernel/linux/linux:
+build/kernel/linux: linux/.config
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
 
 setup_guest_net: #131.159.254.1

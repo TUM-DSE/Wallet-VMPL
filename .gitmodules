@@ -4,8 +4,8 @@
 	branch = svsm
 [submodule "linux"]
 	path = linux
-	url = https://github.com/coconut-svsm/linux.git
-	branch = svsm
+	url = https://github.com/Sabanic-P/linux.git
+	branch = svsm-vmpl-guest
 [submodule "svsm"]
 	path = svsm
 	url = git@github.com:TUM-DSE/svsm.git
