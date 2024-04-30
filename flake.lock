@@ -252,29 +252,13 @@
         "type": "github"
       }
     },
-    "nixpkgs-unstable": {
-      "locked": {
-        "lastModified": 1707212762,
-        "narHash": "sha256-+QZYYy7a4quaMHGt8b2llwMdyaNH/wLDLWzw5F4UR+Y=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "269028fe51e7832507cd33afa1891bccbf32be48",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "269028fe51e7832507cd33afa1891bccbf32be48",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1701718080,
-        "narHash": "sha256-6ovz0pG76dE0P170pmmZex1wWcQoeiomUZGggfH9XPs=",
+        "lastModified": 1714253743,
+        "narHash": "sha256-mdTQw2XlariysyScCv2tTE45QSU9v/ezLcHJ22f0Nxc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2c7f3c0fb7c08a0814627611d9d7d45ab6d75335",
+        "rev": "58a1abdbae3217ca6b702f03d3b35125d88a2994",
         "type": "github"
       },
       "original": {
@@ -298,6 +282,19 @@
         "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
+      }
+    },
+    "qemu-coconut-igvm-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1714479916,
+        "narHash": "sha256-ZIWmccqolTcgfz4rCz+MVOZAz1o+wUWDUcT+I0N14GM=",
+        "type": "tarball",
+        "url": "https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu-8.2.0.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu-8.2.0.tar.gz"
       }
     },
     "qemu-coconut-src": {
@@ -329,7 +326,7 @@
         "nixpkgs-2211": "nixpkgs-2211",
         "nixpkgs-2305": "nixpkgs-2305",
         "nixpkgs-2311": "nixpkgs-2311",
-        "nixpkgs-unstable": "nixpkgs-unstable",
+        "qemu-coconut-igvm-src": "qemu-coconut-igvm-src",
         "qemu-coconut-src": "qemu-coconut-src",
         "rust-overlay": "rust-overlay"
       }
@@ -340,11 +337,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1707358215,
-        "narHash": "sha256-Nuhi8KEJ2e+2nTimSyEIPqN5eh7ECVWd+AnPXG6L+SY=",
+        "lastModified": 1714443211,
+        "narHash": "sha256-lKTA3XqRo4aVgkyTSCtpcALpGXdmkilHTtN00eRg0QU=",
         "owner": "Sabanic-P",
         "repo": "rust-overlay",
-        "rev": "dd917bb1b67fc049fd56fe6de70266a9ab74a4aa",
+        "rev": "ce35c36f58f82cee6ec959e0d44c587d64281b6f",
         "type": "github"
       },
       "original": {

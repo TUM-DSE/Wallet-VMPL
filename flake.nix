@@ -24,6 +24,11 @@
         "git+https://github.com/coconut-svsm/qemu.git?ref=svsm-v8.0.0&submodules=1";
       flake = false;
     };
+    qemu-coconut-igvm-src = {
+      url = "https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu-8.2.0.tar.gz";
+        #"git+https://github.com/coconut-svsm/qemu.git?ref=svsm-igvm&submodules=1";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, flake-utils, nixos-generators, rust-overlay
@@ -41,12 +46,23 @@
         pkgsrust = import nixpkgs { inherit system overlays; };
       in {
         packages = {
-          rustdev = pkgsrust.rust-bin.nightly."2024-01-10".default.override {
+          rustdev = pkgsrust.rust-bin.stable."1.77.2".default.override {
             targets = [ "x86_64-unknown-none" ];
+            extensions = ["rust-docs" "rustfmt" "clippy"];
           };
           qemu-coconut = pkgs2311.qemu.overrideAttrs (new: old: {
             src = self.inputs.qemu-coconut-src;
             version = "8.0.0";
+            configureFlags = old.configureFlags ++ [
+              "--target-list=x86_64-softmmu"
+              "--disable-gtk"
+              "--disable-sdl"
+              "--disable-sdl-image"
+            ];
+          });
+          qemu-coconut-igvm = pkgs.qemu.overrideAttrs (new: old: {
+            src = builtins.fetchurl { url = https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu8.2.0.tar.gz; sha256 = "sha256:15cmwlkiwd001hhbv8rcvdnsdgr092x2jvy15m9c3k4s7g36a7yh";};
+            version = "8.2.0";
             configureFlags = old.configureFlags ++ [
               "--target-list=x86_64-softmmu"
               "--disable-gtk"
@@ -91,23 +107,64 @@
                 man
                 git-lfs
                 zstd
+                glibc
+                glibc.static
                 yq
-              ] ++ common_deps ++ [ self.packages.${system}.qemu-coconut ]
+                autoconf
+                automake
+                libtool
+                openssl
+                autoconf-archive
+                rust-bindgen
+              ] ++ common_deps ++ [ self.packages.${system}.qemu-coconut-igvm ]
               ++ [ self.packages.${system}.rustdev ]
               ++ [ self.packages.${system}.bpftrace ] ++ [ pkgs2311.docker ];
             hardeningDisable = [ "all" ];
             shellHook = ''
               PATH="${pkgs.clang-tools}/bin:$PATH"
               if [ ! -f "./container/99_config.yaml" ]; then
-                ./container/netconf.sh
+                ./container/netconf.sh 2> /dev/null
               fi;
             '';
           };
-
+          musl = pkgs.stdenv.mkDerivation {
+            name = "devshell";
+            buildInputs = with pkgs;
+              [
+                meson
+                ninja
+                cmake
+                json_c
+                pkg-config
+                libuuid
+                nasm
+                coreboot-toolchain.x64
+                guestfs-tools
+                libguestfs-with-appliance
+                flex
+                bison
+                perf-tools
+                llvmPackages.bintools
+                man
+                git-lfs
+                zstd
+                musl
+                yq
+              ] ++ common_deps ++ [ self.packages.${system}.qemu-coconut ]
+              ++ [ self.packages.${system}.rustdev ]
+              ++ [ self.packages.${system}.bpftrace ] ++ [ pkgs2311.docker ];
+            hardeningDisable = [ "all" ];
+            shellHook = '''';
+          };
         };
         apps.gcc = {
           type = "app";
           program = "${self.packages.${system}.gcc}/bin/x86_64-elf-gcc";
+        };
+        apps.musl-gcc = {
+          type = "app";
+          buildInputs = with pkgs; [musl.dev];
+          program = "musl-gcc";
         };
       }));
 }
