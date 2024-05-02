@@ -50,6 +50,7 @@
             targets = [ "x86_64-unknown-none" ];
             extensions = ["rust-docs" "rustfmt" "clippy"];
           };
+          igvm = pkgs.callPackage ./nix/igvm.nix { };
           qemu-coconut = pkgs2311.qemu.overrideAttrs (new: old: {
             src = self.inputs.qemu-coconut-src;
             version = "8.0.0";
@@ -63,16 +64,20 @@
           qemu-coconut-igvm = pkgs.qemu.overrideAttrs (new: old: {
             src = builtins.fetchurl { url = https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu8.2.0.tar.gz; sha256 = "sha256:15cmwlkiwd001hhbv8rcvdnsdgr092x2jvy15m9c3k4s7g36a7yh";};
             version = "8.2.0";
+            buildInputs = old.buildInputs ++ [ self.packages.${system}.igvm ];
+            igvm = self.packages.${system}.igvm;
             configureFlags = old.configureFlags ++ [
               "--target-list=x86_64-softmmu"
               "--disable-gtk"
               "--disable-sdl"
               "--disable-sdl-image"
+              "--enable-igvm"
             ];
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
           gcc = pkgs.callPackage ./nix/gcc.nix { };
+          
         };
 
         devShells = let
@@ -116,7 +121,10 @@
                 openssl
                 autoconf-archive
                 rust-bindgen
-              ] ++ common_deps ++ [ self.packages.${system}.qemu-coconut-igvm ]
+                rust-cbindgen
+                cunit
+                pkg-config
+              ] ++ common_deps ++ [  self.packages.${system}.qemu-coconut-igvm self.packages.${system}.igvm ]
               ++ [ self.packages.${system}.rustdev ]
               ++ [ self.packages.${system}.bpftrace ] ++ [ pkgs2311.docker ];
             hardeningDisable = [ "all" ];
