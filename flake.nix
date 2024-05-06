@@ -112,8 +112,6 @@
                 man
                 git-lfs
                 zstd
-                glibc
-                glibc.static
                 yq
                 autoconf
                 automake

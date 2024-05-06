@@ -5,10 +5,8 @@ KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
 USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 
-
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
-
 
 IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
@@ -20,13 +18,15 @@ USERADDR = $(shell expr $(shell id -u) - 1000)
 
 #Build OVMF Firmware
 build_firmware:
-	git submodule init; git submodule update
+	#git submodule init; git submodule update
 	cd edk2/; git submodule init; git submodule update
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 make -j16 -C BaseTools/
-	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 build -a X64 -b DEBUG -t GCC5 -D DEBUG_ON_SERIAL_PORT -D DEBUG_VERBOSE -p OvmfPkg/OvmfPkgX64.dsc
+	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; \
+	PYTHON3_ENABLE=TRUE PYTHON_COMMAND=python3 build -a X64 -b DEBUG -t GCC5 -D DEBUG_ON_SERIAL_PORT -D DEBUG_VERBOSE -DTPM2_ENABLE -p OvmfPkg/OvmfPkgX64.dsc
 	mkdir -p firmware
 	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
 	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
+	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd firmware/
 
 firmware/OVMF_CODE.fd: build_firmware
 firmware/OVMF_VARS.fd: build_firmware
@@ -55,9 +55,6 @@ linux/.config:
 	cd container; docker build -f Dockerfile -t vmplbuild .
 	touch .buildcontainer
 
-cargo:
-	cargo --version
-
 build/kernel/linux: linux/.config
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
 
@@ -82,7 +79,7 @@ prepare: .toolchain
 svsm/svsm.bin: build_svsm
 
 build_svsm:
-	cd svsm; make FEATURES=enable-gdb
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES=enable-gdb
 
 clean:
 	git submodule foreach --recursive git clean -xfd
@@ -94,18 +91,15 @@ prepare_all: submodules prepare build_svsm guest.qcow2 setup_guest_net
 
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
-run_svsm:
+run:
 	sudo qemu-system-x86_64 \
 	-enable-kvm \
 	-cpu EPYC-v4,host-phys-bits=true  \
-	-machine q35,confidential-guest-support=sev0,memory-backend=ram1,kvm-type=protected \
-	-object memory-backend-memfd-private,id=ram1,size=8G,share=true \
-	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,svsm=on \
+	-machine q35,confidential-guest-support=sev0,memory-backend=ram1 \
+	-object memory-backend-memfd,id=ram1,size=8G,share=true \
+	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,igvm-file=svsm/bin/coconut-qemu.igvm \
 	-smp 8 \
 	-no-reboot \
-	-drive if=pflash,format=raw,unit=0,file=firmware/OVMF_CODE.fd,readonly=on \
-	-drive if=pflash,format=raw,unit=1,file=firmware/OVMF_VARS.fd,snapshot=on \
-	-drive if=pflash,format=raw,unit=2,file=svsm/svsm.bin,readonly=on \
 	-drive file=guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=off \
 	-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on \
 	-device scsi-hd,drive=disk0,bootindex=0 \
@@ -114,52 +108,6 @@ run_svsm:
 	-serial pty \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough
 
-#### Does not work
-run_svsm2:
-	qemu-system-x86_64 \
-	-enable-kvm \
-	-cpu EPYC-v4,host-phys-bits=true  \
-	-machine q35,confidential-guest-support=sev0,memory-backend=ram1,kvm-type=protected \
-	-object memory-backend-memfd-private,id=ram1,size=8G,share=true \
-	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,svsm=on \
-	-smp 8 \
-	-kernel linux/arch/x86/boot/bzImage \
-	-append "root=/dev/vdb console=hvc0 nokaslr" \
-	-virtfs local,path=${ROOT_PATH},security_model=none,mount_tag=home \
-	-virtfs local,path=${ROOT_PATH}/guest/,security_model=none,mount_tag=linux \
-	-no-reboot \
-	-drive if=pflash,format=raw,unit=0,file=firmware/OVMF_CODE.fd,readonly=on \
-	-drive if=pflash,format=raw,unit=1,file=firmware/OVMF_VARS.fd,snapshot=on \
-	-drive if=pflash,format=raw,unit=2,file=svsm/svsm.bin,readonly=on \
-	-drive file=guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=off \
-	-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on \
-	-device scsi-hd,drive=disk0 \
-	-netdev tap,ifname=tap0_${USER},id=net0,script=no,downscript=no -device e1000,netdev=net0 \
-	-serial stdio \
-	-serial pty \
-	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough
-
 
 ssh:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
-
-
-#module/test.ko: module/test.ko 
-
-###
-kernel_build:
-	cd linux; git apply ../kernel.patch | true
-	cp .config linux/.config
-	nix-shell '<nixpkgs>' -A linux.dev --run "\
-	cd linux;\
-        make olddefconfig; \
-	make -j$(shell nproc); "
-
-module_build:
-	nix-shell '<nixpkgs>' -A linux.dev --run "cd module;\
-        make -C ../linux/ M=$(shell pwd)/module"
-
-image_build:
-	nix build --out-link ${GUEST_PATH} --builders '' .#vmplguest-image
-	install -D -m600 ${GUEST_PATH}/nixos.qcow2 guest.qcow2
-###
