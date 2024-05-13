@@ -284,19 +284,6 @@
         "type": "github"
       }
     },
-    "qemu-coconut-igvm-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1714479916,
-        "narHash": "sha256-ZIWmccqolTcgfz4rCz+MVOZAz1o+wUWDUcT+I0N14GM=",
-        "type": "tarball",
-        "url": "https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu-8.2.0.tar.gz"
-      },
-      "original": {
-        "type": "tarball",
-        "url": "https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu-8.2.0.tar.gz"
-      }
-    },
     "qemu-coconut-src": {
       "flake": false,
       "locked": {
@@ -326,7 +313,6 @@
         "nixpkgs-2211": "nixpkgs-2211",
         "nixpkgs-2305": "nixpkgs-2305",
         "nixpkgs-2311": "nixpkgs-2311",
-        "qemu-coconut-igvm-src": "qemu-coconut-igvm-src",
         "qemu-coconut-src": "qemu-coconut-src",
         "rust-overlay": "rust-overlay"
       }
