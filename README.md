@@ -2,10 +2,9 @@
 
 ## Prerequisite
 - Schal requires AMD SEV-SNP VMPL
-- git-lfs is required for this repository
-
 
 ## Usage
+
 Initial Setup:
 ```bash
 make prepare_all
@@ -24,6 +23,10 @@ make ssh
 Build Kernel Module (within VM):
 ```bash
 cd module
-make 
-make test
+make vmpl.ko
+```
+
+To Test Trustlet execution: 
+```bash
+make trustlet_test
 ```
