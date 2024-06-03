@@ -118,8 +118,8 @@ run:
 ssh:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
 
-load_module:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko"
+trustlet_test:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
 
 
 container/99_config.yaml:
