@@ -5,8 +5,10 @@ KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
 USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 
+
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
+
 
 IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
@@ -31,16 +33,22 @@ build_firmware:
 firmware/OVMF_CODE.fd: build_firmware
 firmware/OVMF_VARS.fd: build_firmware
 
+.PHONY: build_firmware setup_guest_net del_guest_net
+
+VMPLkernel6.5.tar.gz: 
+	-wget -nc https://github.com/TUM-DSE/svsm/releases/download/VMPL-guest-Image/VMPLkernel6.5.tar.gz
+	tar -xvzf VMPLkernel6.5.tar.gz
+
 #Get guest image
-${SOURCE_IMAGE}.qcow2:
-	wget ${UBUNTU_IMAGE} -O $@
-	rm ${IMAGE_NAME}.qcow2
+${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
+	-wget -nc ${UBUNTU_IMAGE} -O $@
+	#rm ${IMAGE_NAME}.qcow2
 
 #config: tmp.qcow2#
 #	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
 #	mv config-5.15.0-89-generic config
 
-guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb
+guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb container/99_config.yaml
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
 	
 make update_guest:
@@ -69,13 +77,6 @@ del_guest_net:
 	sudo iptables -t nat -D POSTROUTING -o enp2s0f0np0 -j MASQUERADE
 	echo ""
 
-prepare: .toolchain
-
-.toolchain: #rustup override set nightly 
-	rustup toolchain install nightly
-	rustup target add x86_64-unknown-none
-	touch .toolchain
-
 svsm/svsm.bin: build_svsm
 
 build_svsm:
@@ -89,9 +90,10 @@ clean:
 	cd node; make clean
 
 submodules:
-	git submodule update --init --recursive
+	git submodule update --init --recursive svsm
+	git submodule update --init --recursive edk2
 
-prepare_all: submodules prepare build_svsm guest.qcow2 setup_guest_net
+prepare_all: submodules build_svsm guest.qcow2 setup_guest_net
 
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
@@ -118,3 +120,7 @@ ssh:
 
 load_module:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko"
+
+
+container/99_config.yaml:
+	./container/netconf.sh 2> /dev/null
