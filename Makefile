@@ -79,10 +79,14 @@ prepare: .toolchain
 svsm/svsm.bin: build_svsm
 
 build_svsm:
-	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES=enable-gdb
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES=enable-gdb RELEASE=True
+node/bin/node:
+	cd node; make
+	cp node/bin/node module/
 
 clean:
 	git submodule foreach --recursive git clean -xfd
+	cd node; make clean
 
 submodules:
 	git submodule update --init --recursive
@@ -111,3 +115,6 @@ run:
 
 ssh:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+
+load_module:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko"

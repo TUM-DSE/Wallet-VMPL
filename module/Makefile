@@ -1,9 +1,16 @@
+MODULE_NAME = vmpl
+ccflags-y := -I$(src)/include
 obj-m = vmpl.o
 KVERSION = $(shell uname -r)
+SRC = src/vmpl.c
+${MODULE_NAME}-objs = $(SRC:.c=.o)
 
-all:
+vmpl.ko: ${SRC}
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules
-	gcc -std=c11 test.c -lpthread -o test
+
+all: vmpl.ko	
+	gcc -I include/ -std=c11 app/test.c -lpthread -o test
+	
 clean:
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
 	rm test
@@ -18,15 +25,19 @@ test: reload bin
 test2: reload bin2
 	./test "./bin2"
 
-bin: test.asm
-	nasm -f bin test.asm -o bin
+bin: programs/test.asm
+	nasm -f bin test.asm -o bin/bin
 
-bin2: test2.asm
-	nasm -f bin test.asm -o bin2
+write: programs/write.asm
+	nasm -f bin programs/write.asm -o bin/write
 
 ctest:
 	gcc -c testcode.c -o testcode.o
 	objcopy -O binary -j .text testcode.o binfile
 	
-page: reload bin
-	./test -p
+test_create_cpu: 
+	insmod vmpl.ko
+	./test -
+
+t:
+	gcc -I include/ -std=c11 app/t.c -lpthread -o test

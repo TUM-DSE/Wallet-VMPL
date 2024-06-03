@@ -9,3 +9,9 @@
 [submodule "svsm"]
 	path = svsm
 	url = git@github.com:TUM-DSE/svsm.git
+[submodule "client/snphost"]
+	path = client/snphost
+	url = https://github.com/virtee/snphost.git
+[submodule "client/snpguest"]
+	path = client/snpguest
+	url = https://github.com/virtee/snpguest.git
