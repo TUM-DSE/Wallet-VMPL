@@ -18,6 +18,8 @@ func c_request_init() int32
 func c_alloc(size int32) *byte
 //extern free_memory
 func c_free_memory(ptr *byte)
+//extern handle_attestation
+func c_get_report() *byte
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "Test\n")
@@ -48,9 +50,13 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleAttestation(w http.ResponseWriter, r *http.Request) {
-
+	report_size := c_get_report_size(0);
 }
 
+/* 
+ * TODO: Fetch Zygote from remote repository 
+ *
+*/
 func getZygote() *byte{
 
 	fmt.Println("Catching Zygote")

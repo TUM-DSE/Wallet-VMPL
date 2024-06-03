@@ -76,6 +76,7 @@
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
+          test = pkgs.callPackage ./node/pkg.nix { };
         };
 
         devShells = let
@@ -122,6 +123,10 @@
                 pkg-config
                 gcc
                 gccgo
+                glibc
+                glibc.static
+                python3
+                python311Packages.requests
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm

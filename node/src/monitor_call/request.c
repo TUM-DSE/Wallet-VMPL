@@ -40,10 +40,19 @@ int32_t handle_request(uint8_t* z, uint32_t zs, uint8_t* t, uint32_t ts, uint8_t
     //Zygote
     printf("al: %d\n",is_aligned(z,1));
     call.type = createZygote;
-    call.zygote_size = zs;
-    call.zygote = z;
+    call.trustlet.size = zs;
+    call.zygote.zygote = z;
 
     return 0;
 
 }
 
+int64_t get_monitor_report(int64_t q){
+    if(q == 0){
+         
+    } else {
+        
+
+
+    }
+}
