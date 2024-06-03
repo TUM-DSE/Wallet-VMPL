@@ -1,7 +1,5 @@
-build/kernel/linux/linux-headers-6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
-build/kernel/linux/linux-image-6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
-build/kernel/linux/linux-libc-dev_6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
-*.deb filter=lfs diff=lfs merge=lfs -text
+build/kernel/linux-headers-6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
+build/kernel//linux-image-6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
+build/kernel/linux-libc-dev_6.5.0-svsm.deb filter=lfs diff=lfs merge=lfs -text
 tmp.qcow2 filter=lfs diff=lfs merge=lfs -text
-*.qcow2 filter=lfs diff=lfs merge=lfs -text
 container/kernel_build_container.tar.xz filter=lfs diff=lfs merge=lfs -text
