@@ -16,7 +16,7 @@ KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 USERADDR = $(shell expr $(shell id -u) - 1000)
 
-.PHONY: build_firmware setup_guest_net del_guest_net
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm
 
 #Build OVMF Firmware
 build_firmware:
@@ -125,11 +125,6 @@ trustlet_test:
 container/99_config.yaml:
 	./container/netconf.sh 2> /dev/null
 
-
-
-KERNELDIR := $(shell nix build --print-out-paths "/etc/nixos/#nixosConfigurations.ryan.config.boot.kernelPackages.kernel.dev")
-
-.PHONY: kvm unload_kvm load_kvm
 
 kvm: 
 	make -C host/ kvm
