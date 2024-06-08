@@ -124,3 +124,18 @@ trustlet_test:
 
 container/99_config.yaml:
 	./container/netconf.sh 2> /dev/null
+
+
+
+KERNELDIR := $(shell nix build --print-out-paths "/etc/nixos/#nixosConfigurations.ryan.config.boot.kernelPackages.kernel.dev")
+
+.PHONY: kvm unload_kvm load_kvm
+
+kvm: 
+	make -C host/ kvm
+
+unload_kvm: 
+	make -C host/ unload_kvm
+
+load_kvm:
+	make -C host/ load_kvm
