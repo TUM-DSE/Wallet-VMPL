@@ -23,6 +23,7 @@
 typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
+#include "measurement_utils.h"
 //#define rax 1
 //#define rcx 2
 //#define rdx 3
@@ -68,7 +69,7 @@ int call_attest() {
     struct attestation_report* report = (struct attestation_report*)att_buffer;
     FILE* report_file = fopen("/root/report.txt","w");
     printf("FILE: %p\n",report_file);
-    printf("SIZE: %ld\n",report->report_size);
+    printf("SIZE: %d\n",report->report_size);
     fwrite(report->report,report->report_size, 1,report_file);
     
     for(int i = 0; i<1216;i++){
@@ -104,6 +105,7 @@ int main(int argc, char** argv)
 {
         int32_t value, number;
 
+		uint64_t CPU_freq = get_CPU_freq();
 
         fd = open("/dev/vmpl_device", O_RDWR);
         if(fd < 0) {
@@ -111,8 +113,15 @@ int main(int argc, char** argv)
                 return -1;
         }
         monitor_init();
+		uint64_t initial_cycles = get_cycles();
         single_exec();
+		uint64_t final_cycles = get_cycles();
         int i = 0;
+
+		printf("CPU freq: %ld\n", CPU_freq);
+		printf("Duration: %f ms\n", cycles_to_ms(final_cycles - initial_cycles, CPU_freq));
+
+	//	printf("Number of cycles: %ld\n", final_cycles - initial_cycles);
         //while(1){
             //printf("Test: %d\n", i++);
         //}
