@@ -20,6 +20,8 @@ enum monitor_call_type {
     deleteTrustlet,
     invokeTrustlet,
     waitForTrustletResult,
+
+	get_public_key = 30,
 };
 
 struct monitor_call {

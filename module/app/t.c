@@ -40,6 +40,7 @@ struct PACKED attestation_report {
     uint32_t status;
     uint32_t report_size;
     uint8_t reserved[24];
+	uint8_t pub_key_hash[64];
     uint8_t report[];    
 };
 
@@ -80,6 +81,32 @@ int call_attest() {
     printf("\n");
 }
 
+void get_pub_key(uint8_t** key) {
+    u64 page_size = sysconf(_SC_PAGESIZE);
+    uint8_t* key_buffer = aligned_alloc(page_size, page_size);
+	key_buffer[0] = 0;
+	printf("[Client] Allocated 1 page at %p\n", key_buffer);
+    struct monitor_call call;
+	call.attestation_target = key_buffer;
+    u64 ret;
+    call.type = get_public_key;
+	printf("[Client] Type: %d\n", call.type);
+	sleep(1);
+    ret = ioctl(fd,VMPL_WR,&call);
+    printf("ret = %lld\n", ret);
+
+	// find size of key
+	unsigned int key_size = strlen((char*)key_buffer);	
+	printf("[Client] Key size = %d\n", key_size);
+	
+	// Have space for the terminating null
+	(*key) = malloc(key_size + 1);
+
+	strncpy((*key), key_buffer, key_size);
+	(*key)[key_size] = 0;
+
+	free(key_buffer);
+}
 
 void monitor_init() {
     struct monitor_call call;
@@ -116,7 +143,17 @@ int main(int argc, char** argv)
         //while(1){
             //printf("Test: %d\n", i++);
         //}
-        //call_attest();
+        call_attest();
+		char* key;
+		get_pub_key(&key);
+
+		printf("[Client] key size again: %d\n", strlen(key));
+		printf("[Client] Key: ");
+		for(int i = 0; i < strlen(key); i++) {
+			printf("%d ", key[i]);
+		}
+		printf("\n");
+
 
         /*
         if(argc < 2) {
@@ -162,5 +199,6 @@ int main(int argc, char** argv)
 close_:
         printf("Close");
         close(fd);
+		free(key);
         return 0;
 }
