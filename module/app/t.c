@@ -20,6 +20,8 @@
 #include <sys/mman.h>
 #include <inttypes.h>
 #include <stdlib.h>
+
+#include <openssl/sha.h>
 typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
@@ -50,7 +52,7 @@ int fd;
 
 
 //uint8_t att_buffer[4096];
-int call_attest() {
+int call_attest(uint8_t* pub_key_hash) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* att_buffer = aligned_alloc(page_size, page_size);
     for(int i = 0; i < page_size;i++){
@@ -77,6 +79,10 @@ int call_attest() {
             printf("\n");
         printf("%" PRIu8 " ", att_buffer[i]);
     }
+	
+	//extract pub key hash
+	strncpy(pub_key_hash, att_buffer + 112, 64);
+
     free(att_buffer);
     printf("\n");
 }
@@ -127,6 +133,18 @@ void single_exec(){
     printf("Init called\n");  
 }
 
+int my_SHA512(const char* buff, const unsigned int buff_len, char* hash)
+{
+	SHA512_CTX sha512_ctx;
+	if(SHA512_Init(&sha512_ctx) == 0)
+		return 0;
+	if(SHA512_Update(&sha512_ctx, buff, buff_len) == 0)
+		return 0;
+	if(SHA512_Final(hash, &sha512_ctx) == 0)
+		return 0;
+	return 1;
+}
+
 int main(int argc, char** argv)
 {
         int32_t value, number;
@@ -143,7 +161,8 @@ int main(int argc, char** argv)
         //while(1){
             //printf("Test: %d\n", i++);
         //}
-        call_attest();
+		uint8_t pub_key_hash[64];
+        call_attest(pub_key_hash);
 		char* key;
 		get_pub_key(&key);
 
@@ -153,6 +172,16 @@ int main(int argc, char** argv)
 			printf("%d ", key[i]);
 		}
 		printf("\n");
+
+		uint8_t hash[64];
+		my_SHA512(key, strlen(key), hash);
+
+		if(strncmp(pub_key_hash, hash, 64) == 0) {
+			printf("The hashes match!!\n");
+		} else {
+			printf("The hashes don't match :(\n");
+		}
+
 
 
         /*
