@@ -149,6 +149,7 @@ static long delete_trustlet(struct monitor_call* mcall){
 		return -1;
 	return 0;
 }
+
 static long get_pub_key(struct monitor_call* mcall){
 
 	struct svsm_call call;
@@ -163,7 +164,19 @@ static long get_pub_key(struct monitor_call* mcall){
 	return 0;
 }
 
+static long _send_policy(struct monitor_call* mcall){
 
+	struct svsm_call call;
+	void* ph = pagewalk(mcall->attestation_target);
+	printk(KERN_ERR "Using Page %p for policy\n", ph);
+	call.rcx = (uint64_t)ph;
+
+	call.rax = MONITORCALLID(mcall->type);
+
+	if(do_monitor_call(&call) != 1)
+		return -1;
+	return 0;
+}
 
 static long parse_request(struct file *file, unsigned int cmd, unsigned long arg){
 
@@ -192,6 +205,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return delete_trustlet(&call);
 	case get_public_key:
 		return get_pub_key(&call);
+	case send_policy:
+		return _send_policy(&call);
 
 
 	default:
