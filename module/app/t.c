@@ -226,11 +226,11 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 	int nb_chunks = sizeof(policy) / chunk_size;
 	printf("[Client] Chunk size: %d\n", chunk_size);
 	int i = 0;
-	for(i = 0 ; i < nb_chunks; i++) {
+	for(i = 0 ; i < 1; i++) {
 		RSA_public_encrypt(chunk_size, (void*)p + i * chunk_size, (void*)hashed_policy + i * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
 	}
 	//hash last chunk
-	RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p, (void*)hashed_policy, rsa, RSA_PKCS1_OAEP_PADDING);
+	//RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p, (void*)hashed_policy, rsa, RSA_PKCS1_OAEP_PADDING);
 
 	_send_policy(hashed_policy);
 
@@ -264,9 +264,9 @@ int main(int argc, char** argv)
 			printf("Can't allocate p\n");
 			exit(-1);
 		}
-		p->zygote_hash[0] = 1;
-		p->trustlet_hash[0] = 2;
-		p->data[0] = 3;
+		p->zygote_hash[0] = 233;
+		p->trustlet_hash[0] = 244;
+		p->data[0] = 250;
 		printf("Size of policy: %ld\n", sizeof(policy));
 		sleep(1);
 
