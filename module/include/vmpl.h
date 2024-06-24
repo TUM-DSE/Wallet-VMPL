@@ -22,6 +22,7 @@ enum monitor_call_type {
     waitForTrustletResult,
 
 	get_public_key = 30,
+	send_policy = 31,
 };
 
 struct monitor_call {

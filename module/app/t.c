@@ -22,6 +22,8 @@
 #include <stdlib.h>
 
 #include <openssl/sha.h>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
 typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
@@ -30,6 +32,7 @@ typedef signed long long int u64;
 //#define rdx 3
 //#define r8 4
 //#define r9 5
+#define HASH_SIZE 64
 struct svsm_call {
 	void* caa;
 	u64 rax;
@@ -42,9 +45,15 @@ struct PACKED attestation_report {
     uint32_t status;
     uint32_t report_size;
     uint8_t reserved[24];
-	uint8_t pub_key_hash[64];
+	uint8_t pub_key_hash[HASH_SIZE];
     uint8_t report[];    
 };
+
+typedef struct _policy {
+	uint8_t zygote_hash[HASH_SIZE];
+	uint8_t trustlet_hash[HASH_SIZE];
+	uint8_t data[4096/2 - 2 * HASH_SIZE]; // TODO: For now policy is constrained to 1 page
+}policy;
 
 struct mem memory;
 int fd;
@@ -55,6 +64,7 @@ int fd;
 int call_attest(uint8_t* pub_key_hash) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* att_buffer = aligned_alloc(page_size, page_size);
+	att_buffer[0] = 1;
     for(int i = 0; i < page_size;i++){
         att_buffer[i] = i % 200;
     }
@@ -65,13 +75,14 @@ int call_attest(uint8_t* pub_key_hash) {
     call.attestation_target = att_buffer;
     u64 ret;
     call.type = attest;
+	call.monitor_attestation.type = 2;
     ret = ioctl(fd,VMPL_WR,&call);
     printf("ret = %lld\n", ret);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
     FILE* report_file = fopen("/root/report.txt","w");
     printf("FILE: %p\n",report_file);
-    printf("SIZE: %ld\n",report->report_size);
+    printf("SIZE: %d\n",report->report_size);
     fwrite(report->report,report->report_size, 1,report_file);
     
     for(int i = 0; i<1216;i++){
@@ -131,6 +142,7 @@ void single_exec(){
     call.type = createTrustlet;
       int ret = ioctl(fd,VMPL_WR,&call);
     printf("Init called\n");  
+	free(att_buffer);
 }
 
 int my_SHA512(const char* buff, const unsigned int buff_len, char* hash)
@@ -145,89 +157,140 @@ int my_SHA512(const char* buff, const unsigned int buff_len, char* hash)
 	return 1;
 }
 
+static void _send_policy (uint8_t* hashed_policy) {
+    struct monitor_call call;
+	call.attestation_target = hashed_policy;
+    u64 ret;
+    call.type = send_policy;
+	printf("[Client] Type: %d\n", call.type);
+	sleep(1);
+    ret = ioctl(fd,VMPL_WR,&call);
+    printf("ret = %lld\n", ret);
+}
+
+static inline int attestation(policy* p, uint8_t* hashed_policy) 
+{
+	uint8_t pub_key_hash[HASH_SIZE];
+	uint8_t hash[HASH_SIZE];
+
+/*	uint8_t* pub_key_hash = (uint8_t*)malloc(sizeof(HASH_SIZE));
+	if(pub_key_hash == NULL) {
+		printf("Can't allocate pub_key_hash\n");
+		exit(-1);
+	}
+	uint8_t* hash = (uint8_t*)malloc(sizeof(HASH_SIZE));
+	if(hash == NULL) {
+		printf("Can't allocate hash\n");
+		exit(-1);
+	}*/
+
+	call_attest(pub_key_hash);
+	uint8_t* key = NULL;
+	get_pub_key(&key);
+
+	if(key == NULL) {
+		printf("Could not get key!!\n");
+	}
+
+	printf("[Client] key size again: %ld\n", strlen(key));
+	printf("[Client] Key: ");
+	for(int i = 0; i < strlen(key); i++) {
+		printf("%d ", key[i]);
+	}
+	printf("\n");
+
+	my_SHA512(key, strlen(key), hash);
+
+	if(strncmp(pub_key_hash, hash, HASH_SIZE) == 0) {
+		printf("The hashes match!!\n");
+	} else {
+		printf("The hashes don't match :(\n");
+	}
+
+	// encrypt policy
+	BIO* bio = BIO_new_mem_buf(key, strlen(key));
+	if(bio == NULL) {
+		printf("Could not create bio from public key\n");
+		exit(-1);
+	}
+
+	RSA* rsa = PEM_read_bio_RSAPublicKey(bio, NULL, NULL, NULL); 
+
+	if(rsa == NULL) {
+		printf("Could not allocate RSA struct from BIO\n");
+		exit(-1);
+	}
+
+	int rsa_size = RSA_size(rsa);
+	int chunk_size = rsa_size - 42;
+	int nb_chunks = sizeof(policy) / chunk_size;
+	printf("[Client] Chunk size: %d\n", chunk_size);
+	int i = 0;
+	for(i = 0 ; i < nb_chunks; i++) {
+		RSA_public_encrypt(chunk_size, (void*)p + i * chunk_size, (void*)hashed_policy + i * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
+	}
+	//hash last chunk
+	RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p, (void*)hashed_policy, rsa, RSA_PKCS1_OAEP_PADDING);
+
+	_send_policy(hashed_policy);
+
+	RSA_free(rsa);
+	BIO_free(bio);
+	free(key);
+	return 0;
+
+}
+
+int f() 
+{
+	int a[100];
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
+		f();
+		f();
+		f();
+		f();
+		f();
+		f();
         int32_t value, number;
 
+		// init policy
+		policy* p = (policy*)malloc(sizeof(policy)); //TODO: Use malloc?
+
+		if(p == NULL) {
+			printf("Can't allocate p\n");
+			exit(-1);
+		}
+		p->zygote_hash[0] = 1;
+		p->trustlet_hash[0] = 2;
+		p->data[0] = 3;
+		printf("Size of policy: %ld\n", sizeof(policy));
+		sleep(1);
 
         fd = open("/dev/vmpl_device", O_RDWR);
         if(fd < 0) {
                 printf("Cannot open device file...\n");
                 return -1;
         }
-        monitor_init();
-        single_exec();
-        int i = 0;
-        //while(1){
-            //printf("Test: %d\n", i++);
-        //}
-		uint8_t pub_key_hash[64];
-        call_attest(pub_key_hash);
-		char* key;
-		get_pub_key(&key);
-
-		printf("[Client] key size again: %d\n", strlen(key));
-		printf("[Client] Key: ");
-		for(int i = 0; i < strlen(key); i++) {
-			printf("%d ", key[i]);
+        //monitor_init();
+        //single_exec();
+		
+		// allocate it outside of attenstaion function to avoid measuring the allocation time 
+    	uint8_t* hashed_policy = aligned_alloc(4096, 4096); 
+		if(hashed_policy == NULL) {
+			printf("Can't allocate hashed_policy\n");
+			exit(-1);
 		}
-		printf("\n");
+		hashed_policy[0] = 0;
+		attestation(p, hashed_policy);
 
-		uint8_t hash[64];
-		my_SHA512(key, strlen(key), hash);
-
-		if(strncmp(pub_key_hash, hash, 64) == 0) {
-			printf("The hashes match!!\n");
-		} else {
-			printf("The hashes don't match :(\n");
-		}
-
-
-
-        /*
-        if(argc < 2) {
-            setup_schal();
-            printf("Setup done.\nStarting Process");
-            create_vcpu(3,3);
-            printf("Done");
-            goto close_;
-        }
-
-        if(strcmp(argv[1], "-t") == 0){
-            measure_vmpl_rtt();
-            goto close_;
-        }
-        /*if(strcmp(argv[1], "-p") == 0){
-            test_paging();
-            goto close_;
-        }
-        if(strcmp(argv[1], "-s") == 0){
-            setup_schal();
-            printf("Done!\n");
-            goto close_;
-        }
-        if(strcmp(argv[1], "-c") == 0){
-            create_all_vcpus();
-            printf("Done!\n");
-            goto close_;
-        }
-
-        alloc_memory();
-        read_bin(argv[1]);
-
-
-
-        thrd_t print_thread, svsm_thread;
-
-        thrd_create(&print_thread, print, NULL);
-        thrd_create(&svsm_thread, run_single_exec, (void*)4);
-        
-        thrd_join(print_thread,NULL);
-        thrd_join(svsm_thread,NULL);
-        */
-close_:
+   close_:
         printf("Close");
+		free(hashed_policy);
+		free(p);
         close(fd);
-		free(key);
         return 0;
 }
