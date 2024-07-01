@@ -1,6 +1,8 @@
 #ifndef MEASUREMENT_UTILS_H
 #define MEASUREMENT_UTILS_H
 
+#include <unistd.h>
+
 static inline uint64_t get_cycles() 
 {
     unsigned int lo,hi;
