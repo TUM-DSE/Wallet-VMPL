@@ -27,6 +27,7 @@
 typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
+#include "measurement_utils.h"
 //#define rax 1
 //#define rcx 2
 //#define rdx 3
@@ -52,7 +53,7 @@ struct PACKED attestation_report {
 typedef struct _policy {
 	uint8_t zygote_hash[HASH_SIZE];
 	uint8_t trustlet_hash[HASH_SIZE];
-	uint8_t data[4096/2 - 2 * HASH_SIZE]; // TODO: For now policy is constrained to 1 page
+	uint8_t data[4096 / 2 - 2 * HASH_SIZE + 400]; // TODO: For now policy is constrained to 1 page
 }policy;
 
 struct mem memory;
@@ -68,8 +69,8 @@ int call_attest(uint8_t* pub_key_hash) {
     for(int i = 0; i < page_size;i++){
         att_buffer[i] = i % 200;
     }
-    printf("p: %p\n",att_buffer);
-    sleep(1);
+    //printf("p: %p\n",att_buffer);
+    //sleep(1);
     cpu_set_t cpuset;
     struct monitor_call call;
     call.attestation_target = att_buffer;
@@ -77,44 +78,44 @@ int call_attest(uint8_t* pub_key_hash) {
     call.type = attest;
 	call.monitor_attestation.type = 2;
     ret = ioctl(fd,VMPL_WR,&call);
-    printf("ret = %lld\n", ret);
+    //printf("ret = %lld\n", ret);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-    FILE* report_file = fopen("/root/report.txt","w");
-    printf("FILE: %p\n",report_file);
-    printf("SIZE: %d\n",report->report_size);
-    fwrite(report->report,report->report_size, 1,report_file);
+    //FILE* report_file = fopen("/root/report.txt","w");
+    //printf("FILE: %p\n",report_file);
+    //printf("SIZE: %d\n",report->report_size);
+    //fwrite(report->report,report->report_size, 1,report_file);
     
-    for(int i = 0; i<1216;i++){
-        if(i == 64)
-            printf("\n");
-        printf("%" PRIu8 " ", att_buffer[i]);
-    }
+    //for(int i = 0; i<1216;i++){
+    //    if(i == 64)
+    //        printf("\n");
+    //    printf("%" PRIu8 " ", att_buffer[i]);
+    //}
 	
 	//extract pub key hash
 	strncpy(pub_key_hash, att_buffer + 112, 64);
 
     free(att_buffer);
-    printf("\n");
+    //printf("\n");
 }
 
 void get_pub_key(uint8_t** key) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* key_buffer = aligned_alloc(page_size, page_size);
 	key_buffer[0] = 0;
-	printf("[Client] Allocated 1 page at %p\n", key_buffer);
+	//printf("[Client] Allocated 1 page at %p\n", key_buffer);
     struct monitor_call call;
 	call.attestation_target = key_buffer;
     u64 ret;
     call.type = get_public_key;
-	printf("[Client] Type: %d\n", call.type);
-	sleep(1);
+	//printf("[Client] Type: %d\n", call.type);
+	//sleep(1);
     ret = ioctl(fd,VMPL_WR,&call);
-    printf("ret = %lld\n", ret);
+    //printf("ret = %lld\n", ret);
 
 	// find size of key
 	unsigned int key_size = strlen((char*)key_buffer);	
-	printf("[Client] Key size = %d\n", key_size);
+	//printf("[Client] Key size = %d\n", key_size);
 	
 	// Have space for the terminating null
 	(*key) = malloc(key_size + 1);
@@ -129,7 +130,7 @@ void monitor_init() {
     struct monitor_call call;
     call.type = initMonitor;
     int ret = ioctl(fd,VMPL_WR,&call);
-    printf("Init called\n");
+    //printf("Init called\n");
 
 }
 
@@ -162,10 +163,10 @@ static void _send_policy (uint8_t* hashed_policy) {
 	call.attestation_target = hashed_policy;
     u64 ret;
     call.type = send_policy;
-	printf("[Client] Type: %d\n", call.type);
-	sleep(1);
+	//printf("[Client] Type: %d\n", call.type);
+	//sleep(1);
     ret = ioctl(fd,VMPL_WR,&call);
-    printf("ret = %lld\n", ret);
+    //printf("ret = %lld\n", ret);
 }
 
 static inline int attestation(policy* p, uint8_t* hashed_policy) 
@@ -192,17 +193,17 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 		printf("Could not get key!!\n");
 	}
 
-	printf("[Client] key size again: %ld\n", strlen(key));
-	printf("[Client] Key: ");
-	for(int i = 0; i < strlen(key); i++) {
-		printf("%d ", key[i]);
-	}
-	printf("\n");
+	//printf("[Client] key size again: %ld\n", strlen(key));
+	//printf("[Client] Key: ");
+	//for(int i = 0; i < strlen(key); i++) {
+	//	printf("%d ", key[i]);
+	//}
+	//printf("\n");
 
 	my_SHA512(key, strlen(key), hash);
 
 	if(strncmp(pub_key_hash, hash, HASH_SIZE) == 0) {
-		printf("The hashes match!!\n");
+	//	printf("The hashes match!!\n");
 	} else {
 		printf("The hashes don't match :(\n");
 	}
@@ -224,13 +225,18 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 	int rsa_size = RSA_size(rsa);
 	int chunk_size = rsa_size - 42;
 	int nb_chunks = sizeof(policy) / chunk_size;
-	printf("[Client] Chunk size: %d\n", chunk_size);
+	//printf("[Client] Chunk size: %d\n", chunk_size);
 	int i = 0;
 	for(i = 0 ; i < 1; i++) {
+//		uint64_t start = get_cycles();
 		RSA_public_encrypt(chunk_size, (void*)p + i * chunk_size, (void*)hashed_policy + i * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
+//		uint64_t end = get_cycles();
+	//	printf("Encryption time: %f\n", cycles_to_ms(end - start, get_CPU_freq()));
 	}
 	//hash last chunk
-	//RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p, (void*)hashed_policy, rsa, RSA_PKCS1_OAEP_PADDING);
+	//if(sizeof(policy) % chunk_size != 0) {
+	//	RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p + nb_chunks * chunk_size, (void*)hashed_policy + nb_chunks * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
+	//}
 
 	_send_policy(hashed_policy);
 
@@ -241,20 +247,8 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 
 }
 
-int f() 
-{
-	int a[100];
-	return 0;
-}
-
 int main(int argc, char** argv)
 {
-		f();
-		f();
-		f();
-		f();
-		f();
-		f();
         int32_t value, number;
 
 		// init policy
@@ -267,6 +261,8 @@ int main(int argc, char** argv)
 		p->zygote_hash[0] = 233;
 		p->trustlet_hash[0] = 244;
 		p->data[0] = 250;
+		p->data[300] = 69;
+		p->data[2310] = 169;
 		printf("Size of policy: %ld\n", sizeof(policy));
 		sleep(1);
 
@@ -285,7 +281,17 @@ int main(int argc, char** argv)
 			exit(-1);
 		}
 		hashed_policy[0] = 0;
-		attestation(p, hashed_policy);
+		float total = 0.0;
+		monitor_init();
+		for(int i = 0; i < 1000; i++) {
+			uint64_t start = get_cycles();
+			attestation(p, hashed_policy);
+			uint64_t end = get_cycles();
+			total += (end - start)/1000;
+		}
+
+		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
+		printf("Decryption took %f ms\n", cycles_to_ms(139747880, get_CPU_freq()));
 
    close_:
         printf("Close");
