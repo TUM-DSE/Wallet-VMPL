@@ -1,0 +1,1 @@
+The outb program can be compiled on a VM and set as a systemd service to run on VM startup. Bpftrace will capture the time that Qemu starts (in nanoseconds) and the time when the user program starts and writes to the port via the outb instruction.
