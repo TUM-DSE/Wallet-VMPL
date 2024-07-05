@@ -1,0 +1,4 @@
+outb.c must be compiled with the following command 
+
+gcc -fPIC -shared -o my_outb.so outb.c 
+
