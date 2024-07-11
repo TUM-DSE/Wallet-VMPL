@@ -15,3 +15,6 @@
 [submodule "client/snpguest"]
 	path = client/snpguest
 	url = https://github.com/virtee/snpguest.git
+[submodule "gramine-svsm"]
+	path = gramine-svsm
+	url = https://github.com/TUM-DSE/gramine-svsm
