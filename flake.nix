@@ -127,6 +127,11 @@
                 glibc.static
                 python3
                 python311Packages.requests
+				python311Packages.click
+				python311Packages.voluptuous
+				python311Packages.jinja2
+				python311Packages.tomli
+				python311Packages.tomli-w
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
