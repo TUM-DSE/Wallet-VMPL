@@ -40,7 +40,7 @@ test_create_cpu:
 	./test -
 
 t:
-	gcc -I include/ -std=c11 app/t.c -lpthread -lssl -lcrypto -o test
+	gcc -I include/ -std=c11 app/t.c -lpthread -L include -lssl -lcrypto -l:libmy_crypto.a -o test
 
 outb:
 	gcc app/outb.c -o outb

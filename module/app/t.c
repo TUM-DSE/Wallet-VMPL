@@ -28,6 +28,7 @@ typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
 #include "measurement_utils.h"
+#include "my_crypto.h"
 //#define rax 1
 //#define rcx 2
 //#define rdx 3
@@ -146,18 +147,6 @@ void single_exec(){
 	free(att_buffer);
 }
 
-int my_SHA512(const char* buff, const unsigned int buff_len, char* hash)
-{
-	SHA512_CTX sha512_ctx;
-	if(SHA512_Init(&sha512_ctx) == 0)
-		return 0;
-	if(SHA512_Update(&sha512_ctx, buff, buff_len) == 0)
-		return 0;
-	if(SHA512_Final(hash, &sha512_ctx) == 0)
-		return 0;
-	return 1;
-}
-
 static void _send_policy (uint8_t* hashed_policy) {
     struct monitor_call call;
 	call.attestation_target = hashed_policy;
@@ -191,6 +180,12 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 
 	if(key == NULL) {
 		printf("Could not get key!!\n");
+	} else {
+		printf("Monitor public key: [");
+		for(int i = 0; i < 32; i++) {
+			printf("%d ", key[i]);
+		}
+		printf("]\n");
 	}
 
 	//printf("[Client] key size again: %ld\n", strlen(key));
@@ -203,7 +198,7 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 	my_SHA512(key, strlen(key), hash);
 
 	if(strncmp(pub_key_hash, hash, HASH_SIZE) == 0) {
-	//	printf("The hashes match!!\n");
+		printf("The hashes match!!\n");
 	} else {
 		printf("The hashes don't match :(\n");
 	}
@@ -251,6 +246,18 @@ int main(int argc, char** argv)
 {
         int32_t value, number;
 
+		key_pair keys;
+		gen_keys(&keys);
+		printf("Hacl Private key: [");
+		for(int i = 0; i < 32; i++) {
+			printf("%d ", keys.private_key[i]);
+		}
+		printf("]\n");
+		printf("Hacl public key: [");
+		for(int i = 0; i < 32; i++) {
+			printf("%d ", keys.public_key[i]);
+		}
+		printf("]\n");
 		// init policy
 		policy* p = (policy*)malloc(sizeof(policy)); //TODO: Use malloc?
 
@@ -281,17 +288,17 @@ int main(int argc, char** argv)
 			exit(-1);
 		}
 		hashed_policy[0] = 0;
-		float total = 0.0;
+		//float total = 0.0;
 		monitor_init();
-		for(int i = 0; i < 1000; i++) {
-			uint64_t start = get_cycles();
+//		for(int i = 0; i < 1000; i++) {
+//			uint64_t start = get_cycles();
 			attestation(p, hashed_policy);
-			uint64_t end = get_cycles();
-			total += (end - start)/1000;
-		}
+//			uint64_t end = get_cycles();
+//			total += (end - start)/1000;
+//		}
 
-		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
-		printf("Decryption took %f ms\n", cycles_to_ms(139747880, get_CPU_freq()));
+//		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
+//		printf("Decryption took %f ms\n", cycles_to_ms(139747880, get_CPU_freq()));
 
    close_:
         printf("Close");
