@@ -45,6 +45,11 @@ struct monitor_call {
             uint32_t size;
             tpid_t zygote;
         }trustlet;
+		struct decryption_context {
+			void* sender_pub_key;
+			void* encrypted_data;
+			uint32_t encrypted_data_size;
+		}decryption_context;
     };
 };
 

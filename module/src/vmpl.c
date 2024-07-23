@@ -51,7 +51,7 @@ static long init_monitor(struct monitor_call* mcall){
 static long attest_monitor(struct monitor_call* mcall){
 	struct svsm_call call;
 	void* ph = pagewalk(mcall->monitor_attestation.address);
-	printk(KERN_ERR "Using Page %p for report\n", ph);
+//	printk(KERN_ERR "Using Page %p for report\n", ph);
 	call.rcx = (uint64_t)ph;
 	call.rax = (((u64)10) << 32) | 1;
 	call.rdx = mcall->monitor_attestation.type;
@@ -154,7 +154,7 @@ static long get_pub_key(struct monitor_call* mcall){
 
 	struct svsm_call call;
 	void* ph = pagewalk(mcall->attestation_target);
-	printk(KERN_ERR "Using Page %p for pub key\n", ph);
+//	printk(KERN_ERR "Using Page %p for pub key\n", ph);
 	call.rcx = (uint64_t)ph;
 
 	call.rax = MONITORCALLID(mcall->type);
@@ -167,10 +167,13 @@ static long get_pub_key(struct monitor_call* mcall){
 static long _send_policy(struct monitor_call* mcall){
 
 	struct svsm_call call;
-	void* ph = pagewalk(mcall->attestation_target);
-	printk(KERN_ERR "Using Page %p for policy\n", ph);
-	call.rcx = (uint64_t)ph;
-
+	void* sender_pub_key_pa = pagewalk(mcall->decryption_context.sender_pub_key);
+	printk(KERN_ERR "Using Page %p for pub key\n", sender_pub_key_pa);
+	void* encrypted_data_pa = pagewalk(mcall->decryption_context.encrypted_data);
+	printk(KERN_ERR "Using Page %p for pub key\n", encrypted_data_pa);
+	call.r8 = (uint64_t)encrypted_data_pa;
+	call.rcx =  (uint64_t)sender_pub_key_pa;
+	call.rdx = mcall->decryption_context.encrypted_data_size;
 	call.rax = MONITORCALLID(mcall->type);
 
 	if(do_monitor_call(&call) != 1)

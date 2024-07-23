@@ -21,9 +21,6 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include <openssl/sha.h>
-#include <openssl/rsa.h>
-#include <openssl/pem.h>
 typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
@@ -51,7 +48,7 @@ struct PACKED attestation_report {
     uint8_t report[];    
 };
 
-typedef struct _policy {
+typedef struct PACKED _policy {
 	uint8_t zygote_hash[HASH_SIZE];
 	uint8_t trustlet_hash[HASH_SIZE];
 	uint8_t data[4096 / 2 - 2 * HASH_SIZE + 400]; // TODO: For now policy is constrained to 1 page
@@ -147,9 +144,11 @@ void single_exec(){
 	free(att_buffer);
 }
 
-static void _send_policy (uint8_t* hashed_policy) {
+static void _send_policy (uint8_t* encrypted_policy, uint8_t* sender_pub_key) {
     struct monitor_call call;
-	call.attestation_target = hashed_policy;
+	call.decryption_context.sender_pub_key = sender_pub_key;
+	call.decryption_context.encrypted_data = encrypted_policy;
+	call.decryption_context.encrypted_data_size = sizeof(policy) + 16;
     u64 ret;
     call.type = send_policy;
 	//printf("[Client] Type: %d\n", call.type);
@@ -158,21 +157,10 @@ static void _send_policy (uint8_t* hashed_policy) {
     //printf("ret = %lld\n", ret);
 }
 
-static inline int attestation(policy* p, uint8_t* hashed_policy) 
+static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* keys, uint8_t* public_key) 
 {
 	uint8_t pub_key_hash[HASH_SIZE];
 	uint8_t hash[HASH_SIZE];
-
-/*	uint8_t* pub_key_hash = (uint8_t*)malloc(sizeof(HASH_SIZE));
-	if(pub_key_hash == NULL) {
-		printf("Can't allocate pub_key_hash\n");
-		exit(-1);
-	}
-	uint8_t* hash = (uint8_t*)malloc(sizeof(HASH_SIZE));
-	if(hash == NULL) {
-		printf("Can't allocate hash\n");
-		exit(-1);
-	}*/
 
 	call_attest(pub_key_hash);
 	uint8_t* key = NULL;
@@ -188,13 +176,6 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 		printf("]\n");
 	}
 
-	//printf("[Client] key size again: %ld\n", strlen(key));
-	//printf("[Client] Key: ");
-	//for(int i = 0; i < strlen(key); i++) {
-	//	printf("%d ", key[i]);
-	//}
-	//printf("\n");
-
 	my_SHA512(key, strlen(key), hash);
 
 	if(strncmp(pub_key_hash, hash, HASH_SIZE) == 0) {
@@ -202,41 +183,12 @@ static inline int attestation(policy* p, uint8_t* hashed_policy)
 	} else {
 		printf("The hashes don't match :(\n");
 	}
+	 
+	uint8_t nonce[24] = {0};
+	int n = encrypt(encrypted_policy, (uint8_t*)p, sizeof(policy), nonce, key, keys->private_key);	
+	
+	_send_policy(encrypted_policy, public_key);
 
-	// encrypt policy
-	BIO* bio = BIO_new_mem_buf(key, strlen(key));
-	if(bio == NULL) {
-		printf("Could not create bio from public key\n");
-		exit(-1);
-	}
-
-	RSA* rsa = PEM_read_bio_RSAPublicKey(bio, NULL, NULL, NULL); 
-
-	if(rsa == NULL) {
-		printf("Could not allocate RSA struct from BIO\n");
-		exit(-1);
-	}
-
-	int rsa_size = RSA_size(rsa);
-	int chunk_size = rsa_size - 42;
-	int nb_chunks = sizeof(policy) / chunk_size;
-	//printf("[Client] Chunk size: %d\n", chunk_size);
-	int i = 0;
-	for(i = 0 ; i < 1; i++) {
-//		uint64_t start = get_cycles();
-		RSA_public_encrypt(chunk_size, (void*)p + i * chunk_size, (void*)hashed_policy + i * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
-//		uint64_t end = get_cycles();
-	//	printf("Encryption time: %f\n", cycles_to_ms(end - start, get_CPU_freq()));
-	}
-	//hash last chunk
-	//if(sizeof(policy) % chunk_size != 0) {
-	//	RSA_public_encrypt(sizeof(policy) % chunk_size, (void*)p + nb_chunks * chunk_size, (void*)hashed_policy + nb_chunks * rsa_size, rsa, RSA_PKCS1_OAEP_PADDING);
-	//}
-
-	_send_policy(hashed_policy);
-
-	RSA_free(rsa);
-	BIO_free(bio);
 	free(key);
 	return 0;
 
@@ -246,16 +198,16 @@ int main(int argc, char** argv)
 {
         int32_t value, number;
 
-		key_pair keys;
-		gen_keys(&keys);
+		key_pair* keys;
+		keys = gen_keys();
 		printf("Hacl Private key: [");
 		for(int i = 0; i < 32; i++) {
-			printf("%d ", keys.private_key[i]);
+			printf("%d ", keys->private_key[i]);
 		}
 		printf("]\n");
 		printf("Hacl public key: [");
 		for(int i = 0; i < 32; i++) {
-			printf("%d ", keys.public_key[i]);
+			printf("%d ", keys->public_key[i]);
 		}
 		printf("]\n");
 		// init policy
@@ -278,21 +230,24 @@ int main(int argc, char** argv)
                 printf("Cannot open device file...\n");
                 return -1;
         }
-        //monitor_init();
-        //single_exec();
 		
 		// allocate it outside of attenstaion function to avoid measuring the allocation time 
-    	uint8_t* hashed_policy = aligned_alloc(4096, 4096); 
-		if(hashed_policy == NULL) {
-			printf("Can't allocate hashed_policy\n");
+    	uint8_t* encrypted_policy = aligned_alloc(4096, 4096); 
+		if(encrypted_policy == NULL) {
+			printf("Can't allocate encrypted_policy\n");
 			exit(-1);
 		}
-		hashed_policy[0] = 0;
+		encrypted_policy[0] = 0;
+		uint8_t* public_key = aligned_alloc(4096, 4096);
+		for(int i = 0; i < 32; i++)
+		{
+			public_key[i] = keys->public_key[i];
+		}
 		//float total = 0.0;
 		monitor_init();
 //		for(int i = 0; i < 1000; i++) {
 //			uint64_t start = get_cycles();
-			attestation(p, hashed_policy);
+			attestation(p, encrypted_policy, keys, public_key);
 //			uint64_t end = get_cycles();
 //			total += (end - start)/1000;
 //		}
@@ -302,8 +257,9 @@ int main(int argc, char** argv)
 
    close_:
         printf("Close");
-		free(hashed_policy);
+		free(encrypted_policy);
 		free(p);
+		free(public_key);
         close(fd);
         return 0;
 }
