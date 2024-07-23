@@ -92,8 +92,9 @@ clean:
 submodules:
 	git submodule update --init --recursive svsm
 	git submodule update --init --recursive edk2
+	cd svsm/kernel/src/my_crypto/; ./build.sh
 
-prepare_all: submodules build_svsm guest.qcow2 setup_guest_net
+prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
 
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
