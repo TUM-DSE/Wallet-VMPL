@@ -91,35 +91,30 @@ int call_attest(uint8_t* pub_key_hash) {
     //}
 	
 	//extract pub key hash
-	strncpy(pub_key_hash, att_buffer + 112, 64);
+	memcpy(pub_key_hash, att_buffer + 112, 64);
 
     free(att_buffer);
     //printf("\n");
 }
 
-void get_pub_key(uint8_t** key) {
+void get_pub_key(uint8_t* key) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* key_buffer = aligned_alloc(page_size, page_size);
 	key_buffer[0] = 0;
-	//printf("[Client] Allocated 1 page at %p\n", key_buffer);
     struct monitor_call call;
 	call.attestation_target = key_buffer;
     u64 ret;
     call.type = get_public_key;
-	//printf("[Client] Type: %d\n", call.type);
-	//sleep(1);
     ret = ioctl(fd,VMPL_WR,&call);
-    //printf("ret = %lld\n", ret);
 
+	printf("Key buff: [");
+	for(int i = 0; i < 32; i++)
+	{
+		printf("%d ", key_buffer[i]);
+	}
+	printf("]\n");
 	// find size of key
-	unsigned int key_size = strlen((char*)key_buffer);	
-	//printf("[Client] Key size = %d\n", key_size);
-	
-	// Have space for the terminating null
-	(*key) = malloc(key_size + 1);
-
-	strncpy((*key), key_buffer, key_size);
-	(*key)[key_size] = 0;
+	memcpy(key, key_buffer, 32);
 
 	free(key_buffer);
 }
@@ -163,8 +158,8 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 	uint8_t hash[HASH_SIZE];
 
 	call_attest(pub_key_hash);
-	uint8_t* key = NULL;
-	get_pub_key(&key);
+	uint8_t key[32];
+	get_pub_key(key);
 
 	if(key == NULL) {
 		printf("Could not get key!!\n");
@@ -176,10 +171,10 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 		printf("]\n");
 	}
 
-	my_SHA512(key, strlen(key), hash);
+	my_SHA512(key, 32, hash);
 
-	if(strncmp(pub_key_hash, hash, HASH_SIZE) == 0) {
-		printf("The hashes match!!\n");
+	if(memcmp(pub_key_hash, hash, HASH_SIZE) == 0) {
+		//printf("The hashes match!!\n");
 	} else {
 		printf("The hashes don't match :(\n");
 	}
@@ -189,7 +184,6 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 	
 	_send_policy(encrypted_policy, public_key);
 
-	free(key);
 	return 0;
 
 }
@@ -243,17 +237,18 @@ int main(int argc, char** argv)
 		{
 			public_key[i] = keys->public_key[i];
 		}
-		//float total = 0.0;
+		float total = 0.0;
+		const int iterations = 1;
 		monitor_init();
-//		for(int i = 0; i < 1000; i++) {
-//			uint64_t start = get_cycles();
+		for(int i = 0; i < iterations; i++) {
+			uint64_t start = get_cycles();
 			attestation(p, encrypted_policy, keys, public_key);
-//			uint64_t end = get_cycles();
-//			total += (end - start)/1000;
-//		}
+			uint64_t end = get_cycles();
+			total += (end - start)/iterations;
+		}
 
-//		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
-//		printf("Decryption took %f ms\n", cycles_to_ms(139747880, get_CPU_freq()));
+		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
+		printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
 
    close_:
         printf("Close");
