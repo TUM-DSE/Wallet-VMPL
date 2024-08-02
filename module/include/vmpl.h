@@ -23,6 +23,7 @@ enum monitor_call_type {
 
 	get_public_key = 30,
 	send_policy = 31,
+	execute_elf = 32,
 };
 
 struct monitor_call {
@@ -50,6 +51,11 @@ struct monitor_call {
 			void* encrypted_data;
 			uint32_t encrypted_data_size;
 		}decryption_context;
+		struct execute_elf_context {
+			void* page1;
+			void* page2;
+			uint32_t size;
+		}execute_elf_context;
     };
 };
 

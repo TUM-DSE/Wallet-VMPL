@@ -152,6 +152,57 @@ static void _send_policy (uint8_t* encrypted_policy, uint8_t* sender_pub_key) {
     //printf("ret = %lld\n", ret);
 }
 
+static long exec_elf(const unsigned char* filename, int* argument)
+{
+	// Map ELF file to memory
+	FILE* file = fopen(filename, "r");
+	fseek(file, 0L, SEEK_END);
+	long size = ftell(file);
+
+	if(size > 4096 * 2) {
+		printf("Error: we only support 2 page elf at this point\n");
+		return -1;
+	}
+
+	rewind(file);
+	printf("Size of file: %ld\n", size);
+	void* file_contents = mmap(NULL, size, PROT_EXEC | PROT_READ, MAP_PRIVATE,
+			fileno(file), 0);
+
+	if(file_contents == MAP_FAILED) {
+		printf("Failed mapping the file");
+		return -1;
+	}
+	printf("File successfully mapped: %p !\n", file_contents);
+
+
+	unsigned char* file_raw = (unsigned char*)file_contents;
+	printf("Raw file bytes: [");
+	for(int i = 0; i < size; i++) {
+		printf("%d ", file_raw[i]);
+	}
+	printf("]\n");
+
+	sleep(3);
+
+	uint8_t* page1 = aligned_alloc(4096, 4096);
+	uint8_t* page2 = aligned_alloc(4096, 4096);
+	page1[0] = 0;
+	page2[0] = 0;
+
+	memcpy(page1, file_contents, 4096);
+	memcpy(page2, file_contents + 4096, size - 4096);
+	
+	struct monitor_call call;
+	call.execute_elf_context.page1 = page1;
+	call.execute_elf_context.page2 = page2;
+	call.execute_elf_context.size = size;
+	call.type = execute_elf;
+	u64 ret;
+	ret = ioctl(fd, VMPL_WR, &call);
+	sleep(1);
+}
+
 static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* keys, uint8_t* public_key) 
 {
 	uint8_t pub_key_hash[HASH_SIZE];
@@ -190,71 +241,76 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 
 int main(int argc, char** argv)
 {
-        int32_t value, number;
 
-		key_pair* keys;
-		keys = gen_keys();
-		printf("Hacl Private key: [");
-		for(int i = 0; i < 32; i++) {
-			printf("%d ", keys->private_key[i]);
-		}
-		printf("]\n");
-		printf("Hacl public key: [");
-		for(int i = 0; i < 32; i++) {
-			printf("%d ", keys->public_key[i]);
-		}
-		printf("]\n");
-		// init policy
-		policy* p = (policy*)malloc(sizeof(policy)); //TODO: Use malloc?
 
-		if(p == NULL) {
-			printf("Can't allocate p\n");
-			exit(-1);
-		}
-		p->zygote_hash[0] = 233;
-		p->trustlet_hash[0] = 244;
-		p->data[0] = 250;
-		p->data[300] = 69;
-		p->data[2310] = 169;
-		printf("Size of policy: %ld\n", sizeof(policy));
-		sleep(1);
+	int32_t value, number;
 
-        fd = open("/dev/vmpl_device", O_RDWR);
-        if(fd < 0) {
-                printf("Cannot open device file...\n");
-                return -1;
-        }
-		
-		// allocate it outside of attenstaion function to avoid measuring the allocation time 
-    	uint8_t* encrypted_policy = aligned_alloc(4096, 4096); 
-		if(encrypted_policy == NULL) {
-			printf("Can't allocate encrypted_policy\n");
-			exit(-1);
-		}
-		encrypted_policy[0] = 0;
-		uint8_t* public_key = aligned_alloc(4096, 4096);
-		for(int i = 0; i < 32; i++)
-		{
-			public_key[i] = keys->public_key[i];
-		}
-		float total = 0.0;
-		const int iterations = 1;
-		monitor_init();
-		for(int i = 0; i < iterations; i++) {
-			uint64_t start = get_cycles();
-			attestation(p, encrypted_policy, keys, public_key);
-			uint64_t end = get_cycles();
-			total += (end - start)/iterations;
-		}
+	key_pair* keys;
+	keys = gen_keys();
+	printf("Hacl Private key: [");
+	for(int i = 0; i < 32; i++) {
+		printf("%d ", keys->private_key[i]);
+	}
+	printf("]\n");
+	printf("Hacl public key: [");
+	for(int i = 0; i < 32; i++) {
+		printf("%d ", keys->public_key[i]);
+	}
+	printf("]\n");
+	// init policy
+	policy* p = (policy*)malloc(sizeof(policy)); //TODO: Use malloc?
 
-		printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
-		printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
+	if(p == NULL) {
+		printf("Can't allocate p\n");
+		exit(-1);
+	}
+	p->zygote_hash[0] = 233;
+	p->trustlet_hash[0] = 244;
+	p->data[0] = 250;
+	p->data[300] = 69;
+	p->data[2310] = 169;
+	printf("Size of policy: %ld\n", sizeof(policy));
+	sleep(1);
 
-   close_:
-        printf("Close");
-		free(encrypted_policy);
-		free(p);
-		free(public_key);
-        close(fd);
-        return 0;
+	fd = open("/dev/vmpl_device", O_RDWR);
+	if(fd < 0) {
+		printf("Cannot open device file...\n");
+		return -1;
+	}
+
+	// allocate it outside of attenstaion function to avoid measuring the allocation time 
+	uint8_t* encrypted_policy = aligned_alloc(4096, 4096); 
+	if(encrypted_policy == NULL) {
+		printf("Can't allocate encrypted_policy\n");
+		exit(-1);
+	}
+	encrypted_policy[0] = 0;
+	uint8_t* public_key = aligned_alloc(4096, 4096);
+	for(int i = 0; i < 32; i++)
+	{
+		public_key[i] = keys->public_key[i];
+	}
+	float total = 0.0;
+	const int iterations = 1;
+	monitor_init();
+	for(int i = 0; i < iterations; i++) {
+		uint64_t start = get_cycles();
+		attestation(p, encrypted_policy, keys, public_key);
+		uint64_t end = get_cycles();
+		total += (end - start)/iterations;
+	}
+
+	printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
+	printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
+	sleep(1);
+	exec_elf("hello_elf_asm.elf", NULL);
+	sleep(1);
+
+close_:
+	printf("Close");
+	free(encrypted_policy);
+	free(p);
+	free(public_key);
+	close(fd);
+	return 0;
 }

@@ -154,7 +154,6 @@ static long get_pub_key(struct monitor_call* mcall){
 
 	struct svsm_call call;
 	void* ph = pagewalk(mcall->attestation_target);
-//	printk(KERN_ERR "Using Page %p for pub key\n", ph);
 	call.rcx = (uint64_t)ph;
 
 	call.rax = MONITORCALLID(mcall->type);
@@ -168,12 +167,27 @@ static long _send_policy(struct monitor_call* mcall){
 
 	struct svsm_call call;
 	void* sender_pub_key_pa = pagewalk(mcall->decryption_context.sender_pub_key);
-	printk(KERN_ERR "Using Page %p for pub key\n", sender_pub_key_pa);
 	void* encrypted_data_pa = pagewalk(mcall->decryption_context.encrypted_data);
-	printk(KERN_ERR "Using Page %p for pub key\n", encrypted_data_pa);
 	call.r8 = (uint64_t)encrypted_data_pa;
 	call.rcx =  (uint64_t)sender_pub_key_pa;
 	call.rdx = mcall->decryption_context.encrypted_data_size;
+	call.rax = MONITORCALLID(mcall->type);
+
+	if(do_monitor_call(&call) != 1)
+		return -1;
+	return 0;
+}
+
+static long exec_elf(struct monitor_call* mcall) 
+{
+	struct svsm_call call;
+	void* page1_pa = pagewalk(mcall->execute_elf_context.page1);
+	printk(KERN_ERR "Elf file page1 PA: %p\n", page1_pa);
+	void* page2_pa = pagewalk(mcall->execute_elf_context.page2);
+	printk(KERN_ERR "Elf file page2 PA: %p\n", page2_pa);
+	call.r8 =  (uint64_t)page1_pa;
+	call.rcx =  (uint64_t)page2_pa;
+	call.rdx = mcall->execute_elf_context.size;
 	call.rax = MONITORCALLID(mcall->type);
 
 	if(do_monitor_call(&call) != 1)
@@ -190,7 +204,7 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		printk(KERN_ERR "Copy from user error\n");
 		return -1;
 	}
-	printk(KERN_INFO "%d\n", call.type);
+	printk(KERN_ERR "Call type: %d\n", call.type);
 	switch (call.type)
 	{
 	
@@ -210,6 +224,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return get_pub_key(&call);
 	case send_policy:
 		return _send_policy(&call);
+	case execute_elf:
+		return exec_elf(&call);
 
 
 	default:
