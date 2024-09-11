@@ -24,7 +24,7 @@ build_firmware:
 	cd edk2/; git submodule init; git submodule update
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 make -j16 -C BaseTools/
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; \
-	PYTHON3_ENABLE=TRUE PYTHON_COMMAND=python3 build -a X64 -b DEBUG -t GCC5 -D DEBUG_ON_SERIAL_PORT -D DEBUG_VERBOSE -DTPM2_ENABLE -p OvmfPkg/OvmfPkgX64.dsc
+	PYTHON3_ENABLE=TRUE PYTHON_COMMAND=python3 build -a X64 -b RELEASE -t GCC5 -D DEBUG_ON_SERIAL_PORT -DTPM2_ENABLE -p OvmfPkg/OvmfPkgX64.dsc
 	mkdir -p firmware
 	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
 	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
@@ -50,7 +50,7 @@ ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 
 guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb container/99_config.yaml
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
-	
+
 make update_guest:
 	bash ./scripts/update_image.sh guest linux
 
@@ -94,6 +94,8 @@ submodules:
 	git submodule update --init --recursive edk2
 
 prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
+
+build_and_run: build_svsm run
 
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
