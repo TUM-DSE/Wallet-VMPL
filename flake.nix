@@ -123,8 +123,6 @@
                 pkg-config
                 gcc
                 gccgo
-                glibc
-                glibc.static
                 python3
                 python311Packages.requests
 				python311Packages.click
