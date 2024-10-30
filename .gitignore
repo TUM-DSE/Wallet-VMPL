@@ -11,7 +11,11 @@ build/*dbg*
 /.buildcontainer
 /.toolchain
 tmp.qcow2
-guest.qcow2
+guest.qcow2*
 tmp
 guest
 container/99_config.yaml
+host/
+build/
+VMPLkernel6.5.tar.gz
+.ccls-cache/
