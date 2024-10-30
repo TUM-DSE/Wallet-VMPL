@@ -136,3 +136,6 @@ unload_kvm:
 
 load_kvm:
 	make -C host/ load_kvm
+
+copy_pal:
+	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
