@@ -57,6 +57,7 @@ typedef struct PACKED _policy {
 struct mem memory;
 int fd;
 
+void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size);
 
 
 //uint8_t att_buffer[4096];
@@ -123,7 +124,7 @@ void monitor_init() {
     struct monitor_call call;
     call.type = initMonitor;
     int ret = ioctl(fd,VMPL_WR,&call);
-    //printf("Init called\n");
+    printf("Init called\n");
 
 }
 
@@ -139,6 +140,49 @@ void single_exec(){
 	free(att_buffer);
 }
 
+int create_zygote(const char* zygote){
+    printf("Trying to register Zygote with Monitor");
+    uint8_t* data;
+    uint64_t size;
+    load_file(zygote, &data, &size);
+    printf("Zygote(%s) size: %ld\n", zygote, size);
+
+    struct monitor_call call;
+    call.zygote.zygote = data;
+    call.zygote.size = size;
+    call.type = createZygote;
+
+    int ret = ioctl(fd, VMPL_WR,&call);
+
+    printf("Zygote ID: %d\n",ret);
+
+}
+
+int create_trustlet(const int zygote_id) {
+    printf("Trying to register Trustlet with Monitor\n");
+
+    struct monitor_call call;
+    call.type = createTrustlet;
+    call.trustlet.zygote = zygote_id;
+
+    int ret = ioctl(fd, VMPL_WR, &call);
+
+    printf("Trustlet ID: %d\n", ret);
+
+}
+
+int invoke_trustlet(const int trustlet_id) {
+    printf("Trying to invoke Trustlet\n");
+
+    struct monitor_call call;
+    call.type = invokeTrustlet;
+    call.process_id = trustlet_id;
+
+    int ret = ioctl(fd, VMPL_WR, &call);
+   
+}
+
+
 static void _send_policy (uint8_t* encrypted_policy, uint8_t* sender_pub_key) {
     struct monitor_call call;
 	call.decryption_context.sender_pub_key = sender_pub_key;
@@ -150,6 +194,41 @@ static void _send_policy (uint8_t* encrypted_policy, uint8_t* sender_pub_key) {
 	//sleep(1);
     ret = ioctl(fd,VMPL_WR,&call);
     //printf("ret = %lld\n", ret);
+}
+
+void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size){
+    FILE* file = fopen(filename,"r");
+    fseek(file, 0L, SEEK_END);
+    uint64_t size = ftell(file);
+    rewind(file);
+    uint8_t* buf = aligned_alloc(4096, size + 4096);
+    for(int i =0;i <size+4096;i++)
+        buf[i] = 0;
+    size_t read_len = fread((void*)buf,1,size,file);
+    if(read_len != size){
+        fprintf(stderr,"Failed to load entire file %ld != %ld", read_len, size);
+        exit(-1);
+    }
+    fprintf(stderr, "Start Address: %p\n", buf);
+    *buffer = buf;
+    *buffer_size = size;
+}
+
+static long load_elf(){
+    printf("test");
+    uint8_t* data;
+    uint64_t size;
+    load_file("libpal.so", &data, &size);
+    //load_file("simple_elf",&data,&size);
+
+    printf("\nStart Address: %p, First bytes: %d\n", data,data[0]);
+    printf("Size %ld\n",size);
+    uint64_t sum = 0;
+    struct monitor_call call;
+    call.data_info.size = size;
+    call.data_info.start_address = data;
+    call.type = create_data_struct;
+    ioctl(fd, VMPL_WR, &call);
 }
 
 static long exec_elf(const unsigned char* filename, int* argument)
@@ -239,78 +318,104 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 
 }
 
+key_pair* prepair_keys(){
+    key_pair* keys = gen_keys();
+    printf("Hacl Private key: [");
+    for(int i = 0; i < 32; i++) {
+        printf("%02x", keys->private_key[i]);
+    }
+    printf("]\n");
+    printf("Hacl Public key:  [");
+    for(int i = 0; i < 32; i++) {
+        printf("%02x", keys->public_key[i]);
+    }
+    printf("]\n");
+    return keys;
+}
+
+policy* prepair_policy(){
+
+    policy* p = (policy*)malloc(sizeof(policy));
+    if(p == NULL) {
+        printf("Can't allocate p\n");
+        exit(-1);
+    }
+    p->zygote_hash[0] = 233;
+    p->trustlet_hash[0] = 244;
+    p->data[0] = 250;
+    p->data[300] = 69;
+    p->data[2310] = 169;
+    printf("Size of policy: %ld\n", sizeof(policy));
+    sleep(1);
+    return p;
+}
+
+void attestation_time(key_pair* keys, policy* p){
+     uint8_t* encrypted_policy = aligned_alloc(4096, 4096);
+     if(encrypted_policy == NULL) {
+         printf("Can't allocate encrypted_policy\n");
+         exit(-1);
+     }
+     encrypted_policy[0] = 0;
+     uint8_t* public_key = aligned_alloc(4096, 4096);
+     memcpy(public_key,(uint8_t*)keys,32);
+     double total = 0.0;
+     const int iterations = 1;
+     monitor_init();
+     for(int i = 0; i < iterations; i++){
+         uint64_t start = get_cycles();
+         attestation(p, encrypted_policy, keys, public_key);
+         uint64_t end = get_cycles();
+         total += (end - start)/iterations;
+     }
+     printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
+     printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
+}
+
+
 int main(int argc, char** argv)
 {
 
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(2,&cpuset);
+    pthread_t thread = pthread_self();
+    int pr = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+   
 
 	int32_t value, number;
 
-	key_pair* keys;
-	keys = gen_keys();
-	printf("Hacl Private key: [");
-	for(int i = 0; i < 32; i++) {
-		printf("%d ", keys->private_key[i]);
-	}
-	printf("]\n");
-	printf("Hacl public key: [");
-	for(int i = 0; i < 32; i++) {
-		printf("%d ", keys->public_key[i]);
-	}
-	printf("]\n");
-	// init policy
-	policy* p = (policy*)malloc(sizeof(policy)); //TODO: Use malloc?
+    //key_pair* keys = prepair_keys();
+    //policy* p = prepair_policy();
+    fd = open("/dev/vmpl_device", O_RDWR);
+    if(fd < 0) {
+        printf("Cannot open device file...\n");
+        return -1;
+    }
+    //monitor_init();
+    //create_zygote("libpal.so");
+    //create_trustlet(0);
+    //invoke_trustlet(1);
+    invoke_trustlet(1);
+    return 0;
 
-	if(p == NULL) {
-		printf("Can't allocate p\n");
-		exit(-1);
-	}
-	p->zygote_hash[0] = 233;
-	p->trustlet_hash[0] = 244;
-	p->data[0] = 250;
-	p->data[300] = 69;
-	p->data[2310] = 169;
-	printf("Size of policy: %ld\n", sizeof(policy));
-	sleep(1);
+    load_elf();
+    return 0;
+    //attestation_time(keys,p);
+    //return 0;
+    monitor_init();
+    single_exec();
+    return 0;
 
-	fd = open("/dev/vmpl_device", O_RDWR);
-	if(fd < 0) {
-		printf("Cannot open device file...\n");
-		return -1;
-	}
-
-	// allocate it outside of attenstaion function to avoid measuring the allocation time 
-	uint8_t* encrypted_policy = aligned_alloc(4096, 4096); 
-	if(encrypted_policy == NULL) {
-		printf("Can't allocate encrypted_policy\n");
-		exit(-1);
-	}
-	encrypted_policy[0] = 0;
-	uint8_t* public_key = aligned_alloc(4096, 4096);
-	for(int i = 0; i < 32; i++)
-	{
-		public_key[i] = keys->public_key[i];
-	}
-	float total = 0.0;
-	const int iterations = 1;
-	monitor_init();
-	for(int i = 0; i < iterations; i++) {
-		uint64_t start = get_cycles();
-		attestation(p, encrypted_policy, keys, public_key);
-		uint64_t end = get_cycles();
-		total += (end - start)/iterations;
-	}
-
-	printf("Attestation time: %f\n", cycles_to_ms(total, get_CPU_freq()));
-	printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
 	sleep(1);
 	exec_elf("hello_elf_asm.elf", NULL);
 	sleep(1);
 
 close_:
 	printf("Close");
-	free(encrypted_policy);
+	/*free(encrypted_policy);
 	free(p);
-	free(public_key);
+	free(public_key);*/
 	close(fd);
 	return 0;
 }

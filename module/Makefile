@@ -40,7 +40,11 @@ test_create_cpu:
 	./test -
 
 t:
-	gcc -I include/ -std=c11 app/t.c -lpthread -L include -l:libmy_crypto.a -o test
+	gcc -g3 -I include/ -std=c11 app/t.c -lpthread -L include -l:libmy_crypto.a -o test
 
 outb:
 	gcc app/outb.c -o outb
+
+test_elf:
+	nasm -f elf64 -o  hello_elf.o hello_elf.asm
+	ld -o simple_elf hello_elf.o

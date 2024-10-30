@@ -76,11 +76,11 @@ static long create_zygote(struct monitor_call* mcall){
 
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->zygote.size;
-	call.r8 = pagewalki(mcall->zygote.zygote);
+	call.r8 = get_pgd_phys();
+	call.rdx = mcall->zygote.zygote;
 
-	if((res = do_monitor_call(&call)) != 1){
-		return -1;
-	}
+	do_monitor_call(&call);
+
 	res = call.rcx;
 	return res;
 }
@@ -120,15 +120,27 @@ static long create_trustlet(struct monitor_call* mcall){
 	int res;
 
 	call.rax = MONITORCALLID(mcall->type);
-	call.rcx = mcall->trustlet.size;
-	call.r8 = pagewalki(mcall->trustlet.trustlet_data);
-	call.rdx = mcall->trustlet.zygote;
+	//call.rcx = mcall->trustlet.size;
+	//call.r8 = pagewalki(mcall->trustlet.trustlet_data);
+	//call.rdx = mcall->trustlet.zygote;
+	call.r9 = mcall->trustlet.zygote;
 
-	if((res = do_monitor_call(&call)) != 1)
-		return -1;
+	do_monitor_call(&call);
+
 	return call.rcx;
 }
 
+static long invoke_trustlet(struct monitor_call* mcall) {
+	struct svsm_call call;
+	int res;
+
+	call.rax = MONITORCALLID(mcall->type);
+	call.rcx = mcall->process_id;
+
+	do_monitor_call(&call);
+
+	return call.rcx;
+}
 
 /**
  * rax: call ID
@@ -194,6 +206,43 @@ static long exec_elf(struct monitor_call* mcall)
 		return -1;
 	return 0;
 }
+/*
+ * For now for testing
+ * rcx is the size
+ * r8 is the physical address of list of pages *
+ */
+
+
+static long load_data(struct monitor_call* mcall){
+	printk(KERN_ERR "Working");
+	uint64_t size = mcall->data_info.size;
+	u8* start_addr = mcall->data_info.start_address;
+	struct svsm_call call;
+	//uint64_t* pages = get_zeroed_page(GFP_KERNEL);
+	//printk(KERN_ERR "SIZE, %d", size);
+	/*for(int i = 0; i < size; i++){
+		printk(KERN_ERR "Trying address: %x", start_addr + i *4096);
+		pages[i] = pagewalk(start_addr + i * 4096);
+		printk(KERN_ERR "Physical address: %x", pages[i]);
+	}*/
+
+	//Page Table of calling app
+	void* pgd_phys = get_pgd_phys();
+
+	printk(KERN_ERR "PGD: %p, %p",get_pgd(),pgd_phys);
+
+	call.rcx = size;
+	call.rdx = pgd_phys;
+	call.r8 = start_addr;
+	//u64 test = pagewalk(start_addr);
+	//call.rdx = test;//virt_to_phys(pages);
+	//printk(KERN_ERR "ADDRESS: %d", test);//virt_to_phys(pages));
+	call.rax = MONITORCALLID(mcall->type);
+	printk(KERN_INFO "Size: %d",size);
+	do_monitor_call(&call);
+	return 0;
+}
+
 
 static long parse_request(struct file *file, unsigned int cmd, unsigned long arg){
 
@@ -205,6 +254,7 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return -1;
 	}
 	printk(KERN_ERR "Call type: %d\n", call.type);
+	printk(KERN_ERR "d: %d\n", create_data_struct);
 	switch (call.type)
 	{
 	
@@ -226,7 +276,11 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return _send_policy(&call);
 	case execute_elf:
 		return exec_elf(&call);
+	case create_data_struct:
+		return load_data(&call);
 
+	case invokeTrustlet:
+		return invoke_trustlet(&call);
 
 	default:
 		printk(KERN_ERR "Invalid type");

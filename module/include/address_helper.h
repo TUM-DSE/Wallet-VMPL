@@ -14,27 +14,27 @@ static inline void* pagewalk_generic(void* vaddr, struct mm_struct* mm){
 
         pgd_t* pgd = pgd_offset(mm, addr);
         if (pgd_none(*pgd) || pgd_bad(*pgd)) {
-                printk( KERN_INFO "Invalid pgd\n");
+                printk( KERN_ERR "Invalid pgd\n");
                 return NULL;
         }
         p4d_t* p4d = p4d_offset(pgd,addr);
         if (p4d_none(*p4d) || p4d_bad(*p4d)){
-                printk( KERN_INFO "Invalid p4d\n");
+                printk( KERN_ERR "Invalid p4d\n");
                 return NULL;
         }
         pud_t *pud = pud_offset(p4d, addr);
         if (pud_none(*pud) || pud_bad(*pud)){
-                printk( KERN_INFO "Invalid pud\n");
+                printk( KERN_ERR "Invalid pud\n");
                 return NULL;
         }
         pmd_t *pmd = pmd_offset(pud, addr);
         if (pmd_none(*pmd) || pmd_bad(*pmd)){
-                printk( KERN_INFO "Invalid pmd\n");
+                printk( KERN_ERR "Invalid pmd\n");
                 return NULL;
         }
         pte_t *pte = pte_offset_kernel(pmd, addr);
         if (pte_none(*pte)) {
-                printk( KERN_INFO "Invalid pte\n");
+                printk( KERN_ERR "Invalid pte\n");
                 pte_unmap(pte);
                 return NULL;    
         }
@@ -52,5 +52,12 @@ static uint64_t pagewalki(void* vaddr){
 	return (uint64_t)pagewalk_generic(vaddr, current->mm);
 }
 
+static void* get_pgd(void){
+        return current->mm->pgd;
+}
+
+static void* get_pgd_phys(void) {
+        return virt_to_phys(get_pgd());
+}
 
 #endif

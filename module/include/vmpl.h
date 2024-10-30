@@ -18,12 +18,14 @@ enum monitor_call_type {
     deleteZygote,
     createTrustlet,
     deleteTrustlet,
-    invokeTrustlet,
+    invokeTrustlet = 8,
     waitForTrustletResult,
 
 	get_public_key = 30,
 	send_policy = 31,
 	execute_elf = 32,
+
+    create_data_struct = 50,
 };
 
 struct monitor_call {
@@ -39,7 +41,7 @@ struct monitor_call {
         tpid_t process_id;
         struct zygote {
             void* zygote;
-            uint32_t size; 
+            uint64_t size;
         }zygote;
         struct trustlet {
             void* trustlet_data;
@@ -56,6 +58,10 @@ struct monitor_call {
 			void* page2;
 			uint32_t size;
 		}execute_elf_context;
+        struct data_info {
+            void* start_address;
+            uint64_t size; //In 4K pages
+        }data_info;
     };
 };
 
