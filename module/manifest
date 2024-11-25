@@ -1,0 +1,38 @@
+[libos]
+entrypoint = "/helloworld"
+
+[loader]
+log_level = "error"
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib"
+
+[fs]
+mounts = [
+    { path = "/lib", uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
+    { path = "/helloworld", uri = "file:helloworld" },
+]
+
+[sgx]
+debug = true
+edmm_enable = false
+trusted_files = [
+    { uri = "file:helloworld" },
+    { uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/" },
+    { uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so" },
+]
+max_threads = 4
+isvprodid = 0
+isvsvn = 0
+remote_attestation = "none"
+enable_stats = false
+enclave_size = "256M"
+use_exinfo = false
+
+[sgx.cpu_features]
+avx = "unspecified"
+avx512 = "unspecified"
+amx = "unspecified"
+mpx = "disabled"
+pkru = "disabled"
