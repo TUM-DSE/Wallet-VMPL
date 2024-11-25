@@ -4,7 +4,7 @@ KERNEL_PATH?=${ROOT_PATH}/linux/
 KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
 USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
-
+CORES?=1
 
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
@@ -106,7 +106,7 @@ run:
 	-machine q35,confidential-guest-support=sev0,memory-backend=ram1 \
 	-object memory-backend-memfd,id=ram1,size=8G,share=true \
 	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,igvm-file=svsm/bin/coconut-qemu.igvm \
-	-smp 8 \
+	-smp ${CORES} \
 	-no-reboot \
 	-drive file=guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=off \
 	-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on \
@@ -138,4 +138,8 @@ load_kvm:
 	make -C host/ load_kvm
 
 copy_pal:
+	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
+
+gramine:
+	cd gramine-svsm; make build_external
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/

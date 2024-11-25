@@ -28,6 +28,8 @@ enum monitor_call_type {
     create_data_struct = 50,
 };
 
+// A Zygote consists of the PAL, the Manifest and the LibOS
+
 struct monitor_call {
     enum monitor_call_type type;
     union {
@@ -40,7 +42,7 @@ struct monitor_call {
         void* attestation_target;
         tpid_t process_id;
         struct zygote {
-            void* zygote;
+            void* zygote_data;
             uint64_t size;
         }zygote;
         struct trustlet {

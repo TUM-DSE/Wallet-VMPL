@@ -140,6 +140,19 @@ void single_exec(){
 	free(att_buffer);
 }
 
+struct zygote_data {
+    void* zygote_data[3];
+    uint64_t size[3];
+};
+
+void allocate_zygote_struct(struct zygote_data** z){
+    uint8_t* buf = aligned_alloc(4096, 4096);
+    for(int i =0;i <4096;i++)
+        buf[i] = 0;
+    *z = (void*)buf;
+}
+
+
 int create_zygote(const char* zygote){
     printf("Trying to register Zygote with Monitor");
     uint8_t* data;
@@ -147,9 +160,33 @@ int create_zygote(const char* zygote){
     load_file(zygote, &data, &size);
     printf("Zygote(%s) size: %ld\n", zygote, size);
 
+    uint8_t* manifest;
+    uint64_t manifest_size;
+    load_file("manifest", &manifest, &manifest_size);
+   
+    uint8_t* libos;
+    uint64_t libos_size;
+    load_file("libsysdb.so", &libos, &libos_size);
+
+    struct zygote_data* z;
+    allocate_zygote_struct(&z);
+    z->zygote_data[0] = data;
+    z->size[0] = size;
+    z->zygote_data[1] = manifest;
+    z->size[1] = manifest_size;
+    z->zygote_data[2] = libos;
+    z->size[2] = libos_size;
+
     struct monitor_call call;
-    call.zygote.zygote = data;
-    call.zygote.size = size;
+    /*call.zygote.zygote_data[0] = data;
+    call.zygote.size[0] = size;
+    call.zygote.zygote_data[1] = manifest;
+    call.zygote.size[1] = manifest_size;
+    */
+
+    call.zygote.zygote_data = (void*)z;
+    call.zygote.size = 4096;
+
     call.type = createZygote;
 
     int ret = ioctl(fd, VMPL_WR,&call);
@@ -393,10 +430,10 @@ int main(int argc, char** argv)
         return -1;
     }
     //monitor_init();
-    //create_zygote("libpal.so");
-    //create_trustlet(0);
-    //invoke_trustlet(1);
+    create_zygote("libpal.so");
+    create_trustlet(0);
     invoke_trustlet(1);
+    //invoke_trustlet(1);
     return 0;
 
     load_elf();
