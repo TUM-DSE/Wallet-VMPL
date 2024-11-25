@@ -48,8 +48,10 @@ ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 #	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
 #	mv config-5.15.0-89-generic config
 
+
 guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb container/99_config.yaml
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
+
 
 make update_guest:
 	bash ./scripts/update_image.sh guest linux
@@ -94,7 +96,7 @@ submodules:
 #The coconut edk2 repository currently tries to clone some deleted repo
 #git submodule update --init --recursive edk2
 	cd svsm/kernel/src/my_crypto/; ./build.sh
-
+	git submodule update --init --recursive gramine-svsm;
 
 prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
 
