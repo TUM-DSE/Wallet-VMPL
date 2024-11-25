@@ -90,8 +90,11 @@ clean:
 	cd node; make clean
 
 submodules:
-	git submodule update --init --recursive svsm; cd svsm/kernel/src/my_crypto/; ./build.sh
-	git submodule update --init --recursive edk2
+	git submodule update --init --recursive svsm;
+#The coconut edk2 repository currently tries to clone some deleted repo
+#git submodule update --init --recursive edk2
+	cd svsm/kernel/src/my_crypto/; ./build.sh
+
 
 prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
 
