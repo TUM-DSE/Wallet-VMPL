@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 groupadd -g $1 users
 useradd -l -u $2 -g users user
