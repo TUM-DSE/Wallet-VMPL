@@ -1,7 +1,8 @@
-# Schal: Secure layering framework for confidential VMs
+# Wallet: Secure layering framework for confidential VMs
 
 ## Prerequisite
-- Schal requires AMD SEV-SNP VMPL
+- Wallet requires AMD SEV-SNP VMPL
+- This repository uses a Nix flake
 
 ## Usage
 
@@ -9,11 +10,22 @@ Initial Setup:
 ```bash
 make prepare_all
 ```
+This will do the following
+- Clone all required submodules including the Monitor and Gramine
+- Fetch the prebuild kernel, and VM base image
+- Build the Monitor and Guest image
+- Setup the network for the VMPL
 
-Run CVM:
-```bash
-make run_svsm
+``` bash
+make gramine
 ```
+This will build gramine and make it accessable to the VM.
+
+Run CVM with Wallet:
+```bash
+make run
+```
+Starts the CVM with the Wallet Monitor.
 
 Connect via SSH:
 ```bash
@@ -26,7 +38,11 @@ cd module
 make vmpl.ko
 ```
 
-To Test Trustlet execution: 
+To Test Trustlet execution (within the VM): 
 ```bash
-make trustlet_test
+cd module
+make
+insmod vmpl.ko
+make t
+./test
 ```
