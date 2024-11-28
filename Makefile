@@ -148,3 +148,4 @@ copy_pal:
 gramine:
 	cd gramine-svsm; make build_external
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
+	cp gramine-svsm/build/libos/src/libsysdb.so module/
