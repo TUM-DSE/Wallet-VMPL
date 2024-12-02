@@ -9,18 +9,15 @@ entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so
 LD_LIBRARY_PATH = "/lib"
 
 [fs]
+root.type = "tmpfs"
 mounts = [
-    { path = "/lib", uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
-    { path = "/helloworld", uri = "file:helloworld" },
+
 ]
 
 [sgx]
 debug = true
 edmm_enable = false
 trusted_files = [
-    { uri = "file:helloworld" },
-    { uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/" },
-    { uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so" },
 ]
 max_threads = 4
 isvprodid = 0
