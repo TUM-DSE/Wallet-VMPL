@@ -239,6 +239,7 @@ void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size){
     uint64_t size = ftell(file);
     rewind(file);
     uint8_t* buf = aligned_alloc(4096, size + 4096);
+    mlock(buf, size);
     for(int i =0;i <size+4096;i++)
         buf[i] = 0;
     size_t read_len = fread((void*)buf,1,size,file);
@@ -429,12 +430,19 @@ int main(int argc, char** argv)
         printf("Cannot open device file...\n");
         return -1;
     }
+
+#if 0 // test zygote
     //monitor_init();
     create_zygote("libpal.so");
     create_trustlet(0);
     invoke_trustlet(1);
     //invoke_trustlet(1);
     return 0;
+#else // test attestation
+    key_pair* keys = prepair_keys();
+    policy* p = prepair_policy();
+    attestation_time(keys,p);
+#endif
 
     load_elf();
     return 0;
