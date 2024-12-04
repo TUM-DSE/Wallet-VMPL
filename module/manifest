@@ -1,8 +1,8 @@
 [libos]
-entrypoint = "/lib/nop"
+entrypoint = "/lib/helloworld"
 
 [loader]
-log_level = "error"
+log_level = "debug"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
 
 [loader.env]
