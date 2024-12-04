@@ -59,6 +59,15 @@ int fd;
 
 void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size);
 
+// Function to print the buffer as hex
+void print_buffer_hex(FILE *file, const uint8_t *buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        fprintf(file, "%02X", buffer[i]);
+        if ((i + 1) % 16 == 0) fprintf(file, "\n"); // Line break every 16 bytes
+    }
+    if (size % 16 != 0) fprintf(file, "\n"); // Final line break if not multiple of 16
+}
+
 // Function to parse and print the attestation report
 void print_attestation_report(const uint8_t *att_buffer, FILE *file) {
     size_t field_count = sizeof(fields) / sizeof(fields[0]);

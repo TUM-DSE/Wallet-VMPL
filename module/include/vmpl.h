@@ -116,15 +116,6 @@ Field fields[] = {
     {"LAUNCH_TCB", 0x1F0, 8},
     {"SIGNATURE", 0x2A0, 512},
 };
-
-// Function to print the buffer as hex
-void print_buffer_hex(FILE *file, const uint8_t *buffer, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        fprintf(file, "%02X", buffer[i]);
-        if ((i + 1) % 16 == 0) fprintf(file, "\n"); // Line break every 16 bytes
-    }
-    if (size % 16 != 0) fprintf(file, "\n"); // Final line break if not multiple of 16
-}
 /* End of attestation dump-related defs */
 
 #endif
