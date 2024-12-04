@@ -412,47 +412,83 @@ void attestation_time(key_pair* keys, policy* p){
 
 int main(int argc, char** argv)
 {
+    int test_num = 0;
+    if (argc > 1) {
+        test_num = atoi(argv[1]);
+    }
+    printf("Test number: %d\n", test_num);
 
+    // Set affinity to CPU 2
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(2,&cpuset);
+    CPU_SET(2, &cpuset);
     pthread_t thread = pthread_self();
     int pr = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
-   
 
-	int32_t value, number;
-
-    //key_pair* keys = prepair_keys();
-    //policy* p = prepair_policy();
     fd = open("/dev/vmpl_device", O_RDWR);
     if(fd < 0) {
         printf("Cannot open device file...\n");
         return -1;
     }
-    //monitor_init();
-    create_zygote("libpal.so");
-    create_trustlet(0);
-    invoke_trustlet(1);
-    //invoke_trustlet(1);
-    return 0;
 
-    load_elf();
-    return 0;
-    //attestation_time(keys,p);
-    //return 0;
-    monitor_init();
-    single_exec();
-    return 0;
+    switch (test_num) {
+        case 0: {
+            // OK
+            printf("Trustlet test\n");
+            create_zygote("libpal.so");
+            create_trustlet(0);
+            invoke_trustlet(1);
+            break;
+        }
+        case 1: {
+            // not work
+            printf("Multiple execution test\n");
+            create_zygote("libpal.so");
+            create_trustlet(0);
+            invoke_trustlet(1);
+            invoke_trustlet(1);
+            break;
+        }
+        case 2: {
+            // not work
+            printf("Multiple execution test2\n");
+            create_zygote("libpal.so");
+            create_trustlet(0);
+            invoke_trustlet(1);
+            create_trustlet(0);
+            invoke_trustlet(2);
+            break;
+        }
+        case 3: {
+            // OK
+            printf("Multiple execution test3\n");
+            create_zygote("libpal.so");
+            create_trustlet(0);
+            invoke_trustlet(1);
 
-	sleep(1);
-	exec_elf("hello_elf_asm.elf", NULL);
-	sleep(1);
+            create_zygote("libpal.so");
+            create_trustlet(2);
+            invoke_trustlet(3);
+            break;
+        }
+        case 100+0: {
+            printf("Attestation test\n");
+            key_pair* keys = prepair_keys();
+            policy* p = prepair_policy();
+            attestation_time(keys,p);
+            break;
+        }
+        case 200+0: {
+            printf("Single elf exec test\n");
+            exec_elf("hello_elf_asm.elf", NULL);
+            break;
+        }
+        default: {
+            printf("Invalid test number! %d\n", test_num);
+            break;
+        }
+    }
 
-close_:
-	printf("Close");
-	/*free(encrypted_policy);
-	free(p);
-	free(public_key);*/
-	close(fd);
-	return 0;
+    close(fd);
+    return 0;
 }
