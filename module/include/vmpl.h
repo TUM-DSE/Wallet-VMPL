@@ -21,9 +21,9 @@ enum monitor_call_type {
     invokeTrustlet = 8,
     waitForTrustletResult,
 
-	get_public_key = 30,
-	send_policy = 31,
-	execute_elf = 32,
+    get_public_key = 30,
+    send_policy = 31,
+    execute_elf = 32,
 
     create_data_struct = 50,
 };
@@ -70,5 +70,61 @@ struct monitor_call {
 };
 
 #define VMPL_WR _IOR('a','a',struct monitor_call)
+
+/* Attestation dump-related defs */
+#define ATTESTATION_REPORT_PATH "attestation_report.txt"
+
+typedef struct {
+    const char *name;
+    size_t offset;
+    size_t size; // in bytes
+} Field;
+
+Field fields[] = {
+    {"VERSION", 0x00, 4},
+    {"GUEST_SVN", 0x04, 4},
+    {"POLICY", 0x08, 8},
+    {"FAMILY_ID", 0x10, 16},
+    {"IMAGE_ID", 0x20, 16},
+    {"VMPL", 0x30, 4},
+    {"SIGNATURE_ALGO", 0x34, 4},
+    {"CURRENT_TCB", 0x38, 8},
+    {"PLATFORM_INFO", 0x40, 8},
+    {"SIGNING_KEY", 0x48, 1},
+    {"MASK_CHIP_KEY", 0x48, 1}, // Overlapping with SIGNING_KEY
+    {"AUTHOR_KEY_EN", 0x48, 1}, // Overlapping with MASK_CHIP_KEY
+    {"RESERVED", 0x4C, 4},
+    {"REPORT_DATA", 0x50, 64},
+    {"MEASUREMENT", 0x90, 48},
+    {"HOST_DATA", 0xC0, 32},
+    {"ID_KEY_DIGEST", 0xE0, 48},
+    {"AUTHOR_KEY_DIGEST", 0x110, 48},
+    {"REPORT_ID", 0x140, 32},
+    {"REPORT_ID_MA", 0x160, 32},
+    {"REPORTED_TCB", 0x180, 8},
+    {"CPUID_FAM_ID", 0x188, 1},
+    {"CPUID_MOD_ID", 0x189, 1},
+    {"CPUID_STEP", 0x18A, 1},
+    {"CHIP_ID", 0x1A0, 64},
+    {"COMMITTED_TCB", 0x1E0, 8},
+    {"CURRENT_BUILD", 0x1E8, 1},
+    {"CURRENT_MINOR", 0x1E9, 1},
+    {"CURRENT_MAJOR", 0x1EA, 1},
+    {"COMMITTED_BUILD", 0x1EC, 1},
+    {"COMMITTED_MINOR", 0x1ED, 1},
+    {"COMMITTED_MAJOR", 0x1EE, 1},
+    {"LAUNCH_TCB", 0x1F0, 8},
+    {"SIGNATURE", 0x2A0, 512},
+};
+
+// Function to print the buffer as hex
+void print_buffer_hex(FILE *file, const uint8_t *buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        fprintf(file, "%02X", buffer[i]);
+        if ((i + 1) % 16 == 0) fprintf(file, "\n"); // Line break every 16 bytes
+    }
+    if (size % 16 != 0) fprintf(file, "\n"); // Final line break if not multiple of 16
+}
+/* End of attestation dump-related defs */
 
 #endif
