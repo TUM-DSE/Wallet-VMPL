@@ -1,17 +1,19 @@
 [libos]
-entrypoint = "/lib/helloworld"
+entrypoint = "/lib/python"
 
 [loader]
 log_level = "debug"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+argv = ["python3", "-c", "print(1+1)"]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib"
-
+PYTHONPATH = "/lib/stdlib.zip" 
 [fs]
 root.type = "tmpfs"
 mounts = [
   { type = "pseudo", path = "/lib", uri = "lib" },
+  #{ type = "pseudo", path = "/python", uri = "python" },
 ]
 
 [sgx]
