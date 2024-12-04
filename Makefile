@@ -98,7 +98,7 @@ submodules:
 	cd svsm/kernel/src/my_crypto/; ./build.sh
 	git submodule update --init --recursive gramine-svsm;
 
-prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
+prepare_all: submodules build_svsm gramine guest.qcow2 setup_guest_net
 
 build_and_run: build_svsm run
 
