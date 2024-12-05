@@ -15,7 +15,7 @@ class SimpleScheduler(Scheduler):
             # find a free node that has the function already registered
             # for a warm boot
             for i in range(node.max_functions):
-                if (not node.function_slots_free[i]) and (functions[i] == func_id):
+                if (not node.function_slots_free[i]) and (node.functions_registered[i] == func_id):
                     cold_boot = False
                     return node, cold_boot
 
