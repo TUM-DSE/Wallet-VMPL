@@ -76,8 +76,8 @@ static long create_zygote(struct monitor_call* mcall){
 
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->zygote.size;
-	call.r8 = get_pgd_phys();
-	call.rdx = mcall->zygote.zygote_data;
+	call.r8 = (u64)get_pgd_phys();
+	call.rdx = (u64)mcall->zygote.zygote_data;
 
 	do_monitor_call(&call);
 
@@ -125,7 +125,7 @@ static long create_trustlet(struct monitor_call* mcall){
 	//call.rdx = mcall->trustlet.zygote;
 	call.r9 = mcall->trustlet.zygote;
 
-	do_monitor_call(&call);
+	res = do_monitor_call(&call);
 
 	return call.rcx;
 }
@@ -135,9 +135,10 @@ static long invoke_trustlet(struct monitor_call* mcall) {
 	int res;
 
 	call.rax = MONITORCALLID(mcall->type);
-	call.rcx = mcall->process_id;
-
-	do_monitor_call(&call);
+	call.rcx = mcall->invokation.process_id;
+	call.r8 = (u64)mcall->invokation.input_data;
+	call.r9 = mcall->invokation.input_data_size;
+	res = do_monitor_call(&call);
 
 	return call.rcx;
 }
@@ -232,13 +233,13 @@ static long load_data(struct monitor_call* mcall){
 	printk(KERN_ERR "PGD: %p, %p",get_pgd(),pgd_phys);
 
 	call.rcx = size;
-	call.rdx = pgd_phys;
-	call.r8 = start_addr;
+	call.rdx = (u64)pgd_phys;
+	call.r8 = (u64)start_addr;
 	//u64 test = pagewalk(start_addr);
 	//call.rdx = test;//virt_to_phys(pages);
 	//printk(KERN_ERR "ADDRESS: %d", test);//virt_to_phys(pages));
 	call.rax = MONITORCALLID(mcall->type);
-	printk(KERN_INFO "Size: %d",size);
+	printk(KERN_INFO "Size: %lld",size);
 	do_monitor_call(&call);
 	return 0;
 }
