@@ -5,5 +5,6 @@ pkgs.mkShell {
 	  	python311
 		python311Packages.numpy
 		python311Packages.tqdm
+		 python311Packages.python-lsp-server
   ];
 }

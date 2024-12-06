@@ -2,6 +2,7 @@ import csv
 import numpy as np
 from tqdm import tqdm
 import time
+import random
 
 # my scripts
 from scheduler import SimpleScheduler
@@ -156,12 +157,15 @@ def cache_function(node, f):
 
 def main():
     # default parameter values
-    num_nodes = 5
-    cold_boot_time = 0.3
+    num_nodes = 10
+    cold_boot_time = 3
     warm_boot_time = 0.1
-    max_functions_per_node = 3
+    soft_warm_time = 0.5
+    max_functions_per_node = 20
     caching_time = 5 * 60
-    max_execution_slots = 3
+    max_execution_slots = 5
+    percentage_soft_warm = 0.3
+
 
 
     # index into the csv
@@ -175,6 +179,11 @@ def main():
     sim_time = 0
     total_delay = 0
     cold_boots = 0
+    soft_warm_boots = 0
+    warm_boots = 0
+
+    #initialize rng
+    random.seed()
 
     # read csv
     input_file = 'AzureFunctionsInvocationTraceForTwoWeeksJan2021_preprocessed.csv'
@@ -198,6 +207,7 @@ def main():
 
 
     scheduler = SimpleScheduler()
+    delays = np.empty(len(rows))
     pbar = tqdm(total=len(rows))
     cur_func = 0
     while cur_func < len(rows):
@@ -234,8 +244,13 @@ def main():
 
         #look for nodes again, just in case there is a better one than the previous candidate
         assigned_node, assigned_slot, cold_boot = scheduler.pick_next_node(nodes, f)
+        soft_warm = False
         if cold_boot == True:
-            f.duration = f.duration + cold_boot_time
+            if random.random() < percentage_soft_warm:
+                f.duration = f.duration + soft_warm_time
+                soft_warm = True
+            else:
+                f.duration = f.duration + cold_boot_time
         else:
             f.duration = f.duration + warm_boot_time
 
@@ -253,20 +268,42 @@ def main():
 
         f_delay = f.start_time - f.arrival_time
         total_delay = total_delay + f_delay
-        if cold_boot == True:
+        delays[cur_func] = f_delay
+
+        if soft_warm == True:
+            soft_warm_boots = soft_warm_boots + 1
+        elif cold_boot == True:
             cold_boots = cold_boots + 1
-        log(f'[{sim_time}] Function {f.func_hash} starts executing on node {assigned_node.node_id} slot {assigned_slot} after a delay of {f_delay}. Execution duration: {f.duration}, Cold boot: {cold_boot}')
+        else:
+            warm_boots = warm_boots + 1
+
+        log(f'[{sim_time}] Function {f.func_hash} starts executing on node {assigned_node.node_id} slot {assigned_slot} after a delay of {f_delay}. Execution duration: {f.duration}, Cold boot: {cold_boot}, Soft warm boot: {soft_warm}')
 
         cur_func = cur_func + 1
         pbar.update(1)
 
     pbar.close()
+    print('------------------------------------------------')
     print(f'Statistics:')
     print(f'Total simulation time: {sim_time}')
     print(f'Cold boot rate: {cold_boots / len(rows)}')
-    print(f'Avg function delay: {total_delay / len(rows)}')
-
-        
+    print(f'Soft warm boot rate: {soft_warm_boots / len(rows)}')
+    print(f'Warm boot rate: {warm_boots / len(rows)}')
+    print(f'Function delay:')
+    print(f'    Avg: {np.average(delays)}')
+    print(f'    Median: {np.median(delays)}')
+    print(f'    Std: {np.std(delays)}')
+    print(f'')
+    print(f'Configuration:')
+    print(f'num_nodes: {num_nodes}')
+    print(f'cold_boot_time: {cold_boot_time}')
+    print(f'warm_boot_time: {warm_boot_time}')
+    print(f'soft_warm_time: {soft_warm_time}')
+    print(f'max_functions_cached_per_node: {max_functions_per_node}')
+    print(f'caching_time: {caching_time}')
+    print(f'max_executions_slots: {max_execution_slots}')
+    print(f'percentage_soft_warm: {percentage_soft_warm}')
+    print('------------------------------------------------')
 
 if __name__ == '__main__':
     main()
