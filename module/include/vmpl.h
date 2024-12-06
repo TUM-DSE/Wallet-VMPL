@@ -28,7 +28,24 @@ enum monitor_call_type {
     create_data_struct = 50,
 };
 
+enum attestation_report_type {
+    monitorAttestation = 0,
+    zygoteAttestation = 1,
+    trustletAttestation = 2,
+    functionAttestation = 3,
+    maxAttestationReportType,
+};
+
 // A Zygote consists of the PAL, the Manifest and the LibOS
+
+/* Structure of function data is shown below */
+// typedef struct PACKED _function_data {
+//   uint64_t trustletId; // 8 bytes
+//   uint64_t fnInputSize; // 8 bytes
+//   void* fnInput; // 8 bytes
+//   uint64_t fnOutputSize; // 8 bytes
+//   void* fnOutput; // 8 bytes
+// } function_data;
 
 struct monitor_call {
     enum monitor_call_type type;
@@ -37,7 +54,10 @@ struct monitor_call {
         struct mem memory;
         struct{
             void* address;
-            uint64_t type; 
+            uint64_t zygote_id;
+            uint64_t trustlet_id;
+            void* function_data_ptr;
+            enum attestation_report_type type;
         }monitor_attestation;
         void* attestation_target;
         tpid_t process_id;
@@ -71,7 +91,7 @@ struct monitor_call {
 
 #define VMPL_WR _IOR('a','a',struct monitor_call)
 
-/* Attestation dump-related defs */
+/* Attestation related defs */
 #define ATTESTATION_REPORT_PATH "attestation_report.txt"
 
 typedef struct {
