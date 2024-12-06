@@ -156,6 +156,13 @@ def cache_function(node, f):
     node.function_last_call_time[max_slot] = 0
     return max_slot
 
+def is_any_active(nodes):
+    for node in nodes:
+        for f in node.execution_slots:
+            if f != None:
+                return True
+    return False
+
 def main():
 
     parser = argparse.ArgumentParser(description='Simulate the azure traces.')
@@ -294,6 +301,11 @@ def main():
 
         cur_func = cur_func + 1
         pbar.update(1)
+
+    # TODO: Finish executing currently running functions
+    while is_any_active(nodes):
+        _, sim_time, _ = update_simulation(nodes, 0, sim_time, caching_time, True)
+
 
     pbar.close()
     print('------------------------------------------------')
