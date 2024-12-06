@@ -41,26 +41,28 @@ struct monitor_call {
         }monitor_attestation;
         void* attestation_target;
         tpid_t process_id;
-        struct zygote {
+        // C++ compiler complains about having name in the anonymous
+        // union, thus commented out
+        struct /* zygote */ {
             void* zygote_data;
             uint64_t size;
         }zygote;
-        struct trustlet {
+        struct /* trustlet */ {
             void* trustlet_data;
             uint32_t size;
             tpid_t zygote;
         }trustlet;
-		struct decryption_context {
+		struct /* decryption_context */ {
 			void* sender_pub_key;
 			void* encrypted_data;
 			uint32_t encrypted_data_size;
 		}decryption_context;
-		struct execute_elf_context {
+		struct /* execute_elf_context */ {
 			void* page1;
 			void* page2;
 			uint32_t size;
 		}execute_elf_context;
-        struct data_info {
+        struct /* data_info */ {
             void* start_address;
             uint64_t size; //In 4K pages
         }data_info;
