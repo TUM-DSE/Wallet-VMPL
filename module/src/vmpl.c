@@ -120,11 +120,10 @@ static long create_trustlet(struct monitor_call* mcall){
 	int res;
 
 	call.rax = MONITORCALLID(mcall->type);
-	//call.rcx = mcall->trustlet.size;
-	//call.r8 = pagewalki(mcall->trustlet.trustlet_data);
-	//call.rdx = mcall->trustlet.zygote;
+	call.rcx = mcall->trustlet.size;
+	call.r8 = (u64)get_pgd_phys();
+	call.rdx = mcall->trustlet.trustlet_data;
 	call.r9 = mcall->trustlet.zygote;
-
 	res = do_monitor_call(&call);
 
 	return call.rcx;
