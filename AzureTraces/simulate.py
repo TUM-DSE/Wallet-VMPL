@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 import time
 import random
+import argparse
 
 # my scripts
 from scheduler import SimpleScheduler
@@ -156,15 +157,27 @@ def cache_function(node, f):
     return max_slot
 
 def main():
+
+    parser = argparse.ArgumentParser(description='Simulate the azure traces.')
+    parser.add_argument('-num_nodes', type=int, default=5, help='Number of nodes in the simulation.')
+    parser.add_argument('-cold_penalty', type=float, help='Penalty incurred by a function during a cold start (in seconds).', required=True)
+    parser.add_argument('-warm_penalty', type=float, help='Penalty incurred by a function during a warm start (in seconds).', required=True)
+    parser.add_argument('-soft_warm_penalty', type=float, default=0, help='Penalty incurred by a function during a soft warm start (in seconds). In the normal case, this would be equal to the cold boot penalty. In Wallet\'s case, this is the latency of starting a function that isn\'t cached, but whose zygote is already loaded.')
+    parser.add_argument('-cache_size', type=int, default=10, help='Number of functions that can be cached on a node concurrently.')
+    parser.add_argument('-caching_time', type=float, default= 300, help='The time (in seconds) after which an unused cached function will be automatically evicted.')
+    parser.add_argument('-execution_slots', type=int, default=3, help='The number of functions that can be executed concurrently on a node.')
+    parser.add_argument('-percentage_soft_warm', type=float, default=0, help='The percentage of cold boots that get turned into soft warm boots.')
+    args = parser.parse_args()
+
     # default parameter values
-    num_nodes = 10
-    cold_boot_time = 3
-    warm_boot_time = 0.1
-    soft_warm_time = 0.5
-    max_functions_per_node = 20
-    caching_time = 5 * 60
-    max_execution_slots = 5
-    percentage_soft_warm = 0.3
+    num_nodes = args.num_nodes
+    cold_boot_time = args.cold_penalty
+    warm_boot_time = args.warm_penalty
+    soft_warm_time = args.soft_warm_penalty
+    max_functions_per_node = args.cache_size
+    caching_time = args.caching_time
+    max_execution_slots = args.execution_slots
+    percentage_soft_warm = args.percentage_soft_warm
 
 
 
