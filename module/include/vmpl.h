@@ -35,34 +35,39 @@ struct monitor_call {
     union {
         int vmpl_level;
         struct mem memory;
+        tpid_t process_id;
         struct{
             void* address;
             uint64_t type; 
         }monitor_attestation;
         void* attestation_target;
-        tpid_t process_id;
-        // C++ compiler complains about having name in the anonymous
-        // union, thus commented out
-        struct /* zygote */ {
+        struct invokation {
+            tpid_t process_id;
+            void* input_data;
+            uint64_t input_data_size;
+            void* result;
+            uint64_t result_size;
+        }invokation;
+        struct zygote {
             void* zygote_data;
             uint64_t size;
         }zygote;
-        struct /* trustlet */ {
+        struct trustlet {
             void* trustlet_data;
             uint32_t size;
             tpid_t zygote;
         }trustlet;
-		struct /* decryption_context */ {
-			void* sender_pub_key;
-			void* encrypted_data;
-			uint32_t encrypted_data_size;
-		}decryption_context;
-		struct /* execute_elf_context */ {
-			void* page1;
-			void* page2;
-			uint32_t size;
-		}execute_elf_context;
-        struct /* data_info */ {
+        struct decryption_context {
+            void* sender_pub_key;
+            void* encrypted_data;
+            uint32_t encrypted_data_size;
+        }decryption_context;
+        struct execute_elf_context {
+            void* page1;
+            void* page2;
+            uint32_t size;
+        }execute_elf_context;
+        struct data_info {
             void* start_address;
             uint64_t size; //In 4K pages
         }data_info;
