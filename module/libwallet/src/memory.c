@@ -27,7 +27,7 @@ void load_file(const char* path, uint8_t** data, uint64_t* buf_size) {
     *buf_size = actual_size;
 }
 
-void load_data(const char* in, const char** out){
+void load_data(char* in, char** out){
     uint64_t size = strlen(in);
     uint64_t actual_size = ROUND_UP_SIZE(size);
     uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);

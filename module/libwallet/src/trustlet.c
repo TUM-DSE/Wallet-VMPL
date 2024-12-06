@@ -6,15 +6,29 @@
 #include "memory.h"
 #include "vmpl.h"
 
-int create_trustlet(const int zygote_id/*TODO: Add parameters*/) {
+#define INIT_CREATE_TRUSTLET(id, data, size)\
+    do {                                    \
+    call.type = createTrustlet;             \
+    call.trustlet.zygote = id;              \
+    call.trustlet.trustlet_data = data;     \
+    call.trustlet.size = size;              \
+    } while(0)
+
+int create_trustlet(const int zygote_id, char* func) {
     #ifndef NODEBUG
     printf("Trying to register Trustlet with Monitor\n");
     assert(con);
     #endif
-
+    uint64_t size = strlen(func);
+    char* out;
+    if(func){
+        load_data(func, &out);
+    } else {
+        out = NULL;
+    }
     struct monitor_call call;
-    call.type = createTrustlet;
-    call.trustlet.zygote = zygote_id;
+
+    INIT_CREATE_TRUSTLET(zygote_id, out, size);
 
     int ret = ioctl(con, VMPL_WR, &call);
 
@@ -24,11 +38,11 @@ int create_trustlet(const int zygote_id/*TODO: Add parameters*/) {
     return ret;
 }
 
-void* invoke_trustlet(const int trustlet_id, const char* args){
+void* invoke_trustlet(const int trustlet_id, char* args){
     #ifndef NODEBUG
     assert(con);
     #endif
-    const char* data;
+    char* data;
     load_data(args, &data);
 
     struct monitor_call call;

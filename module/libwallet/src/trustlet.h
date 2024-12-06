@@ -2,9 +2,10 @@
 #define TRUSTLET_H_
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "monitor.h"
 
-int create_trustlet(const int zygote_id);
-void* invoke_trustlet(const int trustlet_id, const char* args);
+int create_trustlet(const int zygote_id, char* func);
+void* invoke_trustlet(const int trustlet_id, char* args);
 #endif // TRUSTLET_H_
