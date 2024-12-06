@@ -97,6 +97,7 @@ submodules:
 #git submodule update --init --recursive edk2
 	cd svsm/kernel/src/my_crypto/; ./build.sh
 	git submodule update --init --recursive gramine-svsm;
+	git submodule update --init --recursive Benchmarks/SeBS;
 
 prepare_all: submodules build_svsm guest.qcow2 setup_guest_net 
 
@@ -119,7 +120,9 @@ run:
 	-netdev tap,ifname=tap0_${USER},id=net0,script=no,downscript=no -device e1000,netdev=net0 \
 	-serial stdio \
 	-serial pty \
-	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough
+	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough \
+	-virtfs local,path=Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
+	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough
 
 
 ssh:
