@@ -54,8 +54,7 @@ struct monitor_call {
         struct mem memory;
         struct{
             void* address;
-            uint64_t zygote_id;
-            uint64_t trustlet_id;
+            uint64_t process_id;
             void* function_data_ptr;
             enum attestation_report_type type;
         }monitor_attestation;
@@ -92,7 +91,11 @@ struct monitor_call {
 #define VMPL_WR _IOR('a','a',struct monitor_call)
 
 /* Attestation related defs */
-#define ATTESTATION_REPORT_PATH "attestation_report.txt"
+// NOTE: used for testing for now
+#define MONITOR_ATTESTATION_REPORT_PATH "monitor_attestation_report.txt"
+#define ZYGOTE_ATTESTATION_REPORT_PATH "zygote_attestation_report.txt"
+#define TRUSTLET_ATTESTATION_REPORT_PATH "trustlet_attestation_report.txt"
+#define FUNCTION_ATTESTATION_REPORT_PATH "function_attestation_report.txt"
 
 typedef struct {
     const char *name;
@@ -135,6 +138,11 @@ Field fields[] = {
     {"COMMITTED_MAJOR", 0x1EE, 1},
     {"LAUNCH_TCB", 0x1F0, 8},
     {"SIGNATURE", 0x2A0, 512},
+    {"INIT_MEASUREMENT", 0x4A0, 64},           // Wallet differential attestation field
+    {"MANIFEST_MEASUREMENT", 0x4E0, 64},       // Wallet differential attestation field
+    {"LIBOS_MEASUREMENT", 0x520, 64},          // Wallet differential attestation field
+    {"FUNCTION_INPUT_MEASUREMENT", 0x560, 64}, // Wallet differential attestation field
+    {"FUNCTION_OUTPUT_MEASUREMENT", 0x5A0, 64} // Wallet differential attestation field
 };
 /* End of attestation dump-related defs */
 

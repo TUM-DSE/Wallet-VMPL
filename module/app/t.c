@@ -45,7 +45,7 @@ struct PACKED attestation_report {
     uint32_t report_size;
     uint8_t reserved[24];
     uint8_t pub_key_hash[HASH_SIZE];
-    uint8_t report[];    
+    uint8_t report[];
 };
 
 typedef struct PACKED _policy {
@@ -61,6 +61,7 @@ typedef struct PACKED _function_data {
   void* fnInput; // 8 bytes
   uint64_t fnOutputSize; // 8 bytes
   void* fnOutput; // 8 bytes
+  void* reportOutput;
 } function_data;
 
 struct mem memory;
@@ -108,7 +109,7 @@ int call_attest(uint8_t* pub_key_hash) {
     struct attestation_report* report = (struct attestation_report*)att_buffer;
 
     // Open a file for writing the report
-    FILE *output_file = fopen(ATTESTATION_REPORT_PATH, "w");
+    FILE *output_file = fopen(MONITOR_ATTESTATION_REPORT_PATH, "w");
     if (output_file == NULL) {
         perror("Error opening file");
         return 1;
@@ -439,6 +440,9 @@ int attest_monitor(key_pair* keys, policy* p){
         printf("Can't allocate monitor attestation report buffer\n");
         return -1;
     }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; // i % 200;
+    }
 
     struct monitor_call call;
     call.type = attest;
@@ -447,6 +451,17 @@ int attest_monitor(key_pair* keys, policy* p){
     u64 ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
+
+    // Open a file for writing the report
+    FILE *output_file = fopen(MONITOR_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
 
     return 0;
 }
@@ -459,16 +474,28 @@ int attest_zygote(const int zygote_id, key_pair* keys, policy* p){
         printf("Can't allocate zygote attestation report buffer\n");
         return -1;
     }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
 
     struct monitor_call call;
     call.type = attest;
     call.attestation_target = att_buffer;
     call.monitor_attestation.type = zygoteAttestation;
-    call.monitor_attestation.zygote_id = zygote_id;
+    call.monitor_attestation.process_id = zygote_id;
     u64 ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-
+    // Open a file for writing the report
+    FILE *output_file = fopen(ZYGOTE_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
     return 0;
 }
 
@@ -480,16 +507,28 @@ int attest_trustlet(const int trustlet_id, key_pair* keys, policy* p){
         printf("Can't allocate trustlet attestation report buffer\n");
         return -1;
     }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
 
     struct monitor_call call;
     call.type = attest;
     call.attestation_target = att_buffer;
     call.monitor_attestation.type = trustletAttestation;
-    call.monitor_attestation.trustlet_id = trustlet_id;
+    call.monitor_attestation.process_id = trustlet_id;
     u64 ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-
+    // Open a file for writing the report
+    FILE *output_file = fopen(TRUSTLET_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
     return 0;
 }
 
@@ -501,17 +540,28 @@ int attest_function(function_data* function_data_ptr, const int trustlet_id, key
         printf("Can't allocate trustlet attestation report buffer\n");
         return -1;
     }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
 
     struct monitor_call call;
     call.type = attest;
     call.attestation_target = att_buffer;
     call.monitor_attestation.type = functionAttestation;
-    call.monitor_attestation.trustlet_id = trustlet_id;
+    call.monitor_attestation.process_id = trustlet_id;
     call.monitor_attestation.function_data_ptr = (void*)function_data_ptr;
     u64 ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-
+    FILE *output_file = fopen(FUNCTION_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
     return 0;
 }
 
@@ -599,6 +649,7 @@ int main(int argc, char** argv)
             ret = attest_monitor(keys, p);
             if (ret != 0)
               printf("Error in attesting monitor\n");
+            printf("Monitor attestation report stored in %s\n", MONITOR_ATTESTATION_REPORT_PATH);
 
             printf("Creating Zygote\n");
             int zygote_id = create_zygote("libpal.so");
@@ -607,6 +658,7 @@ int main(int argc, char** argv)
             ret = attest_zygote(zygote_id, keys, p);
             if (ret != 0)
               printf("Error in attesting zygote\n");
+            printf("Zygote attestation report stored in %s\n", ZYGOTE_ATTESTATION_REPORT_PATH);
 
             printf("Creating Trustlet\n");
             int trustlet_id = create_trustlet(zygote_id);
@@ -615,6 +667,7 @@ int main(int argc, char** argv)
             ret = attest_trustlet(trustlet_id, keys, p);
             if (ret != 0)
               printf("Error in attesting trustlet\n");
+            printf("Trustlet attestation report stored in %s\n", TRUSTLET_ATTESTATION_REPORT_PATH);
 
             uint8_t input[512];
             uint64_t input_len = 512;
@@ -640,7 +693,7 @@ int main(int argc, char** argv)
             ret = attest_function(function_data_ptr, trustlet_id, keys, p);
             if (ret != 0)
               printf("Error in attesting function\n");
-
+            printf("Function attestation report stored in %s\n", FUNCTION_ATTESTATION_REPORT_PATH);
             free(function_data_ptr);
             break;
         }
@@ -649,7 +702,7 @@ int main(int argc, char** argv)
             key_pair* keys = prepair_keys();
             policy* p = prepair_policy();
             attestation_time(keys,p);
-            printf("Attestation report stored in %s\n", ATTESTATION_REPORT_PATH);
+            printf("Attestation report stored in %s\n", MONITOR_ATTESTATION_REPORT_PATH);
             break;
         }
         case 200+0: {

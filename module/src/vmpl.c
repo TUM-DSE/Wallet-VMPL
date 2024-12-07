@@ -41,7 +41,7 @@ static long init_monitor(struct monitor_call* mcall){
 
 /**
  * rax: call ID
- * rcx: Report storage 
+ * rcx: Report storage buffer
  * rdx: Attestation type
  * r8: zygote/trustlet id (if applicable)
  * return:
@@ -51,25 +51,23 @@ static long init_monitor(struct monitor_call* mcall){
 static long diff_attestation(struct monitor_call* mcall){
   struct svsm_call call;
   void* ph = pagewalk(mcall->monitor_attestation.address);
-  call.rcx = (uint64_t)ph; // rcx -> Report storage
+  call.rcx = (uint64_t)ph; // rcx -> Report storage buffer
   call.rax = MONITORCALLID(mcall->type); // rax -> call ID
   call.rdx = mcall->monitor_attestation.type; // rdx -> attestation type
 
   switch (mcall->monitor_attestation.type)
   {
     case monitorAttestation:
-      /* do nothing */
       break;
     case zygoteAttestation:
-      call.r8 = mcall->monitor_attestation.zygote_id;
-      break;
+      /* fall through */
     case trustletAttestation:
-      call.r8 = mcall->monitor_attestation.trustlet_id;
+      call.r8 = mcall->monitor_attestation.process_id;
       break;
     case functionAttestation:
       call.r8 = get_pgd_phys();
       /*
-        4k structure that includes hte following:
+        4k structure that includes the following:
         1. trustlet_id as a uint64_t
         2. fnInputSize as a uint64_t
         3. fnInput as a void* ptr
