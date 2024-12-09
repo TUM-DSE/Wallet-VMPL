@@ -48,16 +48,16 @@ static void* pagewalk(void* vaddr){
 	return pagewalk_generic(vaddr, current->mm);
 }
 
-static uint64_t pagewalki(void* vaddr){
-	return (uint64_t)pagewalk_generic(vaddr, current->mm);
-}
+//static uint64_t pagewalki(void* vaddr){
+//	return (uint64_t)pagewalk_generic(vaddr, current->mm);
+//}
 
 static void* get_pgd(void){
         return current->mm->pgd;
 }
 
 static void* get_pgd_phys(void) {
-        return virt_to_phys(get_pgd());
+        return (void*)virt_to_phys(get_pgd());
 }
 
 #endif
