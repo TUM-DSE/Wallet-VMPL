@@ -15,8 +15,6 @@ FileName: TypeAlias = str | os.PathLike
 class Wallet:
     def __init__(self):
         self.fd = None
-        self.zyotes = set()
-        self.trustlets = set()
         pass
 
     def open_device(self, path: FileName = "/dev/vmpl_device") -> int:
@@ -46,8 +44,6 @@ class Wallet:
         return zygote_id
 
     def create_trustlet(self, zygote_id: int, function_code: FileName) -> int:
-        # if zygote_id not in self.zyotes:
-        #     raise Exception(f"Zygote {zygote_id} not found")
         if not Path(function_code).exists():
             raise Exception(f"Function Code {function_code} not found")
         trustlet_id = _w.create_trustlet(self.fd, zygote_id, function_code)
@@ -57,11 +53,7 @@ class Wallet:
         return trustlet_id
 
     def invoke_trustlet(self, trustlet_id: int, argument: str) -> str:
-        # if trustlet_id not in self.trustlets:
-        #     raise Exception(f"Trustlet {trustlet_id} not found")
         ret = _w.invoke_trustlet(self.fd, trustlet_id, argument)
-        # if ret < 0:
-        #     raise Exception(f"Failed to invoke trustlet {trustlet_id}")
         return ret
 
     def __enter__(self):

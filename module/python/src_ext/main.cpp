@@ -162,8 +162,12 @@ char* invoke_trustlet(int fd, const int trustlet_id, std::string argument_string
     call.invokation.result = buf;
     call.invokation.result_size = buf_size_round_up;
 
-    // int ret = ::ioctl(fd, VMPL_WR, &call);
+    int ret = ::ioctl(fd, VMPL_WR, &call);
     // return ret;
+
+    if (ret < 0) {
+        throw std::runtime_error("Failed to invoke trustlet");
+    }
 
     return (char*) call.invokation.result; // python takes ownership of memory
 }
