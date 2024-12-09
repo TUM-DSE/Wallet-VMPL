@@ -135,6 +135,7 @@ static long invoke_trustlet(struct monitor_call* mcall) {
 
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->invokation.process_id;
+	call.rdx = (u64)get_pgd_phys();
 	call.r8 = (u64)mcall->invokation.input_data;
 	call.r9 = mcall->invokation.input_data_size;
 	res = do_monitor_call(&call);
