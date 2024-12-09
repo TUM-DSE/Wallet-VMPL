@@ -45,21 +45,23 @@ class Wallet:
         self.zyotes.add(zygote_id)
         return zygote_id
 
-    def create_trustlet(self, zygote_id: int) -> int:
-        if zygote_id not in self.zyotes:
-            raise Exception(f"Zygote {zygote_id} not found")
-        trustlet_id = _w.create_trustlet(self.fd, zygote_id)
+    def create_trustlet(self, zygote_id: int, function_code: FileName) -> int:
+        # if zygote_id not in self.zyotes:
+        #     raise Exception(f"Zygote {zygote_id} not found")
+        if not Path(function_code).exists():
+            raise Exception(f"Function Code {function_code} not found")
+        trustlet_id = _w.create_trustlet(self.fd, zygote_id, function_code)
         if trustlet_id < 0:
             raise Exception(f"Failed to create trustlet")
         self.trustlets.add(trustlet_id)
         return trustlet_id
 
-    def invoke_trustlet(self, trustlet_id: int) -> int:
-        if trustlet_id not in self.trustlets:
-            raise Exception(f"Trustlet {trustlet_id} not found")
-        ret = _w.invoke_trustlet(self.fd, trustlet_id)
-        if ret < 0:
-            raise Exception(f"Failed to invoke trustlet {trustlet_id}")
+    def invoke_trustlet(self, trustlet_id: int, argument: str) -> str:
+        # if trustlet_id not in self.trustlets:
+        #     raise Exception(f"Trustlet {trustlet_id} not found")
+        ret = _w.invoke_trustlet(self.fd, trustlet_id, argument)
+        # if ret < 0:
+        #     raise Exception(f"Failed to invoke trustlet {trustlet_id}")
         return ret
 
     def __enter__(self):
@@ -69,3 +71,4 @@ class Wallet:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close_device()
+        self.fd = None
