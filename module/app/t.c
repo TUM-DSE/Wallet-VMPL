@@ -44,80 +44,105 @@ struct PACKED attestation_report {
     uint32_t status;
     uint32_t report_size;
     uint8_t reserved[24];
-	uint8_t pub_key_hash[HASH_SIZE];
-    uint8_t report[];    
+    uint8_t pub_key_hash[HASH_SIZE];
+    uint8_t report[];
 };
 
 typedef struct PACKED _policy {
 	uint8_t zygote_hash[HASH_SIZE];
 	uint8_t trustlet_hash[HASH_SIZE];
 	uint8_t data[4096 / 2 - 2 * HASH_SIZE + 400]; // TODO: For now policy is constrained to 1 page
-}policy;
+} policy;
+
+// this struct is allocated with alignment requirements!
+typedef struct PACKED _function_data {
+  uint64_t trustletId; // 8 bytes
+  uint64_t fnInputSize; // 8 bytes
+  void* fnInput; // 8 bytes
+  uint64_t fnOutputSize; // 8 bytes
+  void* fnOutput; // 8 bytes
+  void* reportOutput;
+} function_data;
 
 struct mem memory;
 int fd;
 
 void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size);
 
+// Function to print the buffer as hex
+void print_buffer_hex(FILE *file, const uint8_t *buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        fprintf(file, "%02X", buffer[i]);
+        if ((i + 1) % 16 == 0) fprintf(file, "\n"); // Line break every 16 bytes
+    }
+    if (size % 16 != 0) fprintf(file, "\n"); // Final line break if not multiple of 16
+}
 
-//uint8_t att_buffer[4096];
+// Function to parse and print the attestation report
+void print_attestation_report(const uint8_t *att_buffer, FILE *file) {
+    size_t field_count = sizeof(fields) / sizeof(fields[0]);
+    for (size_t i = 0; i < field_count; i++) {
+        const Field *field = &fields[i];
+        fprintf(file, "%s (Offset: 0x%02lX, Size: %lu bytes):\n",
+                field->name, field->offset, field->size);
+        print_buffer_hex(file, att_buffer + field->offset, field->size);
+        fprintf(file, "\n");
+    }
+}
+
 int call_attest(uint8_t* pub_key_hash) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* att_buffer = aligned_alloc(page_size, page_size);
-	att_buffer[0] = 1;
+    att_buffer[0] = 1;
     for(int i = 0; i < page_size;i++){
         att_buffer[i] = i % 200;
     }
-    //printf("p: %p\n",att_buffer);
-    //sleep(1);
+
     cpu_set_t cpuset;
     struct monitor_call call;
     call.attestation_target = att_buffer;
     u64 ret;
     call.type = attest;
-	call.monitor_attestation.type = 2;
-    ret = ioctl(fd,VMPL_WR,&call);
-    //printf("ret = %lld\n", ret);
+    call.monitor_attestation.type = monitorAttestation;
+    ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-    //FILE* report_file = fopen("/root/report.txt","w");
-    //printf("FILE: %p\n",report_file);
-    //printf("SIZE: %d\n",report->report_size);
-    //fwrite(report->report,report->report_size, 1,report_file);
-    
-    //for(int i = 0; i<1216;i++){
-    //    if(i == 64)
-    //        printf("\n");
-    //    printf("%" PRIu8 " ", att_buffer[i]);
-    //}
-	
-	//extract pub key hash
-	memcpy(pub_key_hash, att_buffer + 112, 64);
+
+    // Open a file for writing the report
+    FILE *output_file = fopen(MONITOR_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+	  // Extract pub key hash
+	  memcpy(pub_key_hash, att_buffer + 112, 64);
 
     free(att_buffer);
-    //printf("\n");
+
+    // Close the output file
+    fclose(output_file);
 }
 
 void get_pub_key(uint8_t* key) {
     u64 page_size = sysconf(_SC_PAGESIZE);
     uint8_t* key_buffer = aligned_alloc(page_size, page_size);
-	key_buffer[0] = 0;
+    key_buffer[0] = 0;
     struct monitor_call call;
-	call.attestation_target = key_buffer;
+    call.attestation_target = key_buffer;
     u64 ret;
     call.type = get_public_key;
     ret = ioctl(fd,VMPL_WR,&call);
 
-	printf("Key buff: [");
-	for(int i = 0; i < 32; i++)
-	{
-		printf("%d ", key_buffer[i]);
-	}
-	printf("]\n");
-	// find size of key
-	memcpy(key, key_buffer, 32);
+    printf("Key buff: [");
+    for(int i = 0; i < 32; i++) {
+        printf("%d ", key_buffer[i]);
+    }
+    printf("]\n");
+    // find size of key
+    memcpy(key, key_buffer, 32);
 
-	free(key_buffer);
+    free(key_buffer);
 }
 
 void monitor_init() {
@@ -125,19 +150,19 @@ void monitor_init() {
     call.type = initMonitor;
     int ret = ioctl(fd,VMPL_WR,&call);
     printf("Init called\n");
-
 }
 
 void single_exec(){
+    u64 page_size = sysconf(_SC_PAGESIZE);
     struct monitor_call call; 
-    uint8_t* att_buffer = aligned_alloc(4096, 4096);
+    uint8_t* att_buffer = aligned_alloc(page_size, page_size);
     call.trustlet.size = 1;
     call.trustlet.trustlet_data = att_buffer;
     call.trustlet.zygote = 1;
     call.type = createTrustlet;
-      int ret = ioctl(fd,VMPL_WR,&call);
-    printf("Init called\n");  
-	free(att_buffer);
+    int ret = ioctl(fd,VMPL_WR,&call);
+    printf("Init called\n");
+    free(att_buffer);
 }
 
 struct zygote_data {
@@ -146,12 +171,12 @@ struct zygote_data {
 };
 
 void allocate_zygote_struct(struct zygote_data** z){
-    uint8_t* buf = aligned_alloc(4096, 4096);
-    for(int i =0;i <4096;i++)
+    u64 page_size = sysconf(_SC_PAGESIZE);
+    uint8_t* buf = aligned_alloc(page_size, page_size);
+    for(int i = 0; i < page_size; i++)
         buf[i] = 0;
     *z = (void*)buf;
 }
-
 
 int create_zygote(const char* zygote){
     printf("Trying to register Zygote with Monitor");
@@ -184,15 +209,16 @@ int create_zygote(const char* zygote){
     call.zygote.size[1] = manifest_size;
     */
 
+    u64 page_size = sysconf(_SC_PAGESIZE);
     call.zygote.zygote_data = (void*)z;
-    call.zygote.size = 4096;
+    call.zygote.size = page_size;
 
     call.type = createZygote;
 
     int ret = ioctl(fd, VMPL_WR,&call);
 
     printf("Zygote ID: %d\n",ret);
-
+    return ret;
 }
 
 int create_trustlet(const int zygote_id) {
@@ -205,7 +231,7 @@ int create_trustlet(const int zygote_id) {
     int ret = ioctl(fd, VMPL_WR, &call);
 
     printf("Trustlet ID: %d\n", ret);
-
+    return ret;
 }
 
 int invoke_trustlet(const int trustlet_id) {
@@ -216,30 +242,28 @@ int invoke_trustlet(const int trustlet_id) {
     call.process_id = trustlet_id;
 
     int ret = ioctl(fd, VMPL_WR, &call);
-   
 }
 
 
 static void _send_policy (uint8_t* encrypted_policy, uint8_t* sender_pub_key) {
     struct monitor_call call;
-	call.decryption_context.sender_pub_key = sender_pub_key;
-	call.decryption_context.encrypted_data = encrypted_policy;
-	call.decryption_context.encrypted_data_size = sizeof(policy) + 16;
+    call.decryption_context.sender_pub_key = sender_pub_key;
+    call.decryption_context.encrypted_data = encrypted_policy;
+    call.decryption_context.encrypted_data_size = sizeof(policy) + 16;
     u64 ret;
     call.type = send_policy;
-	//printf("[Client] Type: %d\n", call.type);
-	//sleep(1);
     ret = ioctl(fd,VMPL_WR,&call);
     //printf("ret = %lld\n", ret);
 }
 
 void load_file(const char* filename, uint8_t** buffer, uint64_t* buffer_size){
+    u64 page_size = sysconf(_SC_PAGESIZE);
     FILE* file = fopen(filename,"r");
     fseek(file, 0L, SEEK_END);
     uint64_t size = ftell(file);
     rewind(file);
-    uint8_t* buf = aligned_alloc(4096, size + 4096);
-    for(int i =0;i <size+4096;i++)
+    uint8_t* buf = aligned_alloc(page_size, size + page_size);
+    for(int i = 0; i < size + page_size; i++)
         buf[i] = 0;
     size_t read_len = fread((void*)buf,1,size,file);
     if(read_len != size){
@@ -274,10 +298,11 @@ static long exec_elf(const unsigned char* filename, int* argument)
 	FILE* file = fopen(filename, "r");
 	fseek(file, 0L, SEEK_END);
 	long size = ftell(file);
+  u64 page_size = sysconf(_SC_PAGESIZE);
 
-	if(size > 4096 * 2) {
-		printf("Error: we only support 2 page elf at this point\n");
-		return -1;
+  if(size > page_size * 2) {
+		  printf("Error: we only support 2 page elf at this point\n");
+		  return -1;
 	}
 
 	rewind(file);
@@ -286,8 +311,8 @@ static long exec_elf(const unsigned char* filename, int* argument)
 			fileno(file), 0);
 
 	if(file_contents == MAP_FAILED) {
-		printf("Failed mapping the file");
-		return -1;
+		  printf("Failed mapping the file");
+		  return -1;
 	}
 	printf("File successfully mapped: %p !\n", file_contents);
 
@@ -295,19 +320,19 @@ static long exec_elf(const unsigned char* filename, int* argument)
 	unsigned char* file_raw = (unsigned char*)file_contents;
 	printf("Raw file bytes: [");
 	for(int i = 0; i < size; i++) {
-		printf("%d ", file_raw[i]);
+		  printf("%d ", file_raw[i]);
 	}
 	printf("]\n");
 
 	sleep(3);
 
-	uint8_t* page1 = aligned_alloc(4096, 4096);
-	uint8_t* page2 = aligned_alloc(4096, 4096);
+	uint8_t* page1 = aligned_alloc(page_size, page_size);
+	uint8_t* page2 = aligned_alloc(page_size, page_size);
 	page1[0] = 0;
 	page2[0] = 0;
 
-	memcpy(page1, file_contents, 4096);
-	memcpy(page2, file_contents + 4096, size - 4096);
+	memcpy(page1, file_contents, page_size);
+	memcpy(page2, file_contents + page_size, size - page_size);
 	
 	struct monitor_call call;
 	call.execute_elf_context.page1 = page1;
@@ -329,21 +354,21 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 	get_pub_key(key);
 
 	if(key == NULL) {
-		printf("Could not get key!!\n");
+		  printf("Could not get key!!\n");
 	} else {
-		printf("Monitor public key: [");
-		for(int i = 0; i < 32; i++) {
-			printf("%d ", key[i]);
-		}
-		printf("]\n");
+		  printf("Monitor public key: [");
+		  for(int i = 0; i < 32; i++) {
+			    printf("%d ", key[i]);
+		  }
+		  printf("]\n");
 	}
 
 	my_SHA512(key, 32, hash);
 
 	if(memcmp(pub_key_hash, hash, HASH_SIZE) == 0) {
-		//printf("The hashes match!!\n");
+		  //printf("The hashes match!!\n");
 	} else {
-		printf("The hashes don't match :(\n");
+		  printf("The hashes don't match :(\n");
 	}
 	 
 	uint8_t nonce[24] = {0};
@@ -352,7 +377,6 @@ static inline int attestation(policy* p, uint8_t* encrypted_policy, key_pair* ke
 	_send_policy(encrypted_policy, public_key);
 
 	return 0;
-
 }
 
 key_pair* prepair_keys(){
@@ -371,7 +395,6 @@ key_pair* prepair_keys(){
 }
 
 policy* prepair_policy(){
-
     policy* p = (policy*)malloc(sizeof(policy));
     if(p == NULL) {
         printf("Can't allocate p\n");
@@ -383,18 +406,18 @@ policy* prepair_policy(){
     p->data[300] = 69;
     p->data[2310] = 169;
     printf("Size of policy: %ld\n", sizeof(policy));
-    sleep(1);
     return p;
 }
 
 void attestation_time(key_pair* keys, policy* p){
-     uint8_t* encrypted_policy = aligned_alloc(4096, 4096);
+     u64 page_size = sysconf(_SC_PAGESIZE);
+     uint8_t* encrypted_policy = aligned_alloc(page_size, page_size);
      if(encrypted_policy == NULL) {
          printf("Can't allocate encrypted_policy\n");
          exit(-1);
      }
      encrypted_policy[0] = 0;
-     uint8_t* public_key = aligned_alloc(4096, 4096);
+     uint8_t* public_key = aligned_alloc(page_size, page_size);
      memcpy(public_key,(uint8_t*)keys,32);
      double total = 0.0;
      const int iterations = 1;
@@ -409,6 +432,146 @@ void attestation_time(key_pair* keys, policy* p){
      printf("Decryption took %f ms\n", cycles_to_ms(1635596, get_CPU_freq()));
 }
 
+int attest_monitor(key_pair* keys, policy* p){
+    u64 page_size = sysconf(_SC_PAGESIZE);
+
+    uint8_t* att_buffer = aligned_alloc(page_size, page_size);
+    if (att_buffer == NULL) {
+        printf("Can't allocate monitor attestation report buffer\n");
+        return -1;
+    }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; // i % 200;
+    }
+
+    struct monitor_call call;
+    call.type = attest;
+    call.attestation_target = att_buffer;
+    call.monitor_attestation.type = monitorAttestation;
+    u64 ret = ioctl(fd, VMPL_WR, &call);
+
+    struct attestation_report* report = (struct attestation_report*)att_buffer;
+
+    // Open a file for writing the report
+    FILE *output_file = fopen(MONITOR_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
+
+    return 0;
+}
+
+int attest_zygote(const int zygote_id, key_pair* keys, policy* p){
+    u64 page_size = sysconf(_SC_PAGESIZE);
+
+    uint8_t* att_buffer = aligned_alloc(page_size, page_size);
+    if (att_buffer == NULL) {
+        printf("Can't allocate zygote attestation report buffer\n");
+        return -1;
+    }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
+
+    struct monitor_call call;
+    call.type = attest;
+    call.attestation_target = att_buffer;
+    call.monitor_attestation.type = zygoteAttestation;
+    call.monitor_attestation.process_id = zygote_id;
+    u64 ret = ioctl(fd, VMPL_WR, &call);
+
+    struct attestation_report* report = (struct attestation_report*)att_buffer;
+    // Open a file for writing the report
+    FILE *output_file = fopen(ZYGOTE_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
+    return 0;
+}
+
+int attest_trustlet(const int trustlet_id, key_pair* keys, policy* p){
+    u64 page_size = sysconf(_SC_PAGESIZE);
+
+    uint8_t* att_buffer = aligned_alloc(page_size, page_size);
+    if (att_buffer == NULL) {
+        printf("Can't allocate trustlet attestation report buffer\n");
+        return -1;
+    }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
+
+    struct monitor_call call;
+    call.type = attest;
+    call.attestation_target = att_buffer;
+    call.monitor_attestation.type = trustletAttestation;
+    call.monitor_attestation.process_id = trustlet_id;
+    u64 ret = ioctl(fd, VMPL_WR, &call);
+
+    struct attestation_report* report = (struct attestation_report*)att_buffer;
+    // Open a file for writing the report
+    FILE *output_file = fopen(TRUSTLET_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
+    return 0;
+}
+
+int attest_function(function_data* function_data_ptr, const int trustlet_id, key_pair* keys, policy* p){
+    u64 page_size = sysconf(_SC_PAGESIZE);
+
+    uint8_t* att_buffer = aligned_alloc(page_size, page_size);
+    if (att_buffer == NULL) {
+        printf("Can't allocate trustlet attestation report buffer\n");
+        return -1;
+    }
+    for(int i = 0; i < page_size; i++){
+        att_buffer[i] = 0; //i % 200;
+    }
+
+    struct monitor_call call;
+    call.type = attest;
+    call.attestation_target = att_buffer;
+    call.monitor_attestation.type = functionAttestation;
+    call.monitor_attestation.process_id = trustlet_id;
+    call.monitor_attestation.function_data_ptr = (void*)function_data_ptr;
+    u64 ret = ioctl(fd, VMPL_WR, &call);
+
+    struct attestation_report* report = (struct attestation_report*)att_buffer;
+    FILE *output_file = fopen(FUNCTION_ATTESTATION_REPORT_PATH, "w");
+    if (output_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    print_attestation_report(att_buffer, output_file);
+    free(att_buffer);
+    // Close the output file
+    fclose(output_file);
+    return 0;
+}
+
+void allocate_function_struct(function_data** fn){
+    u64 page_size = sysconf(_SC_PAGESIZE);
+    uint8_t* buf = aligned_alloc(page_size, page_size);
+    for(int i = 0; i < page_size; i++)
+        buf[i] = 0;
+    *fn = (void*)buf;
+}
 
 int main(int argc, char** argv)
 {
@@ -471,11 +634,75 @@ int main(int argc, char** argv)
             invoke_trustlet(3);
             break;
         }
+        case 10: {
+            printf("----- Differential attestation test -----\n");
+            int ret = 0;
+
+            printf("Preparing keys and policy\n");
+            key_pair* keys = prepair_keys();
+            policy* p = prepair_policy();
+
+            printf("Initializing monitor\n");
+            monitor_init();
+
+            printf("Retrieving base monitor attestation report\n");
+            ret = attest_monitor(keys, p);
+            if (ret != 0)
+              printf("Error in attesting monitor\n");
+            printf("Monitor attestation report stored in %s\n", MONITOR_ATTESTATION_REPORT_PATH);
+
+            printf("Creating Zygote\n");
+            int zygote_id = create_zygote("libpal.so");
+
+            printf("Attesting Zygote %d\n", zygote_id);
+            ret = attest_zygote(zygote_id, keys, p);
+            if (ret != 0)
+              printf("Error in attesting zygote\n");
+            printf("Zygote attestation report stored in %s\n", ZYGOTE_ATTESTATION_REPORT_PATH);
+
+            printf("Creating Trustlet\n");
+            int trustlet_id = create_trustlet(zygote_id);
+
+            printf("Attesting Trustlet %d\n", trustlet_id);
+            ret = attest_trustlet(trustlet_id, keys, p);
+            if (ret != 0)
+              printf("Error in attesting trustlet\n");
+            printf("Trustlet attestation report stored in %s\n", TRUSTLET_ATTESTATION_REPORT_PATH);
+
+            uint8_t input[512];
+            uint64_t input_len = 512;
+            uint8_t output[256];
+            uint64_t output_len = 256;
+            for (int i = 0; i < input_len ; i++) {
+              input[i] = i;
+            }
+            for (int i = 0; i < output_len ; i++) {
+              output[i] = input_len + i;
+            }
+
+            function_data* function_data_ptr;
+            allocate_function_struct(&function_data_ptr);
+
+            function_data_ptr->trustletId = trustlet_id;
+            function_data_ptr->fnInput = (void*)input;
+            function_data_ptr->fnInputSize = input_len;
+            function_data_ptr->fnOutput = (void*)output;
+            function_data_ptr->fnOutputSize = output_len;
+
+            printf("Attesting Function based on trustlet %d\n", trustlet_id);
+            ret = attest_function(function_data_ptr, trustlet_id, keys, p);
+            if (ret != 0)
+              printf("Error in attesting function\n");
+            printf("Function attestation report stored in %s\n", FUNCTION_ATTESTATION_REPORT_PATH);
+            free(function_data_ptr);
+            break;
+        }
         case 100+0: {
             printf("Attestation test\n");
             key_pair* keys = prepair_keys();
             policy* p = prepair_policy();
             attestation_time(keys,p);
+            printf("Attestation report stored in %s\n", MONITOR_ATTESTATION_REPORT_PATH);
             break;
         }
         case 200+0: {

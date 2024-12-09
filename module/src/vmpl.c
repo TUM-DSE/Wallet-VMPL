@@ -41,20 +41,46 @@ static long init_monitor(struct monitor_call* mcall){
 
 /**
  * rax: call ID
- * rcx: Report storage 
- * rdx: Query report size
- * 
+ * rcx: Report storage buffer
+ * rdx: Attestation type
+ * r8: zygote/trustlet id (if applicable)
  * return:
- * 	- (Size of Report) on success
+ * 	- (Size of Report) from rdx on success
  *  - -1 on failure
 */
-static long attest_monitor(struct monitor_call* mcall){
-	struct svsm_call call;
-	void* ph = pagewalk(mcall->monitor_attestation.address);
-//	printk(KERN_ERR "Using Page %p for report\n", ph);
-	call.rcx = (uint64_t)ph;
-	call.rax = (((u64)10) << 32) | 1;
-	call.rdx = mcall->monitor_attestation.type;
+static long diff_attestation(struct monitor_call* mcall){
+  struct svsm_call call;
+  void* ph = pagewalk(mcall->monitor_attestation.address);
+  call.rcx = (uint64_t)ph; // rcx -> Report storage buffer
+  call.rax = MONITORCALLID(mcall->type); // rax -> call ID
+  call.rdx = mcall->monitor_attestation.type; // rdx -> attestation type
+
+  switch (mcall->monitor_attestation.type)
+  {
+    case monitorAttestation:
+      break;
+    case zygoteAttestation:
+      /* fall through */
+    case trustletAttestation:
+      call.r8 = mcall->monitor_attestation.process_id;
+      break;
+    case functionAttestation:
+      call.r8 = get_pgd_phys();
+      /*
+        4k structure that includes the following:
+        1. trustlet_id as a uint64_t
+        2. fnInputSize as a uint64_t
+        3. fnInput as a void* ptr
+        4. fnOutputSize as a uint64_t
+        5. fnOutput as a void* ptr
+      */
+      call.r9 = mcall->monitor_attestation.function_data_ptr;
+      break;
+    default:
+      printk(KERN_ERR "Invalid differential attestation type");
+      break;
+  }
+
 	int res = do_svsm_protocol(&call);
 	if(res != 1)
 		return -1;
@@ -262,7 +288,7 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 	case initMonitor:
 		return init_monitor(&call);
 	case attest:
-		return attest_monitor(&call);
+		return diff_attestation(&call);
 	case createZygote:
 		return create_zygote(&call);
 	case createTrustlet:
