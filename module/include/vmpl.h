@@ -62,10 +62,12 @@ struct monitor_call {
         void* attestation_target;
         struct /* invokation */ {
             tpid_t process_id;
-            void* input_data;
+            void* data;
+            uint64_t data_size;
+            /*void* input_data;
             uint64_t input_data_size;
             void* result;
-            uint64_t result_size;
+            uint64_t result_size;*/
         }invokation;
         struct /* zygote */ {
             void* zygote_data;
@@ -108,7 +110,7 @@ typedef struct {
     size_t size; // in bytes
 } Field;
 
-Field fields[] = {
+static Field fields[] = {
     {"VERSION", 0x00, 4},
     {"GUEST_SVN", 0x04, 4},
     {"POLICY", 0x08, 8},
