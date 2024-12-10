@@ -17,6 +17,7 @@ namespace py = pybind11;
 
 extern "C" {
 #include "../../include/vmpl.h"
+#include "trustlet.h"
 }
 
 // These functions are taken from the ./app/t.c

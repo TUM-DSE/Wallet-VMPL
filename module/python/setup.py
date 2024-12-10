@@ -13,14 +13,17 @@ __version__ = "0.0.1"
 #   Sort input source files if you glob sources to ensure bit-for-bit
 #   reproducible builds (https://github.com/pybind/python_example/pull/53)
 
-ext_modules = [
-    Pybind11Extension(
+ext = Pybind11Extension(
         "_wallet",
         ["src_ext/main.cpp"],
-        # Example: passing in the version to the compiled code
         define_macros=[("VERSION_INFO", __version__)],
-    ),
-]
+        )
+ext._add_ldflags(["-L../libwallet -l:libwallet.a"])
+ext._add_cflags(["-I../libwallet/src/"])
+ext_modules = [
+    ext,
+        ]
+
 
 setup(
     name="wallet",
