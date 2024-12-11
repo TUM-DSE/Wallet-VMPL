@@ -17,10 +17,11 @@ class Wallet:
         self.fd = None
         pass
 
-    def open_device(self, path: FileName = "/dev/vmpl_device") -> int:
+    def open_device(self) -> int:
         self.fd = _w.monitor_connect()
-        if self.fd < 0:
-            raise Exception(f"Failed to open {path}, forgot to load the kernel module?")
+        # todo: return type is void
+        # if self.fd < 0:
+        #     raise Exception(f"Failed to open /dev/vmpl_device, forgot to load the kernel module?")
         return self.fd
 
     def close_device(self) -> None:
@@ -49,7 +50,6 @@ class Wallet:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close_device()
-        self.fd = None
 
 
 class TrustedProcess:
@@ -60,8 +60,8 @@ class Trustlet(TrustedProcess):
     def __init__(self, process_id):
         TrustedProcess.__init__(self, process_id)
 
-    def invoke_trustlet(self, argument: str) -> str:
-        ret = _w.invoke_trustlet(self.process_id, argument, 0)
+    def invoke_trustlet(self, argument: str, output_size: int) -> str:
+        ret = _w.invoke_trustlet(self.process_id, argument, output_size)
         return ret
 
 class Zygote(TrustedProcess):
@@ -69,8 +69,10 @@ class Zygote(TrustedProcess):
         TrustedProcess.__init__(self, process_id)
 
     def create_trustlet(self, function_code: FileName) -> Trustlet:
-        #if not Path(function_code).exists():
-        #    raise Exception(f"Function Code {function_code} not found")
+        if not Path(function_code).exists():
+            raise Exception(f"Function Code {function_code} not found")
+        with open(function_code, mode='r') as file:
+            function_code = file.read()
         trustlet_id = _w.create_trustlet(self.process_id, function_code)
         if trustlet_id < 0:
             raise Exception(f"Failed to create trustlet")
