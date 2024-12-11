@@ -163,30 +163,7 @@ def is_any_active(nodes):
                 return True
     return False
 
-def main():
-
-    parser = argparse.ArgumentParser(description='Simulate the azure traces.')
-    parser.add_argument('-num_nodes', type=int, default=5, help='Number of nodes in the simulation.')
-    parser.add_argument('-cold_penalty', type=float, help='Penalty incurred by a function during a cold start (in seconds).', required=True)
-    parser.add_argument('-warm_penalty', type=float, help='Penalty incurred by a function during a warm start (in seconds).', required=True)
-    parser.add_argument('-soft_warm_penalty', type=float, default=0, help='Penalty incurred by a function during a soft warm start (in seconds). In the normal case, this would be equal to the cold boot penalty. In Wallet\'s case, this is the latency of starting a function that isn\'t cached, but whose zygote is already loaded.')
-    parser.add_argument('-cache_size', type=int, default=10, help='Number of functions that can be cached on a node concurrently.')
-    parser.add_argument('-caching_time', type=float, default= 300, help='The time (in seconds) after which an unused cached function will be automatically evicted.')
-    parser.add_argument('-execution_slots', type=int, default=3, help='The number of functions that can be executed concurrently on a node.')
-    parser.add_argument('-percentage_soft_warm', type=float, default=0, help='The percentage of cold boots that get turned into soft warm boots.')
-    args = parser.parse_args()
-
-    # default parameter values
-    num_nodes = args.num_nodes
-    cold_boot_time = args.cold_penalty
-    warm_boot_time = args.warm_penalty
-    soft_warm_time = args.soft_warm_penalty
-    max_functions_per_node = args.cache_size
-    caching_time = args.caching_time
-    max_execution_slots = args.execution_slots
-    percentage_soft_warm = args.percentage_soft_warm
-
-
+def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm):
 
     # index into the csv
     app_hash = 0
@@ -308,6 +285,11 @@ def main():
 
 
     pbar.close()
+    #output = '------------------------------------------------\nStatistics:\n'
+    #output = output + f'Total simulation time: {sim_time}\n'
+    #output = output + f'Cold boot rate: {cold_boots / len(rows)}\n'
+    #output = output + '------------------------------------------------\n'
+    #return output
     print('------------------------------------------------')
     print(f'Statistics:')
     print(f'Total simulation time: {sim_time}')
@@ -330,8 +312,31 @@ def main():
     print(f'percentage_soft_warm: {percentage_soft_warm}')
     print('------------------------------------------------')
 
+    return [sim_time, cold_boots/len(rows), soft_warm_boots / len(rows), warm_boots / len(rows), np.average(delays), np.median(delays), np.std(delays)]
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Simulate the azure traces.')
+    parser.add_argument('-num_nodes', type=int, default=5, help='Number of nodes in the simulation.')
+    parser.add_argument('-cold_penalty', type=float, help='Penalty incurred by a function during a cold start (in seconds).', required=True)
+    parser.add_argument('-warm_penalty', type=float, help='Penalty incurred by a function during a warm start (in seconds).', required=True)
+    parser.add_argument('-soft_warm_penalty', type=float, default=0, help='Penalty incurred by a function during a soft warm start (in seconds). In the normal case, this would be equal to the cold boot penalty. In Wallet\'s case, this is the latency of starting a function that isn\'t cached, but whose zygote is already loaded.')
+    parser.add_argument('-cache_size', type=int, default=10, help='Number of functions that can be cached on a node concurrently.')
+    parser.add_argument('-caching_time', type=float, default= 300, help='The time (in seconds) after which an unused cached function will be automatically evicted.')
+    parser.add_argument('-execution_slots', type=int, default=3, help='The number of functions that can be executed concurrently on a node.')
+    parser.add_argument('-percentage_soft_warm', type=float, default=0, help='The percentage of cold boots that get turned into soft warm boots.')
+    args = parser.parse_args()
+
+    # default parameter values
+    num_nodes = args.num_nodes
+    cold_boot_time = args.cold_penalty
+    warm_boot_time = args.warm_penalty
+    soft_warm_time = args.soft_warm_penalty
+    max_functions_per_node = args.cache_size
+    caching_time = args.caching_time
+    max_execution_slots = args.execution_slots
+    percentage_soft_warm = args.percentage_soft_warm
+    out = main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm)
+    print(out)
 
 
 
