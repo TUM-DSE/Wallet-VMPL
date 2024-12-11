@@ -18,14 +18,14 @@ class Wallet:
         pass
 
     def open_device(self, path: FileName = "/dev/vmpl_device") -> int:
-        self.fd = _w.open_device(path)
+        self.fd = _w.monitor_connect(path)
         if self.fd < 0:
             raise Exception(f"Failed to open {path}, forgot to load the kernel module?")
         return self.fd
 
     def close_device(self) -> None:
         if self.fd:
-            _w.close_device(self.fd)
+            _w.monitor_close()
             self.fd = None
 
     def create_zygote(
@@ -53,7 +53,7 @@ class Wallet:
         return trustlet_id
 
     def invoke_trustlet(self, trustlet_id: int, argument: str) -> str:
-        ret = _w.invoke_trustlet(self.fd, trustlet_id, argument)
+        ret = _w.invoke_trustlet(self.fd, trustlet_id, argument, 0)
         return ret
 
     def __enter__(self):

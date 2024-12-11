@@ -6,7 +6,7 @@
 typedef int monitor_connection;
 extern monitor_connection con;
 
-void monitor_connect();
-
+int monitor_connect();
+void monitor_close();
 
 #endif // MONITOR_H_
