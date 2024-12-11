@@ -6,12 +6,9 @@
 
 monitor_connection con;
 
-void monitor_connect() {
+int monitor_connect() {
     con = open("/dev/vmpl_device", O_RDWR);
-    if(con < 0) {
-        fprintf(stderr, "Cannot open device file...\n");
-        exit(-1);
-    }
+    return con
 }
 
 void monitor_close() {
