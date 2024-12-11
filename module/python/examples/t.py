@@ -20,12 +20,17 @@ class Runner:
         libos: FileName = f"{SCRIPTDIR}/../../libsysdb.so",
     ):
         with wallet.Wallet() as w:
-            zid = w.create_zygote(zygote, manifest, libos)
-            print(f"Created zygote {zid}")
-            tid = w.create_trustlet(zid)
-            print(f"Created trustlet {tid}")
-            ret = w.invoke_trustlet(tid)
-            print(f"Invoked trustlet {tid}, ret = {ret}")
+            zy = w.create_zygote(zygote, manifest, libos)
+            print(f"Created zygote {zy.process_id}")
+            tr = zy.create_trustlet("print(1+1)")
+            print(f"Created trustlet {tr.process_id}")
+            tr2 = zy.create_trustlet("print(1+2)")
+            print(f"Created trustlet {tr.process_id}")
+            ret = tr.invoke_trustlet("Test")
+            print(f"Invoked trustlet {tr.process_id}, ret = {ret}")
+            ret = tr2.invoke_trustlet("Test2")
+            print(f"Invoked trustlet {tr2.process_id}, ret = {ret}")
+            pass
 
 
 if __name__ == "__main__":

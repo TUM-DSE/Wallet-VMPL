@@ -12,5 +12,5 @@ struct trustlet_invokation {
 };
 
 int create_trustlet(const int zygote_id, char* func);
-void* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size);
+char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size);
 #endif // TRUSTLET_H_

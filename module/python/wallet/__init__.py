@@ -18,7 +18,7 @@ class Wallet:
         pass
 
     def open_device(self, path: FileName = "/dev/vmpl_device") -> int:
-        self.fd = _w.monitor_connect(path)
+        self.fd = _w.monitor_connect()
         if self.fd < 0:
             raise Exception(f"Failed to open {path}, forgot to load the kernel module?")
         return self.fd
@@ -37,24 +37,10 @@ class Wallet:
             raise Exception(f"Manifest {manifest} not found")
         if not Path(libos).exists():
             raise Exception(f"LibOS {libos} not found")
-        zygote_id = _w.create_zygote(self.fd, zygote, manifest, libos)
+        zygote_id = _w.create_zygote(zygote, manifest, libos)
         if zygote_id < 0:
             raise Exception(f"Failed to create zygote {zygote}")
-        self.zyotes.add(zygote_id)
-        return zygote_id
-
-    def create_trustlet(self, zygote_id: int, function_code: FileName) -> int:
-        if not Path(function_code).exists():
-            raise Exception(f"Function Code {function_code} not found")
-        trustlet_id = _w.create_trustlet(self.fd, zygote_id, function_code)
-        if trustlet_id < 0:
-            raise Exception(f"Failed to create trustlet")
-        self.trustlets.add(trustlet_id)
-        return trustlet_id
-
-    def invoke_trustlet(self, trustlet_id: int, argument: str) -> str:
-        ret = _w.invoke_trustlet(self.fd, trustlet_id, argument, 0)
-        return ret
+        return Zygote(zygote_id)
 
     def __enter__(self):
         if not self.fd:
@@ -64,3 +50,29 @@ class Wallet:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close_device()
         self.fd = None
+
+
+class TrustedProcess:
+    def __init__(self, process_id):
+        self.process_id = process_id
+
+class Trustlet(TrustedProcess):
+    def __init__(self, process_id):
+        TrustedProcess.__init__(self, process_id)
+
+    def invoke_trustlet(self, argument: str) -> str:
+        ret = _w.invoke_trustlet(self.process_id, argument, 0)
+        return ret
+
+class Zygote(TrustedProcess):
+    def __init__(self, process_id):
+        TrustedProcess.__init__(self, process_id)
+
+    def create_trustlet(self, function_code: FileName) -> Trustlet:
+        #if not Path(function_code).exists():
+        #    raise Exception(f"Function Code {function_code} not found")
+        trustlet_id = _w.create_trustlet(self.process_id, function_code)
+        if trustlet_id < 0:
+            raise Exception(f"Failed to create trustlet")
+        return Trustlet(trustlet_id)
+

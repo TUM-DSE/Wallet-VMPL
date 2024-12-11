@@ -18,8 +18,8 @@ ext = Pybind11Extension(
         ["src_ext/main.cpp"],
         define_macros=[("VERSION_INFO", __version__)],
         )
-ext._add_ldflags(["-L../libwallet -l:libwallet.a"])
-ext._add_cflags(["-I../libwallet/src/"])
+ext._add_ldflags(["-L../libwallet", "-l:libwallet.a"])
+ext._add_cflags(["-I../libwallet/src/", "-L../libwallet" ,"-l:libwallet.a"])
 ext_modules = [
     ext,
         ]
