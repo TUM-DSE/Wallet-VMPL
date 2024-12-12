@@ -1,53 +1,66 @@
-from simulate import main_sim
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 
-def main():
-    #num_nodes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
-    num_nodes = [1, 2]
+def convert_txt_to_array(text):
+    text_values = text[1:-1]
+    values = [float(i) for i in text_values.split(',')]
+    return values
 
-
-    # return_vals [sim_time, cold_boots %, sot_warm_boots %, warm_boots %, avg func delay, median func delay, std func delay]
-
+def plot_node_scalability():
+    input_file = 'node_scalability.csv'
+    with open(input_file, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+        header = next(reader)  # Read the header row
+        values = [row for row in reader]
     
-    cache_size = 8
+    num_nodes = convert_txt_to_array(values[0][0])
+    vm_results = convert_txt_to_array(values[0][1])
+    cvm_results = convert_txt_to_array(values[0][2])
+    w_results = convert_txt_to_array(values[0][3])
+    
+    plt.title("Lower is better ↓", fontsize=9, color="navy", weight="bold")
+    plt.xlabel("Num nodes")
+    plt.ylabel("Execution time (s)")
+    plt.plot(num_nodes, vm_results, label = 'VM')
+    plt.plot(num_nodes, cvm_results, label = 'CVM')
+    plt.plot(num_nodes, w_results, label = 'Wallet')
+    plt.legend()
+    plt.grid()
+#x_ticks = np.linspace(0, 1024, 5, dtype=int)
+#plt.xticks(x_ticks, (str(i) for i in x_ticks))
 
-    # CVM simulation
-    cvm_cold_boot_time = 10
-    cvm_warm_boot_time = 1
-    cvm_max_execution_slots = 4
-    cvm_results = [0] * len(num_nodes)
-    print(cvm_results)
-    for i in range(len(num_nodes)):
-        n = num_nodes[i]
-        results = main_sim(n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, 300, cvm_max_execution_slots, 0)
-        cvm_results[i] = results[0]
-    print(cvm_results)
+    plt.savefig('mock_overhead.png', format='png', dpi=1200)
+    plt.show()
 
-    # VM simulation
-    vm_cold_boot_time = 2
-    vm_warm_boot_time = 1
-    vm_max_execution_slots = 4
-    vm_results = [0] * len(num_nodes)
-    for i in range(len(num_nodes)):
-        n = num_nodes[i]
-        results = main_sim(n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, 300, vm_max_execution_slots, 0)
-        vm_results[i] = results[0]
-
-
-    # Wallet simulation
-    w_cold_boot_time = 1
-    w_warm_boot_time = 0.3
-    w_max_execution_slots = 4
-    w_results = [0] * len(num_nodes)
-    for i in range(len(num_nodes)):
-        n = num_nodes[i]
-        results = main_sim(n, w_cold_boot_time, w_warm_boot_time, 0, cache_size, 300, w_max_execution_slots, 0.3)
-        w_results[i] = results[0]
-
+    print(num_nodes)
     print(vm_results)
     print(cvm_results)
     print(w_results)
 
 if __name__ == '__main__':
-    main()
+    plot_node_scalability()
+# context size
+#x_axis = np.array([16, 32, 64, 128, 256, 512, 1024])
 
+# ms/token
+#native = np.array([2, 3, 5, 7, 9, 12, 15])
+#virt = np.array([4, 5, 7, 9, 11, 14, 17])
+#trust = np.array([5, 6, 8, 10, 12, 15, 18])
+
+#plt.title("LLM-OS overhead")
+#plt.title("Lower is better ↓", fontsize=9, color="navy", weight="bold")
+#plt.xlabel("Context size (tokens)")
+#plt.ylabel("Inference latency (ms/token)")
+#plt.plot(x_axis_new, native_smooth, label = 'Native')
+#plt.plot(x_axis_new, virt_smooth, label = 'Virtualized')
+#plt.plot(x_axis_new, trust_smooth, label = 'LLM-OS')
+#plt.legend()
+#plt.grid()
+#x_ticks = np.linspace(0, 1024, 5, dtype=int)
+#plt.xticks(x_ticks, (str(i) for i in x_ticks))
+
+#plt.savefig('mock_overhead.png', format='png', dpi=1200)
+#plt.show()
 
