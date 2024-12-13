@@ -10,7 +10,7 @@ vmpl.ko: ${SRC}
 
 all: vmpl.ko	
 	gcc -I include/ -std=c11 app/test.c -lpthread -o test
-	
+
 clean:
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
 	rm test
@@ -18,7 +18,7 @@ clean:
 reload:	
 	rmmod vmpl.ko | true
 	insmod vmpl.ko
-	
+
 test: reload bin
 	./test "./bin"
 
@@ -34,13 +34,17 @@ write: programs/write.asm
 ctest:
 	gcc -c testcode.c -o testcode.o
 	objcopy -O binary -j .text testcode.o binfile
-	
+
 test_create_cpu: 
 	insmod vmpl.ko
 	./test -
 
-t:
-	gcc -g3 -I include/ -std=c11 app/t.c -lpthread -L include -l:libmy_crypto.a -o test
+t: libwallet/libwallet.a
+	gcc -g3 -I include/ -std=c11 app/t.c -lpthread -L include -l:libmy_crypto.a -Llibwallet/ -l:libwallet.a -Ilibwallet/src -o test
+
+libwallet/libwallet.a:
+	make -C libwallet/ libwallet.a
+	make -C libwallet/ libwallet.so
 
 outb:
 	gcc app/outb.c -o outb
