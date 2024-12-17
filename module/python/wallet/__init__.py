@@ -42,6 +42,11 @@ class Wallet:
             raise Exception(f"Failed to create zygote {zygote}")
         return Zygote(zygote_id)
 
+    def attest_monitor(self) -> str:
+        if not self.fd:
+            raise Exception("Cannot attest monitor - not initialized!")
+        return _w.attest_monitor()
+
     def __enter__(self):
         if not self.fd:
             self.open_device()
@@ -62,6 +67,10 @@ class Trustlet(TrustedProcess):
 
     def invoke_trustlet(self, argument: str) -> str:
         ret = _w.invoke_trustlet(self.process_id, argument, 0)
+        return ret
+
+    def attest_execution(self, input: str, input_len: int, output: str, output_len: int) -> str:
+        ret = _w.attest_execution(self.process_id, input, input_len, output, output_len)
         return ret
 
 class Zygote(TrustedProcess):

@@ -59,7 +59,7 @@ struct monitor_call {
             void* function_data_ptr;
             enum attestation_report_type type;
         }monitor_attestation;
-        void* attestation_target;
+        void* attestation_target; /* contains the buffer to store the result */
         struct /* invokation */ {
             tpid_t process_id;
             void* data;
@@ -99,10 +99,11 @@ struct monitor_call {
 
 /* Attestation related defs */
 // NOTE: used for testing for now
-#define MONITOR_ATTESTATION_REPORT_PATH "monitor_attestation_report.txt"
-#define ZYGOTE_ATTESTATION_REPORT_PATH "zygote_attestation_report.txt"
-#define TRUSTLET_ATTESTATION_REPORT_PATH "trustlet_attestation_report.txt"
-#define FUNCTION_ATTESTATION_REPORT_PATH "function_attestation_report.txt"
+#define MAX_PATH_SIZE 256
+#define MONITOR_ATTESTATION_REPORT_PATH "monitor_attestation_report"
+#define ZYGOTE_ATTESTATION_REPORT_PATH "zygote_attestation_report"
+#define TRUSTLET_ATTESTATION_REPORT_PATH "trustlet_attestation_report"
+#define FUNCTION_ATTESTATION_REPORT_PATH "function_attestation_report"
 
 typedef struct {
     const char *name;
@@ -148,8 +149,9 @@ static Field fields[] = {
     {"INIT_MEASUREMENT", 0x4A0, 64},           // Wallet differential attestation field
     {"MANIFEST_MEASUREMENT", 0x4E0, 64},       // Wallet differential attestation field
     {"LIBOS_MEASUREMENT", 0x520, 64},          // Wallet differential attestation field
-    {"FUNCTION_INPUT_MEASUREMENT", 0x560, 64}, // Wallet differential attestation field
-    {"FUNCTION_OUTPUT_MEASUREMENT", 0x5A0, 64} // Wallet differential attestation field
+    {"FUNCTION_MEASUREMENT", 0x560, 64},       // Wallet differential attestation field
+    {"FUNCTION_INPUT_MEASUREMENT", 0x5A0, 64}, // Wallet differential attestation field
+    {"FUNCTION_OUTPUT_MEASUREMENT", 0x5E0, 64} // Wallet differential attestation field
 };
 /* End of attestation dump-related defs */
 

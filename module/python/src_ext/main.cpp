@@ -20,6 +20,7 @@ extern "C" {
 #include <trustlet.h>
 #include <monitor.h>
 #include <zygote.h>
+#include <attest.h>
 }
 
 PYBIND11_MODULE(_wallet, m) {
@@ -32,6 +33,10 @@ PYBIND11_MODULE(_wallet, m) {
           py::arg("zygote_id"), py::arg("function_code"));
     m.def("invoke_trustlet", &invoke_trustlet,
           py::arg("trustlet_id"), py::arg("args"), py::arg("output_size"));
+    m.def("attest_monitor", &attest_monitor);
+    m.def("attest_execution", &attest_execution,
+          py::arg("trusted_process_id"), py::arg("input"), py::arg("input_len"),
+          py::arg("output"), py::arg("output_len"));
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

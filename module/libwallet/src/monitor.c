@@ -8,7 +8,7 @@ monitor_connection con;
 
 int monitor_connect() {
     con = open("/dev/vmpl_device", O_RDWR);
-    return con
+    return con;
 }
 
 void monitor_close() {
