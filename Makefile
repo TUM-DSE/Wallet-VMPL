@@ -16,7 +16,7 @@ KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 USERADDR = $(shell expr $(shell id -u) - 1000)
 
-.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python
 
 #Build OVMF Firmware
 build_firmware:
@@ -152,3 +152,6 @@ gramine:
 	cd gramine-svsm; make build_external
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
 	cp gramine-svsm/build/libos/src/libsysdb.so module/
+
+python:
+	docker run --privileged -v ${PWD}/python:/build -it gramine-build-container make -C build/
