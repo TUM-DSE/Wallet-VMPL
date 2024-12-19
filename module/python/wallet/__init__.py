@@ -19,9 +19,8 @@ class Wallet:
 
     def open_device(self) -> int:
         self.fd = _w.monitor_connect()
-        # todo: return type is void
-        # if self.fd < 0:
-        #     raise Exception(f"Failed to open /dev/vmpl_device, forgot to load the kernel module?")
+        if self.fd < 0:
+            raise Exception(f"Failed to open /dev/vmpl_device, forgot to load the kernel module?")
         return self.fd
 
     def close_device(self) -> None:
