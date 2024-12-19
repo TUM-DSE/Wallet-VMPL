@@ -155,3 +155,10 @@ gramine:
 
 python:
 	docker run --privileged -v ${PWD}/python:/build -it gramine-build-container make -C build/
+
+simple_fs:
+	mkdir -p runtime/filesystem/simple/fs/lib/
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/nop nop.c
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/helloworld helloworld.c
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
+	cd runtime/filesystem/simple/; ./create.sh
