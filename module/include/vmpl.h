@@ -151,7 +151,8 @@ static Field fields[] = {
     {"LIBOS_MEASUREMENT", 0x520, 64},          // Wallet differential attestation field
     {"FUNCTION_MEASUREMENT", 0x560, 64},       // Wallet differential attestation field
     {"FUNCTION_INPUT_MEASUREMENT", 0x5A0, 64}, // Wallet differential attestation field
-    {"FUNCTION_OUTPUT_MEASUREMENT", 0x5E0, 64} // Wallet differential attestation field
+    {"FUNCTION_OUTPUT_MEASUREMENT", 0x5E0, 64},// Wallet differential attestation field
+    {"WALLET_SIGNATURE", 0x620, 64}            // Wallet differential attestation field
 };
 /* End of attestation dump-related defs */
 
