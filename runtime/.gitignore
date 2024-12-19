@@ -1,6 +1,4 @@
-*
-!.gitignore
-!Makefile
-!embed/
-!client/
-!filesystem/
+Python-*
+*.so
+python-build
+python-install
