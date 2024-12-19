@@ -1,6 +1,7 @@
 #include "trustlet.h"
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <string.h>
 #include <stdlib.h>
@@ -64,7 +65,7 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     call.invokation.process_id = trustlet_id;
 
     invoke_data->trustlet_data[0] = (void*)data;
-    invoke_data->trustlet_data_size[0] = strlen(args);
+    invoke_data->trustlet_data_size[0] = strlen(args) + 1;
 
     uint64_t allocaction_size = 4096;
     if(output_size != 0){
@@ -87,7 +88,7 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
         printf("Result: %s\n", (char*)return_buffer);
     #endif
 
-    if(ret)
+    if(!ret)
         return return_buffer;
 
     return NULL;
