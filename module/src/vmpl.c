@@ -50,7 +50,7 @@ static long init_monitor(struct monitor_call* mcall){
 */
 static long diff_attestation(struct monitor_call* mcall){
   struct svsm_call call;
-  void* ph = pagewalk(mcall->monitor_attestation.address);
+  void* ph = pagewalk(mcall->attestation_target);
   call.rcx = (uint64_t)ph; // rcx -> Report storage buffer
   call.rax = MONITORCALLID(mcall->type); // rax -> call ID
   call.rdx = mcall->monitor_attestation.type; // rdx -> attestation type

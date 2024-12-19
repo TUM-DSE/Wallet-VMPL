@@ -9,6 +9,8 @@ endif
 
 CFLAGS+=-Iinclude
 
+all: libwallet.a libwallet.so
+
 %.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@
 
