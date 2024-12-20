@@ -32,7 +32,7 @@ os.makedirs(os.path.dirname(os.path.realpath(__file__)) + FS_OUT + "files/",exis
 slash_replacement = "__"
 
 def get_name(subpath, a, f):
-    return (subpath + a).replace("/",slash_replacement) + f.replace(".", "_").replace("-","_")
+    return (subpath + a + f).replace("/",slash_replacement).replace(".", "dot").replace("-","dash").replace("+", "pp")
 
 class Filestructure:
     name = ""
@@ -56,7 +56,7 @@ class Filestructure:
 
     def _parse(self, path, subpath, parse_list):
         for p, f, d in parse_list:
-            if subpath in p:
+            if subpath in p and subpath.split("/")[-1] == (p.split("/")[-1]):
                 self.files = d
                 for directory in f:
                     new_directory = Filestructure()
@@ -173,7 +173,7 @@ class Filestructure:
         a = "/" if len(subpath) > 1 else ""
 
         for f in self.files:
-            target_function_name = (subpath + a).replace("/",slash_replacement) + f.replace(".", "_").replace("-","_") + "_"
+            target_function_name = get_name(subpath, a, f) + "_"
             name = f
             files += f"{ind}__ADD_NODE(\"{name}\", {target_function_name});\n"
 
