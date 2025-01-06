@@ -78,7 +78,7 @@
           bpftrace = bpftrace.packages.x86_64-linux.default;
           test = pkgs.callPackage ./node/pkg.nix { };
         };
-
+	pkgs = nixpkgs.legacyPackages.${system};
         devShells = let
           common_deps = with pkgs; [
             nixos-generators.packages.${system}.nixos-generate
@@ -123,13 +123,16 @@
                 pkg-config
                 gcc
                 gccgo
+                zip
                 python3
                 python311Packages.requests
-				python311Packages.click
-				python311Packages.voluptuous
-				python311Packages.jinja2
-				python311Packages.tomli
-				python311Packages.tomli-w
+                python311Packages.pip
+                python311Packages.numpy
+                python311Packages.click
+                python311Packages.voluptuous
+                python311Packages.jinja2
+                python311Packages.tomli
+                python311Packages.tomli-w
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
