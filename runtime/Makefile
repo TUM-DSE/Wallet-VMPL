@@ -4,7 +4,7 @@ PYTHON_VERSION = 3.11.10
 
 python: python-install/bin/python
 
-python-install/bin/python: Python-${PYTHON_VERSION}/Python/pythonrun.c
+python-install/bin/python:
 	mkdir -p python-build
 	mkdir -p python-install
 	cd python-build; cmake -DBUILD_EXTENSIONS_AS_BUILTIN=${BUILD_EXTENSIONS_AS_BUILTIN} -DPYTHON_VERSION=${PYTHON_VERSION} -DCMAKE_INSTALL_PREFIX:PATH=../python-install ../portable-python-cmake-buildsystem
