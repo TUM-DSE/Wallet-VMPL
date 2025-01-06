@@ -16,6 +16,8 @@ KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 USERADDR = $(shell expr $(shell id -u) - 1000)
 
+REQUIREMENTS=requirements.txt
+
 .PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python
 
 #Build OVMF Firmware
@@ -154,7 +156,7 @@ gramine:
 	cp gramine-svsm/build/libos/src/libsysdb.so module/
 
 python:
-	docker run --privileged -v ${PWD}/python:/build -it gramine-build-container make -C build/
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/
 
 simple_fs:
 	mkdir -p runtime/filesystem/simple/fs/lib/
@@ -162,3 +164,12 @@ simple_fs:
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/helloworld helloworld.c
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
 	cd runtime/filesystem/simple/; ./create.sh
+
+python_fs:
+	mkdir -p runtime/filesystem/python/fs/lib
+	mkdir -p runtime/filesystem/python/fs/python
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ python_fs
+	cp ${REQUIREMENTS} runtime/requirements.txt
+	make -C runtime/ prepare_python_libs
+	rm runtime/requirements.txt
+	cd runtime/filesystem/python; ./create.sh
