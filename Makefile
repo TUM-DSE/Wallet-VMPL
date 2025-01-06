@@ -156,6 +156,7 @@ gramine:
 	cp gramine-svsm/build/libos/src/libsysdb.so module/
 
 python:
+	git submodule update --init --recursive runtime/portable-python-cmake-buildsystem
 	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/
 
 simple_fs:
