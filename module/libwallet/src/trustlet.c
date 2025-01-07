@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+
 #include "memory.h"
 #include "vmpl.h"
 
@@ -106,6 +108,16 @@ retry:
         arg->fileattr.mode = st.st_mode;
         invoke_data->invokation_type = requestFileattr;
         printf("Guest request: fileattr: path=%s, size=%ld, mode=%d\n", arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        goto retry;
+    } else if (ret == guestRequestOpen) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = open(arg->fileattr.path, O_RDONLY);
+        if (fd == -1) {
+            printf("Failed to open file!\n");
+        }
+        arg->open.fd = fd;
+        invoke_data->invokation_type = requestOpen;
+        printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
         goto retry;
     }
 
