@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include "memory.h"
 #include "vmpl.h"
 
@@ -64,8 +65,8 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     call.type = invokeTrustlet;
     call.invokation.process_id = trustlet_id;
 
-    invoke_data->trustlet_data[0] = (void*)data;
-    invoke_data->trustlet_data_size[0] = strlen(args) + 1;
+    invoke_data->function_arg.ptr = (void*)data;
+    invoke_data->function_arg.size = strlen(args) + 1;
 
     uint64_t allocaction_size = 4096;
     if(output_size != 0){
@@ -73,23 +74,40 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     }
     void* return_buffer = allocate_buffer(allocaction_size);
 
-    invoke_data->trustlet_data[1] = return_buffer;
-    invoke_data->trustlet_data_size[1] = allocaction_size;
+    invoke_data->result.ptr = return_buffer;
+    invoke_data->result.size = allocaction_size;
+
+    size_t guest_request_args_size = sizeof(struct guest_request_args);
+    void* guest_request_args_buffer = allocate_buffer(allocaction_size);
+    invoke_data->guest_request_args.ptr = guest_request_args_buffer;
+    invoke_data->guest_request_args.size = guest_request_args_size;
+
+    invoke_data->invokation_type = normalInvocation;
 
     call.invokation.data = invoke_data;
     call.invokation.data_size = sizeof(struct trustlet_invokation);
 
+retry:
     int ret = ioctl(con, VMPL_WR, &call);
 
     #ifndef NODEBUG
-    if(ret)
+    if(ret == invocationError)
         printf("Invokation failed\n");
-    else
-        printf("Result: %s\n", (char*)return_buffer);
     #endif
 
-    if(!ret)
+    if (ret == invocationGetValue) {
         return return_buffer;
+    } else if (ret == guestRequestFileattr) {
+        // handle guest request
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        struct stat st;
+        stat(arg->fileattr.path, &st);
+        arg->fileattr.size = st.st_size;
+        arg->fileattr.mode = st.st_mode;
+        invoke_data->invokation_type = requestFileattr;
+        printf("Guest request: fileattr: path=%s, size=%ld, mode=%d\n", arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        goto retry;
+    }
 
     return NULL;
 }
