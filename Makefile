@@ -174,3 +174,18 @@ python_fs:
 	make -C runtime/ prepare_python_libs
 	rm runtime/requirements.txt
 	cd runtime/filesystem/python; ./create.sh
+
+simple_python_fs:
+	mkdir -p runtime/filesystem/python/fs/lib
+	mkdir -p runtime/filesystem/python/fs/python
+	rm -rf runtime/filesystem/python/fs/python/*
+	rm -rf runtime/filesystem/python/fs_out/
+	echo "" > runtime/requirements.txt
+	mkdir -p runtime/pip
+	mv runtime/pip runtime/tmp_
+	mkdir -p runtime/pip
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ python_fs
+	make -C runtime/ prepare_python_libs
+	rm -r runtime/pip
+	mv runtime/tmp_ runtime/pip
+	cd runtime/filesystem/python; ./create.sh  
