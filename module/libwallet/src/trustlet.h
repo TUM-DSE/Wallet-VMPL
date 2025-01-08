@@ -35,6 +35,15 @@ struct guest_request_args {
             uint64_t offset;
             uint32_t fd;
         } read;
+        struct {
+            uint64_t fd; // use uint64_t so that the monitor
+                         // can access all fields using u64
+                         // sice
+            uint64_t offset;
+            uint64_t size;
+            uint64_t addr_offset;
+            uint64_t buf_addr;
+        } mmap;
     };
 };
 
@@ -43,6 +52,7 @@ enum invocation_type {
     requestFileattr,
     requestOpen,
     requestRead,
+    requestMmap,
 };
 
 enum invocation_return_type {
@@ -52,6 +62,7 @@ enum invocation_return_type {
     guestRequestFileattr = 3,
     guestRequestOpen = 4,
     guestRequestRead = 5,
+    guestRequestMmap = 6,
 };
 
 
