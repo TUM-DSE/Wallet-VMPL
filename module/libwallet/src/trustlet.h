@@ -29,6 +29,12 @@ struct guest_request_args {
             char path[256];
             uint32_t fd;
         } open;
+        struct {
+            char buf[1024];
+            uint64_t count;
+            uint64_t offset;
+            uint32_t fd;
+        } read;
     };
 };
 
@@ -36,6 +42,7 @@ enum invocation_type {
     normalInvocation = 0,
     requestFileattr,
     requestOpen,
+    requestRead,
 };
 
 enum invocation_return_type {
@@ -44,6 +51,7 @@ enum invocation_return_type {
     invocationError = 2,
     guestRequestFileattr = 3,
     guestRequestOpen = 4,
+    guestRequestRead = 5,
 };
 
 

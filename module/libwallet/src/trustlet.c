@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+
 
 #include "memory.h"
 #include "vmpl.h"
@@ -118,6 +120,18 @@ retry:
         arg->open.fd = fd;
         invoke_data->invokation_type = requestOpen;
         printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
+        goto retry;
+    } else if (ret == guestRequestRead) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = arg->read.fd;
+        void* read_buffer = &arg->read.buf[0];
+        int count = arg->read.count;
+        if (count > sizeof(arg->read.buf)) {
+            count = sizeof(arg->read.buf);
+        }
+        int read_bytes= pread64(fd, read_buffer, count, arg->read.offset);
+        arg->read.count = read_bytes;
+        invoke_data->invokation_type = requestRead;
         goto retry;
     }
 
