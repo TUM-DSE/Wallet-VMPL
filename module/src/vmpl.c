@@ -164,6 +164,7 @@ static long invoke_trustlet(struct monitor_call* mcall) {
 	call.rdx = (u64)get_pgd_phys();
 	call.r8 = (u64)mcall->invokation.data;
 	call.r9 = mcall->invokation.data_size;
+
 	res = do_monitor_call(&call);
 
 	return call.rcx;
@@ -183,6 +184,28 @@ static long delete_trustlet(struct monitor_call* mcall){
 
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->process_id;
+
+	if((res = do_monitor_call(&call))!= 1)
+		return -1;
+	return 0;
+}
+
+/**
+ * rax: call ID
+ * rcx: ProcessID of Trustlet 1
+ * rdx: ProcessID of Trustlet 2
+ * 
+ * return:
+ * 	-  0 on success
+ *  - -1 on failure
+*/
+static long create_channel(struct monitor_call* mcall){
+	struct svsm_call call;
+	int res;
+
+	call.rax = MONITORCALLID(mcall->type);
+	call.rcx = mcall->channel.trustlet_id_1;
+	call.rdx = mcall->channel.trustlet_id_2;
 
 	if((res = do_monitor_call(&call))!= 1)
 		return -1;
@@ -297,6 +320,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return delete_zygote(&call);
 	case deleteTrustlet:
 		return delete_trustlet(&call);
+	case createChannel:
+		return create_channel(&call);
 	case get_public_key:
 		return get_pub_key(&call);
 	case send_policy:
