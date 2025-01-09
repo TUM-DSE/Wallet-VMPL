@@ -16,7 +16,7 @@ KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 USERADDR = $(shell expr $(shell id -u) - 1000)
 
-.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark benchmark
 
 #Build OVMF Firmware
 build_firmware:
@@ -130,6 +130,28 @@ ssh:
 
 trustlet_test:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
+
+
+run_benchmark:
+	if [ "$(name)" == "110.dynamic-html" ]; then \
+  		cp module/libsysdb-html.so module/libsysdb.so; \
+	elif [ "$(name)" == "210.thumbnailer" ]; then \
+		cp module/libsysdb-thumbnailer.so module/libsysdb.so; \
+	elif [ "$(name)" == "411.image-recognition" ]; then \
+		cp module/libsysdb-image-recognition.so module/libsysdb.so; \
+	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
+		cp module/libsysdb-igraph.so module/libsysdb.so; \
+	elif [ "$(name)" == "504.dna-visualisation" ]; then \
+		cp module/libsysdb-dna.so module/libsysdb.so; \
+	else \
+	  	sleep 20; \
+	  	echo "Wrong benchmark name."; \
+	  	exit 1; \
+	fi
+	sleep 20
+	ssh -i ./container/key -o StrictHostKeychecking=no root@10.10.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) && poweroff"
+
+benchmark: run run_benchmark
 
 
 container/99_config.yaml:
