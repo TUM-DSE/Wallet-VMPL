@@ -76,6 +76,18 @@ static long diff_attestation(struct monitor_call* mcall){
       */
       call.r9 = mcall->monitor_attestation.function_data_ptr;
       break;
+
+    /* helper attestation options for microbenchmarks */
+    case monitorAttestationCold:
+      break;
+    case prepareZygoteAttestationCold:
+    case zygoteAttestationCold:
+    case prepareTrustletAttestationCold:
+    case trustletAttestationCold:
+      call.r8 = mcall->monitor_attestation.process_id;
+      break;
+    /* end of helper attestation options for microbenchmarks */
+
     default:
       printk(KERN_ERR "Invalid differential attestation type");
       break;
@@ -280,11 +292,10 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		printk(KERN_ERR "Copy from user error\n");
 		return -1;
 	}
-	printk(KERN_ERR "Call type: %d\n", call.type);
-	printk(KERN_ERR "d: %d\n", create_data_struct);
+	// printk(KERN_ERR "Call type: %d\n", call.type);
+	// printk(KERN_ERR "d: %d\n", create_data_struct);
 	switch (call.type)
 	{
-	
 	case initMonitor:
 		return init_monitor(&call);
 	case attest:
