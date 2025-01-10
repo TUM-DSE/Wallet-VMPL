@@ -30,7 +30,7 @@ void measure_monitor_cold() {
 
   struct monitor_call call;
   call.type = attest;
-  call.monitor_attestation.type = monitorAttestation;
+  call.monitor_attestation.type = monitorAttestationCold;
   call.attestation_target = att_buffer;
   uint64_t ret = ioctl(con, VMPL_WR, &call);
 
@@ -52,7 +52,7 @@ void measure_monitor_hot() {
 
   struct monitor_call call;
   call.type = attest;
-  call.monitor_attestation.type = monitorAttestationCold;
+  call.monitor_attestation.type = monitorAttestation;
   call.attestation_target = att_buffer;
   uint64_t ret = ioctl(con, VMPL_WR, &call);
 
