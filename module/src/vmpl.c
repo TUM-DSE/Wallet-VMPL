@@ -280,8 +280,6 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		printk(KERN_ERR "Copy from user error\n");
 		return -1;
 	}
-	printk(KERN_ERR "Call type: %d\n", call.type);
-	printk(KERN_ERR "d: %d\n", create_data_struct);
 	switch (call.type)
 	{
 	
