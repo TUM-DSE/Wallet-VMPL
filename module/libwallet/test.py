@@ -44,8 +44,15 @@ lib.invoke_trustlet.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_ulonglon
 lib.invoke_trustlet.restype = ctypes.c_char_p
 
 
-res = lib.invoke_trustlet(tid1,data,0)
+res = lib.invoke_trustlet(tid1,data,115384320)
+
 print(res)
+print("Done with first invocation")
+
+res = lib.invoke_trustlet(tid1,data,115384320)
+print(res)
+print("Done with second invocation")
+
 #res2 = lib.invoke_trustlet(tid1,b"{}",0)
 #print(res2)
 #lib.invoke_trustlet(tid2,b"test data!",0)
