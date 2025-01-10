@@ -107,11 +107,12 @@ retry:
         // handle guest request
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         struct stat st;
-        stat(arg->fileattr.path, &st);
+        int ret = stat(arg->fileattr.path, &st);
+        arg->fileattr.ret = ret;
         arg->fileattr.size = st.st_size;
         arg->fileattr.mode = st.st_mode;
         invoke_data->invokation_type = requestFileattr;
-        printf("Guest request: fileattr: path=%s, size=%ld, mode=%d\n", arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        printf("Guest request: fileattr: ret=%d, path=%s, size=%ld, mode=%d\n", arg->fileattr.ret, arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
         goto retry;
     } else if (ret == guestRequestOpen) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;

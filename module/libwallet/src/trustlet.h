@@ -24,6 +24,7 @@ struct guest_request_args {
             char path[256];
             uint64_t size;
             uint32_t mode;
+            int32_t ret;
         } fileattr;
         struct {
             char path[256];
