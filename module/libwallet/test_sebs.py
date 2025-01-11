@@ -35,7 +35,7 @@ print(func)
 lib = ctypes.CDLL("./libwallet.so")
 lib.monitor_connect()
 lib.create_zygote.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p)
-zid = lib.create_zygote(b"../libpal.so",b"manifest",b"../libsysdb.so")
+zid = lib.create_zygote(b"../libpal.so",b"manifest.sebs",b"../libsysdb.so")
 lib.create_trustlet.argtypes = (ctypes.c_int,ctypes.c_char_p)
 
 tid1 = lib.create_trustlet(zid, func)
