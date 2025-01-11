@@ -5,6 +5,11 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+
 #include "memory.h"
 #include "vmpl.h"
 
@@ -64,32 +69,89 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     call.type = invokeTrustlet;
     call.invokation.process_id = trustlet_id;
 
-    invoke_data->trustlet_data[0] = (void*)data;
-    invoke_data->trustlet_data_size[0] = strlen(args) + 1;
+    invoke_data->function_arg.ptr = (void*)data;
+    invoke_data->function_arg.size = strlen(args) + 1;
 
     uint64_t allocaction_size = 4096;
     if(output_size != 0){
         allocaction_size = output_size;
     }
     void* return_buffer = allocate_buffer(allocaction_size);
+    void* mmap_read_buffer = allocate_buffer(4096);
 
-    invoke_data->trustlet_data[1] = return_buffer;
-    invoke_data->trustlet_data_size[1] = allocaction_size;
+    invoke_data->result.ptr = return_buffer;
+    invoke_data->result.size = allocaction_size;
+
+    size_t guest_request_args_size = sizeof(struct guest_request_args);
+    void* guest_request_args_buffer = allocate_buffer(allocaction_size);
+    invoke_data->guest_request_args.ptr = guest_request_args_buffer;
+    invoke_data->guest_request_args.size = guest_request_args_size;
+
+    invoke_data->invokation_type = normalInvocation;
 
     call.invokation.data = invoke_data;
     call.invokation.data_size = sizeof(struct trustlet_invokation);
 
+retry:
+    void* return_buffer_address = NULL;
     int ret = ioctl(con, VMPL_WR, &call);
 
     #ifndef NODEBUG
-    if(ret)
+    if(ret == invocationError)
         printf("Invokation failed\n");
-    else
-        printf("Result: %s\n", (char*)return_buffer);
     #endif
 
-    if(!ret)
-        return return_buffer;
+    if (ret == invocationGetValue) {
+        return_buffer_address = return_buffer;
+    } else if (ret == guestRequestFileattr) {
+        // handle guest request
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        struct stat st;
+        stat(arg->fileattr.path, &st);
+        arg->fileattr.size = st.st_size;
+        arg->fileattr.mode = st.st_mode;
+        invoke_data->invokation_type = requestFileattr;
+        printf("Guest request: fileattr: path=%s, size=%ld, mode=%d\n", arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        goto retry;
+    } else if (ret == guestRequestOpen) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = open(arg->fileattr.path, O_RDONLY);
+        if (fd == -1) {
+            printf("Failed to open file!\n");
+        }
+        arg->open.fd = fd;
+        invoke_data->invokation_type = requestOpen;
+        printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
+        goto retry;
+    } else if (ret == guestRequestRead) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = arg->read.fd;
+        void* read_buffer = &arg->read.buf[0];
+        int count = arg->read.count;
+        if (count > sizeof(arg->read.buf)) {
+            count = sizeof(arg->read.buf);
+        }
+        int read_bytes= pread(fd, read_buffer, count, arg->read.offset);
+        arg->read.count = read_bytes;
+        invoke_data->invokation_type = requestRead;
+        printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
+        goto retry;
+    } else if (ret == guestRequestMmap) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        printf("Guest request: mmap: fd=%d, size=%ld, offset=%ld, addr_offset=%ld\n", (int)arg->mmap.fd, arg->mmap.size, arg->mmap.offset, arg->mmap.addr_offset);
+        void *addr = NULL;
+        memset(mmap_read_buffer, 0, 4096);
+        int ret = pread(arg->mmap.fd, mmap_read_buffer, 4096, arg->mmap.offset + arg->mmap.addr_offset);
+        if (ret == -1) {
+            printf("Failed to read file!\n");
+        }
+        arg->mmap.buf_addr = (uint64_t)mmap_read_buffer;
+        invoke_data->invokation_type = requestMmap;
+        goto retry;
+    }
 
-    return NULL;
+exit:
+
+    free(mmap_read_buffer);
+    return return_buffer_address;
 }
