@@ -20,6 +20,8 @@ enum monitor_call_type {
     deleteTrustlet,
     invokeTrustlet = 8,
     waitForTrustletResult,
+    createChannel,
+    deleteChannel,
 
     get_public_key = 30,
     send_policy = 31,
@@ -35,6 +37,7 @@ enum attestation_report_type {
     functionAttestation = 3,
     maxAttestationReportType,
 };
+
 
 // A Zygote consists of the PAL, the Manifest and the LibOS
 
@@ -58,40 +61,40 @@ struct monitor_call {
             uint64_t process_id;
             void* function_data_ptr;
             enum attestation_report_type type;
-        }monitor_attestation;
+        } monitor_attestation;
         void* attestation_target; /* contains the buffer to store the result */
-        struct /* invokation */ {
+        struct {
             tpid_t process_id;
             void* data;
             uint64_t data_size;
-            /*void* input_data;
-            uint64_t input_data_size;
-            void* result;
-            uint64_t result_size;*/
-        }invokation;
-        struct /* zygote */ {
+        } invokation;
+        struct {
             void* zygote_data;
             uint64_t size;
-        }zygote;
-        struct /* trustlet */ {
+        } zygote;
+        struct {
             void* trustlet_data;
             uint64_t size;
             tpid_t zygote;
-        }trustlet;
-        struct /* decryption_context */ {
+        } trustlet;
+        struct {
             void* sender_pub_key;
             void* encrypted_data;
             uint32_t encrypted_data_size;
-        }decryption_context;
+        } decryption_context;
         struct /* execute_elf_contexti */ {
             void* page1;
             void* page2;
             uint32_t size;
-        }execute_elf_context;
-        struct /* data_info */ {
+        } execute_elf_context;
+        struct {
             void* start_address;
             uint64_t size; //In 4K pages
-        }data_info;
+        } data_info;
+        struct {
+            tpid_t trustlet_id_1;
+            tpid_t trustlet_id_2;
+        } channel;
     };
 };
 

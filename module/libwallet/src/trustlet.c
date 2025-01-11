@@ -155,3 +155,17 @@ exit:
     free(mmap_read_buffer);
     return return_buffer_address;
 }
+
+void create_channel(const int trustlet_id_1, const int trustlet_id_2){
+    #ifndef NODEBUG
+    assert(con);
+    #endif
+
+    printf("Creating channel between %d and %d\n", trustlet_id_1, trustlet_id_2);
+
+    struct monitor_call call;
+    call.type = createChannel;
+    call.channel.trustlet_id_1 = trustlet_id_1;
+    call.channel.trustlet_id_2 = trustlet_id_2;
+    ioctl(con, VMPL_WR, &call);
+}
