@@ -8,13 +8,13 @@ argv = ["/external/channel_stest", "2"]
 loader.insecure__disable_aslr  = true
 
 [loader.env]
-LD_LIBRARY_PATH = "/lib"
-#LD_LIBRARY_PATH = "/external/lib"
+#LD_LIBRARY_PATH = "/lib"
+LD_LIBRARY_PATH = "/external/fs/lib"
 
 [fs]
 root.type = "tmpfs"
 mounts = [
-  { type = "pseudo", path = "/lib", uri = "lib" },
+  #{ type = "pseudo", path = "/lib", uri = "lib" },
   { path = "/external", uri = "file:/root/module/libwallet/external" },
 ]
 
