@@ -10,7 +10,7 @@ SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
 
 FEATURE?=
-
+LOG_LEVEL?="print"
 BOOTTIME_ITERATION?=10
 
 GRAMINE_BUILD?=debug
@@ -89,7 +89,7 @@ del_guest_net:
 svsm/svsm.bin: build_svsm
 
 build_svsm:
-	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="enable-gdb ${FEATURE}" RELEASE=True
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="enable-gdb ${FEATURE} ${LOG_LEVEL}" RELEASE=True
 node/bin/node:
 	cd node; make
 	cp node/bin/node module/
@@ -202,7 +202,7 @@ boottime_setup:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup"
 	make simple_python_fs
 	make gramine
-	FEATURE=boottime make build_svsm
+	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
 	cp module/libsysdb.so Benchmarks/Boottime/wallet/
 	cp module/libpal.so Benchmarks/Boottime/wallet/
 
