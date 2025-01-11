@@ -22,11 +22,13 @@ if [ ! -f fs/python/stdlib.zip ]; then
     (cd ${PYTHONPATH}/lib/python3.11/; zip -r ../../../filesystem/python/fs/python/stdlib.zip *)
 fi
 
-cp -r ../../pip/* fs/python/
+cp -r ../../pip/* fs/python/ || true
 
 FS_IN="python/fs/" FS_OUT="python/fs_out/" python ../fs.py
 
 mkdir -p ${LIBOSPATH}/src/fs/static/files/
+
+rm -rf ${LIBOSPATH}/src/fs/static/files/*
 
 cp fs_out/fs.c ${LIBOSPATH}/src/fs/static/
 cp -r fs_out/files/ ${LIBOSPATH}/src/fs/static/

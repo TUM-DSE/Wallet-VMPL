@@ -9,6 +9,11 @@ CORES?=1
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
 
+FEATURE?=
+
+BOOTTIME_ITERATION?=10
+
+GRAMINE_BUILD?=debug
 
 IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
@@ -84,7 +89,7 @@ del_guest_net:
 svsm/svsm.bin: build_svsm
 
 build_svsm:
-	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES=enable-gdb RELEASE=True
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="enable-gdb ${FEATURE}" RELEASE=True
 node/bin/node:
 	cd node; make
 	cp node/bin/node module/
@@ -151,7 +156,7 @@ copy_pal:
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
 
 gramine:
-	cd gramine-svsm; make build_external
+	cd gramine-svsm; BUILD_MODE=${GRAMINE_BUILD} make build_external
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
 	cp gramine-svsm/build/libos/src/libsysdb.so module/
 
@@ -178,14 +183,38 @@ python_fs:
 simple_python_fs:
 	mkdir -p runtime/filesystem/python/fs/lib
 	mkdir -p runtime/filesystem/python/fs/python
-	rm -rf runtime/filesystem/python/fs/python/*
-	rm -rf runtime/filesystem/python/fs_out/
+	sudo rm -rf runtime/filesystem/python/fs/python/*
+	sudo rm -rf runtime/filesystem/python/fs/lib/*
+	sudo rm -rf runtime/filesystem/python/fs_out/
 	echo "" > runtime/requirements.txt
 	mkdir -p runtime/pip
 	mv runtime/pip runtime/tmp_
 	mkdir -p runtime/pip
 	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ python_fs
 	make -C runtime/ prepare_python_libs
+	cd runtime/filesystem/python; ./create.sh
 	rm -r runtime/pip
 	mv runtime/tmp_ runtime/pip
-	cd runtime/filesystem/python; ./create.sh  
+
+boottime_setup:
+	make run > /dev/null &
+	sleep 20
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup"
+	make simple_python_fs
+	make gramine
+	FEATURE=boottime make build_svsm
+	cp module/libsysdb.so Benchmarks/Boottime/wallet/
+	cp module/libpal.so Benchmarks/Boottime/wallet/
+
+boottime_setup_vm:
+	make run > /dev/null &
+	sleep 20
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup_vm"
+
+
+shutdown:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "shutdown now"
+
+boottime:
+	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh
+	cd Benchmarks/Boottime/wallet/; python parse_boottime.py

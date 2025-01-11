@@ -1,0 +1,10 @@
+[Unit]
+Description=Python runtime
+After=outb.service
+
+[Service]
+Type=idle
+ExecStart=/root/Benchmarks/Boottime/wallet/run
+
+[Install]
+WantedBy=multi-user.target
