@@ -12,6 +12,12 @@
 #include "memory.h"
 #include "vmpl.h"
 
+#ifdef NODEBUG
+#define debug_printf(fmt, ...) do {} while (0)
+#else
+#define debug_printf(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#endif
+
 #include <sys/syscall.h>
 #include <dirent.h>
 struct linux_dirent64 {
@@ -280,17 +286,17 @@ retry:
         arg->fileattr.size = st.st_size;
         arg->fileattr.mode = st.st_mode;
         invoke_data->invokation_type = requestFileattr;
-        printf("Guest request: fileattr: ret=%d, path=%s, size=%ld, mode=%d\n", arg->fileattr.ret, arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        debug_printf("Guest request: fileattr: ret=%d, path=%s, size=%ld, mode=%d\n", arg->fileattr.ret, arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
         goto retry;
     } else if (ret == guestRequestOpen) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         int fd = open(arg->fileattr.path, O_RDONLY);
         if (fd == -1) {
-            printf("Failed to open file!\n");
+            debug_printf("Failed to open file!\n");
         }
         arg->open.fd = fd;
         invoke_data->invokation_type = requestOpen;
-        printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
+        debug_printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
         goto retry;
     } else if (ret == guestRequestRead) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
@@ -310,12 +316,12 @@ retry:
             // gcc does not provide a wrapper for getdents64
             int size = syscall(SYS_getdents64, fd, dirbuf, sizeof(dirbuf));
             if (size == -1) {
-                printf("Failed to read dir!\n");
+                debug_printf("Failed to read dir!\n");
                 // TODO: handle error
             } else {
                 char *ptr = dirbuf;
                 int remaining = size;
-                printf("Guest requet: dire_read: %d bytes for dentry\n", size);
+                debug_printf("Guest requet: dire_read: %d bytes for dentry\n", size);
                 while(remaining > 0) {
                     struct linux_dirent64* dirent = (struct linux_dirent64*)ptr;
                     if (is_dot_or_dotdot(dirent->d_name)) {
@@ -354,16 +360,16 @@ skip:
         }
         arg->read.count = read_bytes;
         invoke_data->invokation_type = requestRead;
-        printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
+        debug_printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
         goto retry;
     } else if (ret == guestRequestMmap) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
-        printf("Guest request: mmap: fd=%d, size=%ld, offset=%ld, addr_offset=%ld\n", (int)arg->mmap.fd, arg->mmap.size, arg->mmap.offset, arg->mmap.addr_offset);
+        debug_printf("Guest request: mmap: fd=%d, size=%ld, offset=%ld, addr_offset=%ld\n", (int)arg->mmap.fd, arg->mmap.size, arg->mmap.offset, arg->mmap.addr_offset);
         void *addr = NULL;
         memset(mmap_read_buffer, 0, 4096);
         int ret = pread(arg->mmap.fd, mmap_read_buffer, 4096, arg->mmap.offset + arg->mmap.addr_offset);
         if (ret == -1) {
-            printf("Failed to read file!\n");
+            debug_printf("Failed to read file!\n");
         }
         arg->mmap.buf_addr = (uint64_t)mmap_read_buffer;
         invoke_data->invokation_type = requestMmap;
@@ -381,7 +387,7 @@ void create_channel(const int trustlet_id_1, const int trustlet_id_2){
     assert(con);
     #endif
 
-    printf("Creating channel between %d and %d\n", trustlet_id_1, trustlet_id_2);
+    debug_printf("Creating channel between %d and %d\n", trustlet_id_1, trustlet_id_2);
 
     struct monitor_call call;
     call.type = createChannel;
