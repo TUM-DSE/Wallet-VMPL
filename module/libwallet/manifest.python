@@ -4,40 +4,17 @@ entrypoint = "/external/fs/python/python"
 [loader]
 log_level = "debug"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-argv = ["python3", "-c", """
-printf('Hello from python\n')
-"""]
+argv = ["python3", "-c", "printf('Hello from python\n')"]
+loader.insecure__disable_aslr  = true
 
 [loader.env]
 LD_LIBRARY_PATH = "/external/fs/lib"
 PYTHONPATH = "/external/fs/python/stdlib.zip"
 OPENBLAS_NUM_THREADS = "1"
-loader.insecure__disable_aslr  = true
 
 [fs]
 root.type = "tmpfs"
 mounts = [
-  #{ type = "pseudo", path = "/lib", uri = "lib" },
-  #{ type = "pseudo", path = "/python", uri = "python" },
   { path = "/external", uri = "file:/root/module/libwallet/external" },
 ]
 
-[sgx]
-debug = true
-edmm_enable = false
-trusted_files = [
-]
-max_threads = 4
-isvprodid = 0
-isvsvn = 0
-remote_attestation = "none"
-enable_stats = false
-enclave_size = "256M"
-use_exinfo = false
-
-[sgx.cpu_features]
-avx = "unspecified"
-avx512 = "unspecified"
-amx = "unspecified"
-mpx = "disabled"
-pkru = "disabled"

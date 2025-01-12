@@ -13,5 +13,7 @@ tid1 = lib.create_trustlet(zid1, func)
 
 input_data = b"input data"
 output_size = 4096
-lib.invoke_trustlet(tid1, input_data, output_size)
+output1 = lib.invoke_trustlet(tid1, input_data, output_size)
 
+if output1:
+    print(f"output tid1: {output1.decode('utf-8')}")
