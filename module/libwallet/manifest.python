@@ -18,3 +18,5 @@ mounts = [
   { path = "/external", uri = "file:/root/module/libwallet/external" },
 ]
 
+[svsm]
+file_check_policy = "allow_all_but_log"
