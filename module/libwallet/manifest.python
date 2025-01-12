@@ -4,7 +4,7 @@ entrypoint = "/external/fs/python/python"
 [loader]
 log_level = "debug"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-argv = ["python3", "-c", "printf('Hello from python\n')"]
+argv = ["python3", "-c", "print('Hello from python')"]
 loader.insecure__disable_aslr  = true
 
 [loader.env]
