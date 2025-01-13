@@ -1,0 +1,21 @@
+22:58:40,290 INFO SeBS-aa0f: Created experiment output at /root/Benchmarks/SeBS/502.graph-mst
+22:58:40,366 INFO Wallet-6ddc: Generating unique resource name wallet-1a0f1fac
+22:58:40,370 INFO minio.Minio-7ec5: Initialize a new bucket for benchmarks
+22:58:40,377 INFO minio.Minio-7ec5: Created bucket sebs-benchmarks-wallet-1a0f1fac
+22:58:40,462 INFO Benchmark-dd12: Building benchmark 502.graph-mst. Reason: no cached code package.
+22:58:40,646 INFO Benchmark-dd12: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+22:58:40,715 INFO Wallet-6ddc: Function size 0.000004 MB
+22:58:40,754 INFO Benchmark-dd12: Created code package (source hash: 9f329363bd2cd2997fce74d4012e51f4), for run on wallet with python:3.11
+22:58:41,51 INFO Wallet-6ddc: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+22:58:41,741 INFO Experiment.PerfCost-668b: Begin experiment
+22:58:41,743 INFO Experiment.PerfCost-668b: Begin cold experiments
+22:58:41,750 INFO Wallet.WalletFunction-3f2f: Not stopping function as it was not running
+22:59:08,155 INFO Experiment.PerfCost-668b: Processed 1 samples out of 2, 0 errors
+22:59:13,160 INFO Wallet.WalletFunction-3f2f: Stopping function
+22:59:13,166 INFO Wallet.WalletFunction-3f2f: Function stopped succesfully
+22:59:42,306 INFO Experiment.PerfCost-668b: Processed 2 samples out of 2, 0 errors
+22:59:47,314 INFO Experiment.PerfCost-668b: Mean 22763.6825 [ms], median 22763.6825 [ms], std 1367.2075000000004, CV 6.006091061936049
+22:59:47,328 INFO Experiment.PerfCost-668b: Parametric CI (Student's t-distribution) 0.95 from 5391.664087814508 to 40135.70091218549, within 76.3146226986143% of mean
+22:59:47,335 INFO Experiment.PerfCost-668b: Parametric CI (Student's t-distribution) 0.99 from -64268.29144344007 to 109795.65644344006, within 382.32818413031407% of mean
+22:59:47,339 INFO Wallet.WalletFunction-3f2f: Stopping function
+22:59:47,344 INFO Wallet.WalletFunction-3f2f: Function stopped succesfully

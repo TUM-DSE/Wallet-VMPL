@@ -1,0 +1,4 @@
+15:06:08,515 INFO SeBS-34c5: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+15:06:08,540 INFO Native-bef5: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+15:06:08,542 INFO Experiment.PerfCost-5748: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/cold_results.json
+15:06:08,544 INFO Experiment.PerfCost-5748: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/sequential_results.json

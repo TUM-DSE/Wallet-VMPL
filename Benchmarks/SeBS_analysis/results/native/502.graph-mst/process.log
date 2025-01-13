@@ -1,0 +1,4 @@
+16:33:04,639 INFO SeBS-07a4: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+16:33:04,666 INFO Native-7571: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:33:04,669 INFO Experiment.PerfCost-6b50: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/perf-cost/sequential_results.json
+16:33:04,671 INFO Experiment.PerfCost-6b50: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/perf-cost/cold_results.json

@@ -1,0 +1,21 @@
+22:46:52,938 INFO SeBS-171d: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+22:46:53,22 INFO Wallet-403c: Generating unique resource name wallet-74730118
+22:46:53,26 INFO minio.Minio-63e3: Initialize a new bucket for benchmarks
+22:46:53,33 INFO minio.Minio-63e3: Created bucket sebs-benchmarks-wallet-74730118
+22:46:53,44 INFO Benchmark-3a86: Building benchmark 210.thumbnailer. Reason: no cached code package.
+22:46:53,265 INFO Benchmark-3a86: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+22:46:53,341 INFO Wallet-403c: Function size 0.000005 MB
+22:46:53,385 INFO Benchmark-3a86: Created code package (source hash: cd60a4afc033c3fd69b476e58f97aafb), for run on wallet with python:3.11
+22:46:53,727 INFO Wallet-403c: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+22:46:54,723 INFO Experiment.PerfCost-945e: Begin experiment
+22:46:54,726 INFO Experiment.PerfCost-945e: Begin cold experiments
+22:46:54,733 INFO Wallet.WalletFunction-37f0: Not stopping function as it was not running
+22:47:22,786 INFO Experiment.PerfCost-945e: Processed 1 samples out of 2, 0 errors
+22:47:27,793 INFO Wallet.WalletFunction-37f0: Stopping function
+22:47:27,798 INFO Wallet.WalletFunction-37f0: Function stopped succesfully
+22:47:58,968 INFO Experiment.PerfCost-945e: Processed 2 samples out of 2, 0 errors
+22:48:03,982 INFO Experiment.PerfCost-945e: Mean 24602.288500000002 [ms], median 24602.288500000002 [ms], std 1557.4974999999995, CV 6.330701715005087
+22:48:03,992 INFO Experiment.PerfCost-945e: Parametric CI (Student's t-distribution) 0.95 from 4812.4063885188625 to 44392.17061148114, within 80.43919211613641% of mean
+22:48:03,998 INFO Experiment.PerfCost-945e: Parametric CI (Student's t-distribution) 0.99 from -74542.9267193233 to 123747.50371932331, within 402.9918404514413% of mean
+22:48:04,3 INFO Wallet.WalletFunction-37f0: Stopping function
+22:48:04,9 INFO Wallet.WalletFunction-37f0: Function stopped succesfully

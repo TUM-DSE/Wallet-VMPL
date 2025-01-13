@@ -1,0 +1,18 @@
+22:55:04,384 INFO SeBS-cf05: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
+22:55:04,460 INFO Wallet-6153: Generating unique resource name wallet-995e8dca
+22:55:04,464 INFO minio.Minio-8b5a: Initialize a new bucket for benchmarks
+22:55:04,471 INFO minio.Minio-8b5a: Created bucket sebs-benchmarks-wallet-995e8dca
+22:55:04,559 INFO Benchmark-e541: Building benchmark 503.graph-bfs. Reason: no cached code package.
+22:55:04,749 INFO Benchmark-e541: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+22:55:04,820 INFO Wallet-6153: Function size 0.000004 MB
+22:55:04,860 INFO Benchmark-e541: Created code package (source hash: 0836453fe988a0d7143a2c061a8276b7), for run on wallet with python:3.11
+22:55:05,166 INFO Wallet-6153: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+22:55:05,870 INFO Experiment.PerfCost-6b35: Begin experiment
+22:55:05,872 INFO Experiment.PerfCost-6b35: Begin sequential experiments
+22:55:32,461 INFO Experiment.PerfCost-6b35: Processed 1 samples out of 2, 0 errors
+22:55:42,536 INFO Experiment.PerfCost-6b35: Processed 2 samples out of 2, 0 errors
+22:55:47,545 INFO Experiment.PerfCost-6b35: Mean 97.65599999999999 [ms], median 97.65599999999999 [ms], std 33.84799999999999, CV 34.66044073072826
+22:55:47,559 INFO Experiment.PerfCost-6b35: Parametric CI (Student's t-distribution) 0.95 from -332.42361791875345 to 527.7356179187534, within 440.40265617960335% of mean
+22:55:47,566 INFO Experiment.PerfCost-6b35: Parametric CI (Student's t-distribution) 0.99 from -2056.9973748809584 to 2252.3093748809583, within 2206.3707041871044% of mean
+22:55:47,641 INFO Wallet.WalletFunction-fe5e: Stopping function
+22:55:47,644 INFO Wallet.WalletFunction-fe5e: Function stopped succesfully

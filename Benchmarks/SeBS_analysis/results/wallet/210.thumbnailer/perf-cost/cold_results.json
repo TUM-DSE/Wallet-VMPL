@@ -1,0 +1,133 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "31557dbb-4a05-4f93-80b2-87e1d5f6c4d1": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376473.050582",
+          "end": "1736376478.964142",
+          "is_cold": false,
+          "request_id": "31557dbb-4a05-4f93-80b2-87e1d5f6c4d1",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 457029700.0,
+                "download_size": 3578502,
+                "upload_size": 10342
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-74730118",
+                "key": "210.thumbnailer-0-output/2_aerial-shot-architecture-bird-s-eye-view-2440013.a17f8b8d.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "31557dbb-4a05-4f93-80b2-87e1d5f6c4d1",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 5913560,
+          "client": 26159786,
+          "client_begin": "2025-01-08 22:47:32.806285",
+          "client_end": "2025-01-08 22:47:58.966071",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "34d9efb4-632c-4278-9cb1-e344a91471f9": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376438.105683",
+          "end": "1736376442.781622",
+          "is_cold": false,
+          "request_id": "34d9efb4-632c-4278-9cb1-e344a91471f9",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 447030660.0,
+                "download_size": 3578502,
+                "upload_size": 10342
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-74730118",
+                "key": "210.thumbnailer-0-output/2_aerial-shot-architecture-bird-s-eye-view-2440013.9598a38c.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "34d9efb4-632c-4278-9cb1-e344a91471f9",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 4675939,
+          "client": 23044791,
+          "client_begin": "2025-01-08 22:46:59.738734",
+          "client_end": "2025-01-08 22:47:22.783525",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736376414.730765,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "210.thumbnailer",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 2
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736376483.975446,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 2,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

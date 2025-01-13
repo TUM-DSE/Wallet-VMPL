@@ -1,0 +1,4 @@
+14:59:06,647 INFO SeBS-e28c: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+14:59:06,677 INFO Native-0b46: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+14:59:06,679 INFO Experiment.PerfCost-e4df: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/sequential_results.json
+14:59:06,681 INFO Experiment.PerfCost-e4df: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/cold_results.json

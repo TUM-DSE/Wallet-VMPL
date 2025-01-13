@@ -1,0 +1,4 @@
+17:08:09,308 INFO SeBS-679d: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+17:08:09,335 INFO Cvm-9437: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:08:09,337 INFO Experiment.PerfCost-622d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/sequential_results.json
+17:08:09,339 INFO Experiment.PerfCost-622d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/cold_results.json

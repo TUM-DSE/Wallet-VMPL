@@ -1,0 +1,43 @@
+18:01:48,107 INFO SeBS-e954: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+18:01:48,135 INFO Gramine-4765: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+18:01:48,140 INFO Benchmark-b28e: Building benchmark 110.dynamic-html. Reason: no cached code package.
+18:01:48,165 INFO Benchmark-b28e: Docker build of benchmark dependencies in container of image sebs:build.gramine.python.3.10
+18:01:48,165 INFO Benchmark-b28e: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/110.dynamic-html_code/python/3.10
+18:01:50,614 INFO Gramine-4765: Function size 0.000005 MB
+18:01:50,615 INFO Benchmark-b28e: Created code package (source hash: f99e8b95bd47e7b0c44ea38d3ab23905), for run on gramine with python:3.10
+18:01:50,652 INFO Gramine-4765: Creating new function! Reason: function 110.dynamic-html-python-3.10 not found in cache.
+18:01:50,663 INFO minio.Minio-8340: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+18:01:50,664 INFO Experiment.PerfCost-8127: Begin experiment
+18:01:50,664 INFO Experiment.PerfCost-8127: Begin cold experiments
+18:01:50,667 INFO Gramine.GramineFunction-96c6: Not stopping function as it was not running
+18:01:57,79 INFO Experiment.PerfCost-8127: Processed 0 warm-up samples, ignoring these results.
+18:02:02,80 INFO Gramine.GramineFunction-96c6: Stopping function
+18:02:02,436 INFO Gramine.GramineFunction-96c6: Function stopped succesfully
+18:02:08,825 INFO Experiment.PerfCost-8127: Processed 1 samples out of 5, 0 errors
+18:02:13,825 INFO Gramine.GramineFunction-96c6: Stopping function
+18:02:14,138 INFO Gramine.GramineFunction-96c6: Function stopped succesfully
+18:02:20,542 INFO Experiment.PerfCost-8127: Processed 2 samples out of 5, 0 errors
+18:02:25,543 INFO Gramine.GramineFunction-96c6: Stopping function
+18:02:25,875 INFO Gramine.GramineFunction-96c6: Function stopped succesfully
+18:02:32,272 INFO Experiment.PerfCost-8127: Processed 3 samples out of 5, 0 errors
+18:02:37,272 INFO Gramine.GramineFunction-96c6: Stopping function
+18:02:37,601 INFO Gramine.GramineFunction-96c6: Function stopped succesfully
+18:02:43,995 INFO Experiment.PerfCost-8127: Processed 4 samples out of 5, 0 errors
+18:02:48,995 INFO Gramine.GramineFunction-96c6: Stopping function
+18:02:49,320 INFO Gramine.GramineFunction-96c6: Function stopped succesfully
+18:02:55,704 INFO Experiment.PerfCost-8127: Processed 5 samples out of 5, 0 errors
+18:03:00,705 INFO Experiment.PerfCost-8127: Mean 1392.0732000000003 [ms], median 1392.44 [ms], std 7.044458911797231, CV 0.5060408397918464
+18:03:00,707 INFO Experiment.PerfCost-8127: Parametric CI (Student's t-distribution) 0.95 from 1382.293923267787 to 1401.8524767322135, within 0.70249730633513% of mean
+18:03:00,708 INFO Experiment.PerfCost-8127: Parametric CI (Student's t-distribution) 0.99 from 1375.8565214261475 to 1408.289878573853, within 1.1649300176063104% of mean
+18:03:00,714 INFO Experiment.PerfCost-8127: Begin sequential experiments
+18:03:05,739 INFO Experiment.PerfCost-8127: Processed 0 warm-up samples, ignoring these results.
+18:03:15,750 INFO Experiment.PerfCost-8127: Processed 1 samples out of 5, 0 errors
+18:03:25,762 INFO Experiment.PerfCost-8127: Processed 2 samples out of 5, 0 errors
+18:03:35,773 INFO Experiment.PerfCost-8127: Processed 3 samples out of 5, 0 errors
+18:03:45,785 INFO Experiment.PerfCost-8127: Processed 4 samples out of 5, 0 errors
+18:03:55,798 INFO Experiment.PerfCost-8127: Processed 5 samples out of 5, 0 errors
+18:04:00,799 INFO Experiment.PerfCost-8127: Mean 10.5352 [ms], median 10.477 [ms], std 0.48333690113625666, CV 4.587828433596483
+18:04:00,800 INFO Experiment.PerfCost-8127: Parametric CI (Student's t-distribution) 0.95 from 9.864220813339383 to 11.206179186660616, within 6.368926898973126% of mean
+18:04:00,802 INFO Experiment.PerfCost-8127: Parametric CI (Student's t-distribution) 0.99 from 9.422535526156254 to 11.647864473843745, within 10.561398681028791% of mean
+18:04:00,808 INFO Gramine.GramineFunction-96c6: Stopping function
+18:04:01,153 INFO Gramine.GramineFunction-96c6: Function stopped succesfully

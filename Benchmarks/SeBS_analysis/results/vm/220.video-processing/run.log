@@ -1,0 +1,43 @@
+17:24:32,135 INFO SeBS-7e02: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing
+17:24:32,160 INFO Cvm-dcca: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:24:32,165 INFO Benchmark-065c: Building benchmark 220.video-processing. Reason: no cached code package.
+17:24:39,861 INFO Benchmark-065c: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+17:24:39,861 INFO Benchmark-065c: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/220.video-processing_code/python/3.11
+17:24:43,216 INFO Cvm-dcca: Function size 0.000005 MB
+17:24:43,218 INFO Benchmark-065c: Created code package (source hash: 6b3dea16eaa90e3f559d3d100169bec7), for run on cvm with python:3.11
+17:24:43,361 INFO Cvm-dcca: Creating new function! Reason: function 220.video-processing-python-3.11 not found in cache.
+17:24:43,369 INFO minio.Minio-2bca: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:24:43,446 INFO Experiment.PerfCost-e086: Begin experiment
+17:24:43,446 INFO Experiment.PerfCost-e086: Begin cold experiments
+17:24:43,449 INFO Cvm.CvmFunction-6e95: Not stopping function as it was not running
+17:24:59,445 INFO Experiment.PerfCost-e086: Processed 0 warm-up samples, ignoring these results.
+17:25:04,445 INFO Cvm.CvmFunction-6e95: Stopping function
+17:25:05,458 INFO Cvm.CvmFunction-6e95: Function stopped succesfully
+17:25:20,470 INFO Experiment.PerfCost-e086: Processed 1 samples out of 5, 0 errors
+17:25:25,471 INFO Cvm.CvmFunction-6e95: Stopping function
+17:25:26,483 INFO Cvm.CvmFunction-6e95: Function stopped succesfully
+17:25:41,385 INFO Experiment.PerfCost-e086: Processed 2 samples out of 5, 0 errors
+17:25:46,386 INFO Cvm.CvmFunction-6e95: Stopping function
+17:25:47,398 INFO Cvm.CvmFunction-6e95: Function stopped succesfully
+17:26:02,466 INFO Experiment.PerfCost-e086: Processed 3 samples out of 5, 0 errors
+17:26:07,467 INFO Cvm.CvmFunction-6e95: Stopping function
+17:26:08,479 INFO Cvm.CvmFunction-6e95: Function stopped succesfully
+17:26:23,434 INFO Experiment.PerfCost-e086: Processed 4 samples out of 5, 0 errors
+17:26:28,435 INFO Cvm.CvmFunction-6e95: Stopping function
+17:26:29,446 INFO Cvm.CvmFunction-6e95: Function stopped succesfully
+17:26:44,442 INFO Experiment.PerfCost-e086: Processed 5 samples out of 5, 0 errors
+17:26:49,443 INFO Experiment.PerfCost-e086: Mean 9985.066 [ms], median 9993.82 [ms], std 55.72972231403993, CV 0.5581307355809157
+17:26:49,445 INFO Experiment.PerfCost-e086: Parametric CI (Student's t-distribution) 0.95 from 9907.700742633577 to 10062.431257366425, within 0.7748096744320365% of mean
+17:26:49,446 INFO Experiment.PerfCost-e086: Parametric CI (Student's t-distribution) 0.99 from 9856.773535654249 to 10113.358464345753, within 1.2848434286338397% of mean
+17:26:49,450 INFO Experiment.PerfCost-e086: Begin sequential experiments
+17:26:59,315 INFO Experiment.PerfCost-e086: Processed 0 warm-up samples, ignoring these results.
+17:27:11,710 INFO Experiment.PerfCost-e086: Processed 1 samples out of 5, 0 errors
+17:27:24,114 INFO Experiment.PerfCost-e086: Processed 2 samples out of 5, 0 errors
+17:27:36,500 INFO Experiment.PerfCost-e086: Processed 3 samples out of 5, 0 errors
+17:27:48,914 INFO Experiment.PerfCost-e086: Processed 4 samples out of 5, 0 errors
+17:28:01,327 INFO Experiment.PerfCost-e086: Processed 5 samples out of 5, 0 errors
+17:28:06,328 INFO Experiment.PerfCost-e086: Mean 2400.897 [ms], median 2402.702 [ms], std 10.526378541549906, CV 0.43843524072669116
+17:28:06,330 INFO Experiment.PerfCost-e086: Parametric CI (Student's t-distribution) 0.95 from 2386.284043911427 to 2415.509956088573, within 0.6086456890309289% of mean
+17:28:06,331 INFO Experiment.PerfCost-e086: Parametric CI (Student's t-distribution) 0.99 from 2376.664777271134 to 2425.129222728866, within 1.0092987216388694% of mean
+17:28:06,335 INFO Cvm.CvmFunction-6e95: Stopping function
+17:28:07,347 INFO Cvm.CvmFunction-6e95: Function stopped succesfully

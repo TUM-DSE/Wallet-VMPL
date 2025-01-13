@@ -1,0 +1,45 @@
+17:31:20,71 INFO SeBS-494c: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+17:31:20,98 INFO Cvm-96cf: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:31:20,104 INFO Benchmark-e105: Building benchmark 411.image-recognition. Reason: no cached code package.
+17:31:20,129 INFO Benchmark-e105: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+17:31:20,130 INFO Benchmark-e105: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/411.image-recognition_code/python/3.11
+17:32:00,999 INFO Benchmark-e105: Docker build: Original size 362M
+17:32:00,999 INFO Benchmark-e105: Docker build: Stripped size 298M
+17:32:01,1 INFO Cvm-96cf: Function size 0.000005 MB
+17:32:01,4 INFO Benchmark-e105: Created code package (source hash: ab83c8ef486c3b61d5d0b38ae48e61af), for run on cvm with python:3.11
+17:32:05,386 INFO Cvm-96cf: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+17:32:05,394 INFO minio.Minio-c4f8: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:32:05,868 INFO Experiment.PerfCost-d97b: Begin experiment
+17:32:05,869 INFO Experiment.PerfCost-d97b: Begin cold experiments
+17:32:05,871 INFO Cvm.CvmFunction-87f8: Not stopping function as it was not running
+17:33:03,309 INFO Experiment.PerfCost-d97b: Processed 0 warm-up samples, ignoring these results.
+17:33:08,310 INFO Cvm.CvmFunction-87f8: Stopping function
+17:33:09,322 INFO Cvm.CvmFunction-87f8: Function stopped succesfully
+17:33:41,175 INFO Experiment.PerfCost-d97b: Processed 1 samples out of 5, 0 errors
+17:33:46,176 INFO Cvm.CvmFunction-87f8: Stopping function
+17:33:47,189 INFO Cvm.CvmFunction-87f8: Function stopped succesfully
+17:34:19,289 INFO Experiment.PerfCost-d97b: Processed 2 samples out of 5, 0 errors
+17:34:24,290 INFO Cvm.CvmFunction-87f8: Stopping function
+17:34:25,302 INFO Cvm.CvmFunction-87f8: Function stopped succesfully
+17:34:56,959 INFO Experiment.PerfCost-d97b: Processed 3 samples out of 5, 0 errors
+17:35:01,960 INFO Cvm.CvmFunction-87f8: Stopping function
+17:35:02,972 INFO Cvm.CvmFunction-87f8: Function stopped succesfully
+17:35:34,978 INFO Experiment.PerfCost-d97b: Processed 4 samples out of 5, 0 errors
+17:35:39,979 INFO Cvm.CvmFunction-87f8: Stopping function
+17:35:40,992 INFO Cvm.CvmFunction-87f8: Function stopped succesfully
+17:36:12,642 INFO Experiment.PerfCost-d97b: Processed 5 samples out of 5, 0 errors
+17:36:17,643 INFO Experiment.PerfCost-d97b: Mean 26852.052399999997 [ms], median 26851.379 [ms], std 181.32824944789996, CV 0.6752863682326941
+17:36:17,646 INFO Experiment.PerfCost-d97b: Parametric CI (Student's t-distribution) 0.95 from 26600.328434693143 to 27103.77636530685, within 0.937447765843231% of mean
+17:36:17,647 INFO Experiment.PerfCost-d97b: Parametric CI (Student's t-distribution) 0.99 from 26434.626168337047 to 27269.478631662947, within 1.55454125235861% of mean
+17:36:17,651 INFO Experiment.PerfCost-d97b: Begin sequential experiments
+17:36:23,92 INFO Experiment.PerfCost-d97b: Processed 0 warm-up samples, ignoring these results.
+17:36:33,311 INFO Experiment.PerfCost-d97b: Processed 1 samples out of 5, 0 errors
+17:36:43,528 INFO Experiment.PerfCost-d97b: Processed 2 samples out of 5, 0 errors
+17:36:53,746 INFO Experiment.PerfCost-d97b: Processed 3 samples out of 5, 0 errors
+17:37:03,965 INFO Experiment.PerfCost-d97b: Processed 4 samples out of 5, 0 errors
+17:37:14,184 INFO Experiment.PerfCost-d97b: Processed 5 samples out of 5, 0 errors
+17:37:19,185 INFO Experiment.PerfCost-d97b: Mean 217.03000000000003 [ms], median 217.589 [ms], std 0.7377384360327174, CV 0.33992463531895006
+17:37:19,187 INFO Experiment.PerfCost-d97b: Parametric CI (Student's t-distribution) 0.95 from 216.00585486518037 to 218.0541451348197, within 0.4718910449337243% of mean
+17:37:19,189 INFO Experiment.PerfCost-d97b: Parametric CI (Student's t-distribution) 0.99 from 215.3316911251077 to 218.72830887489235, within 0.7825226350699531% of mean
+17:37:19,192 INFO Cvm.CvmFunction-87f8: Stopping function
+17:37:20,204 INFO Cvm.CvmFunction-87f8: Function stopped succesfully

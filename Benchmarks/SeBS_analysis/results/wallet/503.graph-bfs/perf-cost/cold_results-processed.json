@@ -1,0 +1,100 @@
+{
+  "_invocations": {
+    "503.graph-bfs-python-3.11": {
+      "063ae33a-62e9-4b13-b251-9ba15b396b41": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376768.397721",
+          "end": "1736376772.916356",
+          "is_cold": false,
+          "request_id": "063ae33a-62e9-4b13-b251-9ba15b396b41",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "063ae33a-62e9-4b13-b251-9ba15b396b41",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 4518635,
+          "client": 21369034,
+          "client_begin": "2025-01-08 22:52:31.553872",
+          "client_end": "2025-01-08 22:52:52.922906",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "ebf82734-2bcc-47cd-866d-9928f133ecc3": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376801.470211",
+          "end": "1736376807.168880",
+          "is_cold": false,
+          "request_id": "ebf82734-2bcc-47cd-866d-9928f133ecc3",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "ebf82734-2bcc-47cd-866d-9928f133ecc3",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 5698669,
+          "client": 24230256,
+          "client_begin": "2025-01-08 22:53:02.945021",
+          "client_end": "2025-01-08 22:53:27.175277",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "503.graph-bfs-python-3.11": {}
+  },
+  "begin_time": 1736376746.545844,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736376812.181077,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 2,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

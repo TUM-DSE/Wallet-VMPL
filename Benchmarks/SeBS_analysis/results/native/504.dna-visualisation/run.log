@@ -1,0 +1,43 @@
+16:35:23,911 INFO SeBS-a551: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+16:35:23,936 INFO Native-e922: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:35:23,942 INFO Benchmark-dcb8: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+16:35:23,947 INFO Benchmark-dcb8: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+16:35:23,947 INFO Benchmark-dcb8: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/504.dna-visualisation_code/python/3.11
+16:35:50,474 INFO Native-e922: Function size 0.000005 MB
+16:35:50,476 INFO Benchmark-dcb8: Created code package (source hash: 99686ca7b896d046965dc38806678b19), for run on native with python:3.11
+16:35:53,533 INFO Native-e922: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+16:35:53,541 INFO minio.Minio-27f1: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+16:35:53,597 INFO Experiment.PerfCost-ef13: Begin experiment
+16:35:53,597 INFO Experiment.PerfCost-ef13: Begin cold experiments
+16:35:53,600 INFO Native.NativeFunction-3d68: Not stopping function as it was not running
+16:36:08,908 INFO Experiment.PerfCost-ef13: Processed 0 warm-up samples, ignoring these results.
+16:36:13,909 INFO Native.NativeFunction-3d68: Stopping function
+16:36:13,909 INFO Native.NativeFunction-3d68: Function stopped succesfully
+16:36:29,280 INFO Experiment.PerfCost-ef13: Processed 1 samples out of 5, 0 errors
+16:36:34,280 INFO Native.NativeFunction-3d68: Stopping function
+16:36:34,281 INFO Native.NativeFunction-3d68: Function stopped succesfully
+16:36:49,543 INFO Experiment.PerfCost-ef13: Processed 2 samples out of 5, 0 errors
+16:36:54,543 INFO Native.NativeFunction-3d68: Stopping function
+16:36:54,544 INFO Native.NativeFunction-3d68: Function stopped succesfully
+16:37:09,903 INFO Experiment.PerfCost-ef13: Processed 3 samples out of 5, 0 errors
+16:37:14,904 INFO Native.NativeFunction-3d68: Stopping function
+16:37:14,904 INFO Native.NativeFunction-3d68: Function stopped succesfully
+16:37:30,214 INFO Experiment.PerfCost-ef13: Processed 4 samples out of 5, 0 errors
+16:37:35,215 INFO Native.NativeFunction-3d68: Stopping function
+16:37:35,215 INFO Native.NativeFunction-3d68: Function stopped succesfully
+16:37:50,500 INFO Experiment.PerfCost-ef13: Processed 5 samples out of 5, 0 errors
+16:37:55,501 INFO Experiment.PerfCost-ef13: Mean 10316.083999999999 [ms], median 10308.557 [ms], std 41.872727009355444, CV 0.40589749956820287
+16:37:55,503 INFO Experiment.PerfCost-ef13: Parametric CI (Student's t-distribution) 0.95 from 10257.955336026795 to 10374.212663973203, within 0.5634760629440815% of mean
+16:37:55,505 INFO Experiment.PerfCost-ef13: Parametric CI (Student's t-distribution) 0.99 from 10219.690996162013 to 10412.477003837985, within 0.9343952980412512% of mean
+16:37:55,508 INFO Experiment.PerfCost-ef13: Begin sequential experiments
+16:38:19,263 INFO Experiment.PerfCost-ef13: Processed 0 warm-up samples, ignoring these results.
+16:38:38,650 INFO Experiment.PerfCost-ef13: Processed 1 samples out of 5, 0 errors
+16:38:58,77 INFO Experiment.PerfCost-ef13: Processed 2 samples out of 5, 0 errors
+16:39:17,472 INFO Experiment.PerfCost-ef13: Processed 3 samples out of 5, 0 errors
+16:39:36,813 INFO Experiment.PerfCost-ef13: Processed 4 samples out of 5, 0 errors
+16:39:56,164 INFO Experiment.PerfCost-ef13: Processed 5 samples out of 5, 0 errors
+16:40:01,165 INFO Experiment.PerfCost-ef13: Mean 9378.6862 [ms], median 9385.522 [ms], std 31.01189283742598, CV 0.3306635084712183
+16:40:01,167 INFO Experiment.PerfCost-ef13: Parametric CI (Student's t-distribution) 0.95 from 9335.634790964305 to 9421.737609035696, within 0.459034539781228% of mean
+16:40:01,168 INFO Experiment.PerfCost-ef13: Parametric CI (Student's t-distribution) 0.99 from 9307.295351617155 to 9450.077048382846, within 0.7612030817583537% of mean
+16:40:01,171 INFO Native.NativeFunction-3d68: Stopping function
+16:40:01,172 INFO Native.NativeFunction-3d68: Function stopped succesfully

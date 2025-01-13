@@ -1,0 +1,43 @@
+16:33:06,357 INFO SeBS-a459: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs
+16:33:06,385 INFO Native-9832: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:33:06,391 INFO Benchmark-e162: Building benchmark 503.graph-bfs. Reason: no cached code package.
+16:33:06,399 INFO Benchmark-e162: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+16:33:06,400 INFO Benchmark-e162: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/503.graph-bfs_code/python/3.11
+16:33:13,392 INFO Native-9832: Function size 0.000005 MB
+16:33:13,394 INFO Benchmark-e162: Created code package (source hash: bd363bdb63bea001923eceb39d70a983), for run on native with python:3.11
+16:33:13,753 INFO Native-9832: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+16:33:13,762 INFO minio.Minio-d40d: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+16:33:13,763 INFO Experiment.PerfCost-aa23: Begin experiment
+16:33:13,764 INFO Experiment.PerfCost-aa23: Begin cold experiments
+16:33:13,767 INFO Native.NativeFunction-960d: Not stopping function as it was not running
+16:33:19,751 INFO Experiment.PerfCost-aa23: Processed 0 warm-up samples, ignoring these results.
+16:33:24,752 INFO Native.NativeFunction-960d: Stopping function
+16:33:24,752 INFO Native.NativeFunction-960d: Function stopped succesfully
+16:33:30,728 INFO Experiment.PerfCost-aa23: Processed 1 samples out of 5, 0 errors
+16:33:35,728 INFO Native.NativeFunction-960d: Stopping function
+16:33:35,729 INFO Native.NativeFunction-960d: Function stopped succesfully
+16:33:41,708 INFO Experiment.PerfCost-aa23: Processed 2 samples out of 5, 0 errors
+16:33:46,708 INFO Native.NativeFunction-960d: Stopping function
+16:33:46,709 INFO Native.NativeFunction-960d: Function stopped succesfully
+16:33:52,684 INFO Experiment.PerfCost-aa23: Processed 3 samples out of 5, 0 errors
+16:33:57,685 INFO Native.NativeFunction-960d: Stopping function
+16:33:57,685 INFO Native.NativeFunction-960d: Function stopped succesfully
+16:34:03,662 INFO Experiment.PerfCost-aa23: Processed 4 samples out of 5, 0 errors
+16:34:08,662 INFO Native.NativeFunction-960d: Stopping function
+16:34:08,662 INFO Native.NativeFunction-960d: Function stopped succesfully
+16:34:14,639 INFO Experiment.PerfCost-aa23: Processed 5 samples out of 5, 0 errors
+16:34:19,640 INFO Experiment.PerfCost-aa23: Mean 975.5964 [ms], median 975.103 [ms], std 1.257201431752296, CV 0.12886491091524077
+16:34:19,642 INFO Experiment.PerfCost-aa23: Parametric CI (Student's t-distribution) 0.95 from 973.8511246192819 to 977.3416753807181, within 0.1788931755711801% of mean
+16:34:19,644 INFO Experiment.PerfCost-aa23: Parametric CI (Student's t-distribution) 0.99 from 972.7022626678663 to 978.4905373321337, within 0.29665313772516066% of mean
+16:34:19,853 INFO Experiment.PerfCost-aa23: Begin sequential experiments
+16:34:24,978 INFO Experiment.PerfCost-aa23: Processed 0 warm-up samples, ignoring these results.
+16:34:35,41 INFO Experiment.PerfCost-aa23: Processed 1 samples out of 5, 0 errors
+16:34:45,102 INFO Experiment.PerfCost-aa23: Processed 2 samples out of 5, 0 errors
+16:34:55,158 INFO Experiment.PerfCost-aa23: Processed 3 samples out of 5, 0 errors
+16:35:05,216 INFO Experiment.PerfCost-aa23: Processed 4 samples out of 5, 0 errors
+16:35:15,272 INFO Experiment.PerfCost-aa23: Processed 5 samples out of 5, 0 errors
+16:35:20,273 INFO Experiment.PerfCost-aa23: Mean 57.487399999999994 [ms], median 55.826 [ms], std 2.594077762905346, CV 4.512428398058264
+16:35:20,275 INFO Experiment.PerfCost-aa23: Parametric CI (Student's t-distribution) 0.95 from 53.88624274633949 to 61.0885572536605, within 6.264254869172207% of mean
+16:35:20,277 INFO Experiment.PerfCost-aa23: Parametric CI (Student's t-distribution) 0.99 from 51.51570993787673 to 63.45909006212326, within 10.387824222565754% of mean
+16:35:20,488 INFO Native.NativeFunction-960d: Stopping function
+16:35:20,488 INFO Native.NativeFunction-960d: Function stopped succesfully

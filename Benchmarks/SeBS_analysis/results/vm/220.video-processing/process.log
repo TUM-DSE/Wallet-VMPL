@@ -1,0 +1,4 @@
+17:28:09,83 INFO SeBS-aae8: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing
+17:28:09,112 INFO Cvm-04ef: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:28:09,115 INFO Experiment.PerfCost-a13d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/cold_results.json
+17:28:09,117 INFO Experiment.PerfCost-a13d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/sequential_results.json

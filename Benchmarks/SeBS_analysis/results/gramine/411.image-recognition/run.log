@@ -1,0 +1,45 @@
+20:57:20,576 INFO SeBS-9e38: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+20:57:20,600 INFO Gramine-3539: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+20:57:20,606 INFO Benchmark-6ac5: Building benchmark 411.image-recognition. Reason: no cached code package.
+20:57:20,632 INFO Benchmark-6ac5: Docker build of benchmark dependencies in container of image sebs:build.gramine.python.3.10
+20:57:20,633 INFO Benchmark-6ac5: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/411.image-recognition_code/python/3.10
+20:57:49,622 INFO Benchmark-6ac5: Docker build: Original size 54M
+20:57:49,623 INFO Benchmark-6ac5: Docker build: Stripped size 298M
+20:57:49,625 INFO Gramine-3539: Function size 0.000005 MB
+20:57:49,627 INFO Benchmark-6ac5: Created code package (source hash: ab83c8ef486c3b61d5d0b38ae48e61af), for run on gramine with python:3.10
+20:57:53,159 INFO Gramine-3539: Creating new function! Reason: function 411.image-recognition-python-3.10 not found in cache.
+20:57:53,169 INFO minio.Minio-508e: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+20:57:53,600 INFO Experiment.PerfCost-79dc: Begin experiment
+20:57:53,600 INFO Experiment.PerfCost-79dc: Begin cold experiments
+20:57:53,603 INFO Gramine.GramineFunction-df4b: Not stopping function as it was not running
+20:58:04,416 INFO Experiment.PerfCost-79dc: Processed 0 warm-up samples, ignoring these results.
+20:58:09,417 INFO Gramine.GramineFunction-df4b: Stopping function
+20:58:09,863 INFO Gramine.GramineFunction-df4b: Function stopped succesfully
+20:58:20,504 INFO Experiment.PerfCost-79dc: Processed 1 samples out of 5, 0 errors
+20:58:25,504 INFO Gramine.GramineFunction-df4b: Stopping function
+20:58:25,967 INFO Gramine.GramineFunction-df4b: Function stopped succesfully
+20:58:36,579 INFO Experiment.PerfCost-79dc: Processed 2 samples out of 5, 0 errors
+20:58:41,579 INFO Gramine.GramineFunction-df4b: Stopping function
+20:58:42,8 INFO Gramine.GramineFunction-df4b: Function stopped succesfully
+20:58:52,616 INFO Experiment.PerfCost-79dc: Processed 3 samples out of 5, 0 errors
+20:58:57,616 INFO Gramine.GramineFunction-df4b: Stopping function
+20:58:58,83 INFO Gramine.GramineFunction-df4b: Function stopped succesfully
+20:59:08,708 INFO Experiment.PerfCost-79dc: Processed 4 samples out of 5, 0 errors
+20:59:13,709 INFO Gramine.GramineFunction-df4b: Stopping function
+20:59:14,164 INFO Gramine.GramineFunction-df4b: Function stopped succesfully
+20:59:24,811 INFO Experiment.PerfCost-79dc: Processed 5 samples out of 5, 0 errors
+20:59:29,812 INFO Experiment.PerfCost-79dc: Mean 5625.087600000001 [ms], median 5623.483 [ms], std 15.243533482759416, CV 0.2709919305569466
+20:59:29,814 INFO Experiment.PerfCost-79dc: Parametric CI (Student's t-distribution) 0.95 from 5603.926183037937 to 5646.249016962064, within 0.37619710957147423% of mean
+20:59:29,815 INFO Experiment.PerfCost-79dc: Parametric CI (Student's t-distribution) 0.99 from 5589.996262834886 to 5660.178937165116, within 0.6238362788361724% of mean
+20:59:29,819 INFO Experiment.PerfCost-79dc: Begin sequential experiments
+20:59:35,29 INFO Experiment.PerfCost-79dc: Processed 0 warm-up samples, ignoring these results.
+20:59:45,130 INFO Experiment.PerfCost-79dc: Processed 1 samples out of 5, 0 errors
+20:59:55,233 INFO Experiment.PerfCost-79dc: Processed 2 samples out of 5, 0 errors
+21:00:05,336 INFO Experiment.PerfCost-79dc: Processed 3 samples out of 5, 0 errors
+21:00:15,437 INFO Experiment.PerfCost-79dc: Processed 4 samples out of 5, 0 errors
+21:00:25,538 INFO Experiment.PerfCost-79dc: Processed 5 samples out of 5, 0 errors
+21:00:30,539 INFO Experiment.PerfCost-79dc: Mean 100.5108 [ms], median 100.002 [ms], std 0.8410734569584268, CV 0.8367990872209025
+21:00:30,541 INFO Experiment.PerfCost-79dc: Parametric CI (Student's t-distribution) 0.95 from 99.34320285865799 to 101.67839714134202, within 1.1616633648742367% of mean
+21:00:30,543 INFO Experiment.PerfCost-79dc: Parametric CI (Student's t-distribution) 0.99 from 98.57460900516683 to 102.44699099483317, within 1.9263511929396329% of mean
+21:00:30,546 INFO Gramine.GramineFunction-df4b: Stopping function
+21:00:31,14 INFO Gramine.GramineFunction-df4b: Function stopped succesfully

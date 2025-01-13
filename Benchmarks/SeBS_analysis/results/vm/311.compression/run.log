@@ -1,0 +1,41 @@
+17:28:10,814 INFO SeBS-acc5: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+17:28:10,842 INFO Cvm-8382: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:28:10,846 INFO Benchmark-6e22: Building benchmark 311.compression. Reason: no cached code package.
+17:28:10,853 INFO Cvm-8382: Function size 0.000003 MB
+17:28:10,854 INFO Benchmark-6e22: Created code package (source hash: 4e8d7a494ddddb1c60db65fc96591f43), for run on cvm with python:3.11
+17:28:10,857 INFO Cvm-8382: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+17:28:10,864 INFO minio.Minio-b70a: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:28:11,95 INFO Experiment.PerfCost-1ae1: Begin experiment
+17:28:11,95 INFO Experiment.PerfCost-1ae1: Begin cold experiments
+17:28:11,101 INFO Cvm.CvmFunction-05fd: Not stopping function as it was not running
+17:28:25,473 INFO Experiment.PerfCost-1ae1: Processed 0 warm-up samples, ignoring these results.
+17:28:30,474 INFO Cvm.CvmFunction-05fd: Stopping function
+17:28:31,487 INFO Cvm.CvmFunction-05fd: Function stopped succesfully
+17:28:45,326 INFO Experiment.PerfCost-1ae1: Processed 1 samples out of 5, 0 errors
+17:28:50,326 INFO Cvm.CvmFunction-05fd: Stopping function
+17:28:51,339 INFO Cvm.CvmFunction-05fd: Function stopped succesfully
+17:29:05,215 INFO Experiment.PerfCost-1ae1: Processed 2 samples out of 5, 0 errors
+17:29:10,215 INFO Cvm.CvmFunction-05fd: Stopping function
+17:29:11,228 INFO Cvm.CvmFunction-05fd: Function stopped succesfully
+17:29:24,631 INFO Experiment.PerfCost-1ae1: Processed 3 samples out of 5, 0 errors
+17:29:29,632 INFO Cvm.CvmFunction-05fd: Stopping function
+17:29:30,644 INFO Cvm.CvmFunction-05fd: Function stopped succesfully
+17:29:44,427 INFO Experiment.PerfCost-1ae1: Processed 4 samples out of 5, 0 errors
+17:29:49,428 INFO Cvm.CvmFunction-05fd: Stopping function
+17:29:50,441 INFO Cvm.CvmFunction-05fd: Function stopped succesfully
+17:30:04,326 INFO Experiment.PerfCost-1ae1: Processed 5 samples out of 5, 0 errors
+17:30:09,327 INFO Experiment.PerfCost-1ae1: Mean 8756.0104 [ms], median 8837.248 [ms], std 180.64187904093524, CV 2.0630614947754657
+17:30:09,330 INFO Experiment.PerfCost-1ae1: Parametric CI (Student's t-distribution) 0.95 from 8505.23926957153 to 9006.781530428469, within 2.8639884944457057% of mean
+17:30:09,331 INFO Experiment.PerfCost-1ae1: Parametric CI (Student's t-distribution) 0.99 from 8340.16422557235 to 9171.85657442765, within 4.7492654237556655% of mean
+17:30:09,335 INFO Experiment.PerfCost-1ae1: Begin sequential experiments
+17:30:16,165 INFO Experiment.PerfCost-1ae1: Processed 0 warm-up samples, ignoring these results.
+17:30:27,51 INFO Experiment.PerfCost-1ae1: Processed 1 samples out of 5, 0 errors
+17:30:37,941 INFO Experiment.PerfCost-1ae1: Processed 2 samples out of 5, 0 errors
+17:30:48,826 INFO Experiment.PerfCost-1ae1: Processed 3 samples out of 5, 0 errors
+17:30:59,719 INFO Experiment.PerfCost-1ae1: Processed 4 samples out of 5, 0 errors
+17:31:10,599 INFO Experiment.PerfCost-1ae1: Processed 5 samples out of 5, 0 errors
+17:31:15,600 INFO Experiment.PerfCost-1ae1: Mean 885.4714 [ms], median 885.206 [ms], std 4.759032489908011, CV 0.5374575045459414
+17:31:15,602 INFO Experiment.PerfCost-1ae1: Parametric CI (Student's t-distribution) 0.95 from 878.8648037689588 to 892.0779962310412, within 0.7461106288741998% of mean
+17:31:15,603 INFO Experiment.PerfCost-1ae1: Parametric CI (Student's t-distribution) 0.99 from 874.5158814601565 to 896.4269185398435, within 1.2372526701419746% of mean
+17:31:15,607 INFO Cvm.CvmFunction-05fd: Stopping function
+17:31:16,616 INFO Cvm.CvmFunction-05fd: Function stopped succesfully

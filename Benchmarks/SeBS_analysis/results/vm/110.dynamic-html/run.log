@@ -1,0 +1,43 @@
+17:15:15,572 INFO SeBS-8ba6: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+17:15:15,600 INFO Cvm-709c: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:15:15,604 INFO Benchmark-c500: Building benchmark 110.dynamic-html. Reason: no cached code package.
+17:15:15,629 INFO Benchmark-c500: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+17:15:15,629 INFO Benchmark-c500: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/110.dynamic-html_code/python/3.11
+17:15:19,599 INFO Cvm-709c: Function size 0.000005 MB
+17:15:19,600 INFO Benchmark-c500: Created code package (source hash: f99e8b95bd47e7b0c44ea38d3ab23905), for run on cvm with python:3.11
+17:15:19,638 INFO Cvm-709c: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+17:15:19,647 INFO minio.Minio-3373: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:15:19,648 INFO Experiment.PerfCost-0dcb: Begin experiment
+17:15:19,649 INFO Experiment.PerfCost-0dcb: Begin cold experiments
+17:15:19,651 INFO Cvm.CvmFunction-9f27: Not stopping function as it was not running
+17:15:33,1 INFO Experiment.PerfCost-0dcb: Processed 0 warm-up samples, ignoring these results.
+17:15:38,2 INFO Cvm.CvmFunction-9f27: Stopping function
+17:15:39,15 INFO Cvm.CvmFunction-9f27: Function stopped succesfully
+17:15:52,525 INFO Experiment.PerfCost-0dcb: Processed 1 samples out of 5, 0 errors
+17:15:57,526 INFO Cvm.CvmFunction-9f27: Stopping function
+17:15:58,537 INFO Cvm.CvmFunction-9f27: Function stopped succesfully
+17:16:11,24 INFO Experiment.PerfCost-0dcb: Processed 2 samples out of 5, 0 errors
+17:16:16,25 INFO Cvm.CvmFunction-9f27: Stopping function
+17:16:17,37 INFO Cvm.CvmFunction-9f27: Function stopped succesfully
+17:16:29,966 INFO Experiment.PerfCost-0dcb: Processed 3 samples out of 5, 0 errors
+17:16:34,966 INFO Cvm.CvmFunction-9f27: Stopping function
+17:16:35,979 INFO Cvm.CvmFunction-9f27: Function stopped succesfully
+17:16:48,750 INFO Experiment.PerfCost-0dcb: Processed 4 samples out of 5, 0 errors
+17:16:53,751 INFO Cvm.CvmFunction-9f27: Stopping function
+17:16:54,763 INFO Cvm.CvmFunction-9f27: Function stopped succesfully
+17:17:07,684 INFO Experiment.PerfCost-0dcb: Processed 5 samples out of 5, 0 errors
+17:17:12,685 INFO Experiment.PerfCost-0dcb: Mean 7922.222199999999 [ms], median 7919.65 [ms], std 334.1423863920289, CV 4.217786095320944
+17:17:12,687 INFO Experiment.PerfCost-0dcb: Parametric CI (Student's t-distribution) 0.95 from 7458.3582034313695 to 8386.086196568629, within 5.855225779562581% of mean
+17:17:12,689 INFO Experiment.PerfCost-0dcb: Parametric CI (Student's t-distribution) 0.99 from 7153.010576244895 to 8691.433823755104, within 9.709543665098217% of mean
+17:17:12,695 INFO Experiment.PerfCost-0dcb: Begin sequential experiments
+17:17:17,726 INFO Experiment.PerfCost-0dcb: Processed 0 warm-up samples, ignoring these results.
+17:17:27,742 INFO Experiment.PerfCost-0dcb: Processed 1 samples out of 5, 0 errors
+17:17:37,758 INFO Experiment.PerfCost-0dcb: Processed 2 samples out of 5, 0 errors
+17:17:47,773 INFO Experiment.PerfCost-0dcb: Processed 3 samples out of 5, 0 errors
+17:17:57,788 INFO Experiment.PerfCost-0dcb: Processed 4 samples out of 5, 0 errors
+17:18:07,804 INFO Experiment.PerfCost-0dcb: Processed 5 samples out of 5, 0 errors
+17:18:12,805 INFO Experiment.PerfCost-0dcb: Mean 14.199599999999998 [ms], median 14.336 [ms], std 0.3700435650028251, CV 2.606014007456725
+17:18:12,807 INFO Experiment.PerfCost-0dcb: Parametric CI (Student's t-distribution) 0.95 from 13.68589717761898 to 14.713302822381017, within 3.617727417540063% of mean
+17:18:12,808 INFO Experiment.PerfCost-0dcb: Parametric CI (Student's t-distribution) 0.99 from 13.347742160085017 to 15.05145783991498, within 5.999167863284748% of mean
+17:18:12,814 INFO Cvm.CvmFunction-9f27: Stopping function
+17:18:13,826 INFO Cvm.CvmFunction-9f27: Function stopped succesfully

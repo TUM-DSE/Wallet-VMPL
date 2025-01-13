@@ -1,0 +1,4 @@
+16:40:02,837 INFO SeBS-a650: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+16:40:02,864 INFO Native-86c0: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:40:02,865 INFO Experiment.PerfCost-f1ee: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/sequential_results.json
+16:40:02,867 INFO Experiment.PerfCost-f1ee: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/cold_results.json

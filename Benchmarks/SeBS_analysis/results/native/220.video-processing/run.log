@@ -1,0 +1,43 @@
+15:01:22,385 INFO SeBS-fe7f: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing
+15:01:22,411 INFO Native-fa73: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+15:01:22,416 INFO Benchmark-4929: Building benchmark 220.video-processing. Reason: no cached code package.
+15:01:30,155 INFO Benchmark-4929: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+15:01:30,156 INFO Benchmark-4929: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/220.video-processing_code/python/3.11
+15:01:36,463 INFO Native-fa73: Function size 0.000005 MB
+15:01:36,464 INFO Benchmark-4929: Created code package (source hash: 6b3dea16eaa90e3f559d3d100169bec7), for run on native with python:3.11
+15:01:36,886 INFO Native-fa73: Creating new function! Reason: function 220.video-processing-python-3.11 not found in cache.
+15:01:36,895 INFO minio.Minio-ba10: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+15:01:36,976 INFO Experiment.PerfCost-c62b: Begin experiment
+15:01:36,976 INFO Experiment.PerfCost-c62b: Begin cold experiments
+15:01:36,979 INFO Native.NativeFunction-240b: Not stopping function as it was not running
+15:01:42,875 INFO Experiment.PerfCost-c62b: Processed 0 warm-up samples, ignoring these results.
+15:01:47,875 INFO Native.NativeFunction-240b: Stopping function
+15:01:47,876 INFO Native.NativeFunction-240b: Function stopped succesfully
+15:01:53,745 INFO Experiment.PerfCost-c62b: Processed 1 samples out of 5, 0 errors
+15:01:58,746 INFO Native.NativeFunction-240b: Stopping function
+15:01:58,746 INFO Native.NativeFunction-240b: Function stopped succesfully
+15:02:04,619 INFO Experiment.PerfCost-c62b: Processed 2 samples out of 5, 0 errors
+15:02:09,620 INFO Native.NativeFunction-240b: Stopping function
+15:02:09,620 INFO Native.NativeFunction-240b: Function stopped succesfully
+15:02:15,463 INFO Experiment.PerfCost-c62b: Processed 3 samples out of 5, 0 errors
+15:02:20,464 INFO Native.NativeFunction-240b: Stopping function
+15:02:20,464 INFO Native.NativeFunction-240b: Function stopped succesfully
+15:02:26,317 INFO Experiment.PerfCost-c62b: Processed 4 samples out of 5, 0 errors
+15:02:31,318 INFO Native.NativeFunction-240b: Stopping function
+15:02:31,318 INFO Native.NativeFunction-240b: Function stopped succesfully
+15:02:37,181 INFO Experiment.PerfCost-c62b: Processed 5 samples out of 5, 0 errors
+15:02:42,182 INFO Experiment.PerfCost-c62b: Mean 859.1142 [ms], median 861.548 [ms], std 10.926939194486275, CV 1.2718843658370769
+15:02:42,184 INFO Experiment.PerfCost-c62b: Parametric CI (Student's t-distribution) 0.95 from 843.9451765793373 to 874.2832234206627, within 1.7656585609529805% of mean
+15:02:42,185 INFO Experiment.PerfCost-c62b: Parametric CI (Student's t-distribution) 0.99 from 833.9598676471962 to 884.2685323528037, within 2.927938142892266% of mean
+15:02:42,189 INFO Experiment.PerfCost-c62b: Begin sequential experiments
+15:02:48,288 INFO Experiment.PerfCost-c62b: Processed 0 warm-up samples, ignoring these results.
+15:02:58,838 INFO Experiment.PerfCost-c62b: Processed 1 samples out of 5, 0 errors
+15:03:09,380 INFO Experiment.PerfCost-c62b: Processed 2 samples out of 5, 0 errors
+15:03:19,931 INFO Experiment.PerfCost-c62b: Processed 3 samples out of 5, 0 errors
+15:03:30,486 INFO Experiment.PerfCost-c62b: Processed 4 samples out of 5, 0 errors
+15:03:41,48 INFO Experiment.PerfCost-c62b: Processed 5 samples out of 5, 0 errors
+15:03:46,49 INFO Experiment.PerfCost-c62b: Mean 550.4982 [ms], median 549.564 [ms], std 6.4856522694328795, CV 1.1781423207983022
+15:03:46,51 INFO Experiment.PerfCost-c62b: Parametric CI (Student's t-distribution) 0.95 from 541.4946712512591 to 559.5017287487409, within 1.635523739903401% of mean
+15:03:46,52 INFO Experiment.PerfCost-c62b: Parametric CI (Student's t-distribution) 0.99 from 535.5679208242586 to 565.4284791757414, within 2.7121395084927364% of mean
+15:03:46,56 INFO Native.NativeFunction-240b: Stopping function
+15:03:46,56 INFO Native.NativeFunction-240b: Function stopped succesfully

@@ -1,0 +1,43 @@
+14:56:48,818 INFO SeBS-98fc: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+14:56:48,848 INFO Native-117e: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+14:56:48,852 INFO Benchmark-c88a: Building benchmark 120.uploader. Reason: no cached code package.
+14:56:48,858 INFO Benchmark-c88a: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+14:56:48,858 INFO Benchmark-c88a: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/120.uploader_code/python/3.11
+14:56:55,138 INFO Native-117e: Function size 0.000005 MB
+14:56:55,139 INFO Benchmark-c88a: Created code package (source hash: f9140d3d2939d0a3322b511ec84c3215), for run on native with python:3.11
+14:56:55,436 INFO Native-117e: Creating new function! Reason: function 120.uploader-python-3.11 not found in cache.
+14:56:55,447 INFO minio.Minio-87d6: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+14:56:55,448 INFO Experiment.PerfCost-ad5b: Begin experiment
+14:56:55,448 INFO Experiment.PerfCost-ad5b: Begin cold experiments
+14:56:55,451 INFO Native.NativeFunction-adc6: Not stopping function as it was not running
+14:57:01,595 INFO Experiment.PerfCost-ad5b: Processed 0 warm-up samples, ignoring these results.
+14:57:06,595 INFO Native.NativeFunction-adc6: Stopping function
+14:57:06,596 INFO Native.NativeFunction-adc6: Function stopped succesfully
+14:57:12,533 INFO Experiment.PerfCost-ad5b: Processed 1 samples out of 5, 0 errors
+14:57:17,533 INFO Native.NativeFunction-adc6: Stopping function
+14:57:17,534 INFO Native.NativeFunction-adc6: Function stopped succesfully
+14:57:23,393 INFO Experiment.PerfCost-ad5b: Processed 2 samples out of 5, 0 errors
+14:57:28,393 INFO Native.NativeFunction-adc6: Stopping function
+14:57:28,394 INFO Native.NativeFunction-adc6: Function stopped succesfully
+14:57:34,269 INFO Experiment.PerfCost-ad5b: Processed 3 samples out of 5, 0 errors
+14:57:39,269 INFO Native.NativeFunction-adc6: Stopping function
+14:57:39,269 INFO Native.NativeFunction-adc6: Function stopped succesfully
+14:57:45,146 INFO Experiment.PerfCost-ad5b: Processed 4 samples out of 5, 0 errors
+14:57:50,147 INFO Native.NativeFunction-adc6: Stopping function
+14:57:50,147 INFO Native.NativeFunction-adc6: Function stopped succesfully
+14:57:56,9 INFO Experiment.PerfCost-ad5b: Processed 5 samples out of 5, 0 errors
+14:58:01,10 INFO Experiment.PerfCost-ad5b: Mean 880.6438 [ms], median 873.742 [ms], std 28.358259688492883, CV 3.220173660280454
+14:58:01,12 INFO Experiment.PerfCost-ad5b: Parametric CI (Student's t-distribution) 0.95 from 841.276224347978 to 920.0113756520221, within 4.470317698486276% of mean
+14:58:01,14 INFO Experiment.PerfCost-ad5b: Parametric CI (Student's t-distribution) 0.99 from 815.3617410029649 to 945.9258589970352, within 7.412992517182902% of mean
+14:58:01,17 INFO Experiment.PerfCost-ad5b: Begin sequential experiments
+14:58:07,143 INFO Experiment.PerfCost-ad5b: Processed 0 warm-up samples, ignoring these results.
+14:58:17,711 INFO Experiment.PerfCost-ad5b: Processed 1 samples out of 5, 0 errors
+14:58:28,252 INFO Experiment.PerfCost-ad5b: Processed 2 samples out of 5, 0 errors
+14:58:38,848 INFO Experiment.PerfCost-ad5b: Processed 3 samples out of 5, 0 errors
+14:58:49,423 INFO Experiment.PerfCost-ad5b: Processed 4 samples out of 5, 0 errors
+14:58:59,978 INFO Experiment.PerfCost-ad5b: Processed 5 samples out of 5, 0 errors
+14:59:04,979 INFO Experiment.PerfCost-ad5b: Mean 565.6782 [ms], median 566.784 [ms], std 18.88589495258302, CV 3.338628738491782
+14:59:04,981 INFO Experiment.PerfCost-ad5b: Parametric CI (Student's t-distribution) 0.95 from 539.4603747008105 to 591.8960252991894, within 4.634759709529108% of mean
+14:59:04,982 INFO Experiment.PerfCost-ad5b: Parametric CI (Student's t-distribution) 0.99 from 522.2019739533565 to 609.1544260466434, within 7.685681726225871% of mean
+14:59:04,986 INFO Native.NativeFunction-adc6: Stopping function
+14:59:04,986 INFO Native.NativeFunction-adc6: Function stopped succesfully

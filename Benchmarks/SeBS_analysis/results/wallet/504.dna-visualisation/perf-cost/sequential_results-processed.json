@@ -1,0 +1,68 @@
+{
+  "_invocations": {
+    "504.dna-visualisation-python-3.11": {
+      "bb90aecf-76d1-4535-a5d1-c07fce24d142": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736374907.328311",
+          "end": "1736374952.183752",
+          "is_cold": false,
+          "request_id": "bb90aecf-76d1-4535-a5d1-c07fce24d142",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "bb90aecf-76d1-4535-a5d1-c07fce24d142",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 44855441,
+          "client": 44862986,
+          "client_begin": "2025-01-08 22:21:47.323395",
+          "client_end": "2025-01-08 22:22:32.186381",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "504.dna-visualisation-python-3.11": {}
+  },
+  "begin_time": 1736374792.06448,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736374957.191242,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 1
+  }
+}

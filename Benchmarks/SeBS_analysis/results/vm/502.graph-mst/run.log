@@ -1,0 +1,43 @@
+16:55:56,652 INFO SeBS-1496: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+16:55:56,679 INFO Cvm-df15: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+16:55:56,685 INFO Benchmark-6d43: Building benchmark 502.graph-mst. Reason: no cached code package.
+16:55:56,693 INFO Benchmark-6d43: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+16:55:56,694 INFO Benchmark-6d43: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/502.graph-mst_code/python/3.11
+16:56:00,880 INFO Cvm-df15: Function size 0.000005 MB
+16:56:00,882 INFO Benchmark-6d43: Created code package (source hash: d698e3c3aa2553bb644b000e483d4fca), for run on cvm with python:3.11
+16:56:00,962 INFO Cvm-df15: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+16:56:00,972 INFO minio.Minio-acc8: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+16:56:00,973 INFO Experiment.PerfCost-9420: Begin experiment
+16:56:00,973 INFO Experiment.PerfCost-9420: Begin cold experiments
+16:56:00,976 INFO Cvm.CvmFunction-9611: Not stopping function as it was not running
+16:56:15,6 INFO Experiment.PerfCost-9420: Processed 0 warm-up samples, ignoring these results.
+16:56:20,7 INFO Cvm.CvmFunction-9611: Stopping function
+16:56:21,19 INFO Cvm.CvmFunction-9611: Function stopped succesfully
+16:56:34,134 INFO Experiment.PerfCost-9420: Processed 1 samples out of 5, 0 errors
+16:56:39,134 INFO Cvm.CvmFunction-9611: Stopping function
+16:56:40,147 INFO Cvm.CvmFunction-9611: Function stopped succesfully
+16:56:53,371 INFO Experiment.PerfCost-9420: Processed 2 samples out of 5, 0 errors
+16:56:58,372 INFO Cvm.CvmFunction-9611: Stopping function
+16:56:59,384 INFO Cvm.CvmFunction-9611: Function stopped succesfully
+16:57:13,1 INFO Experiment.PerfCost-9420: Processed 3 samples out of 5, 0 errors
+16:57:18,2 INFO Cvm.CvmFunction-9611: Stopping function
+16:57:19,14 INFO Cvm.CvmFunction-9611: Function stopped succesfully
+16:57:32,90 INFO Experiment.PerfCost-9420: Processed 4 samples out of 5, 0 errors
+16:57:37,91 INFO Cvm.CvmFunction-9611: Stopping function
+16:57:38,103 INFO Cvm.CvmFunction-9611: Function stopped succesfully
+16:57:51,573 INFO Experiment.PerfCost-9420: Processed 5 samples out of 5, 0 errors
+16:57:56,574 INFO Experiment.PerfCost-9420: Mean 8298.8056 [ms], median 8223.181 [ms], std 209.37981066148646, CV 2.5230113916813095
+16:57:56,576 INFO Experiment.PerfCost-9420: Parametric CI (Student's t-distribution) 0.95 from 8008.1398247808365 to 8589.471375219162, within 3.502501314395926% of mean
+16:57:56,577 INFO Experiment.PerfCost-9420: Parametric CI (Student's t-distribution) 0.99 from 7816.803343777709 to 8780.80785622229, within 5.808091904481902% of mean
+16:57:56,581 INFO Experiment.PerfCost-9420: Begin sequential experiments
+16:58:01,694 INFO Experiment.PerfCost-9420: Processed 0 warm-up samples, ignoring these results.
+16:58:11,750 INFO Experiment.PerfCost-9420: Processed 1 samples out of 5, 0 errors
+16:58:21,806 INFO Experiment.PerfCost-9420: Processed 2 samples out of 5, 0 errors
+16:58:31,862 INFO Experiment.PerfCost-9420: Processed 3 samples out of 5, 0 errors
+16:58:41,918 INFO Experiment.PerfCost-9420: Processed 4 samples out of 5, 0 errors
+16:58:51,974 INFO Experiment.PerfCost-9420: Processed 5 samples out of 5, 0 errors
+16:58:56,974 INFO Experiment.PerfCost-9420: Mean 54.741600000000005 [ms], median 54.661 [ms], std 0.3476323345144973, CV 0.6350423343754974
+16:58:56,976 INFO Experiment.PerfCost-9420: Parametric CI (Student's t-distribution) 0.95 from 54.259008953214376 to 55.224191046785634, within 0.8815800904351149% of mean
+16:58:56,978 INFO Experiment.PerfCost-9420: Parametric CI (Student's t-distribution) 0.99 from 53.94133387576174 to 55.54186612423827, within 1.4618975774150973% of mean
+16:58:56,981 INFO Cvm.CvmFunction-9611: Stopping function
+16:58:57,993 INFO Cvm.CvmFunction-9611: Function stopped succesfully

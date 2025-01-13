@@ -1,0 +1,41 @@
+20:54:52,994 INFO SeBS-5d16: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+20:54:53,23 INFO Gramine-5706: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+20:54:53,27 INFO Benchmark-8af3: Building benchmark 311.compression. Reason: no cached code package.
+20:54:53,34 INFO Gramine-5706: Function size 0.000003 MB
+20:54:53,35 INFO Benchmark-8af3: Created code package (source hash: 4e8d7a494ddddb1c60db65fc96591f43), for run on gramine with python:3.10
+20:54:53,39 INFO Gramine-5706: Creating new function! Reason: function 311.compression-python-3.10 not found in cache.
+20:54:53,45 INFO minio.Minio-df23: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+20:54:53,292 INFO Experiment.PerfCost-01ab: Begin experiment
+20:54:53,292 INFO Experiment.PerfCost-01ab: Begin cold experiments
+20:54:53,298 INFO Gramine.GramineFunction-d10f: Not stopping function as it was not running
+20:55:00,969 INFO Experiment.PerfCost-01ab: Processed 0 warm-up samples, ignoring these results.
+20:55:05,969 INFO Gramine.GramineFunction-d10f: Stopping function
+20:55:06,296 INFO Gramine.GramineFunction-d10f: Function stopped succesfully
+20:55:13,979 INFO Experiment.PerfCost-01ab: Processed 1 samples out of 5, 0 errors
+20:55:18,980 INFO Gramine.GramineFunction-d10f: Stopping function
+20:55:19,350 INFO Gramine.GramineFunction-d10f: Function stopped succesfully
+20:55:27,40 INFO Experiment.PerfCost-01ab: Processed 2 samples out of 5, 0 errors
+20:55:32,40 INFO Gramine.GramineFunction-d10f: Stopping function
+20:55:32,404 INFO Gramine.GramineFunction-d10f: Function stopped succesfully
+20:55:40,100 INFO Experiment.PerfCost-01ab: Processed 3 samples out of 5, 0 errors
+20:55:45,100 INFO Gramine.GramineFunction-d10f: Stopping function
+20:55:45,475 INFO Gramine.GramineFunction-d10f: Function stopped succesfully
+20:55:53,151 INFO Experiment.PerfCost-01ab: Processed 4 samples out of 5, 0 errors
+20:55:58,152 INFO Gramine.GramineFunction-d10f: Stopping function
+20:55:58,512 INFO Gramine.GramineFunction-d10f: Function stopped succesfully
+20:56:06,214 INFO Experiment.PerfCost-01ab: Processed 5 samples out of 5, 0 errors
+20:56:11,215 INFO Experiment.PerfCost-01ab: Mean 2687.9466 [ms], median 2688.16 [ms], std 8.92888001039327, CV 0.3321821947799584
+20:56:11,217 INFO Experiment.PerfCost-01ab: Parametric CI (Student's t-distribution) 0.95 from 2675.551327400123 to 2700.3418725998777, within 0.46114281436533905% of mean
+20:56:11,218 INFO Experiment.PerfCost-01ab: Parametric CI (Student's t-distribution) 0.99 from 2667.39189466833 to 2708.50130533167, within 0.7646991696810491% of mean
+20:56:11,222 INFO Experiment.PerfCost-01ab: Begin sequential experiments
+20:56:17,823 INFO Experiment.PerfCost-01ab: Processed 0 warm-up samples, ignoring these results.
+20:56:28,617 INFO Experiment.PerfCost-01ab: Processed 1 samples out of 5, 0 errors
+20:56:39,408 INFO Experiment.PerfCost-01ab: Processed 2 samples out of 5, 0 errors
+20:56:50,196 INFO Experiment.PerfCost-01ab: Processed 3 samples out of 5, 0 errors
+20:57:00,967 INFO Experiment.PerfCost-01ab: Processed 4 samples out of 5, 0 errors
+20:57:11,746 INFO Experiment.PerfCost-01ab: Processed 5 samples out of 5, 0 errors
+20:57:16,747 INFO Experiment.PerfCost-01ab: Mean 783.2872000000001 [ms], median 786.638 [ms], std 8.296356559357832, CV 1.0591717264571452
+20:57:16,749 INFO Experiment.PerfCost-01ab: Parametric CI (Student's t-distribution) 0.95 from 771.7700107198978 to 794.8043892801024, within 1.4703660777429202% of mean
+20:57:16,751 INFO Experiment.PerfCost-01ab: Parametric CI (Student's t-distribution) 0.99 from 764.1885936568116 to 802.3858063431886, within 2.4382635568650324% of mean
+20:57:16,754 INFO Gramine.GramineFunction-d10f: Stopping function
+20:57:17,187 INFO Gramine.GramineFunction-d10f: Function stopped succesfully

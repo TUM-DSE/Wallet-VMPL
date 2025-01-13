@@ -1,0 +1,100 @@
+{
+  "_invocations": {
+    "502.graph-mst-python-3.11": {
+      "1aaf0ce2-9ef9-419a-9a3c-971c4ff2e1e6": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736377176.658436",
+          "end": "1736377182.302206",
+          "is_cold": false,
+          "request_id": "1aaf0ce2-9ef9-419a-9a3c-971c4ff2e1e6",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "1aaf0ce2-9ef9-419a-9a3c-971c4ff2e1e6",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 5643770,
+          "client": 24130890,
+          "client_begin": "2025-01-08 22:59:18.173047",
+          "client_end": "2025-01-08 22:59:42.303937",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "2f1323db-c5c5-420e-a650-6b93db0a25fa": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736377143.638609",
+          "end": "1736377148.151017",
+          "is_cold": false,
+          "request_id": "2f1323db-c5c5-420e-a650-6b93db0a25fa",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "2f1323db-c5c5-420e-a650-6b93db0a25fa",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 4512408,
+          "client": 21396475,
+          "client_begin": "2025-01-08 22:58:46.756047",
+          "client_end": "2025-01-08 22:59:08.152522",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "502.graph-mst-python-3.11": {}
+  },
+  "begin_time": 1736377121.748017,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736377187.311995,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 2,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

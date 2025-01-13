@@ -1,0 +1,43 @@
+16:28:31,535 INFO SeBS-ffb4: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank
+16:28:31,563 INFO Native-1d10: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:28:31,569 INFO Benchmark-8af4: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+16:28:31,578 INFO Benchmark-8af4: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+16:28:31,578 INFO Benchmark-8af4: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank/501.graph-pagerank_code/python/3.11
+16:28:38,734 INFO Native-1d10: Function size 0.000005 MB
+16:28:38,736 INFO Benchmark-8af4: Created code package (source hash: 250a18b2d40ec8d883cfbde635561e62), for run on native with python:3.11
+16:28:39,92 INFO Native-1d10: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+16:28:39,101 INFO minio.Minio-051e: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+16:28:39,101 INFO Experiment.PerfCost-0bf9: Begin experiment
+16:28:39,102 INFO Experiment.PerfCost-0bf9: Begin cold experiments
+16:28:39,105 INFO Native.NativeFunction-7a28: Not stopping function as it was not running
+16:28:45,151 INFO Experiment.PerfCost-0bf9: Processed 0 warm-up samples, ignoring these results.
+16:28:50,151 INFO Native.NativeFunction-7a28: Stopping function
+16:28:50,152 INFO Native.NativeFunction-7a28: Function stopped succesfully
+16:28:56,148 INFO Experiment.PerfCost-0bf9: Processed 1 samples out of 5, 0 errors
+16:29:01,148 INFO Native.NativeFunction-7a28: Stopping function
+16:29:01,148 INFO Native.NativeFunction-7a28: Function stopped succesfully
+16:29:07,161 INFO Experiment.PerfCost-0bf9: Processed 2 samples out of 5, 0 errors
+16:29:12,161 INFO Native.NativeFunction-7a28: Stopping function
+16:29:12,162 INFO Native.NativeFunction-7a28: Function stopped succesfully
+16:29:18,184 INFO Experiment.PerfCost-0bf9: Processed 3 samples out of 5, 0 errors
+16:29:23,184 INFO Native.NativeFunction-7a28: Stopping function
+16:29:23,185 INFO Native.NativeFunction-7a28: Function stopped succesfully
+16:29:29,191 INFO Experiment.PerfCost-0bf9: Processed 4 samples out of 5, 0 errors
+16:29:34,191 INFO Native.NativeFunction-7a28: Stopping function
+16:29:34,192 INFO Native.NativeFunction-7a28: Function stopped succesfully
+16:29:40,208 INFO Experiment.PerfCost-0bf9: Processed 5 samples out of 5, 0 errors
+16:29:45,209 INFO Experiment.PerfCost-0bf9: Mean 1009.527 [ms], median 1011.003 [ms], std 9.002356247116658, CV 0.8917400175643304
+16:29:45,211 INFO Experiment.PerfCost-0bf9: Parametric CI (Student's t-distribution) 0.95 from 997.0297260312232 to 1022.0242739687769, within 1.2379336034377366% of mean
+16:29:45,213 INFO Experiment.PerfCost-0bf9: Parametric CI (Student's t-distribution) 0.99 from 988.8031488859957 to 1030.2508511140043, within 2.052827820752122% of mean
+16:29:45,216 INFO Experiment.PerfCost-0bf9: Begin sequential experiments
+16:29:50,424 INFO Experiment.PerfCost-0bf9: Processed 0 warm-up samples, ignoring these results.
+16:30:00,532 INFO Experiment.PerfCost-0bf9: Processed 1 samples out of 5, 0 errors
+16:30:10,640 INFO Experiment.PerfCost-0bf9: Processed 2 samples out of 5, 0 errors
+16:30:20,749 INFO Experiment.PerfCost-0bf9: Processed 3 samples out of 5, 0 errors
+16:30:30,852 INFO Experiment.PerfCost-0bf9: Processed 4 samples out of 5, 0 errors
+16:30:40,954 INFO Experiment.PerfCost-0bf9: Processed 5 samples out of 5, 0 errors
+16:30:45,954 INFO Experiment.PerfCost-0bf9: Mean 104.28779999999999 [ms], median 106.199 [ms], std 2.8506105591609647, CV 2.733407511867126
+16:30:45,956 INFO Experiment.PerfCost-0bf9: Parametric CI (Student's t-distribution) 0.95 from 100.33051813309618 to 108.2450818669038, within 3.794577953417191% of mean
+16:30:45,958 INFO Experiment.PerfCost-0bf9: Parametric CI (Student's t-distribution) 0.99 from 97.7255592720815 to 110.85004072791848, within 6.292433753438555% of mean
+16:30:45,961 INFO Native.NativeFunction-7a28: Stopping function
+16:30:45,961 INFO Native.NativeFunction-7a28: Function stopped succesfully

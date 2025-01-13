@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "518b81d5-bf1f-4bf0-b59b-399107692301": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521263.903127",
+          "end": "1736521263.951074",
+          "is_cold": false,
+          "request_id": "518b81d5-bf1f-4bf0-b59b-399107692301",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 37483.0,
+                "download_size": 1433478,
+                "download_time": 4558.0,
+                "upload_size": 3363,
+                "upload_time": 5771.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.3d1839c7.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "518b81d5-bf1f-4bf0-b59b-399107692301",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 47947,
+          "client": 54329,
+          "client_begin": "2025-01-10 15:01:03.898065",
+          "client_end": "2025-01-10 15:01:03.952394",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "7dea8f55-a58f-4cc1-8df6-ae641165d110": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521273.958728",
+          "end": "1736521274.011954",
+          "is_cold": false,
+          "request_id": "7dea8f55-a58f-4cc1-8df6-ae641165d110",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 39896.0,
+                "download_size": 1433478,
+                "download_time": 9320.0,
+                "upload_size": 3363,
+                "upload_time": 3854.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.bd98eca0.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "7dea8f55-a58f-4cc1-8df6-ae641165d110",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 53226,
+          "client": 59529,
+          "client_begin": "2025-01-10 15:01:13.953895",
+          "client_end": "2025-01-10 15:01:14.013424",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "8f0db02d-4424-4736-b006-327850209d7b": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521243.790779",
+          "end": "1736521243.838988",
+          "is_cold": false,
+          "request_id": "8f0db02d-4424-4736-b006-327850209d7b",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 39941.0,
+                "download_size": 1433478,
+                "download_time": 4536.0,
+                "upload_size": 3363,
+                "upload_time": 3593.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.204e0441.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "8f0db02d-4424-4736-b006-327850209d7b",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 48209,
+          "client": 54587,
+          "client_begin": "2025-01-10 15:00:43.785853",
+          "client_end": "2025-01-10 15:00:43.840440",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "c87da5d1-06e9-4a8f-a3d3-41c17801034d": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521233.734401",
+          "end": "1736521233.783164",
+          "is_cold": false,
+          "request_id": "c87da5d1-06e9-4a8f-a3d3-41c17801034d",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 39530.0,
+                "download_size": 1433478,
+                "download_time": 4861.0,
+                "upload_size": 3363,
+                "upload_time": 4231.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.35285805.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "c87da5d1-06e9-4a8f-a3d3-41c17801034d",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 48763,
+          "client": 55236,
+          "client_begin": "2025-01-10 15:00:33.729206",
+          "client_end": "2025-01-10 15:00:33.784442",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "ddd56b86-2e55-4581-89a2-bff4daaa9a5e": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521253.847170",
+          "end": "1736521253.895226",
+          "is_cold": false,
+          "request_id": "ddd56b86-2e55-4581-89a2-bff4daaa9a5e",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 39738.0,
+                "download_size": 1433478,
+                "download_time": 4637.0,
+                "upload_size": 3363,
+                "upload_time": 3544.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.3ce236fb.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "ddd56b86-2e55-4581-89a2-bff4daaa9a5e",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 48056,
+          "client": 54806,
+          "client_begin": "2025-01-10 15:00:53.841779",
+          "client_end": "2025-01-10 15:00:53.896585",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736521218.618244,
+  "config": {
+    "deployment": {
+      "name": "native"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "210.thumbnailer",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736521279.014443,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

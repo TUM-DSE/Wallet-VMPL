@@ -1,0 +1,43 @@
+16:52:51,706 INFO SeBS-1f12: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank
+16:52:51,733 INFO Cvm-3fa5: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+16:52:51,739 INFO Benchmark-a25c: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+16:52:51,747 INFO Benchmark-a25c: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+16:52:51,747 INFO Benchmark-a25c: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank/501.graph-pagerank_code/python/3.11
+16:52:55,969 INFO Cvm-3fa5: Function size 0.000005 MB
+16:52:55,971 INFO Benchmark-a25c: Created code package (source hash: 250a18b2d40ec8d883cfbde635561e62), for run on cvm with python:3.11
+16:52:56,48 INFO Cvm-3fa5: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+16:52:56,58 INFO minio.Minio-7f2c: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+16:52:56,59 INFO Experiment.PerfCost-bcf3: Begin experiment
+16:52:56,59 INFO Experiment.PerfCost-bcf3: Begin cold experiments
+16:52:56,62 INFO Cvm.CvmFunction-dd4a: Not stopping function as it was not running
+16:53:09,184 INFO Experiment.PerfCost-bcf3: Processed 0 warm-up samples, ignoring these results.
+16:53:14,184 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:53:15,197 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
+16:53:28,502 INFO Experiment.PerfCost-bcf3: Processed 1 samples out of 5, 0 errors
+16:53:33,503 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:53:34,516 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
+16:53:47,955 INFO Experiment.PerfCost-bcf3: Processed 2 samples out of 5, 0 errors
+16:53:52,956 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:53:53,969 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
+16:54:07,382 INFO Experiment.PerfCost-bcf3: Processed 3 samples out of 5, 0 errors
+16:54:12,382 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:54:13,395 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
+16:54:26,845 INFO Experiment.PerfCost-bcf3: Processed 4 samples out of 5, 0 errors
+16:54:31,845 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:54:32,858 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
+16:54:46,399 INFO Experiment.PerfCost-bcf3: Processed 5 samples out of 5, 0 errors
+16:54:51,400 INFO Experiment.PerfCost-bcf3: Mean 8428.2082 [ms], median 8438.237 [ms], std 76.11612822365566, CV 0.9031116272573294
+16:54:51,403 INFO Experiment.PerfCost-bcf3: Parametric CI (Student's t-distribution) 0.95 from 8322.542074183411 to 8533.874325816587, within 1.2537199284729077% of mean
+16:54:51,404 INFO Experiment.PerfCost-bcf3: Parametric CI (Student's t-distribution) 0.99 from 8252.985262206716 to 8603.431137793283, within 2.0790058056857634% of mean
+16:54:51,407 INFO Experiment.PerfCost-bcf3: Begin sequential experiments
+16:54:56,630 INFO Experiment.PerfCost-bcf3: Processed 0 warm-up samples, ignoring these results.
+16:55:06,741 INFO Experiment.PerfCost-bcf3: Processed 1 samples out of 5, 0 errors
+16:55:16,851 INFO Experiment.PerfCost-bcf3: Processed 2 samples out of 5, 0 errors
+16:55:26,962 INFO Experiment.PerfCost-bcf3: Processed 3 samples out of 5, 0 errors
+16:55:37,72 INFO Experiment.PerfCost-bcf3: Processed 4 samples out of 5, 0 errors
+16:55:47,181 INFO Experiment.PerfCost-bcf3: Processed 5 samples out of 5, 0 errors
+16:55:52,182 INFO Experiment.PerfCost-bcf3: Mean 109.1686 [ms], median 109.303 [ms], std 0.7458875518467891, CV 0.6832436724907978
+16:55:52,184 INFO Experiment.PerfCost-bcf3: Parametric CI (Student's t-distribution) 0.95 from 108.13314207882351 to 110.20405792117649, within 0.948494275072216% of mean
+16:55:52,186 INFO Experiment.PerfCost-bcf3: Parametric CI (Student's t-distribution) 0.99 from 107.45153147394461 to 110.88566852605538, within 1.5728593442211272% of mean
+16:55:52,189 INFO Cvm.CvmFunction-dd4a: Stopping function
+16:55:53,201 INFO Cvm.CvmFunction-dd4a: Function stopped succesfully
