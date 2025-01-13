@@ -266,6 +266,8 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     call.invokation.data = invoke_data;
     call.invokation.data_size = sizeof(struct trustlet_invokation);
 
+    static void *read_buffer = NULL;
+    static size_t read_buffer_size = 0;
 retry:
     void* return_buffer_address = NULL;
     int ret = ioctl(con, VMPL_WR, &call);
@@ -301,7 +303,7 @@ retry:
     } else if (ret == guestRequestRead) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         int fd = arg->read.fd;
-        void* read_buffer = &arg->read.buf[0];
+        char *buf = &arg->read.buf[0];
         int count = arg->read.count;
         if (count > sizeof(arg->read.buf)) {
             count = sizeof(arg->read.buf);
@@ -311,7 +313,6 @@ retry:
         if (arg->read.offset == (uint64_t)-1) {
             // dir read
             // XXX: code adopted from read_dir() of linux pal of gramine
-            char *buf = read_buffer;
             char dirbuf[1024];
             // gcc does not provide a wrapper for getdents64
             int size = syscall(SYS_getdents64, fd, dirbuf, sizeof(dirbuf));
@@ -356,11 +357,44 @@ skip:
             }
         } else {
             // file read
-            read_bytes = pread(fd, read_buffer, count, arg->read.offset);
+            read_bytes = pread(fd, buf, count, arg->read.offset);
         }
         arg->read.count = read_bytes;
         invoke_data->invokation_type = requestRead;
         debug_printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
+        goto retry;
+    } else if (ret == guestRequestRead2) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = arg->read2.fd;
+        uint64_t read_size = arg->read2.count;
+        if (!read_buffer) {
+            read_buffer = aligned_alloc(4096, read_size);
+            if (!read_buffer) {
+                debug_printf("Failed to allocate read buffer!\n");
+                goto exit;
+            }
+            read_buffer_size = read_size;
+        } else if (read_buffer_size < read_size) {
+            free(read_buffer);
+            read_buffer = aligned_alloc(4096, read_size);
+            if (!read_buffer) {
+                debug_printf("Failed to reallocate read buffer!\n");
+                goto exit;
+            }
+            read_buffer_size = read_size;
+        }
+        int read_bytes = pread(fd, read_buffer, read_size, arg->read2.offset);
+        arg->read2.ptr = (uint64_t)read_buffer;
+        arg->read2.bufsize = read_size;
+        arg->read2.count = read_bytes;
+        invoke_data->invokation_type = requestRead2;
+        debug_printf("Guest request: read2: ptr=%lx, fd=%d, offset=%ld, count=%lu\n", arg->read2.ptr, fd, arg->read2.offset, arg->read2.count);
+#if 0
+        for (int i = 0; i < 64; i++) {
+            debug_printf("%02x ", ((uint8_t*)read_buffer)[i]);
+        }
+        debug_printf("\n");
+#endif
         goto retry;
     } else if (ret == guestRequestMmap) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
@@ -379,6 +413,8 @@ skip:
 exit:
 
     free(mmap_read_buffer);
+    if (read_buffer)
+        free(read_buffer);
     return return_buffer_address;
 }
 
