@@ -171,6 +171,14 @@ simple_fs:
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
 	cd runtime/filesystem/simple/; ./create.sh
 
+simple_ipc_fs:
+	mkdir -p runtime/filesystem/simple/fs/lib/
+	rm -rf runtime/filesystem/simple/fs_out/
+	rm -rf runtime/filesystem/simple/fs/lib/*
+	make -B -C Benchmarks/IPC/wallet com
+	cp Benchmarks/IPC/wallet/com runtime/filesystem/simple/fs/lib/com
+	cd runtime/filesystem/simple/; ./create.sh
+
 python_fs:
 	mkdir -p runtime/filesystem/python/fs/lib
 	mkdir -p runtime/filesystem/python/fs/python
@@ -196,6 +204,7 @@ simple_python_fs:
 	rm -r runtime/pip
 	mv runtime/tmp_ runtime/pip
 
+
 boottime_setup:
 	make run > /dev/null &
 	sleep 20
@@ -211,6 +220,19 @@ boottime_setup_vm:
 	sleep 20
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup_vm"
 
+ipc_setup:
+	make simple_ipc_fs
+	make gramine
+	cp module/libsysdb.so Benchmarks/IPC/wallet/
+	cp module/libpal.so Benchmarks/IPC/wallet/
+
+IPC_ITERATIONS?=5
+IPC_SIZE?=64
+ssh_ipc:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
+
+ipc:
+	cd Benchmarks/IPC/wallet/; ./run.sh
 
 shutdown:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "shutdown now"
