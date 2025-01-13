@@ -17,7 +17,7 @@ sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsiz
 TITLE_FONTSIZE = 8
 TICKS_FONTSIZE = 7
 LEGEND_FONTSIZE = 6
-figwidth = 7  # 3.3 inch for single column, 7 inch for double column
+figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
 VARIANTS = ['gramine', 'native', 'vm', 'wallet']
 BENCHMARKS = [
@@ -66,10 +66,10 @@ def load_and_process_data():
                 cold_mask = df['type'] == 'cold'
                 hot_mask = df['type'] == 'sequential'
                 
-                cold_exec = df[cold_mask]['exec_time'].mean()
-                cold_client = df[cold_mask]['client_time'].mean()
-                hot_exec = df[hot_mask]['exec_time'].mean()
-                hot_client = df[hot_mask]['client_time'].mean()
+                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
+                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
+                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
+                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
                 
                 # Add both cold and hot data
                 data.append({
@@ -98,7 +98,7 @@ def create_plot(df, benchmarks, metric, output_dir):
     
     # Calculate bar positions
     n_variants = len(VARIANTS)
-    width = 0.15  # Width of each bar
+    width = 0.2  # Width of each bar
     variant_positions = np.arange(len(benchmarks))
     
     # Plot bars for each variant
@@ -120,13 +120,20 @@ def create_plot(df, benchmarks, metric, output_dir):
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xlabel('Benchmark', fontsize=TICKS_FONTSIZE)
     ax.set_xticks(variant_positions)
-    ax.set_xticklabels(benchmarks, rotation=0, fontsize=TICKS_FONTSIZE)
+    xlabels = [benchmark.split('.')[1] for benchmark in benchmarks]
+    ax.set_xticklabels(xlabels, rotation=0, fontsize=TICKS_FONTSIZE)
+    # as labels are long, alternate their positions
+    for i, label in enumerate(ax.get_xticklabels()):
+        if i % 2 == 0:
+            label.set_y(+0.03)  # Move slightly downward
+        else:
+            label.set_y(-0.03)  # Move slightly further downward
     
     title = 'Execution Time' if metric == 'exec_time' else 'Client Time'
     ax.set_title(title, pad=5, fontsize=TITLE_FONTSIZE)
     
     # Enhance legend
-    legend = plt.legend(bbox_to_anchor=(0.85, 0.98), loc='upper left',
+    legend = plt.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     legend.get_frame().set_edgecolor('black')
     
