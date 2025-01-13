@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "memory.h"
 #include "vmpl.h"
@@ -367,6 +368,7 @@ skip:
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         int fd = arg->read2.fd;
         uint64_t read_size = arg->read2.count;
+        debug_printf("read2: fd=%d, offset=%ld, count=%lu\n", fd, arg->read2.offset, read_size);
         if (!read_buffer) {
             read_buffer = aligned_alloc(4096, read_size);
             if (!read_buffer) {
@@ -384,6 +386,11 @@ skip:
             read_buffer_size = read_size;
         }
         int read_bytes = pread(fd, read_buffer, read_size, arg->read2.offset);
+        if (read_bytes == -1) {
+            fprintf(stderr, "Failed to read file!: errno=%d\n", errno);
+            int is_fd_valid = fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+            fprintf(stderr, "fd=%d (valid=%d), read_buffer=%p, read_size=%lu, offset=%ld\n", fd, is_fd_valid, read_buffer, read_size, arg->read2.offset);
+        }
         arg->read2.ptr = (uint64_t)read_buffer;
         arg->read2.bufsize = read_size;
         arg->read2.count = read_bytes;
@@ -413,8 +420,10 @@ skip:
 exit:
 
     free(mmap_read_buffer);
-    if (read_buffer)
+    if (read_buffer) {
         free(read_buffer);
+        read_buffer = NULL;
+    }
     return return_buffer_address;
 }
 
