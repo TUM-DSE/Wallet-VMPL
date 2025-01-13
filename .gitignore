@@ -20,3 +20,4 @@ VMPLkernel6.5.tar.gz
 .ccls-cache/
 module/libsysdb.so
 module/libpal.so
+report_generation_measurements*

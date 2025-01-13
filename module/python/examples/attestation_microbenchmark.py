@@ -35,7 +35,7 @@ class Runner:
         # Prepare data for CSV
         with open(output_file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["Measurement", "Size (bytes)", "Average", "Median", "StdDev"])
+            writer.writerow(["Measurement", "Size (bytes)", "Average (ns)", "Median (ns)", "StdDev (ns)"])
 
             # Write monitor measurements
             for key in results.keys():
