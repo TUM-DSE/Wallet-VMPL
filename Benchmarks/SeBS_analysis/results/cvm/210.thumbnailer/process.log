@@ -1,0 +1,4 @@
+20:41:31,973 INFO SeBS-b368: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+20:41:31,998 INFO Cvm-e5e8: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:41:32,0 INFO Experiment.PerfCost-4db9: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/perf-cost/sequential_results.json
+20:41:32,2 INFO Experiment.PerfCost-4db9: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/perf-cost/cold_results.json

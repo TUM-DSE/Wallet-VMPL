@@ -1,0 +1,43 @@
+21:15:11,531 INFO SeBS-537c: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+21:15:11,556 INFO Cvm-8e16: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:15:11,560 INFO Benchmark-ca9e: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+21:15:11,566 INFO Benchmark-ca9e: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+21:15:11,566 INFO Benchmark-ca9e: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/504.dna-visualisation_code/python/3.11
+21:15:34,390 INFO Cvm-8e16: Function size 0.000005 MB
+21:15:34,391 INFO Benchmark-ca9e: Created code package (source hash: 99686ca7b896d046965dc38806678b19), for run on cvm with python:3.11
+21:15:37,299 INFO Cvm-8e16: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+21:15:37,309 INFO minio.Minio-913b: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+21:15:37,366 INFO Experiment.PerfCost-8765: Begin experiment
+21:15:37,366 INFO Experiment.PerfCost-8765: Begin cold experiments
+21:15:37,369 INFO Cvm.CvmFunction-e37b: Not stopping function as it was not running
+21:16:18,263 INFO Experiment.PerfCost-8765: Processed 0 warm-up samples, ignoring these results.
+21:16:23,264 INFO Cvm.CvmFunction-e37b: Stopping function
+21:16:24,274 INFO Cvm.CvmFunction-e37b: Function stopped succesfully
+21:17:04,799 INFO Experiment.PerfCost-8765: Processed 1 samples out of 5, 0 errors
+21:17:09,799 INFO Cvm.CvmFunction-e37b: Stopping function
+21:17:10,810 INFO Cvm.CvmFunction-e37b: Function stopped succesfully
+21:17:51,689 INFO Experiment.PerfCost-8765: Processed 2 samples out of 5, 0 errors
+21:17:56,690 INFO Cvm.CvmFunction-e37b: Stopping function
+21:17:57,700 INFO Cvm.CvmFunction-e37b: Function stopped succesfully
+21:18:38,955 INFO Experiment.PerfCost-8765: Processed 3 samples out of 5, 0 errors
+21:18:43,955 INFO Cvm.CvmFunction-e37b: Stopping function
+21:18:44,966 INFO Cvm.CvmFunction-e37b: Function stopped succesfully
+21:19:25,769 INFO Experiment.PerfCost-8765: Processed 4 samples out of 5, 0 errors
+21:19:30,770 INFO Cvm.CvmFunction-e37b: Stopping function
+21:19:31,780 INFO Cvm.CvmFunction-e37b: Function stopped succesfully
+21:20:12,766 INFO Experiment.PerfCost-8765: Processed 5 samples out of 5, 0 errors
+21:20:17,768 INFO Experiment.PerfCost-8765: Mean 35888.2232 [ms], median 35878.019 [ms], std 238.53913400479982, CV 0.6646724544579844
+21:20:17,770 INFO Experiment.PerfCost-8765: Parametric CI (Student's t-distribution) 0.95 from 35557.07779449713 to 36219.368605502874, within 0.922713291369837% of mean
+21:20:17,771 INFO Experiment.PerfCost-8765: Parametric CI (Student's t-distribution) 0.99 from 35339.094798248254 to 36437.35160175175, within 1.5301075193707177% of mean
+21:20:17,775 INFO Experiment.PerfCost-8765: Begin sequential experiments
+21:20:45,819 INFO Experiment.PerfCost-8765: Processed 0 warm-up samples, ignoring these results.
+21:21:07,387 INFO Experiment.PerfCost-8765: Processed 1 samples out of 5, 0 errors
+21:21:28,923 INFO Experiment.PerfCost-8765: Processed 2 samples out of 5, 0 errors
+21:21:50,353 INFO Experiment.PerfCost-8765: Processed 3 samples out of 5, 0 errors
+21:22:11,940 INFO Experiment.PerfCost-8765: Processed 4 samples out of 5, 0 errors
+21:22:33,520 INFO Experiment.PerfCost-8765: Processed 5 samples out of 5, 0 errors
+21:22:38,522 INFO Experiment.PerfCost-8765: Mean 11538.643 [ms], median 11565.924 [ms], std 57.86822234352829, CV 0.5015167064578415
+21:22:38,524 INFO Experiment.PerfCost-8765: Parametric CI (Student's t-distribution) 0.95 from 11458.309028663907 to 11618.976971336093, within 0.6962168024098924% of mean
+21:22:38,525 INFO Experiment.PerfCost-8765: Parametric CI (Student's t-distribution) 0.99 from 11405.427607145104 to 11671.858392854896, within 1.154515248065964% of mean
+21:22:38,529 INFO Cvm.CvmFunction-e37b: Stopping function
+21:22:39,539 INFO Cvm.CvmFunction-e37b: Function stopped succesfully

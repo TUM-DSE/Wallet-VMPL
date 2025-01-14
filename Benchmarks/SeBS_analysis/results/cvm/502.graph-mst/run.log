@@ -1,0 +1,43 @@
+21:06:10,322 INFO SeBS-9204: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+21:06:10,346 INFO Cvm-b9ec: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:06:10,350 INFO Benchmark-a15e: Building benchmark 502.graph-mst. Reason: no cached code package.
+21:06:10,357 INFO Benchmark-a15e: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+21:06:10,357 INFO Benchmark-a15e: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/502.graph-mst_code/python/3.11
+21:06:14,619 INFO Cvm-b9ec: Function size 0.000005 MB
+21:06:14,621 INFO Benchmark-a15e: Created code package (source hash: 7f4337ecd918b3702ee154992b91a7f9), for run on cvm with python:3.11
+21:06:14,703 INFO Cvm-b9ec: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+21:06:14,713 INFO minio.Minio-25e6: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+21:06:14,714 INFO Experiment.PerfCost-7200: Begin experiment
+21:06:14,714 INFO Experiment.PerfCost-7200: Begin cold experiments
+21:06:14,718 INFO Cvm.CvmFunction-7418: Not stopping function as it was not running
+21:06:42,653 INFO Experiment.PerfCost-7200: Processed 0 warm-up samples, ignoring these results.
+21:06:47,654 INFO Cvm.CvmFunction-7418: Stopping function
+21:06:48,664 INFO Cvm.CvmFunction-7418: Function stopped succesfully
+21:07:15,574 INFO Experiment.PerfCost-7200: Processed 1 samples out of 5, 0 errors
+21:07:20,575 INFO Cvm.CvmFunction-7418: Stopping function
+21:07:21,585 INFO Cvm.CvmFunction-7418: Function stopped succesfully
+21:07:49,24 INFO Experiment.PerfCost-7200: Processed 2 samples out of 5, 0 errors
+21:07:54,24 INFO Cvm.CvmFunction-7418: Stopping function
+21:07:55,34 INFO Cvm.CvmFunction-7418: Function stopped succesfully
+21:08:22,64 INFO Experiment.PerfCost-7200: Processed 3 samples out of 5, 0 errors
+21:08:27,65 INFO Cvm.CvmFunction-7418: Stopping function
+21:08:28,75 INFO Cvm.CvmFunction-7418: Function stopped succesfully
+21:08:55,644 INFO Experiment.PerfCost-7200: Processed 4 samples out of 5, 0 errors
+21:09:00,645 INFO Cvm.CvmFunction-7418: Stopping function
+21:09:01,654 INFO Cvm.CvmFunction-7418: Function stopped succesfully
+21:09:29,376 INFO Experiment.PerfCost-7200: Processed 5 samples out of 5, 0 errors
+21:09:34,377 INFO Experiment.PerfCost-7200: Mean 22332.581599999998 [ms], median 22437.223 [ms], std 312.81112008533194, CV 1.400693953292583
+21:09:34,380 INFO Experiment.PerfCost-7200: Parametric CI (Student's t-distribution) 0.95 from 21898.330148393816 to 22766.83305160618, within 1.9444749352496802% of mean
+21:09:34,381 INFO Experiment.PerfCost-7200: Parametric CI (Student's t-distribution) 0.99 from 21612.47556314663 to 23052.687636853367, within 3.224463923388817% of mean
+21:09:34,385 INFO Experiment.PerfCost-7200: Begin sequential experiments
+21:09:39,495 INFO Experiment.PerfCost-7200: Processed 0 warm-up samples, ignoring these results.
+21:09:49,551 INFO Experiment.PerfCost-7200: Processed 1 samples out of 5, 0 errors
+21:09:59,608 INFO Experiment.PerfCost-7200: Processed 2 samples out of 5, 0 errors
+21:10:09,665 INFO Experiment.PerfCost-7200: Processed 3 samples out of 5, 0 errors
+21:10:19,711 INFO Experiment.PerfCost-7200: Processed 4 samples out of 5, 0 errors
+21:10:29,767 INFO Experiment.PerfCost-7200: Processed 5 samples out of 5, 0 errors
+21:10:34,768 INFO Experiment.PerfCost-7200: Mean 52.7602 [ms], median 54.575 [ms], std 4.126154888028322, CV 7.820582348111496
+21:10:34,770 INFO Experiment.PerfCost-7200: Parametric CI (Student's t-distribution) 0.95 from 47.032178728922894 to 58.4882212710771, within 10.856708790105237% of mean
+21:10:34,772 INFO Experiment.PerfCost-7200: Parametric CI (Student's t-distribution) 0.99 from 43.26159572068058 to 62.25880427931941, within 18.00335154021292% of mean
+21:10:34,775 INFO Cvm.CvmFunction-7418: Stopping function
+21:10:35,786 INFO Cvm.CvmFunction-7418: Function stopped succesfully

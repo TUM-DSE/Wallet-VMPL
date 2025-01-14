@@ -1,0 +1,266 @@
+{
+  "_invocations": {
+    "504.dna-visualisation-python-3.11": {
+      "62fd56b1-6c6e-4110-bfdb-3b3918070c47": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736716898.854661",
+          "end": "1736716910.275347",
+          "is_cold": false,
+          "request_id": "62fd56b1-6c6e-4110-bfdb-3b3918070c47",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1525914.0,
+                "download_time": 30951.0,
+                "upload_time": 1525914.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.6ea04ae6.fasta"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "62fd56b1-6c6e-4110-bfdb-3b3918070c47",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 11420686,
+          "client": 11428133,
+          "client_begin": "2025-01-12 21:21:38.924887",
+          "client_end": "2025-01-12 21:21:50.353020",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "90d893ac-ca61-4e58-a002-ddc10869e18d": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736716877.318133",
+          "end": "1736716888.846024",
+          "is_cold": false,
+          "request_id": "90d893ac-ca61-4e58-a002-ddc10869e18d",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1529094.0,
+                "download_time": 33824.0,
+                "upload_time": 1529094.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.0861933b.fasta"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "90d893ac-ca61-4e58-a002-ddc10869e18d",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 11527891,
+          "client": 11535201,
+          "client_begin": "2025-01-12 21:21:17.387919",
+          "client_end": "2025-01-12 21:21:28.923120",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "91639b76-f499-4d68-af4c-860dfa9590d4": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736716941.870039",
+          "end": "1736716953.441561",
+          "is_cold": false,
+          "request_id": "91639b76-f499-4d68-af4c-860dfa9590d4",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1540102.0,
+                "download_time": 30956.0,
+                "upload_time": 1540102.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.d99eeacd.fasta"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "91639b76-f499-4d68-af4c-860dfa9590d4",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 11571522,
+          "client": 11578883,
+          "client_begin": "2025-01-12 21:22:21.941495",
+          "client_end": "2025-01-12 21:22:33.520378",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "ba8f3cf0-97c5-40bb-8702-5c5a765e8c0a": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736716920.283823",
+          "end": "1736716931.861559",
+          "is_cold": false,
+          "request_id": "ba8f3cf0-97c5-40bb-8702-5c5a765e8c0a",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1517416.0,
+                "download_time": 30648.0,
+                "upload_time": 1517416.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.67d15507.fasta"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "ba8f3cf0-97c5-40bb-8702-5c5a765e8c0a",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 11577736,
+          "client": 11585074,
+          "client_begin": "2025-01-12 21:22:00.354781",
+          "client_end": "2025-01-12 21:22:11.939855",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "d7eba537-c393-4c25-9d35-b7720e27f92e": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736716855.750984",
+          "end": "1736716867.310100",
+          "is_cold": false,
+          "request_id": "d7eba537-c393-4c25-9d35-b7720e27f92e",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1528560.0,
+                "download_time": 29877.0,
+                "upload_time": 1528560.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.fb5beb07.fasta"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "d7eba537-c393-4c25-9d35-b7720e27f92e",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 11559116,
+          "client": 11565924,
+          "client_begin": "2025-01-12 21:20:55.820638",
+          "client_end": "2025-01-12 21:21:07.386562",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736716817.777849,
+  "config": {
+    "deployment": {
+      "name": "cvm"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "504.dna-visualisation",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736716958.521545,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

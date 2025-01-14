@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "2636f436-c0a6-4ec2-871a-17cab277b42d": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736714484.011252",
+          "end": "1736714484.105254",
+          "is_cold": false,
+          "request_id": "2636f436-c0a6-4ec2-871a-17cab277b42d",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 62762.0,
+                "download_size": 2907386,
+                "download_time": 27537.0,
+                "upload_size": 3444,
+                "upload_time": 3576.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "210.thumbnailer-0-output/5_asphalt-atmosphere-cloudy-sky-2739010.a843c476.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "2636f436-c0a6-4ec2-871a-17cab277b42d",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 94002,
+          "client": 100586,
+          "client_begin": "2025-01-12 20:41:24.082940",
+          "client_end": "2025-01-12 20:41:24.183526",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "6e660cc2-3d2b-4384-9740-0d08f53fe743": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736714463.806850",
+          "end": "1736714463.900882",
+          "is_cold": false,
+          "request_id": "6e660cc2-3d2b-4384-9740-0d08f53fe743",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 63099.0,
+                "download_size": 2907386,
+                "download_time": 26875.0,
+                "upload_size": 3444,
+                "upload_time": 3940.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "210.thumbnailer-0-output/5_asphalt-atmosphere-cloudy-sky-2739010.1bcfe162.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "6e660cc2-3d2b-4384-9740-0d08f53fe743",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 94032,
+          "client": 101770,
+          "client_begin": "2025-01-12 20:41:03.877072",
+          "client_end": "2025-01-12 20:41:03.978842",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "85a374fc-15a2-4f7a-b507-6da161d1f5d5": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736714443.602671",
+          "end": "1736714443.696850",
+          "is_cold": false,
+          "request_id": "85a374fc-15a2-4f7a-b507-6da161d1f5d5",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 62773.0,
+                "download_size": 2907386,
+                "download_time": 26411.0,
+                "upload_size": 3444,
+                "upload_time": 4878.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "210.thumbnailer-0-output/5_asphalt-atmosphere-cloudy-sky-2739010.d705345c.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "85a374fc-15a2-4f7a-b507-6da161d1f5d5",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 94179,
+          "client": 100842,
+          "client_begin": "2025-01-12 20:40:43.673003",
+          "client_end": "2025-01-12 20:40:43.773845",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "85abf290-8405-4f22-864c-996bcb087378": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736714453.704488",
+          "end": "1736714453.797773",
+          "is_cold": false,
+          "request_id": "85abf290-8405-4f22-864c-996bcb087378",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 62228.0,
+                "download_size": 2907386,
+                "download_time": 27031.0,
+                "upload_size": 3444,
+                "upload_time": 3888.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "210.thumbnailer-0-output/5_asphalt-atmosphere-cloudy-sky-2739010.2dd84d6b.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "85abf290-8405-4f22-864c-996bcb087378",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 93285,
+          "client": 99937,
+          "client_begin": "2025-01-12 20:40:53.775467",
+          "client_end": "2025-01-12 20:40:53.875404",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "87ac21ab-5e1c-4290-9fba-29c10dc4eee3": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736714473.909283",
+          "end": "1736714474.003432",
+          "is_cold": false,
+          "request_id": "87ac21ab-5e1c-4290-9fba-29c10dc4eee3",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 63159.0,
+                "download_size": 2907386,
+                "download_time": 26962.0,
+                "upload_size": 3444,
+                "upload_time": 3906.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-39ac486b",
+                "key": "210.thumbnailer-0-output/5_asphalt-atmosphere-cloudy-sky-2739010.9b5184ad.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "87ac21ab-5e1c-4290-9fba-29c10dc4eee3",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 94149,
+          "client": 101084,
+          "client_begin": "2025-01-12 20:41:13.980296",
+          "client_end": "2025-01-12 20:41:14.081380",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736714428.48076,
+  "config": {
+    "deployment": {
+      "name": "cvm"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "210.thumbnailer",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736714489.184588,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

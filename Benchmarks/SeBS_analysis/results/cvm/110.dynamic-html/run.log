@@ -1,0 +1,27 @@
+20:10:04,445 INFO SeBS-28c2: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+20:10:04,469 INFO Cvm-78f4: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:10:04,473 INFO Benchmark-298d: Using cached benchmark 110.dynamic-html at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/cache/110.dynamic-html/cvm/python/3.11/code
+20:10:04,473 INFO Cvm-78f4: Using cached function 110.dynamic-html-python-3.11 in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/cache/110.dynamic-html/cvm/python/3.11/code
+20:10:04,474 INFO Cvm-78f4: Cached function 110.dynamic-html-python-3.11 is up to date.
+20:10:04,479 INFO minio.Minio-22e6: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+20:10:04,480 INFO Experiment.PerfCost-689b: Begin experiment
+20:10:04,480 INFO Experiment.PerfCost-689b: Begin cold experiments
+20:10:32,677 INFO Experiment.PerfCost-689b: Processed 0 warm-up samples, ignoring these results.
+20:11:05,968 INFO Experiment.PerfCost-689b: Processed 1 samples out of 5, 0 errors
+20:11:39,169 INFO Experiment.PerfCost-689b: Processed 2 samples out of 5, 0 errors
+20:12:12,114 INFO Experiment.PerfCost-689b: Processed 3 samples out of 5, 0 errors
+20:12:45,71 INFO Experiment.PerfCost-689b: Processed 4 samples out of 5, 0 errors
+20:13:17,945 INFO Experiment.PerfCost-689b: Processed 5 samples out of 5, 0 errors
+20:13:22,947 INFO Experiment.PerfCost-689b: Mean 22041.8038 [ms], median 21945.894 [ms], std 162.2604719103204, CV 0.7361487897388888
+20:13:22,952 INFO Experiment.PerfCost-689b: Parametric CI (Student's t-distribution) 0.95 from 21816.550153498756 to 22267.057446501247, within 1.0219383519839034% of mean
+20:13:22,953 INFO Experiment.PerfCost-689b: Parametric CI (Student's t-distribution) 0.99 from 21668.272496722086 to 22415.335103277917, within 1.6946494337179239% of mean
+20:13:22,960 INFO Experiment.PerfCost-689b: Begin sequential experiments
+20:13:27,995 INFO Experiment.PerfCost-689b: Processed 0 warm-up samples, ignoring these results.
+20:13:38,13 INFO Experiment.PerfCost-689b: Processed 1 samples out of 5, 0 errors
+20:13:48,31 INFO Experiment.PerfCost-689b: Processed 2 samples out of 5, 0 errors
+20:13:58,49 INFO Experiment.PerfCost-689b: Processed 3 samples out of 5, 0 errors
+20:14:08,67 INFO Experiment.PerfCost-689b: Processed 4 samples out of 5, 0 errors
+20:14:18,84 INFO Experiment.PerfCost-689b: Processed 5 samples out of 5, 0 errors
+20:14:23,85 INFO Experiment.PerfCost-689b: Mean 16.138 [ms], median 16.046 [ms], std 0.2563333766796661, CV 1.5883837940244523
+20:14:23,87 INFO Experiment.PerfCost-689b: Parametric CI (Student's t-distribution) 0.95 from 15.78215222550946 to 16.493847774490543, within 2.2050302050473523% of mean
+20:14:23,89 INFO Experiment.PerfCost-689b: Parametric CI (Student's t-distribution) 0.99 from 15.547908407528217 to 16.728091592471788, within 3.656534839954056% of mean

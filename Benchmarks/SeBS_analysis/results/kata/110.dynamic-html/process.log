@@ -1,0 +1,4 @@
+16:27:32,360 INFO SeBS-8b23: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+16:27:32,389 INFO KataQemu-e5af: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:27:32,391 INFO Experiment.PerfCost-0c05: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/sequential_results.json
+16:27:32,393 INFO Experiment.PerfCost-0c05: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/cold_results.json

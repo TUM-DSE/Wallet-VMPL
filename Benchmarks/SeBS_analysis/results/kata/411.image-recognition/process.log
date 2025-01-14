@@ -1,0 +1,4 @@
+16:42:08,186 INFO SeBS-c309: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+16:42:08,217 INFO KataQemu-e4a5: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:42:08,219 INFO Experiment.PerfCost-52e7: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/cold_results.json
+16:42:08,221 INFO Experiment.PerfCost-52e7: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/sequential_results.json

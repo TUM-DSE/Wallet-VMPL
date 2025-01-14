@@ -1,0 +1,4 @@
+21:15:09,746 INFO SeBS-ba55: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs
+21:15:09,770 INFO Cvm-e18a: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:15:09,772 INFO Experiment.PerfCost-a4f2: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/cold_results.json
+21:15:09,794 INFO Experiment.PerfCost-a4f2: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/sequential_results.json

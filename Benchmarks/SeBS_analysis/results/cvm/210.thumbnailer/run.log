@@ -1,0 +1,43 @@
+20:37:02,882 INFO SeBS-3712: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+20:37:02,907 INFO Cvm-715c: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:37:02,911 INFO Benchmark-dde4: Building benchmark 210.thumbnailer. Reason: no cached code package.
+20:37:02,918 INFO Benchmark-dde4: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+20:37:02,918 INFO Benchmark-dde4: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/210.thumbnailer_code/python/3.11
+20:37:07,399 INFO Cvm-715c: Function size 0.000005 MB
+20:37:07,401 INFO Benchmark-dde4: Created code package (source hash: 65b6c9b514e22e1e58bf774a0409c59f), for run on cvm with python:3.11
+20:37:07,503 INFO Cvm-715c: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+20:37:07,512 INFO minio.Minio-6da7: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+20:37:07,783 INFO Experiment.PerfCost-2fd7: Begin experiment
+20:37:07,783 INFO Experiment.PerfCost-2fd7: Begin cold experiments
+20:37:07,787 INFO Cvm.CvmFunction-2d75: Not stopping function as it was not running
+20:37:35,623 INFO Experiment.PerfCost-2fd7: Processed 0 warm-up samples, ignoring these results.
+20:37:40,623 INFO Cvm.CvmFunction-2d75: Stopping function
+20:37:41,633 INFO Cvm.CvmFunction-2d75: Function stopped succesfully
+20:38:09,454 INFO Experiment.PerfCost-2fd7: Processed 1 samples out of 5, 0 errors
+20:38:14,454 INFO Cvm.CvmFunction-2d75: Stopping function
+20:38:15,464 INFO Cvm.CvmFunction-2d75: Function stopped succesfully
+20:38:43,188 INFO Experiment.PerfCost-2fd7: Processed 2 samples out of 5, 0 errors
+20:38:48,188 INFO Cvm.CvmFunction-2d75: Stopping function
+20:38:49,198 INFO Cvm.CvmFunction-2d75: Function stopped succesfully
+20:39:16,554 INFO Experiment.PerfCost-2fd7: Processed 3 samples out of 5, 0 errors
+20:39:21,555 INFO Cvm.CvmFunction-2d75: Stopping function
+20:39:22,565 INFO Cvm.CvmFunction-2d75: Function stopped succesfully
+20:39:50,344 INFO Experiment.PerfCost-2fd7: Processed 4 samples out of 5, 0 errors
+20:39:55,344 INFO Cvm.CvmFunction-2d75: Stopping function
+20:39:56,354 INFO Cvm.CvmFunction-2d75: Function stopped succesfully
+20:40:23,469 INFO Experiment.PerfCost-2fd7: Processed 5 samples out of 5, 0 errors
+20:40:28,471 INFO Experiment.PerfCost-2fd7: Mean 22557.3734 [ms], median 22722.546 [ms], std 276.46200562652416, CV 1.2255948453046583
+20:40:28,473 INFO Experiment.PerfCost-2fd7: Parametric CI (Student's t-distribution) 0.95 from 22173.582608852535 to 22941.164191147465, within 1.7013984046008872% of mean
+20:40:28,474 INFO Experiment.PerfCost-2fd7: Parametric CI (Student's t-distribution) 0.99 from 21920.944748876784 to 23193.802051123217, within 2.82137747085047% of mean
+20:40:28,478 INFO Experiment.PerfCost-2fd7: Begin sequential experiments
+20:40:33,671 INFO Experiment.PerfCost-2fd7: Processed 0 warm-up samples, ignoring these results.
+20:40:43,774 INFO Experiment.PerfCost-2fd7: Processed 1 samples out of 5, 0 errors
+20:40:53,875 INFO Experiment.PerfCost-2fd7: Processed 2 samples out of 5, 0 errors
+20:41:03,979 INFO Experiment.PerfCost-2fd7: Processed 3 samples out of 5, 0 errors
+20:41:14,81 INFO Experiment.PerfCost-2fd7: Processed 4 samples out of 5, 0 errors
+20:41:24,184 INFO Experiment.PerfCost-2fd7: Processed 5 samples out of 5, 0 errors
+20:41:29,185 INFO Experiment.PerfCost-2fd7: Mean 100.8438 [ms], median 100.842 [ms], std 0.6007150405974532, CV 0.59568862002171
+20:41:29,187 INFO Experiment.PerfCost-2fd7: Parametric CI (Student's t-distribution) 0.95 from 100.00987383295725 to 101.67772616704275, within 0.8269483766406537% of mean
+20:41:29,188 INFO Experiment.PerfCost-2fd7: Parametric CI (Student's t-distribution) 0.99 from 99.46092548120144 to 102.22667451879856, within 1.3713034602013796% of mean
+20:41:29,192 INFO Cvm.CvmFunction-2d75: Stopping function
+20:41:30,201 INFO Cvm.CvmFunction-2d75: Function stopped succesfully

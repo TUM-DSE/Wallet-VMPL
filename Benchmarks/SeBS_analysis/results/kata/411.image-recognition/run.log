@@ -1,0 +1,45 @@
+16:38:06,447 INFO SeBS-cec2: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+16:38:06,476 INFO KataQemu-d97b: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:38:06,482 INFO Benchmark-a35d: Building benchmark 411.image-recognition. Reason: no cached code package.
+16:38:06,509 INFO Benchmark-a35d: Docker build of benchmark dependencies in container of image sebs:build.kata_qemu.python.3.11
+16:38:06,510 INFO Benchmark-a35d: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/411.image-recognition_code/python/3.11
+16:38:48,532 INFO Benchmark-a35d: Docker build: Original size 144M
+16:38:48,532 INFO Benchmark-a35d: Docker build: Stripped size 82M
+16:38:48,535 INFO KataQemu-d97b: Function size 0.000005 MB
+16:38:48,537 INFO Benchmark-a35d: Created code package (source hash: ab83c8ef486c3b61d5d0b38ae48e61af), for run on kata_qemu with python:3.11
+16:38:52,928 INFO KataQemu-d97b: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+16:38:52,936 INFO minio.Minio-edad: Using existing bucket sebs-benchmarks-kata-qemu-be6e37d0 for benchmarks
+16:38:53,409 INFO Experiment.PerfCost-1e8c: Begin experiment
+16:38:53,409 INFO Experiment.PerfCost-1e8c: Begin cold experiments
+16:38:53,413 INFO KataQemu.KataQemuFunction-567e: Not stopping function as it was not running
+16:39:09,993 INFO Experiment.PerfCost-1e8c: Processed 0 warm-up samples, ignoring these results.
+16:39:14,994 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:39:15,503 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully
+16:39:31,907 INFO Experiment.PerfCost-1e8c: Processed 1 samples out of 5, 0 errors
+16:39:36,908 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:39:37,349 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully
+16:39:53,743 INFO Experiment.PerfCost-1e8c: Processed 2 samples out of 5, 0 errors
+16:39:58,743 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:39:59,195 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully
+16:40:15,534 INFO Experiment.PerfCost-1e8c: Processed 3 samples out of 5, 0 errors
+16:40:20,535 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:40:21,32 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully
+16:40:37,472 INFO Experiment.PerfCost-1e8c: Processed 4 samples out of 5, 0 errors
+16:40:42,473 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:40:42,945 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully
+16:40:59,427 INFO Experiment.PerfCost-1e8c: Processed 5 samples out of 5, 0 errors
+16:41:04,428 INFO Experiment.PerfCost-1e8c: Mean 11410.2264 [ms], median 11402.567 [ms], std 47.80667307228136, CV 0.41898093338692527
+16:41:04,430 INFO Experiment.PerfCost-1e8c: Parametric CI (Student's t-distribution) 0.95 from 11343.860098276336 to 11476.592701723663, within 0.5816387808366635% of mean
+16:41:04,432 INFO Experiment.PerfCost-1e8c: Parametric CI (Student's t-distribution) 0.99 from 11300.173170844226 to 11520.279629155773, within 0.9645139833138965% of mean
+16:41:04,436 INFO Experiment.PerfCost-1e8c: Begin sequential experiments
+16:41:09,883 INFO Experiment.PerfCost-1e8c: Processed 0 warm-up samples, ignoring these results.
+16:41:20,106 INFO Experiment.PerfCost-1e8c: Processed 1 samples out of 5, 0 errors
+16:41:30,334 INFO Experiment.PerfCost-1e8c: Processed 2 samples out of 5, 0 errors
+16:41:40,557 INFO Experiment.PerfCost-1e8c: Processed 3 samples out of 5, 0 errors
+16:41:50,780 INFO Experiment.PerfCost-1e8c: Processed 4 samples out of 5, 0 errors
+16:42:01,3 INFO Experiment.PerfCost-1e8c: Processed 5 samples out of 5, 0 errors
+16:42:06,4 INFO Experiment.PerfCost-1e8c: Mean 222.78879999999998 [ms], median 221.816 [ms], std 2.1302956977846934, CV 0.9561951488516001
+16:42:06,6 INFO Experiment.PerfCost-1e8c: Parametric CI (Student's t-distribution) 0.95 from 219.83147546863086 to 225.7461245313691, within 1.3274116703214547% of mean
+16:42:06,7 INFO Experiment.PerfCost-1e8c: Parametric CI (Student's t-distribution) 0.99 from 217.88475825161504 to 227.69284174838492, within 2.201206590450212% of mean
+16:42:06,11 INFO KataQemu.KataQemuFunction-567e: Stopping function
+16:42:06,516 INFO KataQemu.KataQemuFunction-567e: Function stopped succesfully

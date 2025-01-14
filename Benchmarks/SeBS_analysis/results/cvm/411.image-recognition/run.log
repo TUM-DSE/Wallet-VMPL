@@ -1,0 +1,49 @@
+20:52:18,47 INFO SeBS-5703: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+20:52:18,70 INFO Cvm-3acf: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:52:18,72 INFO Benchmark-7e18: Building benchmark 411.image-recognition. Reason: no cached code package.
+20:52:18,97 INFO Benchmark-7e18: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+20:52:18,97 INFO Benchmark-7e18: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/411.image-recognition_code/python/3.11
+20:53:00,112 INFO Benchmark-7e18: Docker build: Original size 351M
+20:53:00,112 INFO Benchmark-7e18: Docker build: Stripped size 298M
+20:53:00,114 INFO Cvm-3acf: Function size 0.000005 MB
+20:53:00,116 INFO Benchmark-7e18: Created code package (source hash: dfc02f441024e0e5b8627a17c05469e8), for run on cvm with python:3.11
+20:53:04,914 INFO Cvm-3acf: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+20:53:04,924 INFO minio.Minio-4d69: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+20:53:05,384 INFO Experiment.PerfCost-26d2: Begin experiment
+20:53:05,384 INFO Experiment.PerfCost-26d2: Begin cold experiments
+20:53:05,388 INFO Cvm.CvmFunction-bbc4: Not stopping function as it was not running
+20:54:28,141 INFO Experiment.PerfCost-26d2: Processed 0 warm-up samples, ignoring these results.
+20:54:33,142 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:54:34,152 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:54:48,33 ERROR Experiment.PerfCost-26d2: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+20:54:48,34 INFO Experiment.PerfCost-26d2: Processed 0 samples out of 5, 1 errors
+20:54:53,34 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:54:54,44 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:55:46,813 INFO Experiment.PerfCost-26d2: Processed 1 samples out of 5, 1 errors
+20:55:51,814 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:55:52,823 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:56:47,262 INFO Experiment.PerfCost-26d2: Processed 2 samples out of 5, 1 errors
+20:56:52,263 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:56:53,272 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:57:45,763 INFO Experiment.PerfCost-26d2: Processed 3 samples out of 5, 1 errors
+20:57:50,763 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:57:51,773 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:58:46,457 INFO Experiment.PerfCost-26d2: Processed 4 samples out of 5, 1 errors
+20:58:51,458 INFO Cvm.CvmFunction-bbc4: Stopping function
+20:58:52,468 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully
+20:59:46,560 INFO Experiment.PerfCost-26d2: Processed 5 samples out of 5, 1 errors
+20:59:51,561 INFO Experiment.PerfCost-26d2: Mean 48693.38220000001 [ms], median 49090.83 [ms], std 893.9091034879107, CV 1.835791771079542
+20:59:51,563 INFO Experiment.PerfCost-26d2: Parametric CI (Student's t-distribution) 0.95 from 47452.437422564624 to 49934.32697743539, within 2.5484875384881005% of mean
+20:59:51,565 INFO Experiment.PerfCost-26d2: Parametric CI (Student's t-distribution) 0.99 from 46635.561040559674 to 50751.20335944034, within 4.226079739107407% of mean
+20:59:51,569 INFO Experiment.PerfCost-26d2: Begin sequential experiments
+20:59:57,18 INFO Experiment.PerfCost-26d2: Processed 0 warm-up samples, ignoring these results.
+21:00:07,250 INFO Experiment.PerfCost-26d2: Processed 1 samples out of 5, 0 errors
+21:00:17,485 INFO Experiment.PerfCost-26d2: Processed 2 samples out of 5, 0 errors
+21:00:27,707 INFO Experiment.PerfCost-26d2: Processed 3 samples out of 5, 0 errors
+21:00:37,943 INFO Experiment.PerfCost-26d2: Processed 4 samples out of 5, 0 errors
+21:00:48,173 INFO Experiment.PerfCost-26d2: Processed 5 samples out of 5, 0 errors
+21:00:53,174 INFO Experiment.PerfCost-26d2: Mean 229.31060000000002 [ms], median 230.357 [ms], std 4.916673778073951, CV 2.14411099097641
+21:00:53,176 INFO Experiment.PerfCost-26d2: Parametric CI (Student's t-distribution) 0.95 from 222.48516257750612 to 236.13603742249393, within 2.9765032329486316% of mean
+21:00:53,178 INFO Experiment.PerfCost-26d2: Parametric CI (Student's t-distribution) 0.99 from 217.99218373697238 to 240.62901626302767, within 4.935845208650469% of mean
+21:00:53,181 INFO Cvm.CvmFunction-bbc4: Stopping function
+21:00:54,191 INFO Cvm.CvmFunction-bbc4: Function stopped succesfully

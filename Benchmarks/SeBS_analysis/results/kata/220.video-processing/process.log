@@ -1,0 +1,4 @@
+16:35:34,756 INFO SeBS-d6b6: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing
+16:35:34,782 INFO KataQemu-1036: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:35:34,784 INFO Experiment.PerfCost-e996: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/sequential_results.json
+16:35:34,786 INFO Experiment.PerfCost-e996: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/cold_results.json
