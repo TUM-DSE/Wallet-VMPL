@@ -97,7 +97,7 @@ def calculate_categories(df):
     
     return categories
 
-def create_plot(categories, output_dir):
+def create_plot(categories, output_dir, y_scale='linear'):
     """Create stacked bar chart"""
     # Convert to DataFrame
     data = []
@@ -126,7 +126,7 @@ def create_plot(categories, output_dir):
     for bar, pattern in zip(bars, patterns):
         bar.set_hatch(pattern)
     
-    # Add value labels on the bars
+    # Add value labels on the top bars
     for i, category in enumerate(df.index):
         total = 0
         for j, value in enumerate(df.loc[category]):
@@ -136,37 +136,154 @@ def create_plot(categories, output_dir):
                 total += value
                 # if value > df.values.max() * 0.05:  # Only show labels for visible segments
                     # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
-        # Add total on top
+        # Add total on top of each bar - choose the axis depending where the total is
         ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
     
     # Customize the plot
+    ax.set_yscale(y_scale)
+    # Tick size
+    ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    ax.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
+    # Fix xticks rotation
+    plt.xticks(rotation=0)
+    # y-axis label set in the middle of the plt
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
-    plt.yticks(fontsize=TICKS_FONTSIZE)
-    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
+  
+    # x-axis label
     ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
-    plt.xticks(fontsize=TICKS_FONTSIZE, rotation=0)
-    ax.set_title('Attestation report generation', pad=5, fontsize=TITLE_FONTSIZE)
-    
-    # Enhance legend
-    legend = plt.legend(bbox_to_anchor=(0.7, 0.98), loc='upper left', 
+    # Title in the upper plot
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+
+    # Insert legend in the top right position
+    legend = ax.legend(bbox_to_anchor=(0.73, 0.97), loc='upper left', 
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
-    
-    # Set y-axis to start at 0
-    ax.set_ylim(bottom=0)
-    
+       
     # Adjust layout to prevent label cutoff
     plt.tight_layout()
-    
+    plt.subplots_adjust(wspace=0, hspace=0.05)
+
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / 'attestation_report.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'attestation_report.png', format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'attestation_report_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'attestation_report_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    
+    plt.close()
+
+def create_cutoff_plot(categories, output_dir):
+    """Create stacked bar chart"""
+    # Convert to DataFrame
+    data = []
+    for category, components in categories.items():
+        row = {'Category': category}
+        row.update(components)
+        data.append(row)
+    
+    df = pd.DataFrame(data)
+    df.set_index('Category', inplace=True)
+    
+    # Convert nanoseconds to milliseconds
+    df = df / 1_000_000
+    
+    # Create the plot with increased size
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(figwidth, figheight))
+
+    ax1.set_ylim(2450, 2850)  # outliers only
+    ax2.set_ylim(0, 7)  # most of the data
+    
+    # hide the spines between ax and ax2
+    ax1.spines.bottom.set_visible(False)
+    ax2.spines.top.set_visible(False)
+
+    # hide the xaxis from the upper plot
+    ax1.get_xaxis().set_visible(False)
+
+    d = .5  # proportion of vertical to horizontal extent of the slanted line
+    kwargs = dict(marker=[(-1, -d), (1, d)], markersize=TICKS_FONTSIZE,
+                  linestyle="none", color='k', mec='k', mew=1, clip_on=False)
+    ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
+    ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
+
+    # Plot stacked bars with wider bars
+    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, edgecolor='black', width=0.8)
+    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, edgecolor='black', width=0.8, legend=False)
+    
+    # Add hatches for better distinction
+    bars1 = ax1.patches
+    bars2 = ax2.patches
+    n_bars = len(df)
+    n_categories = len(df.columns)
+    patterns = [h for h in hatches for _ in range(n_bars)]
+    for bar, pattern in zip(bars1, patterns):
+        bar.set_hatch(pattern)
+    for bar, pattern in zip(bars2, patterns):
+        bar.set_hatch(pattern)
+    
+    # Add value labels on the top bars
+    for i, category in enumerate(df.index):
+        total = 0
+        for j, value in enumerate(df.loc[category]):
+            if value > 0:  # Only show non-zero values
+                x = i
+                y = total + (value / 2)
+                total += value
+                # if value > df.values.max() * 0.05:  # Only show labels for visible segments
+                    # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
+        # Add total on top of each bar - choose the axis depending where the total is
+        if total > 2450:
+            ax1.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+        else:
+            ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+    
+    # Customize the plot
+    # Tick size
+    ax1.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    ax1.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
+    ax2.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
+    # Fix xticks rotation
+    plt.xticks(rotation=0)
+    # y-axis label set in the middle of the plt
+    # ax2.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax2.annotate(
+        'Time (ms)',  # Text to annotate
+        xy=(-0.12, 5),  # The point to annotate (data coordinates)
+        xytext=(-50, 15),  # Text location (offset coordinates)
+        textcoords='offset points',  # Interpret xytext as an offset from xy
+        rotation=90,  # Rotate the label vertically
+        va='center',  # Align text vertically to the center
+        fontsize=TICKS_FONTSIZE,  # Font size
+    )
+  
+    # x-axis label
+    ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    # Title in the upper plot
+    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Insert legend in the top right position
+    legend = ax1.legend(bbox_to_anchor=(0.73, 0.97), loc='upper left', 
+                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+    legend.get_frame().set_edgecolor('black')
+    
+    # Add gridlines for better readability
+    ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
+    ax2.yaxis.grid(True, linestyle='--', alpha=0.7)
+       
+    # Adjust layout to prevent label cutoff
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0, hspace=0.05)
+
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / 'attestation_report_cutoff.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'attestation_report_cutoff.png', format='png', dpi=300, bbox_inches='tight')
     
     plt.close()
 
@@ -183,6 +300,8 @@ def main():
     
     # Create plots
     create_plot(categories, args.output_dir)
+    create_plot(categories, args.output_dir, 'log')
+    create_cutoff_plot(categories, args.output_dir)
     print(f"Plots saved in {args.output_dir}")
 
 if __name__ == "__main__":

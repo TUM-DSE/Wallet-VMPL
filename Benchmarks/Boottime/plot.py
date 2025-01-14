@@ -118,7 +118,7 @@ def calculate_categories(raw_data):
     
     return categories
 
-def create_plot(categories, output_dir):
+def create_plot(categories, output_dir, y_scale='linear'):
     """Create stacked bar chart"""
     # Convert to DataFrame
     data = []
@@ -154,12 +154,14 @@ def create_plot(categories, output_dir):
         ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
     
     # Customize the plot
+    ax.set_yscale(y_scale)
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
     plt.xticks(fontsize=TICKS_FONTSIZE, rotation=0)
-    ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
+    # ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Enhance legend
     legend = plt.legend(bbox_to_anchor=(0.7, 0.98), loc='upper left', 
@@ -171,7 +173,7 @@ def create_plot(categories, output_dir):
     
     # Set y-axis to start at 0
     ax.set_ylim(bottom=0)
-    
+
     # Adjust layout to prevent label cutoff
     plt.tight_layout()
     
@@ -179,8 +181,8 @@ def create_plot(categories, output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / 'boot_time.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'boot_time.png', format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'boot_time_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'boot_time_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
     
     plt.close()
 
@@ -197,6 +199,7 @@ def main():
     
     # Create plots
     create_plot(categories, args.output_dir)
+    create_plot(categories, args.output_dir, 'log')
     print(f"Plots saved in {args.output_dir}")
 
 if __name__ == "__main__":

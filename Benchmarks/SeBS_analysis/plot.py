@@ -17,16 +17,25 @@ sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsiz
 TITLE_FONTSIZE = 8
 TICKS_FONTSIZE = 7
 LEGEND_FONTSIZE = 6
-figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
+figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
-VARIANTS = ['gramine', 'native', 'vm', 'wallet']
+VARIANTS = ['native', 'gramine', 'vm', 'kata', 'cvm', 'wallet']
+LABEL_MAPPINGS = {
+    'native'  : 'Native',
+    'gramine' : 'Gramine',
+    'vm'      : 'VM',
+    'kata'    : 'Kata',
+    'cvm'     : 'CVM',
+    'wallet'  : 'Wallet'
+}
+
 BENCHMARKS = [
     '110.dynamic-html', '120.uploader', '210.thumbnailer', 
     '220.video-processing', '311.compression', '411.image-recognition',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs', 
     '504.dna-visualisation'
 ]
-palette = sns.color_palette("pastel")
+palette = sns.color_palette("pastel", n_colors=len(VARIANTS))
 hatches = ["", "//", "xx", "\\\\", ".."]
 
 def load_and_process_data():
@@ -92,29 +101,28 @@ def load_and_process_data():
     
     return pd.DataFrame(data), list(common_benchmarks)
 
-def create_plot(df, benchmarks, metric, output_dir):
-    """Create grouped bar chart for the given metric"""
+def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale='linear'):
+    """Create grouped bar chart for the given metric and execution type"""
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    
+    # Filter data for the specific execution type
+    df = df[df['type'] == exec_type]
     
     # Calculate bar positions
     n_variants = len(VARIANTS)
-    width = 0.2  # Width of each bar
+    width = 0.15  # Width of each bar
     variant_positions = np.arange(len(benchmarks))
     
     # Plot bars for each variant
-    for i, (variant, hatch) in enumerate(zip(VARIANTS, hatches)):
+    for i, variant in enumerate(VARIANTS):
         variant_data = df[df['variant'] == variant]
-        cold_data = variant_data[variant_data['type'] == 'cold']
-        hot_data = variant_data[variant_data['type'] == 'hot']
-        
-        # Plot cold and hot bars
-        positions = variant_positions + (i - n_variants/2) * width
-        cold_bars = ax.bar(positions, cold_data[metric], width / 2, label=f'{variant} (cold)',
-                          color=palette[i], edgecolor='black', hatch=hatch)
-        hot_bars = ax.bar(positions + width/2, hot_data[metric], width / 2 , label=f'{variant} (hot)',
-                         color=palette[i + len(VARIANTS)], edgecolor='black', hatch=hatch)
+        positions = variant_positions + (i - n_variants/2 + 0.5) * width
+        bars = ax.bar(positions, variant_data[metric], width, 
+                     label=LABEL_MAPPINGS[variant],
+                     color=palette[i], edgecolor='black', hatch=hatches[i%len(hatches)])
     
     # Customize the plot
+    ax.set_yscale(y_scale)
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
@@ -129,13 +137,13 @@ def create_plot(df, benchmarks, metric, output_dir):
         else:
             label.set_y(-0.03)  # Move slightly further downward
     
-    title = 'Execution Time' if metric == 'exec_time' else 'Client Time'
-    ax.set_title(title, pad=5, fontsize=TITLE_FONTSIZE)
+    # title = f'{metric.replace("_", " ").title()} ({exec_type} start)'
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Enhance legend
     legend = plt.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
-    legend.get_frame().set_edgecolor('black')
+    # legend.get_frame().set_edgecolor('black')
     
     # Add gridlines
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -147,18 +155,26 @@ def create_plot(df, benchmarks, metric, output_dir):
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f'{metric}_{exec_type}'
+    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
 
-    plt.savefig(output_dir / (metric + '.pdf'), format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / (metric + '.png'), format='png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def main():
     # Load and process data
     df, common_benchmarks = load_and_process_data()
     
-    # Create plots for exec_time and client_time
-    create_plot(df, common_benchmarks, 'exec_time', 'output')
-    create_plot(df, common_benchmarks, 'client_time', 'output')
+    # Create separate plots for each metric and execution type
+    metrics = ['exec_time', 'client_time']
+    exec_types = ['cold', 'hot']
+    
+    for metric in metrics:
+        for exec_type in exec_types:
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
+    
     print("Plots saved in output directory")
 
 if __name__ == "__main__":
