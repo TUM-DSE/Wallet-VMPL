@@ -31,10 +31,10 @@ int main(int argc, char** argv) {
             trustlet_exit();
         } else {
             //call_outb_with_value(201);
-            strcpy(input, buf);
+            strcpy(buf, input);
             call_outb_with_value(202);
 
-            uint64_t size = strlen(input);
+            uint64_t size = strlen(buf);
             sprintf(output, "strlen = %d",size);
             notify_monitor();
         }

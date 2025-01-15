@@ -32,7 +32,8 @@ def parse(filename):
                 exit(0)
             end = ti(line)
             current_start = False
-            res.append( (end - start)/ 10e6)
+            res.append( (end - start)/ 10e5)
+            print(end-start)
 
     res = np.array(res)
 
