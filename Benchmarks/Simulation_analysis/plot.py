@@ -8,6 +8,10 @@ import numpy as np
 import argparse
 from pathlib import Path
 
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib.lines import Line2D
+import matplotlib.transforms as mtransforms
+
 # Common graph settings
 mpl.use("Agg")
 mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
@@ -32,6 +36,10 @@ def format_nodes(value):
     else:
         value /= 1024
         return f"{value:.0f}K"
+
+def format_data_to_hours(value):
+    """Format measurements in seconds to hours"""
+    return value/3600
 
 def parse_simulation_results(file_path):
     """Parse the simulation results file into a structured format"""
@@ -99,12 +107,12 @@ def create_scalability_plot(data, metric, output_dir, y_scale='linear'):
             # Convert node values to positions
             x_positions = [node_positions[n] for n in variant_data['num_nodes']]
             ax.plot(x_positions, 
-                   variant_data[metric],
+                   format_data_to_hours(variant_data[metric]),  # Convert to hours
                    label=variant,
                    color=palette[i],
                    marker=markers[i],
-                   markersize=1,
-                   linewidth=1)
+                   markersize=0.8,
+                   linewidth=0.8)
     
     # Plot Wallet with different percentage_soft_warm values
     soft_warm_values = [0, 0.3, 0.6, 0.9]
@@ -116,9 +124,9 @@ def create_scalability_plot(data, metric, output_dir, y_scale='linear'):
         if not wallet_data.empty:
             # Convert node values to positions
             x_positions = [node_positions[n] for n in wallet_data['num_nodes']]
-            label = f'Wallet ({soft_warm})'
+            label = f'Wallet-{int(soft_warm * 100)}%'
             ax.plot(x_positions,
-                   wallet_data[metric],
+                   format_data_to_hours(wallet_data[metric]),  # Convert to hours
                    label=label,
                    color=palette[i+2],
                    marker=markers[i+2],
@@ -133,7 +141,7 @@ def create_scalability_plot(data, metric, output_dir, y_scale='linear'):
     ax.set_xticklabels([str(format_nodes(n)) for n in all_nodes], fontsize=TICKS_FONTSIZE)
     
     ax.set_xlabel('Number of nodes', fontsize=TICKS_FONTSIZE)
-    ylabel = 'Time (s)' if metric == 'simulation_time' else 'Average function delay (ms)'
+    ylabel = 'Time (hours)' if metric == 'simulation_time' else 'Average function delay (hours)'
     ax.set_ylabel(ylabel, fontsize=TICKS_FONTSIZE)
     
     plt.yticks(fontsize=TICKS_FONTSIZE)
@@ -158,6 +166,80 @@ def create_scalability_plot(data, metric, output_dir, y_scale='linear'):
         
     # Set x-axis limits with some padding
     ax.set_xlim(-0.2, len(all_nodes) - 0.8)
+
+    if y_scale == 'linear' and metric == 'simulation_time':
+      # Create an inset plot focusing on nodes >= 64
+      node_threshold = 64
+      inset_x_prop = 0.58
+      inset_y_prop = 0.14
+      inset_width = 0.35
+      inset_height = 0.30
+      inset_ax = ax.inset_axes([inset_x_prop, inset_y_prop, inset_width, inset_height])
+      zoomed_data = data[data['num_nodes'] >= node_threshold]
+      zoomed_nodes = sorted(zoomed_data['num_nodes'].unique())
+      zoomed_node_positions = {node: i for i, node in enumerate(zoomed_nodes)}
+      
+      # Plot data in the inset
+      for i, variant in enumerate(['VM', 'CVM']):
+          variant_data = zoomed_data[
+              (zoomed_data['variant'] == variant) & 
+              (zoomed_data['percentage_soft_warm'] == 0)
+          ]
+          if not variant_data.empty:
+              x_positions = [zoomed_node_positions[n] for n in variant_data['num_nodes']]
+              inset_ax.plot(x_positions,
+                            format_data_to_hours(variant_data[metric]),  # Convert to hours
+                            label=variant,
+                            color=palette[i],
+                            marker=markers[i],
+                            markersize=0.8,
+                            linewidth=0.8)
+      
+      for i, soft_warm in enumerate(soft_warm_values):
+          wallet_data = zoomed_data[
+              (zoomed_data['variant'] == 'WALLET') & 
+              (zoomed_data['percentage_soft_warm'] == soft_warm)
+          ]
+          if not wallet_data.empty:
+              x_positions = [zoomed_node_positions[n] for n in wallet_data['num_nodes']]
+              label = f'Wallet ({soft_warm})'
+              inset_ax.plot(x_positions,
+                            format_data_to_hours(wallet_data[metric]),  # Convert to hours
+                            label=label,
+                            color=palette[i+2],
+                            marker=markers[i+2],
+                            markersize=0.8,
+                            linewidth=0.8)
+      
+      # ZOOM-IN arrows
+      # Define the data points for the main plot (VM variant at node 64 and 2048)
+      node_thres_data = data[(data['num_nodes'] == node_threshold) & (data['variant'] == 'VM')]
+      node_max_data = data[(data['num_nodes'] == max(data['num_nodes'])) & (data['variant'] == 'VM')]
+      # Extract coordinates for the start points (main plot)
+      main_x1, main_y1 = node_positions[node_threshold], format_data_to_hours(node_thres_data['simulation_time']).iloc[0]
+      main_x2, main_y2 = node_positions[max(data['num_nodes'])], format_data_to_hours(node_max_data['simulation_time']).iloc[0]
+      # Calculate coordinates for the start points (main plot)
+      zoom_x1 = ax.get_xlim()[1] * inset_x_prop
+      zoom_y1 = ax.get_ylim()[1] * inset_y_prop
+      zoom_x2 = ax.get_xlim()[1] * (inset_x_prop + inset_width)
+      zoom_y2 = ax.get_ylim()[1] * inset_y_prop
+      # Draw the connection lines between the main plot and the inset plot
+      line1 = Line2D([main_x1, zoom_x1], [main_y1, zoom_y1], transform=ax.transData,
+                    linestyle='--', color='grey', linewidth=0.8, alpha=0.7)
+      line2 = Line2D([main_x2, zoom_x2], [main_y2, zoom_y2], transform=ax.transData,
+                    linestyle='--', color='grey', linewidth=0.8, alpha=0.7)
+      # Add lines to the main plot
+      ax.add_line(line1)
+      ax.add_line(line2)
+
+      # Customize inset plot
+      inset_ax.set_yscale(y_scale)
+      
+      # Hide x-axis and y-axis ticks
+      inset_ax.ticklabel_format(useOffset=False)
+      inset_ax.set_xticks([])
+      # inset_ax.set_yticks([])
+      inset_ax.tick_params(axis='y', labelsize=TICKS_FONTSIZE-2)
     
     # Adjust layout
     plt.tight_layout()
@@ -189,7 +271,7 @@ def main():
     metrics = ['simulation_time', 'avg_delay']
     for metric in metrics:
         create_scalability_plot(data, metric, args.output_dir, 'linear')
-        create_scalability_plot(data, metric, args.output_dir, 'log')
+        # create_scalability_plot(data, metric, args.output_dir, 'log')
     
     print(f"Plots saved in {args.output_dir}")
 
