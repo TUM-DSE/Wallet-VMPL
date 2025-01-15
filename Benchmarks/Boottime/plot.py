@@ -64,24 +64,25 @@ def calculate_categories(raw_data):
     categories = {
         'VM': {
             'QEMU': raw_data['VM']['QEMU'],
-            'OVMF': raw_data['VM']['OVMF'],
+            'Monitor/OVMF': raw_data['VM']['OVMF'],
             'Guest-OS': raw_data['VM']['Linux'],
-            'Runtime': raw_data['VM']['Runtime']
+            'Fn Invocation': raw_data['VM']['Runtime']
         },
         'CVM': {
             'QEMU': raw_data['CVM']['QEMU'],
-            'OVMF': raw_data['CVM']['OVMF'],
+            'Monitor/OVMF': raw_data['CVM']['OVMF'],
             'Guest-OS': raw_data['CVM']['Linux'],
-            'Runtime': raw_data['CVM']['Runtime']
+            'Fn Invocation': raw_data['CVM']['Runtime']
         },
         'Wallet\n(cold)': {
             'QEMU': wallet_data['QEMU'],
-            'Monitor': wallet_data['Monitor'],
+            'Monitor/OVMF': wallet_data['Monitor'],
             'Guest-OS': wallet_data['Linux/OVMF'],
-            'Runtime': wallet_data['Runtime'],
-            'Zygote': wallet_data['Zygote'],
-            'Trustlet': wallet_data['Trustlet'],
-            'Invoke': wallet_data['Invoke']
+            # 'Runtime': wallet_data['Runtime'],
+            # 'Zygote': wallet_data['Zygote'],
+            # 'Trustlet': wallet_data['Trustlet'],
+            # 'Invoke': wallet_data['Invoke']
+            'Fn Invocation': wallet_data['Runtime'] + wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
         },
         # Wallet empty
         # 'W-em': {
@@ -92,26 +93,28 @@ def calculate_categories(raw_data):
         #     'Zygote': wallet_data['Zygote'],
         #     'Trustlet': wallet_data['Trustlet'],
         #     'Invoke': wallet_data['Invoke']
+        #     'Fn Invocation': wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
         # },
         # Wallet semi-hot
         'Wallet\n(warm)': {
             'QEMU': 0,
-            'Monitor': 0,
+            'Monitor/OVMF': 0,
             'Guest-OS': 0,
-            'Runtime': 0,
-            'Zygote': 0,
-            'Trustlet': wallet_data['Trustlet'],
-            'Invoke': wallet_data['Invoke']
+            # 'Runtime': 0,
+            # 'Zygote': 0,
+            # 'Trustlet': wallet_data['Trustlet'],
+            # 'Invoke': wallet_data['Invoke']
+            'Fn Invocation': wallet_data['Trustlet'] + wallet_data['Invoke']
         },
         # Wallet hot
         'Wallet\n(hot)': {
             'QEMU': 0,
-            'Monitor': 0,
+            'Monitor/OVMF': 0,
             'Guest-OS': 0,
-            'Runtime': 0,
-            'Zygote': 0,
-            'Trustlet': 0,
-            'Invoke': wallet_data['Invoke']
+            # 'Runtime': 0,
+            # 'Zygote': 0,
+            # 'Trustlet': 0,
+            'Fn Invocation': wallet_data['Invoke']
         }
     }
     
@@ -146,7 +149,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     if motivation:
         df.plot(kind='bar', stacked=True, ax=ax, color='C0', edgecolor='C0', width=0.8, legend=False)
     else:
-        df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.8)
+        df.plot(kind='bar', stacked=True, ax=ax, color=palette, linewidth = 0, edgecolor='black', width=0.8)
     
     # Add hatches for better distinction
     bars = ax.patches
@@ -180,7 +183,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     
     # Enhance legend
     if not motivation:
-      legend = plt.legend(bbox_to_anchor=(0.7, 0.98), loc='upper left', 
+      legend = plt.legend(bbox_to_anchor=(0.63, 0.98), loc='upper left', 
                         borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
       legend.get_frame().set_edgecolor('black')
 
