@@ -23,8 +23,7 @@ sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsiz
 TITLE_FONTSIZE = 8
 TICKS_FONTSIZE = 7
 LEGEND_FONTSIZE = 6
-figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
-figheight = 2.2
+ANNOTATION_SIZE = 4
 palette = sns.color_palette("pastel")
 hatches = ["", "//", "xx", "\\\\", ".."]
 
@@ -75,7 +74,7 @@ def calculate_categories(raw_data):
             'Guest-OS': raw_data['CVM']['Linux'],
             'Runtime': raw_data['CVM']['Runtime']
         },
-        'Wallet': {
+        'Wallet\n(cold)': {
             'QEMU': wallet_data['QEMU'],
             'Monitor': wallet_data['Monitor'],
             'Guest-OS': wallet_data['Linux/OVMF'],
@@ -85,17 +84,17 @@ def calculate_categories(raw_data):
             'Invoke': wallet_data['Invoke']
         },
         # Wallet empty
-        'W-em': {
-            'QEMU': 0,
-            'Monitor': 0,
-            'Guest-OS': 0,
-            'Runtime': 0,
-            'Zygote': wallet_data['Zygote'],
-            'Trustlet': wallet_data['Trustlet'],
-            'Invoke': wallet_data['Invoke']
-        },
+        # 'W-em': {
+        #     'QEMU': 0,
+        #     'Monitor': 0,
+        #     'Guest-OS': 0,
+        #     'Runtime': 0,
+        #     'Zygote': wallet_data['Zygote'],
+        #     'Trustlet': wallet_data['Trustlet'],
+        #     'Invoke': wallet_data['Invoke']
+        # },
         # Wallet semi-hot
-        'W-wa': {
+        'Wallet\n(warm)': {
             'QEMU': 0,
             'Monitor': 0,
             'Guest-OS': 0,
@@ -105,7 +104,7 @@ def calculate_categories(raw_data):
             'Invoke': wallet_data['Invoke']
         },
         # Wallet hot
-        'W-hot': {
+        'Wallet\n(hot)': {
             'QEMU': 0,
             'Monitor': 0,
             'Guest-OS': 0,
@@ -118,8 +117,18 @@ def calculate_categories(raw_data):
     
     return categories
 
-def create_plot(categories, output_dir, y_scale='linear'):
+def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     """Create stacked bar chart"""
+
+    if motivation:
+        motivation_categories = ['VM', 'CVM']
+        categories = {k: categories[k] for k in motivation_categories if k in categories}
+        figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
+        figheight = 1.5
+    else:
+        figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
+        figheight = 2.2
+
     # Convert to DataFrame
     data = []
     for category, components in categories.items():
@@ -134,7 +143,10 @@ def create_plot(categories, output_dir, y_scale='linear'):
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.8)
+    if motivation:
+        df.plot(kind='bar', stacked=True, ax=ax, color='C0', edgecolor='C0', width=0.8, legend=False)
+    else:
+        df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.8)
     
     # Add hatches for better distinction
     bars = ax.patches
@@ -144,6 +156,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     for bar, pattern in zip(bars, patterns):
         bar.set_hatch(pattern)
     
+    y_max = 0
     # Add value labels on the bars
     for i, category in enumerate(df.index):
         total = 0
@@ -151,7 +164,9 @@ def create_plot(categories, output_dir, y_scale='linear'):
             if value > 0:  # Only show non-zero values
                 total += value
         # Add total on top
-        ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+        ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+        if total > y_max:
+            y_max = total
     
     # Customize the plot
     ax.set_yscale(y_scale)
@@ -164,9 +179,16 @@ def create_plot(categories, output_dir, y_scale='linear'):
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Enhance legend
-    legend = plt.legend(bbox_to_anchor=(0.7, 0.98), loc='upper left', 
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
-    legend.get_frame().set_edgecolor('black')
+    if not motivation:
+      legend = plt.legend(bbox_to_anchor=(0.7, 0.98), loc='upper left', 
+                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+      legend.get_frame().set_edgecolor('black')
+
+    # Increase the border a bit to fit the annotations
+    if (y_scale == "linear"):
+      ax.set_ylim(top=y_max + 0.1*y_max)
+    else:
+      ax.set_ylim(top=2*y_max)
     
     # Add gridlines for better readability
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -181,8 +203,9 @@ def create_plot(categories, output_dir, y_scale='linear'):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / f'boot_time_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'boot_time_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    plot_type = 'motivation_' if motivation else ''
+    plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
     
     plt.close()
 
@@ -197,9 +220,12 @@ def main():
     raw_data = load_data(args.input_file)
     categories = calculate_categories(raw_data)
     
-    # Create plots
+    # Create plots for all categories
     create_plot(categories, args.output_dir)
     create_plot(categories, args.output_dir, 'log')
+    # Create plots for VM and CVM only for motivation
+    create_plot(categories, args.output_dir, motivation=True)
+    create_plot(categories, args.output_dir, 'log', motivation=True)
     print(f"Plots saved in {args.output_dir}")
 
 if __name__ == "__main__":

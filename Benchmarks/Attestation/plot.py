@@ -22,6 +22,7 @@ sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsiz
 TITLE_FONTSIZE = 8
 TICKS_FONTSIZE = 7
 LEGEND_FONTSIZE = 6
+ANNOTATION_SIZE = 4
 figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
 palette = sns.color_palette("pastel")
@@ -46,23 +47,23 @@ def calculate_categories(df):
     
     categories = {
         # CVM
-        'CVM': {
-            'CVM TCB': monitor_cold,
-            'Monitor': 0,
-            'Zygote': 0,
-            'Trustlet': 0,
-            'Function': 0
-        },
+        # 'CVM': {
+        #     'CVM TCB': monitor_cold,
+        #     'Monitor': 0,
+        #     'Zygote': 0,
+        #     'Trustlet': 0,
+        #     'Function': 0
+        # },
         # CVM full
-        'CVM-fu': {
-            'CVM TCB': 3 * monitor_cold + zygote_cold + trustlet_cold + function,
-            'Monitor': 0,
-            'Zygote': 0,
-            'Trustlet': 0,
-            'Function': 0
-        },
+        # 'CVM-fu': {
+        #     'CVM TCB': 3 * monitor_cold + zygote_cold + trustlet_cold + function,
+        #     'Monitor': 0,
+        #     'Zygote': 0,
+        #     'Trustlet': 0,
+        #     'Function': 0
+        # },
         # CVM short
-        'CVM-sh': {
+        'CVM': {
             'CVM TCB': monitor_cold + zygote_cold + trustlet_cold + function,
             'Monitor': 0,
             'Zygote': 0,
@@ -70,7 +71,7 @@ def calculate_categories(df):
             'Function': 0
         },
         # Wallet cold
-        'W-co': {
+        'Wallet\n(cold)': {
             'CVM TCB': 0,
             'Monitor': monitor_cold,
             'Zygote': zygote_cold,
@@ -78,7 +79,7 @@ def calculate_categories(df):
             'Function': function
         },
         # Wallet warm (semi-hot)
-        'W-wa': {
+        'Wallet\n(warm)': {
             'CVM TCB': 0,
             'Monitor': monitor_hot,
             'Zygote': zygote_hot,
@@ -86,7 +87,7 @@ def calculate_categories(df):
             'Function': function
         },
         # Wallet hot
-        'W-ho': {
+        'Wallet\n(hot)': {
             'CVM TCB': 0,
             'Monitor': monitor_hot,
             'Zygote': zygote_hot,
@@ -116,7 +117,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.8)
+    df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.6)
     
     # Add hatches for better distinction
     bars = ax.patches
@@ -137,7 +138,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
                 # if value > df.values.max() * 0.05:  # Only show labels for visible segments
                     # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
         # Add total on top of each bar - choose the axis depending where the total is
-        ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+        ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
     
     # Customize the plot
     ax.set_yscale(y_scale)
@@ -161,7 +162,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     
     # Add gridlines for better readability
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
-       
+
     # Adjust layout to prevent label cutoff
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0.05)
@@ -236,9 +237,9 @@ def create_cutoff_plot(categories, output_dir):
                     # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
         # Add total on top of each bar - choose the axis depending where the total is
         if total > 2450:
-            ax1.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+            ax1.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
         else:
-            ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE)
+            ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
     # Customize the plot
     # Tick size

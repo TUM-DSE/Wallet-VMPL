@@ -17,6 +17,7 @@ sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsiz
 TITLE_FONTSIZE = 8
 TICKS_FONTSIZE = 7
 LEGEND_FONTSIZE = 6
+ANNOTATION_SIZE = 4
 figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
 VARIANTS = ['native', 'gramine', 'vm', 'kata', 'cvm', 'wallet']
