@@ -117,7 +117,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax, color=palette, edgecolor='black', width=0.6)
+    df.plot(kind='bar', stacked=True, ax=ax, color=palette, linewidth=0, edgecolor='black', width=0.6)
     
     # Add hatches for better distinction
     bars = ax.patches
@@ -138,7 +138,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
                 # if value > df.values.max() * 0.05:  # Only show labels for visible segments
                     # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
         # Add total on top of each bar - choose the axis depending where the total is
-        ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+        ax.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
     
     # Customize the plot
     ax.set_yscale(y_scale)
@@ -194,7 +194,7 @@ def create_cutoff_plot(categories, output_dir):
     # Create the plot with increased size
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(figwidth, figheight))
 
-    ax1.set_ylim(2450, 2850)  # outliers only
+    ax1.set_ylim(2745, 2749)  # outliers only
     ax2.set_ylim(0, 7)  # most of the data
     
     # hide the spines between ax and ax2
@@ -211,8 +211,8 @@ def create_cutoff_plot(categories, output_dir):
     ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
 
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, edgecolor='black', width=0.8)
-    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, edgecolor='black', width=0.8, legend=False)
+    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8)
+    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
     
     # Add hatches for better distinction
     bars1 = ax1.patches
@@ -237,9 +237,9 @@ def create_cutoff_plot(categories, output_dir):
                     # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
         # Add total on top of each bar - choose the axis depending where the total is
         if total > 2450:
-            ax1.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+            ax1.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
         else:
-            ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+            ax2.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
     # Customize the plot
     # Tick size
@@ -253,12 +253,12 @@ def create_cutoff_plot(categories, output_dir):
     # ax2.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     ax2.annotate(
         'Time (ms)',  # Text to annotate
-        xy=(-0.12, 5),  # The point to annotate (data coordinates)
+        xy=(-0.28, 5),  # The point to annotate (data coordinates)
         xytext=(-50, 15),  # Text location (offset coordinates)
         textcoords='offset points',  # Interpret xytext as an offset from xy
         rotation=90,  # Rotate the label vertically
         va='center',  # Align text vertically to the center
-        fontsize=TICKS_FONTSIZE,  # Font size
+        fontsize=TICKS_FONTSIZE,  # Font size,
     )
   
     # x-axis label
