@@ -124,6 +124,10 @@
                 gcc
                 gccgo
                 zip
+                inotify-tools
+                cargo-depgraph
+                cloc
+                cargo-cache
                 python3
                 python311Packages.requests
                 python311Packages.pip
@@ -133,9 +137,9 @@
                 python311Packages.jinja2
                 python311Packages.tomli
                 python311Packages.tomli-w
-		python311Packages.matplotlib
-		python311Packages.seaborn
-		python311Packages.pandas
+                python311Packages.matplotlib
+                python311Packages.seaborn
+                python311Packages.pandas
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
