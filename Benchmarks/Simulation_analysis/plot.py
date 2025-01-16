@@ -41,6 +41,10 @@ def format_data_to_hours(value):
     """Format measurements in seconds to hours"""
     return value/3600
 
+def format_data_to_minutes(value):
+    """Format measurements in seconds to minutes"""
+    return value/60
+
 def parse_simulation_results(file_path):
     """Parse the simulation results file into a structured format"""
     data = []
@@ -56,7 +60,7 @@ def parse_simulation_results(file_path):
             continue
             
         if line.startswith('**'):
-            if current_variant and len(current_entry) == 5:
+            if current_variant and len(current_entry) == 6:
                 data.append({
                     'variant': current_variant,
                     **current_entry
@@ -74,8 +78,10 @@ def parse_simulation_results(file_path):
                 current_entry['num_nodes'] = int(line.split(':')[1].strip())
             elif line.startswith('percentage_soft_warm:'):
                 current_entry['percentage_soft_warm'] = float(line.split(':')[1].strip())
-    
-    if current_variant and len(current_entry) == 5:
+            elif line.startswith('max_functions_cached_per_node:'):
+                current_entry['max_functions_cached'] = int(line.split(':')[1].strip())
+
+    if current_variant and len(current_entry) == 6:
         data.append({
             'variant': current_variant,
             **current_entry
@@ -256,6 +262,79 @@ def create_scalability_plot(data, metric, output_dir, y_scale='linear'):
     
     plt.close()
 
+def create_selectivity_plot(data, metric, output_dir, y_scale='linear', nodes=64):
+    """Create line plot for cache selectivity analysis"""
+    figwidth = 3.3
+    figheight = 2.2
+    
+    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    
+    # Define markers for different variants
+    markers = ['o', 's', '^']
+    
+    # Filter data for percentage_soft_warm = 0 and the specified number of nodes
+    filtered_data = data[(data['percentage_soft_warm'] == 0) & (data['num_nodes'] == nodes)]
+
+    # Get unique node values and create position mapping
+    all_cache_fn = sorted(filtered_data['max_functions_cached'].unique())
+    cache_fn_positions = {node: i for i, node in enumerate(all_cache_fn)}
+
+    # Plot for each variant
+    for i, variant in enumerate(['VM', 'CVM', 'WALLET']):
+        variant_data = filtered_data[filtered_data['variant'] == variant]
+        if not variant_data.empty:
+            x_positions = [cache_fn_positions[n] for n in variant_data['max_functions_cached']]
+            ax.plot(x_positions, 
+                   format_data_to_minutes(variant_data[metric]),
+                   label=variant,
+                   color=palette[i],
+                   marker=markers[i],
+                   markersize=0.8,
+                   linewidth=0.8)
+    
+    # Customize the plot
+    ax.set_yscale(y_scale)
+    
+    # Set x-ticks to show actual node values
+    ax.set_xticks(list(cache_fn_positions.values()))
+    ax.set_xticklabels([str(format_nodes(n)) for n in all_cache_fn], fontsize=TICKS_FONTSIZE)
+    
+    ax.set_xlabel(f'Function cache size for {nodes} nodes', fontsize=TICKS_FONTSIZE)
+    ylabel = 'Simulation time (mins)' if metric == 'simulation_time' else 'Average function delay (mins)'
+    ax.set_ylabel(ylabel, fontsize=TICKS_FONTSIZE)
+    
+    plt.xticks(fontsize=TICKS_FONTSIZE)
+    plt.yticks(fontsize=TICKS_FONTSIZE)
+    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
+    
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Enhance legend
+    legend = plt.legend(bbox_to_anchor=(0.75, 0.9),
+                       loc='upper left',
+                       borderaxespad=0.,
+                       frameon=True,
+                       fontsize=LEGEND_FONTSIZE)
+    legend.get_frame().set_edgecolor('black')
+    
+    # Add gridlines
+    ax.grid(True, linestyle='--', alpha=0.7)
+       
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    metric_name = 'simulation_time' if metric == 'simulation_time' else 'function_delay'
+    plt.savefig(output_dir / f'selectivity_{nodes}_{metric_name}_{y_scale}.pdf',
+                format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'selectivity_{nodes}_{metric_name}_{y_scale}.png',
+                format='png', dpi=300, bbox_inches='tight')
+    
+    plt.close()
+
 def main():
     parser = argparse.ArgumentParser(description='Generate scalability plots')
     parser.add_argument('input_file', type=str, help='Path to the input file')
@@ -266,13 +345,21 @@ def main():
     
     # Load and process data
     data = parse_simulation_results(args.input_file)
-    
+
     # Create plots for both metrics and scales
     metrics = ['simulation_time', 'avg_delay']
+
+    scalability_data = data[data['max_functions_cached'] == 1]
     for metric in metrics:
-        create_scalability_plot(data, metric, args.output_dir, 'linear')
-        # create_scalability_plot(data, metric, args.output_dir, 'log')
-    
+        create_scalability_plot(scalability_data, metric, args.output_dir, 'linear')
+
+    # Create selectivity plots
+    # nodes = [16, 64, 256, 1024]
+    nodes = [256]
+    for metric in metrics:
+        for node in nodes:
+          create_selectivity_plot(data, metric, args.output_dir, 'linear', node)
+
     print(f"Plots saved in {args.output_dir}")
 
 if __name__ == "__main__":

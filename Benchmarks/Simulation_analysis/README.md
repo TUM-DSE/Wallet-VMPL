@@ -4,7 +4,7 @@
 
 To produce the plots run:
 ```
-python3 plot.py
+python3 plot.py results.txt
 ```
 
 The plots will be stored in the `output` directory.
