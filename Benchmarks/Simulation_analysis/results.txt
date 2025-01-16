@@ -2377,4 +2377,1323 @@ percentage_soft_warm: 0.9
 ------------------------------------------------
 num_nodes;vm_results;cvm_results;w_results
 [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048];[10194726.848205337, 5092752.410683993, 2564253.6930605364, 1487430.2789910918, 1302724.5612629727, 1210049.196006912, 1209599.7607639683, 1209599.7607639683, 1209599.7607639683, 1209599.7607639683, 1209599.7607639683, 1209599.7607639683];[23088466.520760424, 11544236.604853466, 5772119.446567479, 2888414.6640613363, 1456377.943307968, 1236682.4941980173, 1209608.0017639683, 1209608.0017639683, 1209608.0017639683, 1209608.0017639683, 1209608.0017639683, 1209608.0017639683];[10826440.00297213, 5410114.935189524, 2711019.2727923337, 1488912.7155258788, 1302920.0832268267, 1209838.3913989044, 1209601.3710639684, 1209601.3710639684, 1209601.3710639684, 1209601.3710639684, 1209601.3710639684, 1209601.3710639684]
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1456377.943307968
+Cold boot rate: 0.395840179792433
+Soft warm boot rate: 0.0
+Warm boot rate: 0.604159820207567
+Function delay:
+    Avg: 112503.25514421845
+    Median: 108856.49747426144
+    Std: 66154.3596799704
 
+Configuration:
+num_nodes: 16
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.21313954762131926
+Soft warm boot rate: 0.0
+Warm boot rate: 0.7868604523786807
+Function delay:
+    Avg: 1361.3578928252448
+    Median: 0.0
+    Std: 5418.321214211513
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.13753949491935943
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8624605050806405
+Function delay:
+    Avg: 134.19156351533115
+    Median: 0.0
+    Std: 876.9098442410906
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.13489228153548471
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8651077184645153
+Function delay:
+    Avg: 6.068102728689452
+    Median: 0.0
+    Std: 53.20113425861632
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1298973.4733879655
+Cold boot rate: 0.24793293726094184
+Soft warm boot rate: 0.0
+Warm boot rate: 0.7520670627390582
+Function delay:
+    Avg: 8493.903886335675
+    Median: 0.0
+    Std: 30481.856631320596
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.10270117736380152
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8972988226361984
+Function delay:
+    Avg: 890.6560913813266
+    Median: 0.0
+    Std: 4668.225251923034
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.09577823984540758
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9042217601545924
+Function delay:
+    Avg: 117.1092206999666
+    Median: 0.0
+    Std: 776.9430165227168
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.09018143305917209
+Soft warm boot rate: 0.0
+Warm boot rate: 0.909818566940828
+Function delay:
+    Avg: 4.6748483234061755
+    Median: 0.0
+    Std: 44.69005112007695
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1308999.9430018358
+Cold boot rate: 0.3343782859848628
+Soft warm boot rate: 0.0
+Warm boot rate: 0.6656217140151371
+Function delay:
+    Avg: 10382.240653893516
+    Median: 347.9127161083197
+    Std: 31481.276232226435
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.1266886460089119
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8733113539910882
+Function delay:
+    Avg: 924.8979668576856
+    Median: 0.0
+    Std: 4784.670948102057
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.11498669073591422
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8850133092640858
+Function delay:
+    Avg: 119.54457656864768
+    Median: 0.0
+    Std: 793.191801609909
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.11053226455374211
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8894677354462579
+Function delay:
+    Avg: 4.868744350994087
+    Median: 0.0
+    Std: 45.95115913048626
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 2
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1456377.943307968
+Cold boot rate: 0.296438932613679
+Soft warm boot rate: 0.0
+Warm boot rate: 0.703561067386321
+Function delay:
+    Avg: 112503.25514421845
+    Median: 108856.49747426144
+    Std: 66154.3596799704
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.17033081585561682
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8296691841443832
+Function delay:
+    Avg: 1361.3578928252448
+    Median: 0.0
+    Std: 5418.321214211513
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.1204153964434254
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8795846035565746
+Function delay:
+    Avg: 134.19156351533115
+    Median: 0.0
+    Std: 876.9098442410906
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.11811801503419317
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8818819849658068
+Function delay:
+    Avg: 6.068102728689452
+    Median: 0.0
+    Std: 53.20113425861632
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1295037.4350880198
+Cold boot rate: 0.16923336316748874
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8307666368325113
+Function delay:
+    Avg: 8239.187822585813
+    Median: 0.0
+    Std: 29971.241798479343
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.0907589334617565
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9092410665382435
+Function delay:
+    Avg: 873.0590856882219
+    Median: 0.0
+    Std: 4601.540319773434
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.08613287254455057
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9138671274554494
+Function delay:
+    Avg: 115.76404359247731
+    Median: 0.0
+    Std: 767.7327154631669
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.08256791813628908
+Soft warm boot rate: 0.0
+Warm boot rate: 0.917432081863711
+Function delay:
+    Avg: 4.610006828874259
+    Median: 0.0
+    Std: 44.29169381457708
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1306096.2049468292
+Cold boot rate: 0.24460069936106446
+Soft warm boot rate: 0.0
+Warm boot rate: 0.7553993006389356
+Function delay:
+    Avg: 9661.493132457572
+    Median: 134.7229089323664
+    Std: 31180.609083285024
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.10810009939670391
+Soft warm boot rate: 0.0
+Warm boot rate: 0.891899900603296
+Function delay:
+    Avg: 912.1571267456119
+    Median: 0.0
+    Std: 4736.770709985376
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.10331451913752536
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8966854808624747
+Function delay:
+    Avg: 118.5747620769275
+    Median: 0.0
+    Std: 786.5524105380322
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.10016300251747771
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8998369974825223
+Function delay:
+    Avg: 4.817715863246948
+    Median: 0.0
+    Std: 45.68019863701629
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 4
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1456377.943307968
+Cold boot rate: 0.21825880599772535
+Soft warm boot rate: 0.0
+Warm boot rate: 0.7817411940022747
+Function delay:
+    Avg: 112503.25514421845
+    Median: 108856.49747426144
+    Std: 66154.3596799704
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.1367933886300065
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8632066113699935
+Function delay:
+    Avg: 1361.3578928252448
+    Median: 0.0
+    Std: 5418.321214211513
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.10354370198959995
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8964562980104
+Function delay:
+    Avg: 134.19156351533115
+    Median: 0.0
+    Std: 876.9098442410906
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.10207168173266275
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8979283182673372
+Function delay:
+    Avg: 6.068102728689452
+    Median: 0.0
+    Std: 53.20113425861632
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1292211.5390261174
+Cold boot rate: 0.12117917101432595
+Soft warm boot rate: 0.0
+Warm boot rate: 0.878820828985674
+Function delay:
+    Avg: 8102.827377019652
+    Median: 0.0
+    Std: 29582.84197613308
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.07967082477052688
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9203291752294731
+Function delay:
+    Avg: 860.2657590257536
+    Median: 0.0
+    Std: 4553.60774265991
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.07773185707268883
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9222681429273112
+Function delay:
+    Avg: 114.81534194092359
+    Median: 0.0
+    Std: 761.2058639842792
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.0769009430319074
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9230990569680926
+Function delay:
+    Avg: 4.593793441155265
+    Median: 0.0
+    Std: 44.21607446747242
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1304148.6494468178
+Cold boot rate: 0.1738543760042525
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8261456239957475
+Function delay:
+    Avg: 9273.372186917306
+    Median: 54.34611708193552
+    Std: 30955.643863801037
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.0918629486544594
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9081370513455406
+Function delay:
+    Avg: 903.0060476068849
+    Median: 0.0
+    Std: 4702.10581790422
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.08885429271092521
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9111457072890748
+Function delay:
+    Avg: 117.92379857679866
+    Median: 0.0
+    Std: 782.0442435646124
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.0879446286152459
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9120553713847541
+Function delay:
+    Avg: 4.802440564916571
+    Median: 0.0
+    Std: 45.616654480943325
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 8
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1456377.943307968
+Cold boot rate: 0.1586768173468198
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8413231826531802
+Function delay:
+    Avg: 112503.25514421845
+    Median: 108856.49747426144
+    Std: 66154.3596799704
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.11452024810305757
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8854797518969424
+Function delay:
+    Avg: 1361.3578928252448
+    Median: 0.0
+    Std: 5418.321214211513
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.09603064386751615
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9039693561324839
+Function delay:
+    Avg: 134.19156351533115
+    Median: 0.0
+    Std: 876.9098442410906
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.09524970582311224
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9047502941768878
+Function delay:
+    Avg: 6.068102728689452
+    Median: 0.0
+    Std: 53.20113425861632
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1291092.942914056
+Cold boot rate: 0.09375143554787574
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9062485644521242
+Function delay:
+    Avg: 8059.800284713576
+    Median: 0.0
+    Std: 29478.13618219638
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.07310226249917337
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9268977375008266
+Function delay:
+    Avg: 857.561943887411
+    Median: 0.0
+    Std: 4545.007752964241
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.07281805557027912
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9271819444297209
+Function delay:
+    Avg: 114.71264738070865
+    Median: 0.0
+    Std: 760.5013272991408
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.07216029068866418
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9278397093113359
+Function delay:
+    Avg: 4.594575851122754
+    Median: 0.0
+    Std: 44.22106349129325
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1303352.644281878
+Cold boot rate: 0.12526963059661747
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8747303694033826
+Function delay:
+    Avg: 9052.037686733082
+    Median: 18.256168869207613
+    Std: 30910.617034048904
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.08098484010962412
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9190151598903759
+Function delay:
+    Avg: 901.2187589294094
+    Median: 0.0
+    Std: 4696.682883356755
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.07942296402081626
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9205770359791837
+Function delay:
+    Avg: 117.85092948704094
+    Median: 0.0
+    Std: 781.5423035012742
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.07932604087632657
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9206739591236734
+Function delay:
+    Avg: 4.801530008322038
+    Median: 0.0
+    Std: 45.61310190238326
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 16
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1456377.943307968
+Cold boot rate: 0.12050121381094232
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8794987861890576
+Function delay:
+    Avg: 112503.25514421845
+    Median: 108856.49747426144
+    Std: 66154.3596799704
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.10218021546216943
+Soft warm boot rate: 0.0
+Warm boot rate: 0.8978197845378305
+Function delay:
+    Avg: 1361.3578928252448
+    Median: 0.0
+    Std: 5418.321214211513
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.09397001743102176
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9060299825689783
+Function delay:
+    Avg: 134.19156351533115
+    Median: 0.0
+    Std: 876.9098442410906
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* CVM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209608.0017639683
+Cold boot rate: 0.09301340618723028
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9069865938127697
+Function delay:
+    Avg: 6.068102728689452
+    Median: 0.0
+    Std: 53.20113425861632
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 8.3073
+warm_boot_time: 8.3073
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1290280.946315088
+Cold boot rate: 0.07849260279532407
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9215073972046759
+Function delay:
+    Avg: 8031.664725100622
+    Median: 0.0
+    Std: 29403.427873139615
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.0686337016917632
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9313662983082368
+Function delay:
+    Avg: 856.6970546878796
+    Median: 0.0
+    Std: 4543.624245935733
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.06897394231356556
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9310260576864344
+Function delay:
+    Avg: 114.7121525495578
+    Median: 0.0
+    Std: 760.4999740888278
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* VM ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209599.7607639683
+Cold boot rate: 0.06854536028402519
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9314546397159748
+Function delay:
+    Avg: 4.594575851122754
+    Median: 0.0
+    Std: 44.22106349129325
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 3.6999
+warm_boot_time: 0.0663
+soft_warm_time: 0
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1302846.7198018236
+Cold boot rate: 0.09594230245977815
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9040576975402218
+Function delay:
+    Avg: 8948.616251553161
+    Median: 6.580326010123827
+    Std: 30885.05239356226
+
+Configuration:
+num_nodes: 16
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.07437235953842372
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9256276404615763
+Function delay:
+    Avg: 900.5285207853948
+    Median: 0.0
+    Std: 4695.551356691165
+
+Configuration:
+num_nodes: 64
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.07432339315813466
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9256766068418654
+Function delay:
+    Avg: 117.85086297415162
+    Median: 0.0
+    Std: 781.5421438030544
+
+Configuration:
+num_nodes: 256
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
+************* WALLET ****************
+------------------------------------------------
+Statistics:
+Total simulation time: 1209601.3710639684
+Cold boot rate: 0.07410127761867912
+Soft warm boot rate: 0.0
+Warm boot rate: 0.9258987223813209
+Function delay:
+    Avg: 4.801530008322038
+    Median: 0.0
+    Std: 45.61310190238326
+
+Configuration:
+num_nodes: 1024
+cold_boot_time: 4.3061
+warm_boot_time: 1.6766
+soft_warm_time: 2.4124
+max_functions_cached_per_node: 32
+caching_time: 300
+max_executions_slots: 1
+percentage_soft_warm: 0
+------------------------------------------------
