@@ -26,10 +26,10 @@ def plot_node_scalability():
     plt.plot(num_nodes, vm_results, label = 'VM')
     plt.plot(num_nodes, cvm_results, label = 'CVM')
     plt.plot(num_nodes, w_results, label = 'Wallet')
+    plt.xticks(num_nodes)
     plt.legend()
     plt.grid()
 #x_ticks = np.linspace(0, 1024, 5, dtype=int)
-#plt.xticks(x_ticks, (str(i) for i in x_ticks))
 
     plt.savefig('mock_overhead.png', format='png', dpi=1200)
     plt.show()
