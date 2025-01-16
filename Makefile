@@ -28,14 +28,18 @@ REQUIREMENTS=requirements.txt
 #Build OVMF Firmware
 build_firmware:
 	#git submodule init; git submodule update
-	cd edk2/; git submodule init; git submodule update
+	#cd edk2/; git submodule init; git submodule update
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 make -j16 -C BaseTools/
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; \
 	PYTHON3_ENABLE=TRUE PYTHON_COMMAND=python3 build -a X64 -b RELEASE -t GCC5 -D DEBUG_ON_SERIAL_PORT -DTPM2_ENABLE -p OvmfPkg/OvmfPkgX64.dsc
 	mkdir -p firmware
-	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
-	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
-	cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd firmware/
+	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
+	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
+	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd firmware/
+
+clear_firmware_build:
+	cd edk2/; git submodule foreach --recursive git clean -xfd
+	cd edk2/; git clean -xfd
 
 firmware/OVMF_CODE.fd: build_firmware
 firmware/OVMF_VARS.fd: build_firmware
@@ -100,8 +104,9 @@ clean:
 
 submodules:
 	git submodule update --init --recursive svsm;
-#The coconut edk2 repository currently tries to clone some deleted repo
-#git submodule update --init --recursive edk2
+	git submodule update --init --recursive edk2
+	cd edk2; git submodule set-url -- UnitTestFrameworkPkg/Library/SubhookLib/subhook https://github.com/tianocore/edk2-subhook.git
+	git submodule update --init --recursive edk2
 	cd svsm/kernel/src/my_crypto/; ./build.sh
 	git submodule update --init --recursive gramine-svsm;
 	git submodule update --init --recursive Benchmarks/SeBS;
@@ -171,12 +176,13 @@ simple_fs:
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
 	cd runtime/filesystem/simple/; ./create.sh
 
+IPC_BIN?=Benchmarks/IPC/wallet/com
 simple_ipc_fs:
 	mkdir -p runtime/filesystem/simple/fs/lib/
 	rm -rf runtime/filesystem/simple/fs_out/
 	rm -rf runtime/filesystem/simple/fs/lib/*
 	make -B -C Benchmarks/IPC/wallet com
-	cp Benchmarks/IPC/wallet/com runtime/filesystem/simple/fs/lib/com
+	cp ${IPC_BIN} runtime/filesystem/simple/fs/lib/com
 	cd runtime/filesystem/simple/; ./create.sh
 
 python_fs:
@@ -207,7 +213,7 @@ simple_python_fs:
 
 boottime_setup:
 	make run > /dev/null &
-	sleep 20
+	sleep 30
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup"
 	make simple_python_fs
 	make gramine
