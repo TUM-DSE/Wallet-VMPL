@@ -17,8 +17,8 @@ def main():
 
     #num_nodes = [16, 64, 256, 1024]
     #num_nodes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
-    num_nodes = [1]
-    cache_sizes = [1]
+    num_nodes = [1, 4, 16, 64, 256, 1024]
+    cache_sizes = [1, 2, 4, 8, 16, 32]
 
     cvm_cold_boot_time = 8.3073
     cvm_warm_boot_time = 0.0677
@@ -30,7 +30,7 @@ def main():
     vm_max_execution_slots = 1
     vm_header = "************* VM ****************\n"
 
-    w_percentage_soft_warm = [0, 0.3, 0.6]
+    w_percentage_soft_warm = [0, 0.3, 0.6, 0.9]
     w_cold_boot_time = 4.3061
     w_warm_boot_time = 1.6766
     w_soft_warm_time = 2.4124
@@ -46,7 +46,7 @@ def main():
             tmp_file_num += 1
 
             # VM simulation
-            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, 300, vm_max_execution_slots, 0))
+            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', vm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, 300, vm_max_execution_slots, 0))
             tmp_file_num += 1
 
             # Wallet simulation
