@@ -33,7 +33,7 @@ static void print_attestation_report(const uint8_t *att_buffer, FILE *file) {
 }
 
 // Function to allocate the struct for the function attestation arguments
-void allocate_function_struct(function_data** fn){
+static void allocate_function_struct(function_data** fn){
     uint8_t* buf = aligned_alloc(PAGE_SIZE, PAGE_SIZE);
     if (buf == NULL) {
         printf("Can't allocate function struct for the attestation\n");

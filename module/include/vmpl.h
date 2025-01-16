@@ -35,6 +35,13 @@ enum attestation_report_type {
     zygoteAttestation = 1,
     trustletAttestation = 2,
     functionAttestation = 3,
+    /* helper attestation options for microbenchmarks */
+    monitorAttestationCold = 4,
+    prepareZygoteAttestationCold = 5,
+    zygoteAttestationCold = 6,
+    prepareTrustletAttestationCold = 7,
+    trustletAttestationCold = 8,
+    /* end of helper attestation options for microbenchmarks */
     maxAttestationReportType,
 };
 

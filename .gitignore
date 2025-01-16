@@ -34,3 +34,4 @@ runtime/filesystem/**/fs_out/
 runtime/requirements.txt
 runtime/pip/
 runtime/python*
+report_generation_measurements*
