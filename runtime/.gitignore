@@ -1,0 +1,4 @@
+Python-*
+*.so
+python-build
+python-install

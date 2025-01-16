@@ -78,7 +78,7 @@
           bpftrace = bpftrace.packages.x86_64-linux.default;
           test = pkgs.callPackage ./node/pkg.nix { };
         };
-
+	pkgs = nixpkgs.legacyPackages.${system};
         devShells = let
           common_deps = with pkgs; [
             nixos-generators.packages.${system}.nixos-generate
@@ -123,11 +123,15 @@
                 pkg-config
                 gcc
                 gccgo
+                zip
                 python3
                 python311Packages.requests
                 python311Packages.matplotlib
                 python311Packages.seaborn
-                unzip
+                python311Packages.pandas
+                unziz
+                python311Packages.pip
+                python311Packages.numpy
                 python311Packages.click
                 python311Packages.voluptuous
                 python311Packages.jinja2

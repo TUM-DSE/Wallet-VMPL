@@ -52,3 +52,31 @@ outb:
 test_elf:
 	nasm -f elf64 -o  hello_elf.o hello_elf.asm
 	ld -o simple_elf hello_elf.o
+
+install:
+	mkdir -p /lib/modules/$(KVERSION)/build/certs/
+	cp certs/* /lib/modules/$(KVERSION)/build/certs/
+	make -C /lib/modules/$(KVERSION)/build M=$(PWD) modules_install
+	depmod
+	echo "vmpl" > /etc/modules-load.d/vmpl.conf
+	modprobe vmpl
+
+
+BOOT_PATH=/root/Benchmarks/Boottime
+
+boottime_setup: vmpl.ko install
+	cp ${BOOT_PATH}/wallet/service/* /etc/systemd/system/
+	systemctl enable outb.service
+	systemctl enable boottime.service
+	cd libwallet/; NODEBUG=TRUE make libwallet.a
+	cd ${BOOT_PATH}/wallet/; make run
+	cd ${BOOT_PATH}/wallet/; make outb
+	shutdown now
+
+boottime_setup_vm:
+	cp ${BOOT_PATH}/vm/service/* /etc/systemd/system/
+	systemctl enable outb.service
+	systemctl enable boottime.service
+	cd ${BOOT_PATH}/vm/; make outb.so
+	cd ${BOOT_PATH}/vm/; make outb
+	shutdown now
