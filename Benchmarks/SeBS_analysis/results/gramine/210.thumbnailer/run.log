@@ -1,0 +1,43 @@
+18:06:31,26 INFO SeBS-f802: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+18:06:31,53 INFO Gramine-2f02: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+18:06:31,58 INFO Benchmark-7e6e: Building benchmark 210.thumbnailer. Reason: no cached code package.
+18:06:31,67 INFO Benchmark-7e6e: Docker build of benchmark dependencies in container of image sebs:build.gramine.python.3.10
+18:06:31,67 INFO Benchmark-7e6e: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/210.thumbnailer_code/python/3.10
+18:06:34,145 INFO Gramine-2f02: Function size 0.000005 MB
+18:06:34,146 INFO Benchmark-7e6e: Created code package (source hash: 5676c7e104406be85d6a0d6e3e1175cd), for run on gramine with python:3.10
+18:06:34,242 INFO Gramine-2f02: Creating new function! Reason: function 210.thumbnailer-python-3.10 not found in cache.
+18:06:34,251 INFO minio.Minio-8691: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+18:06:34,519 INFO Experiment.PerfCost-02e0: Begin experiment
+18:06:34,520 INFO Experiment.PerfCost-02e0: Begin cold experiments
+18:06:34,523 INFO Gramine.GramineFunction-2ecb: Not stopping function as it was not running
+18:06:41,584 INFO Experiment.PerfCost-02e0: Processed 0 warm-up samples, ignoring these results.
+18:06:46,585 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:06:46,944 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully
+18:06:53,973 INFO Experiment.PerfCost-02e0: Processed 1 samples out of 5, 0 errors
+18:06:58,974 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:06:59,328 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully
+18:07:06,379 INFO Experiment.PerfCost-02e0: Processed 2 samples out of 5, 0 errors
+18:07:11,379 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:07:11,772 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully
+18:07:18,802 INFO Experiment.PerfCost-02e0: Processed 3 samples out of 5, 0 errors
+18:07:23,802 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:07:24,182 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully
+18:07:31,236 INFO Experiment.PerfCost-02e0: Processed 4 samples out of 5, 0 errors
+18:07:36,236 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:07:36,569 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully
+18:07:43,648 INFO Experiment.PerfCost-02e0: Processed 5 samples out of 5, 0 errors
+18:07:48,649 INFO Experiment.PerfCost-02e0: Mean 2047.0878 [ms], median 2049.867 [ms], std 18.555715705948966, CV 0.9064445455612098
+18:07:48,652 INFO Experiment.PerfCost-02e0: Parametric CI (Student's t-distribution) 0.95 from 2021.328336977388 to 2072.847263022612, within 1.2583467608283314% of mean
+18:07:48,653 INFO Experiment.PerfCost-02e0: Parametric CI (Student's t-distribution) 0.99 from 2004.3716622413945 to 2089.8039377586056, within 2.086678341720641% of mean
+18:07:48,657 INFO Experiment.PerfCost-02e0: Begin sequential experiments
+18:07:53,775 INFO Experiment.PerfCost-02e0: Processed 0 warm-up samples, ignoring these results.
+18:08:03,833 INFO Experiment.PerfCost-02e0: Processed 1 samples out of 5, 0 errors
+18:08:13,892 INFO Experiment.PerfCost-02e0: Processed 2 samples out of 5, 0 errors
+18:08:23,951 INFO Experiment.PerfCost-02e0: Processed 3 samples out of 5, 0 errors
+18:08:34,10 INFO Experiment.PerfCost-02e0: Processed 4 samples out of 5, 0 errors
+18:08:44,68 INFO Experiment.PerfCost-02e0: Processed 5 samples out of 5, 0 errors
+18:08:49,69 INFO Experiment.PerfCost-02e0: Mean 57.12700000000001 [ms], median 57.019 [ms], std 0.47548249179123236, CV 0.8323253309139852
+18:08:49,71 INFO Experiment.PerfCost-02e0: Parametric CI (Student's t-distribution) 0.95 from 56.4669244815295 to 57.787075518470516, within 1.1554527954741303% of mean
+18:08:49,72 INFO Experiment.PerfCost-02e0: Parametric CI (Student's t-distribution) 0.99 from 56.032416749047975 to 58.221583250952044, within 1.916052393705313% of mean
+18:08:49,76 INFO Gramine.GramineFunction-2ecb: Stopping function
+18:08:49,416 INFO Gramine.GramineFunction-2ecb: Function stopped succesfully

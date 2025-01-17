@@ -1,0 +1,4 @@
+20:37:01,155 INFO SeBS-add9: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+20:37:01,180 INFO Cvm-50d9: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:37:01,182 INFO Experiment.PerfCost-4ab1: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/sequential_results.json
+20:37:01,184 INFO Experiment.PerfCost-4ab1: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/cold_results.json

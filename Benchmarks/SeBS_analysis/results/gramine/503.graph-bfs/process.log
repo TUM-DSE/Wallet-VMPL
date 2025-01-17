@@ -1,0 +1,4 @@
+21:07:27,425 INFO SeBS-2102: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs
+21:07:27,452 INFO Gramine-a2f0: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+21:07:27,454 INFO Experiment.PerfCost-9f1b: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/cold_results.json
+21:07:27,476 INFO Experiment.PerfCost-9f1b: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/sequential_results.json

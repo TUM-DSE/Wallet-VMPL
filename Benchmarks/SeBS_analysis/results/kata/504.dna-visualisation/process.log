@@ -1,0 +1,4 @@
+16:54:28,81 INFO SeBS-03c2: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+16:54:28,110 INFO KataQemu-4b8f: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:54:28,112 INFO Experiment.PerfCost-183a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/sequential_results.json
+16:54:28,114 INFO Experiment.PerfCost-183a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/cold_results.json

@@ -1,0 +1,4 @@
+17:31:18,352 INFO SeBS-c896: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+17:31:18,377 INFO Cvm-aa24: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:31:18,379 INFO Experiment.PerfCost-32ec: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/cold_results.json
+17:31:18,382 INFO Experiment.PerfCost-32ec: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/sequential_results.json

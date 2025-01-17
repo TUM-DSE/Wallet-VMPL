@@ -76,6 +76,18 @@ static long diff_attestation(struct monitor_call* mcall){
       */
       call.r9 = mcall->monitor_attestation.function_data_ptr;
       break;
+
+    /* helper attestation options for microbenchmarks */
+    case monitorAttestationCold:
+      break;
+    case prepareZygoteAttestationCold:
+    case zygoteAttestationCold:
+    case prepareTrustletAttestationCold:
+    case trustletAttestationCold:
+      call.r8 = mcall->monitor_attestation.process_id;
+      break;
+    /* end of helper attestation options for microbenchmarks */
+
     default:
       printk(KERN_ERR "Invalid differential attestation type");
       break;
@@ -164,6 +176,7 @@ static long invoke_trustlet(struct monitor_call* mcall) {
 	call.rdx = (u64)get_pgd_phys();
 	call.r8 = (u64)mcall->invokation.data;
 	call.r9 = mcall->invokation.data_size;
+
 	res = do_monitor_call(&call);
 
 	return call.rcx;
@@ -183,6 +196,28 @@ static long delete_trustlet(struct monitor_call* mcall){
 
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->process_id;
+
+	if((res = do_monitor_call(&call))!= 1)
+		return -1;
+	return 0;
+}
+
+/**
+ * rax: call ID
+ * rcx: ProcessID of Trustlet 1
+ * rdx: ProcessID of Trustlet 2
+ * 
+ * return:
+ * 	-  0 on success
+ *  - -1 on failure
+*/
+static long create_channel(struct monitor_call* mcall){
+	struct svsm_call call;
+	int res;
+
+	call.rax = MONITORCALLID(mcall->type);
+	call.rcx = mcall->channel.trustlet_id_1;
+	call.rdx = mcall->channel.trustlet_id_2;
 
 	if((res = do_monitor_call(&call))!= 1)
 		return -1;
@@ -280,11 +315,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		printk(KERN_ERR "Copy from user error\n");
 		return -1;
 	}
-	printk(KERN_ERR "Call type: %d\n", call.type);
-	printk(KERN_ERR "d: %d\n", create_data_struct);
 	switch (call.type)
 	{
-	
 	case initMonitor:
 		return init_monitor(&call);
 	case attest:
@@ -297,6 +329,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return delete_zygote(&call);
 	case deleteTrustlet:
 		return delete_trustlet(&call);
+	case createChannel:
+		return create_channel(&call);
 	case get_public_key:
 		return get_pub_key(&call);
 	case send_policy:

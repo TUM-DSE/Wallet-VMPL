@@ -1,0 +1,49 @@
+20:47:03,681 INFO SeBS-86bd: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+20:47:03,707 INFO Cvm-b08c: Using existing deployment cvm-39ac486b that matches prefix cvm!
+20:47:03,712 INFO Benchmark-848a: Building benchmark 311.compression. Reason: no cached code package.
+20:47:03,718 INFO Cvm-b08c: Function size 0.000003 MB
+20:47:03,719 INFO Benchmark-848a: Created code package (source hash: 4e8d7a494ddddb1c60db65fc96591f43), for run on cvm with python:3.11
+20:47:03,723 INFO Cvm-b08c: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+20:47:03,730 INFO minio.Minio-9b75: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+20:47:03,970 INFO Experiment.PerfCost-2ff4: Begin experiment
+20:47:03,970 INFO Experiment.PerfCost-2ff4: Begin cold experiments
+20:47:03,976 INFO Cvm.CvmFunction-fb8f: Not stopping function as it was not running
+20:47:32,538 INFO Experiment.PerfCost-2ff4: Processed 0 warm-up samples, ignoring these results.
+20:47:37,538 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:47:38,548 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:48:06,480 INFO Experiment.PerfCost-2ff4: Processed 1 samples out of 5, 0 errors
+20:48:11,481 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:48:12,491 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:48:40,311 INFO Experiment.PerfCost-2ff4: Processed 2 samples out of 5, 0 errors
+20:48:45,312 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:48:46,322 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:49:00,229 ERROR Experiment.PerfCost-2ff4: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+20:49:00,229 INFO Experiment.PerfCost-2ff4: Processed 2 samples out of 5, 1 errors
+20:49:05,230 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:49:06,240 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:49:34,186 INFO Experiment.PerfCost-2ff4: Processed 3 samples out of 5, 1 errors
+20:49:39,187 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:49:40,197 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:50:08,138 INFO Experiment.PerfCost-2ff4: Processed 4 samples out of 5, 1 errors
+20:50:13,139 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:50:14,149 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:50:28,142 ERROR Experiment.PerfCost-2ff4: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+20:50:28,143 INFO Experiment.PerfCost-2ff4: Processed 4 samples out of 5, 2 errors
+20:50:33,143 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:50:34,153 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully
+20:51:02,173 INFO Experiment.PerfCost-2ff4: Processed 5 samples out of 5, 2 errors
+20:51:07,175 INFO Experiment.PerfCost-2ff4: Mean 22930.827400000002 [ms], median 22940.247 [ms], std 64.09461300483866, CV 0.27951286661744557
+20:51:07,177 INFO Experiment.PerfCost-2ff4: Parametric CI (Student's t-distribution) 0.95 from 22841.849812726585 to 23019.80498727342, within 0.3880260651799121% of mean
+20:51:07,178 INFO Experiment.PerfCost-2ff4: Parametric CI (Student's t-distribution) 0.99 from 22783.278560489518 to 23078.376239510486, within 0.6434518778440762% of mean
+20:51:07,181 INFO Experiment.PerfCost-2ff4: Begin sequential experiments
+20:51:13,990 INFO Experiment.PerfCost-2ff4: Processed 0 warm-up samples, ignoring these results.
+20:51:24,914 INFO Experiment.PerfCost-2ff4: Processed 1 samples out of 5, 0 errors
+20:51:35,822 INFO Experiment.PerfCost-2ff4: Processed 2 samples out of 5, 0 errors
+20:51:46,739 INFO Experiment.PerfCost-2ff4: Processed 3 samples out of 5, 0 errors
+20:51:57,619 INFO Experiment.PerfCost-2ff4: Processed 4 samples out of 5, 0 errors
+20:52:08,511 INFO Experiment.PerfCost-2ff4: Processed 5 samples out of 5, 0 errors
+20:52:13,512 INFO Experiment.PerfCost-2ff4: Mean 902.4849999999999 [ms], median 906.868 [ms], std 15.886656942226743, CV 1.760323655487542
+20:52:13,514 INFO Experiment.PerfCost-2ff4: Parametric CI (Student's t-distribution) 0.95 from 880.4307845473988 to 924.539215452601, within 2.443720998421144% of mean
+20:52:13,515 INFO Experiment.PerfCost-2ff4: Parametric CI (Student's t-distribution) 0.99 from 865.913162124175 to 939.0568378758248, within 4.052348557131137% of mean
+20:52:13,519 INFO Cvm.CvmFunction-fb8f: Stopping function
+20:52:14,529 INFO Cvm.CvmFunction-fb8f: Function stopped succesfully

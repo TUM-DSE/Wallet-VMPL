@@ -1,0 +1,196 @@
+{
+  "_invocations": {
+    "311.compression-python-3.11": {
+      "14a92e16-b1a3-45ec-8a36-392d69e99c9b": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521529.151297",
+          "end": "1736521529.792606",
+          "is_cold": false,
+          "request_id": "14a92e16-b1a3-45ec-8a36-392d69e99c9b",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "14a92e16-b1a3-45ec-8a36-392d69e99c9b",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 641309,
+          "client": 647780,
+          "client_begin": "2025-01-10 15:05:29.146062",
+          "client_end": "2025-01-10 15:05:29.793842",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "5e775c17-636f-4d47-805e-448ebd0392a3": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521550.471679",
+          "end": "1736521551.155831",
+          "is_cold": false,
+          "request_id": "5e775c17-636f-4d47-805e-448ebd0392a3",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "5e775c17-636f-4d47-805e-448ebd0392a3",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 684152,
+          "client": 690904,
+          "client_begin": "2025-01-10 15:05:50.466323",
+          "client_end": "2025-01-10 15:05:51.157227",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "93b062fd-5e0f-4392-8e12-05692d4ccb51": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521561.163720",
+          "end": "1736521561.846849",
+          "is_cold": false,
+          "request_id": "93b062fd-5e0f-4392-8e12-05692d4ccb51",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "93b062fd-5e0f-4392-8e12-05692d4ccb51",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 683129,
+          "client": 689493,
+          "client_begin": "2025-01-10 15:06:01.158695",
+          "client_end": "2025-01-10 15:06:01.848188",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "b5b5262e-2dec-4529-a5a2-f50d43fd33b3": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521539.800137",
+          "end": "1736521540.463599",
+          "is_cold": false,
+          "request_id": "b5b5262e-2dec-4529-a5a2-f50d43fd33b3",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "b5b5262e-2dec-4529-a5a2-f50d43fd33b3",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 663462,
+          "client": 669692,
+          "client_begin": "2025-01-10 15:05:39.795232",
+          "client_end": "2025-01-10 15:05:40.464924",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "c2811f6d-af93-4219-aad6-2e75087c25e0": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521518.491548",
+          "end": "1736521519.143415",
+          "is_cold": false,
+          "request_id": "c2811f6d-af93-4219-aad6-2e75087c25e0",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "c2811f6d-af93-4219-aad6-2e75087c25e0",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 651867,
+          "client": 658468,
+          "client_begin": "2025-01-10 15:05:18.486166",
+          "client_end": "2025-01-10 15:05:19.144634",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "311.compression-python-3.11": {}
+  },
+  "begin_time": 1736521502.162381,
+  "config": {
+    "deployment": {
+      "name": "native"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736521566.849129,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

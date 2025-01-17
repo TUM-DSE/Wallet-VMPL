@@ -1,0 +1,45 @@
+15:06:10,232 INFO SeBS-268c: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+15:06:10,258 INFO Native-de37: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+15:06:10,263 INFO Benchmark-1dd5: Building benchmark 411.image-recognition. Reason: no cached code package.
+15:06:10,291 INFO Benchmark-1dd5: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+15:06:10,291 INFO Benchmark-1dd5: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/411.image-recognition_code/python/3.11
+15:06:53,613 INFO Benchmark-1dd5: Docker build: Original size 317M
+15:06:53,613 INFO Benchmark-1dd5: Docker build: Stripped size 357M
+15:06:53,615 INFO Native-de37: Function size 0.000005 MB
+15:06:53,618 INFO Benchmark-1dd5: Created code package (source hash: ab83c8ef486c3b61d5d0b38ae48e61af), for run on native with python:3.11
+15:06:58,186 INFO Native-de37: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+15:06:58,198 INFO minio.Minio-716a: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+15:06:58,703 INFO Experiment.PerfCost-3c1f: Begin experiment
+15:06:58,703 INFO Experiment.PerfCost-3c1f: Begin cold experiments
+15:06:58,706 INFO Native.NativeFunction-d032: Not stopping function as it was not running
+15:07:11,77 INFO Experiment.PerfCost-3c1f: Processed 0 warm-up samples, ignoring these results.
+15:07:16,77 INFO Native.NativeFunction-d032: Stopping function
+15:07:16,78 INFO Native.NativeFunction-d032: Function stopped succesfully
+15:07:24,238 INFO Experiment.PerfCost-3c1f: Processed 1 samples out of 5, 0 errors
+15:07:29,238 INFO Native.NativeFunction-d032: Stopping function
+15:07:29,239 INFO Native.NativeFunction-d032: Function stopped succesfully
+15:07:37,382 INFO Experiment.PerfCost-3c1f: Processed 2 samples out of 5, 0 errors
+15:07:42,382 INFO Native.NativeFunction-d032: Stopping function
+15:07:42,383 INFO Native.NativeFunction-d032: Function stopped succesfully
+15:07:50,560 INFO Experiment.PerfCost-3c1f: Processed 3 samples out of 5, 0 errors
+15:07:55,560 INFO Native.NativeFunction-d032: Stopping function
+15:07:55,561 INFO Native.NativeFunction-d032: Function stopped succesfully
+15:08:03,745 INFO Experiment.PerfCost-3c1f: Processed 4 samples out of 5, 0 errors
+15:08:08,745 INFO Native.NativeFunction-d032: Stopping function
+15:08:08,746 INFO Native.NativeFunction-d032: Function stopped succesfully
+15:08:16,951 INFO Experiment.PerfCost-3c1f: Processed 5 samples out of 5, 0 errors
+15:08:21,952 INFO Experiment.PerfCost-3c1f: Mean 3172.2488 [ms], median 3175.323 [ms], std 21.388713719155707, CV 0.6742445207688536
+15:08:21,954 INFO Experiment.PerfCost-3c1f: Parametric CI (Student's t-distribution) 0.95 from 3142.5565052439865 to 3201.941094756013, within 0.936001449697556% of mean
+15:08:21,956 INFO Experiment.PerfCost-3c1f: Parametric CI (Student's t-distribution) 0.99 from 3123.010966429726 to 3221.4866335702736, within 1.5521428700760729% of mean
+15:08:21,959 INFO Experiment.PerfCost-3c1f: Begin sequential experiments
+15:08:27,380 INFO Experiment.PerfCost-3c1f: Processed 0 warm-up samples, ignoring these results.
+15:08:39,466 INFO Experiment.PerfCost-3c1f: Processed 1 samples out of 5, 0 errors
+15:08:49,534 INFO Experiment.PerfCost-3c1f: Processed 2 samples out of 5, 0 errors
+15:08:59,670 INFO Experiment.PerfCost-3c1f: Processed 3 samples out of 5, 0 errors
+15:09:09,806 INFO Experiment.PerfCost-3c1f: Processed 4 samples out of 5, 0 errors
+15:09:19,874 INFO Experiment.PerfCost-3c1f: Processed 5 samples out of 5, 0 errors
+15:09:24,875 INFO Experiment.PerfCost-3c1f: Mean 496.28780000000006 [ms], median 131.224 [ms], std 792.8869700824703, CV 159.76354246114255
+15:09:24,877 INFO Experiment.PerfCost-3c1f: Parametric CI (Student's t-distribution) 0.95 from -604.4157735302938 to 1596.991373530294, within 221.7873527276499% of mean
+15:09:24,878 INFO Experiment.PerfCost-3c1f: Parametric CI (Student's t-distribution) 0.99 from -1328.9756162845952 to 2321.5512162845953, within 367.78325324229104% of mean
+15:09:24,882 INFO Native.NativeFunction-d032: Stopping function
+15:09:24,882 INFO Native.NativeFunction-d032: Function stopped succesfully

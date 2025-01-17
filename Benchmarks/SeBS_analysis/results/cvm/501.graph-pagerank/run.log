@@ -1,0 +1,51 @@
+21:00:57,695 INFO SeBS-19eb: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank
+21:00:57,719 INFO Cvm-4863: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:00:57,723 INFO Benchmark-2ca2: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+21:00:57,730 INFO Benchmark-2ca2: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+21:00:57,731 INFO Benchmark-2ca2: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank/501.graph-pagerank_code/python/3.11
+21:01:01,999 INFO Cvm-4863: Function size 0.000005 MB
+21:01:02,0 INFO Benchmark-2ca2: Created code package (source hash: af60d8119b22e95786718c390332270f), for run on cvm with python:3.11
+21:01:02,82 INFO Cvm-4863: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+21:01:02,93 INFO minio.Minio-3975: Using existing bucket sebs-benchmarks-cvm-39ac486b for benchmarks
+21:01:02,94 INFO Experiment.PerfCost-8dbc: Begin experiment
+21:01:02,94 INFO Experiment.PerfCost-8dbc: Begin cold experiments
+21:01:02,97 INFO Cvm.CvmFunction-e22e: Not stopping function as it was not running
+21:01:31,109 INFO Experiment.PerfCost-8dbc: Processed 0 warm-up samples, ignoring these results.
+21:01:36,110 INFO Cvm.CvmFunction-e22e: Stopping function
+21:01:37,119 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:01:51,157 ERROR Experiment.PerfCost-8dbc: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+21:01:51,158 INFO Experiment.PerfCost-8dbc: Processed 0 samples out of 5, 1 errors
+21:01:56,158 INFO Cvm.CvmFunction-e22e: Stopping function
+21:01:57,168 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:02:24,450 INFO Experiment.PerfCost-8dbc: Processed 1 samples out of 5, 1 errors
+21:02:29,451 INFO Cvm.CvmFunction-e22e: Stopping function
+21:02:30,461 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:02:44,401 ERROR Experiment.PerfCost-8dbc: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+21:02:44,402 INFO Experiment.PerfCost-8dbc: Processed 1 samples out of 5, 2 errors
+21:02:49,402 INFO Cvm.CvmFunction-e22e: Stopping function
+21:02:50,412 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:03:18,808 INFO Experiment.PerfCost-8dbc: Processed 2 samples out of 5, 2 errors
+21:03:23,809 INFO Cvm.CvmFunction-e22e: Stopping function
+21:03:24,819 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:03:52,146 INFO Experiment.PerfCost-8dbc: Processed 3 samples out of 5, 2 errors
+21:03:57,147 INFO Cvm.CvmFunction-e22e: Stopping function
+21:03:58,157 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:04:25,782 INFO Experiment.PerfCost-8dbc: Processed 4 samples out of 5, 2 errors
+21:04:30,783 INFO Cvm.CvmFunction-e22e: Stopping function
+21:04:31,793 INFO Cvm.CvmFunction-e22e: Function stopped succesfully
+21:05:00,20 INFO Experiment.PerfCost-8dbc: Processed 5 samples out of 5, 2 errors
+21:05:05,21 INFO Experiment.PerfCost-8dbc: Mean 22770.2284 [ms], median 22624.323 [ms], std 459.27829441444266, CV 2.0170122422419032
+21:05:05,23 INFO Experiment.PerfCost-8dbc: Parametric CI (Student's t-distribution) 0.95 from 22132.647913774712 to 23407.808886225288, within 2.8000618835482918% of mean
+21:05:05,25 INFO Experiment.PerfCost-8dbc: Parametric CI (Student's t-distribution) 0.99 from 21712.947980066914 to 23827.508819933086, within 4.643257860044503% of mean
+21:05:05,28 INFO Experiment.PerfCost-8dbc: Begin sequential experiments
+21:05:10,244 INFO Experiment.PerfCost-8dbc: Processed 0 warm-up samples, ignoring these results.
+21:05:20,353 INFO Experiment.PerfCost-8dbc: Processed 1 samples out of 5, 0 errors
+21:05:30,463 INFO Experiment.PerfCost-8dbc: Processed 2 samples out of 5, 0 errors
+21:05:40,572 INFO Experiment.PerfCost-8dbc: Processed 3 samples out of 5, 0 errors
+21:05:50,683 INFO Experiment.PerfCost-8dbc: Processed 4 samples out of 5, 0 errors
+21:06:00,795 INFO Experiment.PerfCost-8dbc: Processed 5 samples out of 5, 0 errors
+21:06:05,796 INFO Experiment.PerfCost-8dbc: Mean 108.6058 [ms], median 108.033 [ms], std 1.4725970799916717, CV 1.3559101631696204
+21:06:05,798 INFO Experiment.PerfCost-8dbc: Parametric CI (Student's t-distribution) 0.95 from 106.56150752266427 to 110.65009247733573, within 1.8823050678101265% of mean
+21:06:05,800 INFO Experiment.PerfCost-8dbc: Parametric CI (Student's t-distribution) 0.99 from 105.21581166817415 to 111.99578833182585, within 3.1213695141749773% of mean
+21:06:05,803 INFO Cvm.CvmFunction-e22e: Stopping function
+21:06:06,813 INFO Cvm.CvmFunction-e22e: Function stopped succesfully

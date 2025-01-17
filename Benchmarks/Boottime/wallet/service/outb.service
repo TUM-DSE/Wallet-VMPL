@@ -1,0 +1,9 @@
+[Unit]
+Description=Outb for boottime
+
+[Service]
+Type=idle
+ExecStart=/root/Benchmarks/Boottime/wallet/outb
+
+[Install]
+WantedBy=multi-user.target

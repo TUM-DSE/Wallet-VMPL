@@ -21,6 +21,7 @@ extern "C" {
 #include <monitor.h>
 #include <zygote.h>
 #include <attest.h>
+#include <attest_microbenchmark.h>
 }
 
 PYBIND11_MODULE(_wallet, m) {
@@ -37,6 +38,25 @@ PYBIND11_MODULE(_wallet, m) {
     m.def("attest_execution", &attest_execution,
           py::arg("trusted_process_id"), py::arg("input"), py::arg("input_len"),
           py::arg("output"), py::arg("output_len"));
+    /* helper functions for attestation microbenchmark */
+    m.def("measure_monitor_cold", &measure_monitor_cold);
+    m.def("measure_monitor_hot", &measure_monitor_hot);
+    m.def("prepare_measure_zygote_cold", &prepare_measure_zygote_cold,
+          py::arg("trusted_process_id"));
+    m.def("measure_zygote_cold", &measure_zygote_cold,
+          py::arg("trusted_process_id"));
+    m.def("measure_zygote_hot", &measure_zygote_hot,
+          py::arg("trusted_process_id"));
+    m.def("prepare_measure_trustlet_cold", &prepare_measure_trustlet_cold,
+          py::arg("trusted_process_id"));
+    m.def("measure_trustlet_cold", &measure_trustlet_cold,
+          py::arg("trusted_process_id"));
+    m.def("measure_trustlet_hot", &measure_trustlet_hot,
+          py::arg("trusted_process_id"));
+    m.def("measure_function", &measure_function,
+          py::arg("trusted_process_id"), py::arg("input"), py::arg("input_len"),
+          py::arg("output"), py::arg("output_len"));
+    /* end of helper functions for attestation microbenchmark */
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

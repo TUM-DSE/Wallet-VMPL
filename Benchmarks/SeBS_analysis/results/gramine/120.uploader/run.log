@@ -1,0 +1,41 @@
+18:04:04,538 INFO SeBS-bbb1: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+18:04:04,568 INFO Gramine-b03a: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+18:04:04,572 INFO Benchmark-cb9f: Building benchmark 120.uploader. Reason: no cached code package.
+18:04:04,579 INFO Gramine-b03a: Function size 0.000003 MB
+18:04:04,580 INFO Benchmark-cb9f: Created code package (source hash: f9140d3d2939d0a3322b511ec84c3215), for run on gramine with python:3.10
+18:04:04,583 INFO Gramine-b03a: Creating new function! Reason: function 120.uploader-python-3.10 not found in cache.
+18:04:04,591 INFO minio.Minio-1272: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+18:04:04,592 INFO Experiment.PerfCost-557f: Begin experiment
+18:04:04,592 INFO Experiment.PerfCost-557f: Begin cold experiments
+18:04:04,595 INFO Gramine.GramineFunction-6513: Not stopping function as it was not running
+18:04:12,991 INFO Experiment.PerfCost-557f: Processed 0 warm-up samples, ignoring these results.
+18:04:17,992 INFO Gramine.GramineFunction-6513: Stopping function
+18:04:18,339 INFO Gramine.GramineFunction-6513: Function stopped succesfully
+18:04:26,298 INFO Experiment.PerfCost-557f: Processed 1 samples out of 5, 0 errors
+18:04:31,298 INFO Gramine.GramineFunction-6513: Stopping function
+18:04:31,637 INFO Gramine.GramineFunction-6513: Function stopped succesfully
+18:04:38,967 INFO Experiment.PerfCost-557f: Processed 2 samples out of 5, 0 errors
+18:04:43,968 INFO Gramine.GramineFunction-6513: Stopping function
+18:04:44,327 INFO Gramine.GramineFunction-6513: Function stopped succesfully
+18:04:52,303 INFO Experiment.PerfCost-557f: Processed 3 samples out of 5, 0 errors
+18:04:57,304 INFO Gramine.GramineFunction-6513: Stopping function
+18:04:57,670 INFO Gramine.GramineFunction-6513: Function stopped succesfully
+18:05:05,570 INFO Experiment.PerfCost-557f: Processed 4 samples out of 5, 0 errors
+18:05:10,570 INFO Gramine.GramineFunction-6513: Stopping function
+18:05:10,918 INFO Gramine.GramineFunction-6513: Function stopped succesfully
+18:05:18,321 INFO Experiment.PerfCost-557f: Processed 5 samples out of 5, 0 errors
+18:05:23,322 INFO Experiment.PerfCost-557f: Mean 2712.114 [ms], median 2898.083 [ms], std 285.1086517200066, CV 10.512413995872098
+18:05:23,324 INFO Experiment.PerfCost-557f: Parametric CI (Student's t-distribution) 0.95 from 2316.319739741222 to 3107.9082602587782, within 14.593570191325963% of mean
+18:05:23,326 INFO Experiment.PerfCost-557f: Parametric CI (Student's t-distribution) 0.99 from 2055.780359409808 to 3368.447640590192, within 24.20007568229772% of mean
+18:05:23,329 INFO Experiment.PerfCost-557f: Begin sequential experiments
+18:05:29,619 INFO Experiment.PerfCost-557f: Processed 0 warm-up samples, ignoring these results.
+18:05:40,28 INFO Experiment.PerfCost-557f: Processed 1 samples out of 5, 0 errors
+18:05:50,472 INFO Experiment.PerfCost-557f: Processed 2 samples out of 5, 0 errors
+18:06:01,486 INFO Experiment.PerfCost-557f: Processed 3 samples out of 5, 0 errors
+18:06:11,865 INFO Experiment.PerfCost-557f: Processed 4 samples out of 5, 0 errors
+18:06:22,290 INFO Experiment.PerfCost-557f: Processed 5 samples out of 5, 0 errors
+18:06:27,291 INFO Experiment.PerfCost-557f: Mean 532.813 [ms], median 423.442 [ms], std 240.91515575571412, CV 45.215705276656934
+18:06:27,293 INFO Experiment.PerfCost-557f: Parametric CI (Student's t-distribution) 0.95 from 198.36914751704114 to 867.2568524829588, within 62.76946179672021% of mean
+18:06:27,294 INFO Experiment.PerfCost-557f: Parametric CI (Student's t-distribution) 0.99 from -21.785116530622645 to 1087.4111165306226, within 104.08869838585444% of mean
+18:06:27,298 INFO Gramine.GramineFunction-6513: Stopping function
+18:06:27,650 INFO Gramine.GramineFunction-6513: Function stopped succesfully

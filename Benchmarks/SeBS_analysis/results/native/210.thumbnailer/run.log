@@ -1,0 +1,43 @@
+14:59:08,358 INFO SeBS-e8d9: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+14:59:08,386 INFO Native-ffa2: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+14:59:08,391 INFO Benchmark-4775: Building benchmark 210.thumbnailer. Reason: no cached code package.
+14:59:08,400 INFO Benchmark-4775: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+14:59:08,400 INFO Benchmark-4775: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/210.thumbnailer_code/python/3.11
+14:59:15,603 INFO Native-ffa2: Function size 0.000005 MB
+14:59:15,605 INFO Benchmark-4775: Created code package (source hash: 5676c7e104406be85d6a0d6e3e1175cd), for run on native with python:3.11
+14:59:15,981 INFO Native-ffa2: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+14:59:15,989 INFO minio.Minio-74e7: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+14:59:16,240 INFO Experiment.PerfCost-6ed6: Begin experiment
+14:59:16,241 INFO Experiment.PerfCost-6ed6: Begin cold experiments
+14:59:16,244 INFO Native.NativeFunction-af63: Not stopping function as it was not running
+14:59:21,638 INFO Experiment.PerfCost-6ed6: Processed 0 warm-up samples, ignoring these results.
+14:59:26,638 INFO Native.NativeFunction-af63: Stopping function
+14:59:26,638 INFO Native.NativeFunction-af63: Function stopped succesfully
+14:59:32,30 INFO Experiment.PerfCost-6ed6: Processed 1 samples out of 5, 0 errors
+14:59:37,30 INFO Native.NativeFunction-af63: Stopping function
+14:59:37,30 INFO Native.NativeFunction-af63: Function stopped succesfully
+14:59:42,423 INFO Experiment.PerfCost-6ed6: Processed 2 samples out of 5, 0 errors
+14:59:47,424 INFO Native.NativeFunction-af63: Stopping function
+14:59:47,424 INFO Native.NativeFunction-af63: Function stopped succesfully
+14:59:52,824 INFO Experiment.PerfCost-6ed6: Processed 3 samples out of 5, 0 errors
+14:59:57,825 INFO Native.NativeFunction-af63: Stopping function
+14:59:57,825 INFO Native.NativeFunction-af63: Function stopped succesfully
+15:00:03,214 INFO Experiment.PerfCost-6ed6: Processed 4 samples out of 5, 0 errors
+15:00:08,214 INFO Native.NativeFunction-af63: Stopping function
+15:00:08,214 INFO Native.NativeFunction-af63: Function stopped succesfully
+15:00:13,607 INFO Experiment.PerfCost-6ed6: Processed 5 samples out of 5, 0 errors
+15:00:18,609 INFO Experiment.PerfCost-6ed6: Mean 391.6442 [ms], median 391.11 [ms], std 3.9382782227770505, CV 1.005575525637058
+15:00:18,611 INFO Experiment.PerfCost-6ed6: Parametric CI (Student's t-distribution) 0.95 from 386.1769933527318 to 397.1114066472682, within 1.3959626230308526% of mean
+15:00:18,612 INFO Experiment.PerfCost-6ed6: Parametric CI (Student's t-distribution) 0.99 from 382.57809671615166 to 400.71030328384836, within 2.3148825602034573% of mean
+15:00:18,616 INFO Experiment.PerfCost-6ed6: Begin sequential experiments
+15:00:23,728 INFO Experiment.PerfCost-6ed6: Processed 0 warm-up samples, ignoring these results.
+15:00:33,785 INFO Experiment.PerfCost-6ed6: Processed 1 samples out of 5, 0 errors
+15:00:43,841 INFO Experiment.PerfCost-6ed6: Processed 2 samples out of 5, 0 errors
+15:00:53,897 INFO Experiment.PerfCost-6ed6: Processed 3 samples out of 5, 0 errors
+15:01:03,953 INFO Experiment.PerfCost-6ed6: Processed 4 samples out of 5, 0 errors
+15:01:14,14 INFO Experiment.PerfCost-6ed6: Processed 5 samples out of 5, 0 errors
+15:01:19,15 INFO Experiment.PerfCost-6ed6: Mean 55.6974 [ms], median 54.806 [ms], std 1.9387701875157883, CV 3.4808989064404954
+15:01:19,16 INFO Experiment.PerfCost-6ed6: Parametric CI (Student's t-distribution) 0.95 from 53.005955501384186 to 58.38884449861582, within 4.832262365237544% of mean
+15:01:19,18 INFO Experiment.PerfCost-6ed6: Parametric CI (Student's t-distribution) 0.99 from 51.23425906140226 to 60.16054093859774, within 8.013194401529944% of mean
+15:01:19,22 INFO Native.NativeFunction-af63: Stopping function
+15:01:19,22 INFO Native.NativeFunction-af63: Function stopped succesfully

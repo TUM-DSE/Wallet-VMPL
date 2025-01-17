@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "0d156d6c-db19-4195-986e-b323b8f0c013": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736529763.066284",
+          "end": "1736529763.831440",
+          "is_cold": false,
+          "request_id": "0d156d6c-db19-4195-986e-b323b8f0c013",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 121929.0,
+                "download_size": 1433478,
+                "download_time": 13442.0,
+                "upload_size": 3363,
+                "upload_time": 3351.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-0c05e000",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.e13403b1.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "0d156d6c-db19-4195-986e-b323b8f0c013",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 765156,
+          "client": 8182260,
+          "client_begin": "2025-01-10 17:22:35.667007",
+          "client_end": "2025-01-10 17:22:43.849267",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "6f90c78c-a4e9-42f1-84c3-e004d7864970": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736529743.848855",
+          "end": "1736529744.639244",
+          "is_cold": false,
+          "request_id": "6f90c78c-a4e9-42f1-84c3-e004d7864970",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 141122.0,
+                "download_size": 1433478,
+                "download_time": 14605.0,
+                "upload_size": 3363,
+                "upload_time": 3514.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-0c05e000",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.80ab6a89.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "6f90c78c-a4e9-42f1-84c3-e004d7864970",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 790389,
+          "client": 7844757,
+          "client_begin": "2025-01-10 17:22:16.807904",
+          "client_end": "2025-01-10 17:22:24.652661",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "aac89c62-dc14-4696-9e9d-c2c2d0522034": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736529782.343551",
+          "end": "1736529783.142687",
+          "is_cold": false,
+          "request_id": "aac89c62-dc14-4696-9e9d-c2c2d0522034",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 131724.0,
+                "download_size": 1433478,
+                "download_time": 14860.0,
+                "upload_size": 3363,
+                "upload_time": 3448.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-0c05e000",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.65ebae7a.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "aac89c62-dc14-4696-9e9d-c2c2d0522034",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 799136,
+          "client": 8294160,
+          "client_begin": "2025-01-10 17:22:54.863637",
+          "client_end": "2025-01-10 17:23:03.157797",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "e75fe00d-a66f-4827-bd5b-92f5d5e47a71": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736529724.963998",
+          "end": "1736529725.772203",
+          "is_cold": false,
+          "request_id": "e75fe00d-a66f-4827-bd5b-92f5d5e47a71",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 126751.0,
+                "download_size": 1433478,
+                "download_time": 14334.0,
+                "upload_size": 3363,
+                "upload_time": 3525.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-0c05e000",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.9c0353a5.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "e75fe00d-a66f-4827-bd5b-92f5d5e47a71",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 808205,
+          "client": 8388964,
+          "client_begin": "2025-01-10 17:21:57.404488",
+          "client_end": "2025-01-10 17:22:05.793452",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "f46bea2e-3fb0-423e-b3d3-b60b26d0a027": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736529801.391595",
+          "end": "1736529802.188534",
+          "is_cold": false,
+          "request_id": "f46bea2e-3fb0-423e-b3d3-b60b26d0a027",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 125489.0,
+                "download_size": 1433478,
+                "download_time": 13512.0,
+                "upload_size": 3363,
+                "upload_time": 3431.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-cvm-0c05e000",
+                "key": "210.thumbnailer-0-output/4_altitude-astrology-astronomy-1819650.c334294c.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "f46bea2e-3fb0-423e-b3d3-b60b26d0a027",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 796939,
+          "client": 8035831,
+          "client_begin": "2025-01-10 17:23:14.171633",
+          "client_end": "2025-01-10 17:23:22.207464",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736529692.461243,
+  "config": {
+    "deployment": {
+      "name": "cvm"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "210.thumbnailer",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736529807.208395,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 5,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

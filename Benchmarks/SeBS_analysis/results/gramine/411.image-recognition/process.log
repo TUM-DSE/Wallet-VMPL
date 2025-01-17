@@ -1,0 +1,4 @@
+21:00:32,669 INFO SeBS-638b: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+21:00:32,697 INFO Gramine-e503: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+21:00:32,699 INFO Experiment.PerfCost-120a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/cold_results.json
+21:00:32,701 INFO Experiment.PerfCost-120a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/sequential_results.json

@@ -1,0 +1,18 @@
+00:18:44,339 INFO SeBS-6a60: Created experiment output at /root/Benchmarks/SeBS/501.graph-pagerank
+00:18:44,421 INFO Wallet-7d21: Generating unique resource name wallet-497fd23a
+00:18:44,426 INFO minio.Minio-2114: Initialize a new bucket for benchmarks
+00:18:44,432 INFO minio.Minio-2114: Created bucket sebs-benchmarks-wallet-497fd23a
+00:18:44,518 INFO Benchmark-e594: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+00:18:44,705 INFO Benchmark-e594: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+00:18:44,775 INFO Wallet-7d21: Function size 0.000004 MB
+00:18:44,814 INFO Benchmark-e594: Created code package (source hash: 8223d88893b9de38e7a4bdaf1c59194d), for run on wallet with python:3.11
+00:18:45,112 INFO Wallet-7d21: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+00:18:45,802 INFO Experiment.PerfCost-0697: Begin experiment
+00:18:45,804 INFO Experiment.PerfCost-0697: Begin sequential experiments
+00:19:15,983 INFO Experiment.PerfCost-0697: Processed 1 samples out of 2, 0 errors
+00:19:27,904 INFO Experiment.PerfCost-0697: Processed 2 samples out of 2, 0 errors
+00:19:32,917 INFO Experiment.PerfCost-0697: Mean 1911.9165 [ms], median 1911.9165 [ms], std 1.9835000000000491, CV 0.10374407041311945
+00:19:32,928 INFO Experiment.PerfCost-0697: Parametric CI (Student's t-distribution) 0.95 from 1886.7137429052864 to 1937.1192570947137, within 1.318193398859922% of mean
+00:19:32,934 INFO Experiment.PerfCost-0697: Parametric CI (Student's t-distribution) 0.99 from 1785.6533539034363 to 2038.1796460965638, within 6.604009437470925% of mean
+00:19:32,939 INFO Wallet.WalletFunction-7bef: Stopping function
+00:19:32,943 INFO Wallet.WalletFunction-7bef: Function stopped succesfully

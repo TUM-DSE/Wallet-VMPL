@@ -1,0 +1,43 @@
+17:21:27,582 INFO SeBS-f5b7: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+17:21:27,610 INFO Cvm-21ec: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:21:27,614 INFO Benchmark-2dd7: Building benchmark 210.thumbnailer. Reason: no cached code package.
+17:21:27,623 INFO Benchmark-2dd7: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+17:21:27,623 INFO Benchmark-2dd7: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/210.thumbnailer_code/python/3.11
+17:21:32,86 INFO Cvm-21ec: Function size 0.000005 MB
+17:21:32,88 INFO Benchmark-2dd7: Created code package (source hash: 5676c7e104406be85d6a0d6e3e1175cd), for run on cvm with python:3.11
+17:21:32,187 INFO Cvm-21ec: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+17:21:32,194 INFO minio.Minio-c06b: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:21:32,457 INFO Experiment.PerfCost-7f04: Begin experiment
+17:21:32,457 INFO Experiment.PerfCost-7f04: Begin cold experiments
+17:21:32,461 INFO Cvm.CvmFunction-5d36: Not stopping function as it was not running
+17:21:46,390 INFO Experiment.PerfCost-7f04: Processed 0 warm-up samples, ignoring these results.
+17:21:51,390 INFO Cvm.CvmFunction-5d36: Stopping function
+17:21:52,403 INFO Cvm.CvmFunction-5d36: Function stopped succesfully
+17:22:05,794 INFO Experiment.PerfCost-7f04: Processed 1 samples out of 5, 0 errors
+17:22:10,794 INFO Cvm.CvmFunction-5d36: Stopping function
+17:22:11,807 INFO Cvm.CvmFunction-5d36: Function stopped succesfully
+17:22:24,653 INFO Experiment.PerfCost-7f04: Processed 2 samples out of 5, 0 errors
+17:22:29,653 INFO Cvm.CvmFunction-5d36: Stopping function
+17:22:30,666 INFO Cvm.CvmFunction-5d36: Function stopped succesfully
+17:22:43,850 INFO Experiment.PerfCost-7f04: Processed 3 samples out of 5, 0 errors
+17:22:48,850 INFO Cvm.CvmFunction-5d36: Stopping function
+17:22:49,863 INFO Cvm.CvmFunction-5d36: Function stopped succesfully
+17:23:03,158 INFO Experiment.PerfCost-7f04: Processed 4 samples out of 5, 0 errors
+17:23:08,158 INFO Cvm.CvmFunction-5d36: Stopping function
+17:23:09,171 INFO Cvm.CvmFunction-5d36: Function stopped succesfully
+17:23:22,208 INFO Experiment.PerfCost-7f04: Processed 5 samples out of 5, 0 errors
+17:23:27,209 INFO Experiment.PerfCost-7f04: Mean 8149.1944 [ms], median 8182.26 [ms], std 192.4220419542419, CV 2.361240050356903
+17:23:27,211 INFO Experiment.PerfCost-7f04: Parametric CI (Student's t-distribution) 0.95 from 7882.0697817419905 to 8416.319018258011, within 3.2779266900052146% of mean
+17:23:27,212 INFO Experiment.PerfCost-7f04: Parametric CI (Student's t-distribution) 0.99 from 7706.22973174555 to 8592.15906825445, within 5.435686603015015% of mean
+17:23:27,216 INFO Experiment.PerfCost-7f04: Begin sequential experiments
+17:23:32,336 INFO Experiment.PerfCost-7f04: Processed 0 warm-up samples, ignoring these results.
+17:23:42,396 INFO Experiment.PerfCost-7f04: Processed 1 samples out of 5, 0 errors
+17:23:52,457 INFO Experiment.PerfCost-7f04: Processed 2 samples out of 5, 0 errors
+17:24:02,518 INFO Experiment.PerfCost-7f04: Processed 3 samples out of 5, 0 errors
+17:24:12,580 INFO Experiment.PerfCost-7f04: Processed 4 samples out of 5, 0 errors
+17:24:22,643 INFO Experiment.PerfCost-7f04: Processed 5 samples out of 5, 0 errors
+17:24:27,644 INFO Experiment.PerfCost-7f04: Mean 59.97859999999999 [ms], median 59.855 [ms], std 1.0852410976368347, CV 1.809380508442736
+17:24:27,646 INFO Experiment.PerfCost-7f04: Parametric CI (Student's t-distribution) 0.95 from 58.47204383325335 to 61.485156166746634, within 2.5118228280530746% of mean
+17:24:27,647 INFO Experiment.PerfCost-7f04: Parametric CI (Student's t-distribution) 0.99 from 57.48032351406024 to 62.47687648593975, within 4.165279759680544% of mean
+17:24:27,651 INFO Cvm.CvmFunction-5d36: Stopping function
+17:24:28,663 INFO Cvm.CvmFunction-5d36: Function stopped succesfully

@@ -1,0 +1,4 @@
+16:38:04,730 INFO SeBS-a5a8: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression
+16:38:04,758 INFO KataQemu-960e: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:38:04,760 INFO Experiment.PerfCost-7194: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/cold_results.json
+16:38:04,762 INFO Experiment.PerfCost-7194: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/311.compression/perf-cost/sequential_results.json

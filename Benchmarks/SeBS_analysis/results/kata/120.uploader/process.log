@@ -1,0 +1,4 @@
+16:30:02,355 INFO SeBS-0784: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+16:30:02,384 INFO KataQemu-1b8b: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:30:02,386 INFO Experiment.PerfCost-7e80: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/sequential_results.json
+16:30:02,388 INFO Experiment.PerfCost-7e80: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/cold_results.json

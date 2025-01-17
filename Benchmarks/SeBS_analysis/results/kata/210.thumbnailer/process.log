@@ -1,0 +1,4 @@
+16:32:33,706 INFO SeBS-9873: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer
+16:32:33,733 INFO KataQemu-c6c1: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:32:33,735 INFO Experiment.PerfCost-f853: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/perf-cost/cold_results.json
+16:32:33,737 INFO Experiment.PerfCost-f853: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/210.thumbnailer/perf-cost/sequential_results.json

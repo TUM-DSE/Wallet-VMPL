@@ -1,0 +1,4 @@
+17:18:15,562 INFO SeBS-375f: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+17:18:15,590 INFO Cvm-2aad: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:18:15,592 INFO Experiment.PerfCost-145e: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/sequential_results.json
+17:18:15,595 INFO Experiment.PerfCost-145e: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/cold_results.json

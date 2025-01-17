@@ -1,0 +1,43 @@
+21:02:53,679 INFO SeBS-f257: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+21:02:53,704 INFO Gramine-afe4: Using existing deployment gramine-native-746dcb52 that matches prefix gramine!
+21:02:53,710 INFO Benchmark-3688: Building benchmark 502.graph-mst. Reason: no cached code package.
+21:02:53,717 INFO Benchmark-3688: Docker build of benchmark dependencies in container of image sebs:build.gramine.python.3.10
+21:02:53,717 INFO Benchmark-3688: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/502.graph-mst_code/python/3.10
+21:02:56,346 INFO Gramine-afe4: Function size 0.000005 MB
+21:02:56,348 INFO Benchmark-3688: Created code package (source hash: d698e3c3aa2553bb644b000e483d4fca), for run on gramine with python:3.10
+21:02:56,427 INFO Gramine-afe4: Creating new function! Reason: function 502.graph-mst-python-3.10 not found in cache.
+21:02:56,437 INFO minio.Minio-a46b: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+21:02:56,438 INFO Experiment.PerfCost-652b: Begin experiment
+21:02:56,438 INFO Experiment.PerfCost-652b: Begin cold experiments
+21:02:56,441 INFO Gramine.GramineFunction-fb8a: Not stopping function as it was not running
+21:03:02,932 INFO Experiment.PerfCost-652b: Processed 0 warm-up samples, ignoring these results.
+21:03:07,932 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:03:08,276 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully
+21:03:14,758 INFO Experiment.PerfCost-652b: Processed 1 samples out of 5, 0 errors
+21:03:19,758 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:03:20,107 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully
+21:03:26,586 INFO Experiment.PerfCost-652b: Processed 2 samples out of 5, 0 errors
+21:03:31,586 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:03:31,911 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully
+21:03:38,396 INFO Experiment.PerfCost-652b: Processed 3 samples out of 5, 0 errors
+21:03:43,396 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:03:43,755 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully
+21:03:50,241 INFO Experiment.PerfCost-652b: Processed 4 samples out of 5, 0 errors
+21:03:55,242 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:03:55,577 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully
+21:04:02,73 INFO Experiment.PerfCost-652b: Processed 5 samples out of 5, 0 errors
+21:04:07,74 INFO Experiment.PerfCost-652b: Mean 1484.0642 [ms], median 1483.357 [ms], std 5.839214447166695, CV 0.39346104078022326
+21:04:07,76 INFO Experiment.PerfCost-652b: Parametric CI (Student's t-distribution) 0.95 from 1475.958070814982 to 1492.170329185018, within 0.5462114903801374% of mean
+21:04:07,78 INFO Experiment.PerfCost-652b: Parametric CI (Student's t-distribution) 0.99 from 1470.6220513553512 to 1497.5063486446488, within 0.9057659799790869% of mean
+21:04:07,81 INFO Experiment.PerfCost-652b: Begin sequential experiments
+21:04:12,187 INFO Experiment.PerfCost-652b: Processed 0 warm-up samples, ignoring these results.
+21:04:22,238 INFO Experiment.PerfCost-652b: Processed 1 samples out of 5, 0 errors
+21:04:32,289 INFO Experiment.PerfCost-652b: Processed 2 samples out of 5, 0 errors
+21:04:42,341 INFO Experiment.PerfCost-652b: Processed 3 samples out of 5, 0 errors
+21:04:52,392 INFO Experiment.PerfCost-652b: Processed 4 samples out of 5, 0 errors
+21:05:02,444 INFO Experiment.PerfCost-652b: Processed 5 samples out of 5, 0 errors
+21:05:07,445 INFO Experiment.PerfCost-652b: Mean 49.8694 [ms], median 49.915 [ms], std 0.40072414451839516, CV 0.80354715420357
+21:05:07,447 INFO Experiment.PerfCost-652b: Parametric CI (Student's t-distribution) 0.95 from 49.31310570520866 to 50.425694294791334, within 1.1155022815420592% of mean
+21:05:07,448 INFO Experiment.PerfCost-652b: Parametric CI (Student's t-distribution) 0.99 from 48.94691401068516 to 50.791885989314835, within 1.8498036658047545% of mean
+21:05:07,451 INFO Gramine.GramineFunction-fb8a: Stopping function
+21:05:07,780 INFO Gramine.GramineFunction-fb8a: Function stopped succesfully

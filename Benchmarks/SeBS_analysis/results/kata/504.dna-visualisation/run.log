@@ -1,0 +1,43 @@
+16:49:21,145 INFO SeBS-bf16: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+16:49:21,172 INFO KataQemu-e2db: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:49:21,179 INFO Benchmark-df0e: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+16:49:21,185 INFO Benchmark-df0e: Docker build of benchmark dependencies in container of image sebs:build.kata_qemu.python.3.11
+16:49:21,186 INFO Benchmark-df0e: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/504.dna-visualisation_code/python/3.11
+16:49:44,511 INFO KataQemu-e2db: Function size 0.000005 MB
+16:49:44,512 INFO Benchmark-df0e: Created code package (source hash: 99686ca7b896d046965dc38806678b19), for run on kata_qemu with python:3.11
+16:49:47,283 INFO KataQemu-e2db: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+16:49:47,290 INFO minio.Minio-1a77: Using existing bucket sebs-benchmarks-kata-qemu-be6e37d0 for benchmarks
+16:49:47,348 INFO Experiment.PerfCost-3f0f: Begin experiment
+16:49:47,348 INFO Experiment.PerfCost-3f0f: Begin cold experiments
+16:49:47,351 INFO KataQemu.KataQemuFunction-4c60: Not stopping function as it was not running
+16:50:07,310 INFO Experiment.PerfCost-3f0f: Processed 0 warm-up samples, ignoring these results.
+16:50:12,311 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:50:12,731 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully
+16:50:32,146 INFO Experiment.PerfCost-3f0f: Processed 1 samples out of 5, 0 errors
+16:50:37,147 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:50:37,551 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully
+16:50:57,162 INFO Experiment.PerfCost-3f0f: Processed 2 samples out of 5, 0 errors
+16:51:02,162 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:51:02,566 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully
+16:51:22,13 INFO Experiment.PerfCost-3f0f: Processed 3 samples out of 5, 0 errors
+16:51:27,13 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:51:27,450 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully
+16:51:46,822 INFO Experiment.PerfCost-3f0f: Processed 4 samples out of 5, 0 errors
+16:51:51,823 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:51:52,316 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully
+16:52:11,799 INFO Experiment.PerfCost-3f0f: Processed 5 samples out of 5, 0 errors
+16:52:16,800 INFO Experiment.PerfCost-3f0f: Mean 14464.261199999999 [ms], median 14445.43 [ms], std 80.99394678468238, CV 0.5599590996371276
+16:52:16,802 INFO Experiment.PerfCost-3f0f: Parametric CI (Student's t-distribution) 0.95 from 14351.823576449508 to 14576.69882355049, within 0.7773478506492367% of mean
+16:52:16,804 INFO Experiment.PerfCost-3f0f: Parametric CI (Student's t-distribution) 0.99 from 14277.809292496455 to 14650.713107503543, within 1.2890524094209814% of mean
+16:52:16,807 INFO Experiment.PerfCost-3f0f: Begin sequential experiments
+16:52:41,587 INFO Experiment.PerfCost-3f0f: Processed 0 warm-up samples, ignoring these results.
+16:53:01,479 INFO Experiment.PerfCost-3f0f: Processed 1 samples out of 5, 0 errors
+16:53:21,374 INFO Experiment.PerfCost-3f0f: Processed 2 samples out of 5, 0 errors
+16:53:41,236 INFO Experiment.PerfCost-3f0f: Processed 3 samples out of 5, 0 errors
+16:54:01,70 INFO Experiment.PerfCost-3f0f: Processed 4 samples out of 5, 0 errors
+16:54:20,962 INFO Experiment.PerfCost-3f0f: Processed 5 samples out of 5, 0 errors
+16:54:25,963 INFO Experiment.PerfCost-3f0f: Mean 9873.6856 [ms], median 9890.335 [ms], std 23.62425206943063, CV 0.23926477939940305
+16:54:25,965 INFO Experiment.PerfCost-3f0f: Parametric CI (Student's t-distribution) 0.95 from 9840.889880488936 to 9906.481319511066, within 0.33215276280485184% of mean
+16:54:25,967 INFO Experiment.PerfCost-3f0f: Parametric CI (Student's t-distribution) 0.99 from 9819.30145110305 to 9928.06974889695, within 0.5507988718716154% of mean
+16:54:25,970 INFO KataQemu.KataQemuFunction-4c60: Stopping function
+16:54:26,406 INFO KataQemu.KataQemuFunction-4c60: Function stopped succesfully

@@ -1,0 +1,4 @@
+17:37:21,960 INFO SeBS-d187: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition
+17:37:21,986 INFO Cvm-8c34: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:37:21,989 INFO Experiment.PerfCost-8f66: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/cold_results.json
+17:37:21,991 INFO Experiment.PerfCost-8f66: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/411.image-recognition/perf-cost/sequential_results.json

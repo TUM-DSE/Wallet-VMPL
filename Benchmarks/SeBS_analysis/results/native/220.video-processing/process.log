@@ -1,0 +1,4 @@
+15:03:47,720 INFO SeBS-0a38: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing
+15:03:47,748 INFO Native-48aa: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+15:03:47,750 INFO Experiment.PerfCost-280a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/cold_results.json
+15:03:47,752 INFO Experiment.PerfCost-280a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/220.video-processing/perf-cost/sequential_results.json

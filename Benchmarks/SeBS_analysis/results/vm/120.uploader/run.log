@@ -1,0 +1,41 @@
+17:18:17,286 INFO SeBS-db92: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+17:18:17,315 INFO Cvm-c31e: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:18:17,320 INFO Benchmark-bd91: Building benchmark 120.uploader. Reason: no cached code package.
+17:18:17,327 INFO Cvm-c31e: Function size 0.000003 MB
+17:18:17,328 INFO Benchmark-bd91: Created code package (source hash: f9140d3d2939d0a3322b511ec84c3215), for run on cvm with python:3.11
+17:18:17,331 INFO Cvm-c31e: Creating new function! Reason: function 120.uploader-python-3.11 not found in cache.
+17:18:17,339 INFO minio.Minio-9385: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+17:18:17,340 INFO Experiment.PerfCost-23cd: Begin experiment
+17:18:17,340 INFO Experiment.PerfCost-23cd: Begin cold experiments
+17:18:17,343 INFO Cvm.CvmFunction-3864: Not stopping function as it was not running
+17:18:33,311 INFO Experiment.PerfCost-23cd: Processed 0 warm-up samples, ignoring these results.
+17:18:38,311 INFO Cvm.CvmFunction-3864: Stopping function
+17:18:39,324 INFO Cvm.CvmFunction-3864: Function stopped succesfully
+17:18:53,578 INFO Experiment.PerfCost-23cd: Processed 1 samples out of 5, 0 errors
+17:18:58,579 INFO Cvm.CvmFunction-3864: Stopping function
+17:18:59,591 INFO Cvm.CvmFunction-3864: Function stopped succesfully
+17:19:12,893 INFO Experiment.PerfCost-23cd: Processed 2 samples out of 5, 0 errors
+17:19:17,894 INFO Cvm.CvmFunction-3864: Stopping function
+17:19:18,906 INFO Cvm.CvmFunction-3864: Function stopped succesfully
+17:19:33,495 INFO Experiment.PerfCost-23cd: Processed 3 samples out of 5, 0 errors
+17:19:38,495 INFO Cvm.CvmFunction-3864: Stopping function
+17:19:39,508 INFO Cvm.CvmFunction-3864: Function stopped succesfully
+17:19:53,353 INFO Experiment.PerfCost-23cd: Processed 4 samples out of 5, 0 errors
+17:19:58,353 INFO Cvm.CvmFunction-3864: Stopping function
+17:19:59,366 INFO Cvm.CvmFunction-3864: Function stopped succesfully
+17:20:12,713 INFO Experiment.PerfCost-23cd: Processed 5 samples out of 5, 0 errors
+17:20:17,714 INFO Experiment.PerfCost-23cd: Mean 8866.1606 [ms], median 8843.797 [ms], std 502.13657695913764, CV 5.663517723321386
+17:20:17,716 INFO Experiment.PerfCost-23cd: Parametric CI (Student's t-distribution) 0.95 from 8169.083279380511 to 9563.237920619487, within 7.862223030558324% of mean
+17:20:17,718 INFO Experiment.PerfCost-23cd: Parametric CI (Student's t-distribution) 0.99 from 7710.21838063605 to 10022.102819363949, within 13.037686452058509% of mean
+17:20:17,721 INFO Experiment.PerfCost-23cd: Begin sequential experiments
+17:20:24,662 INFO Experiment.PerfCost-23cd: Processed 0 warm-up samples, ignoring these results.
+17:20:35,328 INFO Experiment.PerfCost-23cd: Processed 1 samples out of 5, 0 errors
+17:20:45,999 INFO Experiment.PerfCost-23cd: Processed 2 samples out of 5, 0 errors
+17:20:56,686 INFO Experiment.PerfCost-23cd: Processed 3 samples out of 5, 0 errors
+17:21:07,387 INFO Experiment.PerfCost-23cd: Processed 4 samples out of 5, 0 errors
+17:21:18,107 INFO Experiment.PerfCost-23cd: Processed 5 samples out of 5, 0 errors
+17:21:23,108 INFO Experiment.PerfCost-23cd: Mean 687.6596 [ms], median 686.111 [ms], std 19.580514279252217, CV 2.8474137900862893
+17:21:23,110 INFO Experiment.PerfCost-23cd: Parametric CI (Student's t-distribution) 0.95 from 660.4774884860573 to 714.8417115139426, within 3.952844039978892% of mean
+17:21:23,111 INFO Experiment.PerfCost-23cd: Parametric CI (Student's t-distribution) 0.99 from 642.5843273136045 to 732.7348726863954, within 6.554881613867598% of mean
+17:21:23,115 INFO Cvm.CvmFunction-3864: Stopping function
+17:21:24,127 INFO Cvm.CvmFunction-3864: Function stopped succesfully

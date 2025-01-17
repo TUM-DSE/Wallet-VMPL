@@ -1,0 +1,43 @@
+16:30:49,358 INFO SeBS-52f6: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+16:30:49,385 INFO Native-4cc6: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+16:30:49,391 INFO Benchmark-71db: Building benchmark 502.graph-mst. Reason: no cached code package.
+16:30:49,400 INFO Benchmark-71db: Docker build of benchmark dependencies in container of image sebs:build.native.python.3.11
+16:30:49,400 INFO Benchmark-71db: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/502.graph-mst_code/python/3.11
+16:30:56,354 INFO Native-4cc6: Function size 0.000005 MB
+16:30:56,356 INFO Benchmark-71db: Created code package (source hash: d698e3c3aa2553bb644b000e483d4fca), for run on native with python:3.11
+16:30:56,716 INFO Native-4cc6: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+16:30:56,725 INFO minio.Minio-8138: Using existing bucket sebs-benchmarks-gramine-native-746dcb52 for benchmarks
+16:30:56,726 INFO Experiment.PerfCost-eb57: Begin experiment
+16:30:56,726 INFO Experiment.PerfCost-eb57: Begin cold experiments
+16:30:56,729 INFO Native.NativeFunction-53eb: Not stopping function as it was not running
+16:31:02,705 INFO Experiment.PerfCost-eb57: Processed 0 warm-up samples, ignoring these results.
+16:31:07,705 INFO Native.NativeFunction-53eb: Stopping function
+16:31:07,706 INFO Native.NativeFunction-53eb: Function stopped succesfully
+16:31:13,677 INFO Experiment.PerfCost-eb57: Processed 1 samples out of 5, 0 errors
+16:31:18,678 INFO Native.NativeFunction-53eb: Stopping function
+16:31:18,678 INFO Native.NativeFunction-53eb: Function stopped succesfully
+16:31:24,649 INFO Experiment.PerfCost-eb57: Processed 2 samples out of 5, 0 errors
+16:31:29,649 INFO Native.NativeFunction-53eb: Stopping function
+16:31:29,649 INFO Native.NativeFunction-53eb: Function stopped succesfully
+16:31:35,615 INFO Experiment.PerfCost-eb57: Processed 3 samples out of 5, 0 errors
+16:31:40,616 INFO Native.NativeFunction-53eb: Stopping function
+16:31:40,616 INFO Native.NativeFunction-53eb: Function stopped succesfully
+16:31:46,586 INFO Experiment.PerfCost-eb57: Processed 4 samples out of 5, 0 errors
+16:31:51,586 INFO Native.NativeFunction-53eb: Stopping function
+16:31:51,587 INFO Native.NativeFunction-53eb: Function stopped succesfully
+16:31:57,557 INFO Experiment.PerfCost-eb57: Processed 5 samples out of 5, 0 errors
+16:32:02,558 INFO Experiment.PerfCost-eb57: Mean 968.1349999999999 [ms], median 968.895 [ms], std 1.9573321639415346, CV 0.20217553997547189
+16:32:02,560 INFO Experiment.PerfCost-eb57: Parametric CI (Student's t-distribution) 0.95 from 965.4177873470891 to 970.8522126529107, within 0.2806646441778061% of mean
+16:32:02,562 INFO Experiment.PerfCost-eb57: Parametric CI (Student's t-distribution) 0.99 from 963.6291285111696 to 972.6408714888302, within 0.4654176833634029% of mean
+16:32:02,565 INFO Experiment.PerfCost-eb57: Begin sequential experiments
+16:32:07,679 INFO Experiment.PerfCost-eb57: Processed 0 warm-up samples, ignoring these results.
+16:32:17,736 INFO Experiment.PerfCost-eb57: Processed 1 samples out of 5, 0 errors
+16:32:27,793 INFO Experiment.PerfCost-eb57: Processed 2 samples out of 5, 0 errors
+16:32:37,850 INFO Experiment.PerfCost-eb57: Processed 3 samples out of 5, 0 errors
+16:32:47,908 INFO Experiment.PerfCost-eb57: Processed 4 samples out of 5, 0 errors
+16:32:57,965 INFO Experiment.PerfCost-eb57: Processed 5 samples out of 5, 0 errors
+16:33:02,966 INFO Experiment.PerfCost-eb57: Mean 55.9492 [ms], median 56.003 [ms], std 0.37715641317628373, CV 0.6741051045882404
+16:33:02,968 INFO Experiment.PerfCost-eb57: Parametric CI (Student's t-distribution) 0.95 from 55.425622961371374 to 56.47277703862862, within 0.9358079090114307% of mean
+16:33:02,970 INFO Experiment.PerfCost-eb57: Parametric CI (Student's t-distribution) 0.99 from 55.080968046186726 to 56.81743195381327, within 1.5518219274149974% of mean
+16:33:02,973 INFO Native.NativeFunction-53eb: Stopping function
+16:33:02,973 INFO Native.NativeFunction-53eb: Function stopped succesfully

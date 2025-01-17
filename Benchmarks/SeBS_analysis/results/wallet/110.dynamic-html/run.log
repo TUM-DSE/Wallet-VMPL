@@ -1,0 +1,18 @@
+22:38:37,634 INFO SeBS-e1fd: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+22:38:37,711 INFO Wallet-bfb8: Generating unique resource name wallet-4d387fde
+22:38:37,715 INFO minio.Minio-84a8: Initialize a new bucket for benchmarks
+22:38:37,722 INFO minio.Minio-84a8: Created bucket sebs-benchmarks-wallet-4d387fde
+22:38:37,770 INFO Benchmark-2a10: Building benchmark 110.dynamic-html. Reason: no cached code package.
+22:38:37,874 INFO Benchmark-2a10: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+22:38:37,908 INFO Wallet-bfb8: Function size 0.000004 MB
+22:38:37,933 INFO Benchmark-2a10: Created code package (source hash: a88eb3da36e8823c703ba39299a4d7da), for run on wallet with python:3.11
+22:38:38,117 INFO Wallet-bfb8: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+22:38:38,762 INFO Experiment.PerfCost-d228: Begin experiment
+22:38:38,764 INFO Experiment.PerfCost-d228: Begin sequential experiments
+22:39:02,746 INFO Experiment.PerfCost-d228: Processed 1 samples out of 2, 0 errors
+22:39:12,781 INFO Experiment.PerfCost-d228: Processed 2 samples out of 2, 0 errors
+22:39:17,794 INFO Experiment.PerfCost-d228: Mean 18.9135 [ms], median 18.9135 [ms], std 0.6214999999999993, CV 3.2860126364765874
+22:39:17,804 INFO Experiment.PerfCost-d228: Parametric CI (Student's t-distribution) 0.95 from 11.016593756307461 to 26.810406243692537, within 41.75274932557453% of mean
+22:39:17,811 INFO Experiment.PerfCost-d228: Parametric CI (Student's t-distribution) 0.99 from -20.64916463272614 to 58.47616463272614, within 209.17685585812328% of mean
+22:39:17,817 INFO Wallet.WalletFunction-986d: Stopping function
+22:39:17,821 INFO Wallet.WalletFunction-986d: Function stopped succesfully

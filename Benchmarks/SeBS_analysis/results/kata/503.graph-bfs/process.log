@@ -1,0 +1,4 @@
+16:49:19,389 INFO SeBS-46e2: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs
+16:49:19,416 INFO KataQemu-af74: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:49:19,418 INFO Experiment.PerfCost-cf9d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/cold_results.json
+16:49:19,440 INFO Experiment.PerfCost-cf9d: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/perf-cost/sequential_results.json

@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "220.video-processing-python-3.11": {
+      "2f763ef1-0029-4bb8-8015-445308ff0b26": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699677.006140",
+          "end": "1736699679.126022",
+          "is_cold": false,
+          "request_id": "2f763ef1-0029-4bb8-8015-445308ff0b26",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 2063535.0,
+                "download_size": 15350231,
+                "download_time": 44542.0,
+                "upload_size": 591845,
+                "upload_time": 11078.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "220.video-processing-0-output/processed-city.1c8d0a28.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "2f763ef1-0029-4bb8-8015-445308ff0b26",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 2119882,
+          "client": 2126987,
+          "client_begin": "2025-01-12 16:34:37.000622",
+          "client_end": "2025-01-12 16:34:39.127609",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "51e7feba-25f6-4656-8b7d-3babee76da13": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699725.527629",
+          "end": "1736699727.660111",
+          "is_cold": false,
+          "request_id": "51e7feba-25f6-4656-8b7d-3babee76da13",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 2081057.0,
+                "download_size": 15350231,
+                "download_time": 41107.0,
+                "upload_size": 591845,
+                "upload_time": 9620.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "220.video-processing-0-output/processed-city.2b517dfc.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "51e7feba-25f6-4656-8b7d-3babee76da13",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 2132482,
+          "client": 2139731,
+          "client_begin": "2025-01-12 16:35:25.522144",
+          "client_end": "2025-01-12 16:35:27.661875",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "84eecc11-b488-46e7-89e1-4ceeb2079b3c": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699701.267583",
+          "end": "1736699703.388685",
+          "is_cold": false,
+          "request_id": "84eecc11-b488-46e7-89e1-4ceeb2079b3c",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 2066700.0,
+                "download_size": 15350231,
+                "download_time": 43336.0,
+                "upload_size": 591845,
+                "upload_time": 10377.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "220.video-processing-0-output/processed-city.9baab9e0.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "84eecc11-b488-46e7-89e1-4ceeb2079b3c",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 2121102,
+          "client": 2128267,
+          "client_begin": "2025-01-12 16:35:01.262234",
+          "client_end": "2025-01-12 16:35:03.390501",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "ac4596a5-fcff-410c-a756-49665ebac586": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699689.134405",
+          "end": "1736699691.259151",
+          "is_cold": false,
+          "request_id": "ac4596a5-fcff-410c-a756-49665ebac586",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 2069324.0,
+                "download_size": 15350231,
+                "download_time": 43909.0,
+                "upload_size": 591845,
+                "upload_time": 10833.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "220.video-processing-0-output/processed-city.4d3227a1.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "ac4596a5-fcff-410c-a756-49665ebac586",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 2124746,
+          "client": 2131932,
+          "client_begin": "2025-01-12 16:34:49.128936",
+          "client_end": "2025-01-12 16:34:51.260868",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "ad4fbd1c-04a5-453f-b431-cf6fc4bb6703": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699713.397275",
+          "end": "1736699715.519073",
+          "is_cold": false,
+          "request_id": "ad4fbd1c-04a5-453f-b431-cf6fc4bb6703",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 2067481.0,
+                "download_size": 15350231,
+                "download_time": 43072.0,
+                "upload_size": 591845,
+                "upload_time": 10507.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "220.video-processing-0-output/processed-city.4d1858dd.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "ad4fbd1c-04a5-453f-b431-cf6fc4bb6703",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 2121798,
+          "client": 2128789,
+          "client_begin": "2025-01-12 16:35:13.391857",
+          "client_end": "2025-01-12 16:35:15.520646",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736699657.708956,
+  "config": {
+    "deployment": {
+      "name": "kata_qemu"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "220.video-processing",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736699732.66286,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

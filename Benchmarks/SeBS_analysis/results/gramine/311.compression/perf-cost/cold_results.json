@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "311.compression-python-3.10": {
+      "1de688f4-6eb6-49fb-a107-f3205de69db8": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736542512.551744",
+          "end": "1736542513.977570",
+          "is_cold": false,
+          "request_id": "1de688f4-6eb6-49fb-a107-f3205de69db8",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 519223.0,
+                "download_size": 10063841,
+                "download_time": 190247.0,
+                "upload_size": 9326902,
+                "upload_time": 62548.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "311.compression-0-output/acmart-master.98b15ec4.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "1de688f4-6eb6-49fb-a107-f3205de69db8",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1425826,
+          "client": 2682118,
+          "client_begin": "2025-01-10 20:55:11.296876",
+          "client_end": "2025-01-10 20:55:13.978994",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "605de056-8c5d-4b66-9fab-1355d5b4c0e8": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736542538.671122",
+          "end": "1736542540.097882",
+          "is_cold": false,
+          "request_id": "605de056-8c5d-4b66-9fab-1355d5b4c0e8",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 514718.0,
+                "download_size": 10063841,
+                "download_time": 196502.0,
+                "upload_size": 9326902,
+                "upload_time": 60813.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "311.compression-0-output/acmart-master.17537067.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "605de056-8c5d-4b66-9fab-1355d5b4c0e8",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1426760,
+          "client": 2694135,
+          "client_begin": "2025-01-10 20:55:37.405270",
+          "client_end": "2025-01-10 20:55:40.099405",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "787d535d-fb9e-4cd1-9287-6b570a63e165": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736542525.594719",
+          "end": "1736542527.038127",
+          "is_cold": false,
+          "request_id": "787d535d-fb9e-4cd1-9287-6b570a63e165",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 515464.0,
+                "download_size": 10063841,
+                "download_time": 206831.0,
+                "upload_size": 9326902,
+                "upload_time": 63574.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "311.compression-0-output/acmart-master.19cb5705.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "787d535d-fb9e-4cd1-9287-6b570a63e165",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1443408,
+          "client": 2688160,
+          "client_begin": "2025-01-10 20:55:24.351418",
+          "client_end": "2025-01-10 20:55:27.039578",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "d2b09ac8-37e2-4f1e-908c-0a7ea64f7d49": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736542564.763229",
+          "end": "1736542566.211975",
+          "is_cold": false,
+          "request_id": "d2b09ac8-37e2-4f1e-908c-0a7ea64f7d49",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 512710.0,
+                "download_size": 10063841,
+                "download_time": 220140.0,
+                "upload_size": 9326901,
+                "upload_time": 63213.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "311.compression-0-output/acmart-master.45d372ac.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "d2b09ac8-37e2-4f1e-908c-0a7ea64f7d49",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1448746,
+          "client": 2700430,
+          "client_begin": "2025-01-10 20:56:03.512982",
+          "client_end": "2025-01-10 20:56:06.213412",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "dc6440a3-f870-4440-a292-3d6caedbbabb": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736542551.728816",
+          "end": "1736542553.149564",
+          "is_cold": false,
+          "request_id": "dc6440a3-f870-4440-a292-3d6caedbbabb",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 513292.0,
+                "download_size": 10063841,
+                "download_time": 196331.0,
+                "upload_size": 9326902,
+                "upload_time": 61202.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "311.compression-0-output/acmart-master.d7efde3c.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "dc6440a3-f870-4440-a292-3d6caedbbabb",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1420748,
+          "client": 2674890,
+          "client_begin": "2025-01-10 20:55:50.476178",
+          "client_end": "2025-01-10 20:55:53.151068",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736542493.298404,
+  "config": {
+    "deployment": {
+      "name": "gramine"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "311.compression",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.10"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736542571.214408,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 5,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

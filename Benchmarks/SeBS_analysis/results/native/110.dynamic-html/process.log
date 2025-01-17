@@ -1,0 +1,4 @@
+14:56:47,114 INFO SeBS-9de1: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html
+14:56:47,142 INFO Native-2350: Using existing deployment gramine-native-746dcb52 that matches prefix gramine-native!
+14:56:47,144 INFO Experiment.PerfCost-8c90: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/cold_results.json
+14:56:47,146 INFO Experiment.PerfCost-8c90: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/110.dynamic-html/perf-cost/sequential_results.json

@@ -1,0 +1,4 @@
+21:22:41,323 INFO SeBS-0034: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation
+21:22:41,347 INFO Cvm-5a53: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:22:41,350 INFO Experiment.PerfCost-b1a2: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/sequential_results.json
+21:22:41,352 INFO Experiment.PerfCost-b1a2: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/504.dna-visualisation/perf-cost/cold_results.json

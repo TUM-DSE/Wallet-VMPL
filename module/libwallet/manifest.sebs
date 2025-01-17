@@ -1,0 +1,67 @@
+[libos]
+entrypoint = "/python/python"
+
+
+[loader]
+log_level = "debug"
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+argv = ["python3", "-c", """
+import json
+print('import ctypes');
+import ctypes
+print('string_at')
+a=ctypes.string_at(0x140_0000_0000)
+print(a)
+exec(a)
+while True:
+      print('Trying to get input', flush=True)
+      b=ctypes.string_at(0x280_0000_0000)
+      print('Input received',flush=True)
+      b = json.loads(b)
+      print('Trying to execute',flush=True)
+      res = handler(b)
+      print('Execution done', flush=True)
+      out= json.dumps(res).encode()
+      print('output encoded',flush=True)
+      print(f'output len {len(out)}', flush=True)
+      ptr=ctypes.POINTER(ctypes.c_char*len(out))
+      dst=ctypes.cast(0x300_0000_0000, ptr)
+      ctypes.memmove(dst, out, len(out))
+      c=ctypes.string_at(0x300_0000_0000)
+      print('done!')
+      import ctypes
+      lib = ctypes.CDLL('/lib/libcpuid.so')
+      lib.notify_monitor();
+      print("RESTARTING", flush=True)
+"""]
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib:/python"
+PYTHONPATH = "/python/stdlib.zip:/python"
+OPENBLAS_NUM_THREADS = "1"
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+  { type = "pseudo", path = "/python", uri = "python" },
+]
+
+[sgx]
+debug = true
+edmm_enable = false
+trusted_files = [
+]
+max_threads = 4
+isvprodid = 0
+isvsvn = 0
+remote_attestation = "none"
+enable_stats = false
+enclave_size = "256M"
+use_exinfo = false
+
+[sgx.cpu_features]
+avx = "unspecified"
+avx512 = "unspecified"
+amx = "unspecified"
+mpx = "disabled"
+pkru = "disabled"

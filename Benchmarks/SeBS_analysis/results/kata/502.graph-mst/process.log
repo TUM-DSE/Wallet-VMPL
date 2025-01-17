@@ -1,0 +1,4 @@
+16:46:55,550 INFO SeBS-10e9: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst
+16:46:55,579 INFO KataQemu-8fb2: Using existing deployment kata-qemu-be6e37d0 that matches prefix kata-qemu!
+16:46:55,582 INFO Experiment.PerfCost-e28a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/perf-cost/sequential_results.json
+16:46:55,584 INFO Experiment.PerfCost-e28a: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/502.graph-mst/perf-cost/cold_results.json

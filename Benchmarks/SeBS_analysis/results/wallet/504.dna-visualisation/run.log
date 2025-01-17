@@ -1,0 +1,18 @@
+22:30:40,274 INFO SeBS-c051: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+22:30:40,350 INFO Wallet-b48d: Generating unique resource name wallet-30b118f4
+22:30:40,354 INFO minio.Minio-1759: Initialize a new bucket for benchmarks
+22:30:40,361 INFO minio.Minio-1759: Created bucket sebs-benchmarks-wallet-30b118f4
+22:30:40,444 INFO Benchmark-d8dc: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+22:30:40,539 INFO Benchmark-d8dc: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+22:30:40,565 INFO Wallet-b48d: Function size 0.000005 MB
+22:30:40,591 INFO Benchmark-d8dc: Created code package (source hash: e758d934e9861f398347eee8babe55a8), for run on wallet with python:3.11
+22:30:40,754 INFO Wallet-b48d: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+22:30:41,433 INFO Experiment.PerfCost-e507: Begin experiment
+22:30:41,436 INFO Experiment.PerfCost-e507: Begin cold experiments
+22:30:41,443 INFO Wallet.WalletFunction-0eb1: Not stopping function as it was not running
+22:32:36,170 INFO Experiment.PerfCost-e507: Processed 1 samples out of 1, 0 errors
+22:32:41,179 INFO Experiment.PerfCost-e507: Mean 109718.857 [ms], median 109718.857 [ms], std 0.0, CV 0.0
+22:32:41,201 INFO Experiment.PerfCost-e507: Parametric CI (Student's t-distribution) 0.95 from nan to nan, within nan% of mean
+22:32:41,207 INFO Experiment.PerfCost-e507: Parametric CI (Student's t-distribution) 0.99 from nan to nan, within nan% of mean
+22:32:41,212 INFO Wallet.WalletFunction-0eb1: Stopping function
+22:32:41,221 INFO Wallet.WalletFunction-0eb1: Function stopped succesfully

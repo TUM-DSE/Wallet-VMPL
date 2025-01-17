@@ -1,0 +1,43 @@
+16:59:01,451 INFO SeBS-7414: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs
+16:59:01,478 INFO Cvm-5d91: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+16:59:01,483 INFO Benchmark-724b: Building benchmark 503.graph-bfs. Reason: no cached code package.
+16:59:01,491 INFO Benchmark-724b: Docker build of benchmark dependencies in container of image sebs:build.cvm.python.3.11
+16:59:01,492 INFO Benchmark-724b: Docker mount of benchmark code from path /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/503.graph-bfs/503.graph-bfs_code/python/3.11
+16:59:05,705 INFO Cvm-5d91: Function size 0.000005 MB
+16:59:05,707 INFO Benchmark-724b: Created code package (source hash: bd363bdb63bea001923eceb39d70a983), for run on cvm with python:3.11
+16:59:05,786 INFO Cvm-5d91: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+16:59:05,796 INFO minio.Minio-9bb7: Using existing bucket sebs-benchmarks-cvm-0c05e000 for benchmarks
+16:59:05,797 INFO Experiment.PerfCost-fa64: Begin experiment
+16:59:05,797 INFO Experiment.PerfCost-fa64: Begin cold experiments
+16:59:05,800 INFO Cvm.CvmFunction-bea2: Not stopping function as it was not running
+16:59:19,987 INFO Experiment.PerfCost-fa64: Processed 0 warm-up samples, ignoring these results.
+16:59:24,988 INFO Cvm.CvmFunction-bea2: Stopping function
+16:59:26,1 INFO Cvm.CvmFunction-bea2: Function stopped succesfully
+16:59:38,804 INFO Experiment.PerfCost-fa64: Processed 1 samples out of 5, 0 errors
+16:59:43,805 INFO Cvm.CvmFunction-bea2: Stopping function
+16:59:44,817 INFO Cvm.CvmFunction-bea2: Function stopped succesfully
+16:59:58,224 INFO Experiment.PerfCost-fa64: Processed 2 samples out of 5, 0 errors
+17:00:03,224 INFO Cvm.CvmFunction-bea2: Stopping function
+17:00:04,237 INFO Cvm.CvmFunction-bea2: Function stopped succesfully
+17:00:17,245 INFO Experiment.PerfCost-fa64: Processed 3 samples out of 5, 0 errors
+17:00:22,245 INFO Cvm.CvmFunction-bea2: Stopping function
+17:00:23,257 INFO Cvm.CvmFunction-bea2: Function stopped succesfully
+17:00:36,876 INFO Experiment.PerfCost-fa64: Processed 4 samples out of 5, 0 errors
+17:00:41,876 INFO Cvm.CvmFunction-bea2: Stopping function
+17:00:42,889 INFO Cvm.CvmFunction-bea2: Function stopped succesfully
+17:00:56,253 INFO Experiment.PerfCost-fa64: Processed 5 samples out of 5, 0 errors
+17:01:01,254 INFO Experiment.PerfCost-fa64: Mean 8238.6782 [ms], median 8362.958 [ms], std 293.6684893715363, CV 3.5645097701659987
+17:01:01,257 INFO Experiment.PerfCost-fa64: Parametric CI (Student's t-distribution) 0.95 from 7831.000980066783 to 8646.355419933217, within 4.948332851903563% of mean
+17:01:01,258 INFO Experiment.PerfCost-fa64: Parametric CI (Student's t-distribution) 0.99 from 7562.639407094029 to 8914.716992905973, within 8.205670575966568% of mean
+17:01:01,466 INFO Experiment.PerfCost-fa64: Begin sequential experiments
+17:01:06,590 INFO Experiment.PerfCost-fa64: Processed 0 warm-up samples, ignoring these results.
+17:01:16,652 INFO Experiment.PerfCost-fa64: Processed 1 samples out of 5, 0 errors
+17:01:26,715 INFO Experiment.PerfCost-fa64: Processed 2 samples out of 5, 0 errors
+17:01:36,777 INFO Experiment.PerfCost-fa64: Processed 3 samples out of 5, 0 errors
+17:01:46,840 INFO Experiment.PerfCost-fa64: Processed 4 samples out of 5, 0 errors
+17:01:56,902 INFO Experiment.PerfCost-fa64: Processed 5 samples out of 5, 0 errors
+17:02:01,903 INFO Experiment.PerfCost-fa64: Mean 61.001599999999996 [ms], median 61.13 [ms], std 0.2077234700268619, CV 0.34052134702509756
+17:02:01,905 INFO Experiment.PerfCost-fa64: Parametric CI (Student's t-distribution) 0.95 from 60.7132335942046 to 61.28996640579539, within 0.4727194135816006% of mean
+17:02:01,907 INFO Experiment.PerfCost-fa64: Parametric CI (Student's t-distribution) 0.99 from 60.5234107184883 to 61.47978928151169, within 0.7838962937229452% of mean
+17:02:02,108 INFO Cvm.CvmFunction-bea2: Stopping function
+17:02:03,120 INFO Cvm.CvmFunction-bea2: Function stopped succesfully

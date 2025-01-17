@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "220.video-processing-python-3.11": {
+      "02620a0c-1d85-4746-9d3f-6ebe375f64d4": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521420.492945",
+          "end": "1736521421.045963",
+          "is_cold": false,
+          "request_id": "02620a0c-1d85-4746-9d3f-6ebe375f64d4",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 509010.0,
+                "download_size": 15350231,
+                "download_time": 33130.0,
+                "upload_size": 592694,
+                "upload_time": 10500.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "220.video-processing-0-output/processed-city.8f3d1edb.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "02620a0c-1d85-4746-9d3f-6ebe375f64d4",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 553018,
+          "client": 560115,
+          "client_begin": "2025-01-10 15:03:40.487375",
+          "client_end": "2025-01-10 15:03:41.047490",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "0e648d8d-214b-4373-91f2-dbf2bdeca8e2": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521388.844413",
+          "end": "1736521389.378230",
+          "is_cold": false,
+          "request_id": "0e648d8d-214b-4373-91f2-dbf2bdeca8e2",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 489883.0,
+                "download_size": 15350231,
+                "download_time": 32661.0,
+                "upload_size": 592694,
+                "upload_time": 10953.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "220.video-processing-0-output/processed-city.908e6eb9.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "0e648d8d-214b-4373-91f2-dbf2bdeca8e2",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 533817,
+          "client": 540416,
+          "client_begin": "2025-01-10 15:03:08.839304",
+          "client_end": "2025-01-10 15:03:09.379720",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "2a431084-c1fc-4a90-a075-b1c8c9bd3c05": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521409.937217",
+          "end": "1736521410.484458",
+          "is_cold": false,
+          "request_id": "2a431084-c1fc-4a90-a075-b1c8c9bd3c05",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 503498.0,
+                "download_size": 15350231,
+                "download_time": 32859.0,
+                "upload_size": 592694,
+                "upload_time": 10556.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "220.video-processing-0-output/processed-city.087650b4.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "2a431084-c1fc-4a90-a075-b1c8c9bd3c05",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 547241,
+          "client": 553875,
+          "client_begin": "2025-01-10 15:03:29.932105",
+          "client_end": "2025-01-10 15:03:30.485980",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "f0ece374-e43d-43ed-8fa8-551e9e8bdb73": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521378.294776",
+          "end": "1736521378.836258",
+          "is_cold": false,
+          "request_id": "f0ece374-e43d-43ed-8fa8-551e9e8bdb73",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 503982.0,
+                "download_size": 15350231,
+                "download_time": 27063.0,
+                "upload_size": 592694,
+                "upload_time": 10089.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "220.video-processing-0-output/processed-city.70b10f7e.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "f0ece374-e43d-43ed-8fa8-551e9e8bdb73",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 541482,
+          "client": 548521,
+          "client_begin": "2025-01-10 15:02:58.289274",
+          "client_end": "2025-01-10 15:02:58.837795",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "f33c2e9a-a59a-418a-9d25-1b3d4f09f97d": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736521399.386751",
+          "end": "1736521399.929270",
+          "is_cold": false,
+          "request_id": "f33c2e9a-a59a-418a-9d25-1b3d4f09f97d",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 499182.0,
+                "download_size": 15350231,
+                "download_time": 32170.0,
+                "upload_size": 592694,
+                "upload_time": 10817.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-gramine-native-746dcb52",
+                "key": "220.video-processing-0-output/processed-city.c0d3cdfe.mp4"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "f33c2e9a-a59a-418a-9d25-1b3d4f09f97d",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 542519,
+          "client": 549564,
+          "client_begin": "2025-01-10 15:03:19.381237",
+          "client_end": "2025-01-10 15:03:19.930801",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736521362.191345,
+  "config": {
+    "deployment": {
+      "name": "native"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "220.video-processing",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736521426.04848,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

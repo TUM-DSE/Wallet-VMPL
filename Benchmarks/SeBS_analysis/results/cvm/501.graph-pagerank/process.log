@@ -1,0 +1,4 @@
+21:06:08,594 INFO SeBS-f8d3: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank
+21:06:08,619 INFO Cvm-b159: Using existing deployment cvm-39ac486b that matches prefix cvm!
+21:06:08,622 INFO Experiment.PerfCost-1269: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank/perf-cost/sequential_results.json
+21:06:08,624 INFO Experiment.PerfCost-1269: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/501.graph-pagerank/perf-cost/cold_results.json

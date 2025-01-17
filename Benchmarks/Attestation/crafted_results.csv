@@ -1,0 +1,8 @@
+Measurement,Size (bytes),Average (ns),Median (ns),StdDev (ns)
+measure_monitor_cold,-,5,5891029.0,233043.1139578209
+measure_monitor_hot,-,1,43772.0,4018.091095611395
+measure_zygote_cold,-,3,2739610834.5,723210.090476945
+measure_zygote_hot,-,1,47714.5,8418.401413445117
+measure_trustlet_cold,-,2,100393.0,41949.040081985186
+measure_trustlet_hot,-,1,36969.5,14061.665292092615
+measure_function,4096,1,3148255.0,145388.36794889095

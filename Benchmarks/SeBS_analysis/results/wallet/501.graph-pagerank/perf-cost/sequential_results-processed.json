@@ -1,0 +1,100 @@
+{
+  "_invocations": {
+    "501.graph-pagerank-python-3.11": {
+      "450cb76d-2394-4607-8fc2-82d34ee88e11": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736381965.996413",
+          "end": "1736381967.900373",
+          "is_cold": false,
+          "request_id": "450cb76d-2394-4607-8fc2-82d34ee88e11",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "450cb76d-2394-4607-8fc2-82d34ee88e11",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1903960,
+          "client": 1909933,
+          "client_begin": "2025-01-09 00:19:25.991796",
+          "client_end": "2025-01-09 00:19:27.901729",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "919748da-1466-4c83-be46-bc951a2ce86b": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736381954.071890",
+          "end": "1736381955.979439",
+          "is_cold": false,
+          "request_id": "919748da-1466-4c83-be46-bc951a2ce86b",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "919748da-1466-4c83-be46-bc951a2ce86b",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1907549,
+          "client": 1913900,
+          "client_begin": "2025-01-09 00:19:14.066972",
+          "client_end": "2025-01-09 00:19:15.980872",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "501.graph-pagerank-python-3.11": {}
+  },
+  "begin_time": 1736381925.809727,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736381972.911144,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

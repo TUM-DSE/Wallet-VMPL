@@ -1,0 +1,4 @@
+17:21:25,876 INFO SeBS-37c7: Created experiment output at /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader
+17:21:25,904 INFO Cvm-ff11: Using existing deployment cvm-0c05e000 that matches prefix cvm!
+17:21:25,906 INFO Experiment.PerfCost-864e: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/sequential_results.json
+17:21:25,908 INFO Experiment.PerfCost-864e: Processing data in /scratch/michael/CVM_eval/benchmarks/sebs/serverless-benchmarks/120.uploader/perf-cost/cold_results.json

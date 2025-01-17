@@ -1,0 +1,276 @@
+{
+  "_invocations": {
+    "311.compression-python-3.11": {
+      "252a3d86-2512-4ca2-826b-0dc8ebcf71c9": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699833.803521",
+          "end": "1736699834.580556",
+          "is_cold": false,
+          "request_id": "252a3d86-2512-4ca2-826b-0dc8ebcf71c9",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 446771.0,
+                "download_size": 10063841,
+                "download_time": 273909.0,
+                "upload_size": 9326901,
+                "upload_time": 52407.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "311.compression-0-output/acmart-master.49d1fff4.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "252a3d86-2512-4ca2-826b-0dc8ebcf71c9",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 777035,
+          "client": 777266,
+          "client_begin": "2025-01-12 16:37:13.815339",
+          "client_end": "2025-01-12 16:37:14.592605",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "2635524d-7e58-41a4-bc48-efbfe22b0081": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699866.098858",
+          "end": "1736699866.845268",
+          "is_cold": false,
+          "request_id": "2635524d-7e58-41a4-bc48-efbfe22b0081",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 440388.0,
+                "download_size": 10063841,
+                "download_time": 248545.0,
+                "upload_size": 9326901,
+                "upload_time": 53991.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "311.compression-0-output/acmart-master.a0e9c655.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "2635524d-7e58-41a4-bc48-efbfe22b0081",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 746410,
+          "client": 753487,
+          "client_begin": "2025-01-12 16:37:46.093447",
+          "client_end": "2025-01-12 16:37:46.846934",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "4d13296b-1272-4cf8-9560-2ef2f0b6c39c": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699855.350314",
+          "end": "1736699856.090383",
+          "is_cold": false,
+          "request_id": "4d13296b-1272-4cf8-9560-2ef2f0b6c39c",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 439903.0,
+                "download_size": 10063841,
+                "download_time": 246796.0,
+                "upload_size": 9326901,
+                "upload_time": 49994.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "311.compression-0-output/acmart-master.d76ae0f0.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "4d13296b-1272-4cf8-9560-2ef2f0b6c39c",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 740069,
+          "client": 746988,
+          "client_begin": "2025-01-12 16:37:35.345067",
+          "client_end": "2025-01-12 16:37:36.092055",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "bd2594de-4152-4cba-8608-dd3210993ef6": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699876.854067",
+          "end": "1736699877.600834",
+          "is_cold": false,
+          "request_id": "bd2594de-4152-4cba-8608-dd3210993ef6",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 442612.0,
+                "download_size": 10063841,
+                "download_time": 246247.0,
+                "upload_size": 9326901,
+                "upload_time": 54553.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "311.compression-0-output/acmart-master.bb7da143.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "bd2594de-4152-4cba-8608-dd3210993ef6",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 746767,
+          "client": 754122,
+          "client_begin": "2025-01-12 16:37:56.848420",
+          "client_end": "2025-01-12 16:37:57.602542",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "d24c11ff-2fec-44f3-80cb-9b0a68b61bbe": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736699844.599593",
+          "end": "1736699845.341906",
+          "is_cold": false,
+          "request_id": "d24c11ff-2fec-44f3-80cb-9b0a68b61bbe",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 437651.0,
+                "download_size": 10063841,
+                "download_time": 246730.0,
+                "upload_size": 9326901,
+                "upload_time": 54530.0
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-kata-qemu-be6e37d0",
+                "key": "311.compression-0-output/acmart-master.c35dbe56.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "d24c11ff-2fec-44f3-80cb-9b0a68b61bbe",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 742313,
+          "client": 749572,
+          "client_begin": "2025-01-12 16:37:24.594061",
+          "client_end": "2025-01-12 16:37:25.343633",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1736699817.268005,
+  "config": {
+    "deployment": {
+      "name": "kata_qemu"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "311.compression",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736699882.60348,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

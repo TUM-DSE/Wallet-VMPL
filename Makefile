@@ -9,6 +9,11 @@ CORES?=1
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
 
+FEATURE?=
+LOG_LEVEL?="print"
+BOOTTIME_ITERATION?=10
+
+GRAMINE_BUILD?=debug
 
 IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
@@ -16,7 +21,9 @@ KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
 USERADDR = $(shell expr $(shell id -u) - 1000)
 
-.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark benchmark
+REQUIREMENTS=requirements.txt
+
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark_sebs benchmark_sebs
 
 #Build OVMF Firmware
 build_firmware:
@@ -82,7 +89,7 @@ del_guest_net:
 svsm/svsm.bin: build_svsm
 
 build_svsm:
-	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES=enable-gdb RELEASE=True
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="enable-gdb ${FEATURE} ${LOG_LEVEL}" RELEASE=True
 node/bin/node:
 	cd node; make
 	cp node/bin/node module/
@@ -111,7 +118,7 @@ run:
 	-cpu EPYC-v4,host-phys-bits=true  \
 	-machine q35,confidential-guest-support=sev0,memory-backend=ram1 \
 	-object memory-backend-memfd,id=ram1,size=8G,share=true \
-	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,igvm-file=svsm/bin/coconut-qemu.igvm \
+	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file=svsm/bin/coconut-qemu.igvm \
 	-smp ${CORES} \
 	-no-reboot \
 	-drive file=guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=off \
@@ -132,7 +139,7 @@ trustlet_test:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
 
 
-run_benchmark:
+run_benchmark_sebs:
 	if [ "$(name)" == "110.dynamic-html" ]; then \
   		cp module/libsysdb-html.so module/libsysdb.so; \
 	elif [ "$(name)" == "210.thumbnailer" ]; then \
@@ -149,9 +156,9 @@ run_benchmark:
 	  	exit 1; \
 	fi
 	sleep 20
-	ssh -i ./container/key -o StrictHostKeychecking=no root@10.10.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) && poweroff"
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) && poweroff"
 
-benchmark: run run_benchmark
+benchmark_sebs: run run_benchmark_sebs
 
 
 container/99_config.yaml:
@@ -171,9 +178,65 @@ copy_pal:
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
 
 gramine:
-	cd gramine-svsm; make build_external
+	cd gramine-svsm; BUILD_MODE=${GRAMINE_BUILD} make build_external
 	cp gramine-svsm/build/pal/src/host/svsm/libpal.so module/
 	cp gramine-svsm/build/libos/src/libsysdb.so module/
 
 python:
-	docker run --privileged -v ${PWD}/python:/build -it gramine-build-container make -C build/
+	git submodule update --init --recursive runtime/portable-python-cmake-buildsystem
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/
+
+simple_fs:
+	mkdir -p runtime/filesystem/simple/fs/lib/
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/nop nop.c
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/helloworld helloworld.c
+	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
+	cd runtime/filesystem/simple/; ./create.sh
+
+python_fs:
+	mkdir -p runtime/filesystem/python/fs/lib
+	mkdir -p runtime/filesystem/python/fs/python
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ python_fs
+	cp ${REQUIREMENTS} runtime/requirements.txt
+	make -C runtime/ prepare_python_libs
+	rm runtime/requirements.txt
+	cd runtime/filesystem/python; ./create.sh
+
+simple_python_fs:
+	mkdir -p runtime/filesystem/python/fs/lib
+	mkdir -p runtime/filesystem/python/fs/python
+	sudo rm -rf runtime/filesystem/python/fs/python/*
+	sudo rm -rf runtime/filesystem/python/fs/lib/*
+	sudo rm -rf runtime/filesystem/python/fs_out/
+	echo "" > runtime/requirements.txt
+	mkdir -p runtime/pip
+	mv runtime/pip runtime/tmp_
+	mkdir -p runtime/pip
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ python_fs
+	make -C runtime/ prepare_python_libs
+	cd runtime/filesystem/python; ./create.sh
+	rm -r runtime/pip
+	mv runtime/tmp_ runtime/pip
+
+boottime_setup:
+	make run > /dev/null &
+	sleep 20
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup"
+	make simple_python_fs
+	make gramine
+	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
+	cp module/libsysdb.so Benchmarks/Boottime/wallet/
+	cp module/libpal.so Benchmarks/Boottime/wallet/
+
+boottime_setup_vm:
+	make run > /dev/null &
+	sleep 20
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup_vm"
+
+
+shutdown:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "shutdown now"
+
+boottime:
+	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh
+	cd Benchmarks/Boottime/wallet/; python parse_boottime.py
