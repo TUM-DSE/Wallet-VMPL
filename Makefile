@@ -27,15 +27,11 @@ REQUIREMENTS=requirements.txt
 
 #Build OVMF Firmware
 build_firmware:
-	#git submodule init; git submodule update
-	#cd edk2/; git submodule init; git submodule update
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 make -j16 -C BaseTools/
 	cd edk2/; PYTHON3_ENABLE=TRUE  PYTHON_COMMAND=python3 source ./edksetup.sh; \
 	PYTHON3_ENABLE=TRUE PYTHON_COMMAND=python3 build -a X64 -b RELEASE -t GCC5 -D DEBUG_ON_SERIAL_PORT -DTPM2_ENABLE -p OvmfPkg/OvmfPkgX64.dsc
 	mkdir -p firmware
-	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_CODE.fd firmware/
-	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF_VARS.fd firmware/
-	#cp edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd firmware/
+	cp edk2/Build/OvmfX64/RELEASE_GCC5/FV/OVMF* firmware/
 
 clear_firmware_build:
 	cd edk2/; git submodule foreach --recursive git clean -xfd
@@ -107,6 +103,7 @@ submodules:
 	git submodule update --init --recursive edk2
 	cd edk2; git submodule set-url -- UnitTestFrameworkPkg/Library/SubhookLib/subhook https://github.com/tianocore/edk2-subhook.git
 	git submodule update --init --recursive edk2
+	cd edk2; git apply ../patches/ovmf_outb.patch
 	cd svsm/kernel/src/my_crypto/; ./build.sh
 	git submodule update --init --recursive gramine-svsm;
 	git submodule update --init --recursive Benchmarks/SeBS;
