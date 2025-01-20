@@ -1,0 +1,26 @@
+#!/usr/bin/env bpftrace
+
+#define BENCHMARK_PORT 0xf4
+
+BEGIN {
+    @ = 0;
+    @EVENT[200]   = "COPY Start";
+    @EVENT[201]   = "READ Start";
+    @EVENT[202]   = "DONE";
+}
+
+// QEMU entry point
+u:qemu-system-x86_64:main {
+    printf("%llu: QEMU: main\n", nsecs);
+}
+
+tracepoint:kvm:kvm_pio {
+    if (args->port == BENCHMARK_PORT) {
+        printf("%llu: %d %s\n", nsecs, args->val, @EVENT[args->val]);
+    }
+}
+
+END {
+    clear(@);
+    clear(@EVENT);
+}

@@ -12,6 +12,10 @@ python-install/bin/python:
 	cd python-build; make install
 	make python_app
 
+test_build:
+	sudo rm -r python-build
+	sudo rm -r python-install
+	mkdir -p python-build
 
 CFLAGS=-I./python-install/include/python3.11/ -Wno-unused-result -Wsign-compare -fno-semantic-interposition -DNDEBUG -g -fwrapv -O3 -Wall
 LDFLAGS=-L./python-install/lib -l:libpython3.11.a -lcrypt -ldl -lsqlite3 -lm -lz -lssl -lcrypto -llzma -lgdbm -lexpat -lbz2 -lgdbm_compat -lffi -luuid
