@@ -11,13 +11,22 @@ def parse_boottime(filename):
     def ti(line):
         return int(line.split(":")[0])
 
-
+    firmware = False
     for line in text:
         if "QEMU: main" in line:
             if "qemu_start" in locals():
                 continue
             qemu_start = ti(line)
-
+        elif "OVMF Start" in line:
+            if firmware:
+                continue
+            firmware_start = ti(line)
+            firmware = True
+        elif "OVMF END" in line:
+            if not firmware:
+                print("-1")
+                exit(-1)
+            firmware_end = ti(line)
         elif "Monitor: Start" in line:
             monitor_start = ti(line)
         elif "Monitor: Load Guest" in line:
@@ -41,17 +50,17 @@ def parse_boottime(filename):
         elif "110 Runtime: In Python environment" in line:
             runtime_python_call = ti(line)
 
-    print(runtime_con_end)
 
     qemu_delay = monitor_start - qemu_start
     monitor_delay = monitor_guest - monitor_start
-    linux_ovmf_delay = guest_startup - monitor_guest
+    ovmf_delay = firmware_end - firmware_start
+    linux_delay = guest_startup - firmware_end
     runtime_startup = runtime_con_end - guest_startup
     runtime_zygote = runtime_zygote_end - runtime_con_end
     runtime_trustlet = runtime_trustlet_end - runtime_zygote_end
     runtime_invoke = runtime_python_call - runtime_trustlet_end
 
-    return qemu_delay, monitor_delay, linux_ovmf_delay, runtime_startup, runtime_zygote,\
+    return qemu_delay, monitor_delay, ovmf_delay, linux_delay, runtime_startup, runtime_zygote,\
         runtime_trustlet, runtime_invoke
 
 
@@ -61,12 +70,10 @@ if __name__ == "__main__":
     results = []
     directory = os.fsencode("result/")
     for file in os.listdir(directory):
-        print(file)
         filename = os.fsdecode(file)
         if filename.endswith(".txt"):
             results.append(parse_boottime("result/" +filename))
 
-    print(results)
 
 
     vm_avg = np.mean(results, axis=0)
@@ -75,14 +82,15 @@ if __name__ == "__main__":
     print("Wallet stats:")
     print(f"QEMU: {vm_avg[0]/1000000} ms, std: {vm_std[0]/1000000} ms")
     print(f"Monitor: {vm_avg[1]/1000000} ms, std: {vm_std[1]/1000000} ms")
-    print(f"Linux/OVMF: {vm_avg[2]/1000000} ms, std: {vm_std[2]/1000000} ms")
-    print(f"Runtime: {vm_avg[3]/1000000} ms, std: {vm_std[3]/1000000} ms")
-    print(f"Zygote: {vm_avg[4]/1000000} ms, std: {vm_std[3]/1000000} ms")
-    print(f"Trustlet: {vm_avg[5]/1000000} ms, std: {vm_std[3]/1000000} ms")
-    print(f"Invoke: {vm_avg[6]/1000000} ms, std: {vm_std[3]/1000000} ms")
+    print(f"OVMF: {vm_avg[2]/1000000} ms, std: {vm_std[2]/1000000} ms")
+    print(f"Linux: {vm_avg[3]/1000000} ms, std: {vm_std[3]/1000000} ms")
+    print(f"Runtime: {vm_avg[4]/1000000} ms, std: {vm_std[4]/1000000} ms")
+    print(f"Zygote: {vm_avg[5]/1000000} ms, std: {vm_std[5]/1000000} ms")
+    print(f"Trustlet: {vm_avg[6]/1000000} ms, std: {vm_std[6]/1000000} ms")
+    print(f"Invoke: {vm_avg[7]/1000000} ms, std: {vm_std[7]/1000000} ms")
 
-    res = "VM,Type,QEMU,Monitor,Linux/OVMF,Runtime,Zygote,Trustlet,Invoke\n"
-    res += f"Wallet,Cold,{vm_avg[0]/1000000},{vm_avg[1]/1000000},{vm_avg[2]/1000000},{vm_avg[3]/1000000},{vm_avg[4]/1000000},{vm_avg[5]/1000000},{vm_avg[6]/1000000}\n"
+    res = "VM,Type,QEMU,Monitor,OVMF,Linux,Runtime,Zygote,Trustlet,Invoke\n"
+    res += f"Wallet,Cold,{vm_avg[0]/1000000},{vm_avg[1]/1000000},{vm_avg[2]/1000000},{vm_avg[3]/1000000},{vm_avg[4]/1000000},{vm_avg[5]/1000000},{vm_avg[6]/1000000},{vm_avg[7]/1000000}\n"
     res += f"Wallet,Warm 1,0,0,0,0,{vm_avg[4]/1000000},{vm_avg[5]/1000000},{vm_avg[6]/1000000}\n"
     res += f"Wallet,Warm 2,0,0,0,0,0,{vm_avg[5]/1000000},{vm_avg[6]/1000000}"
 

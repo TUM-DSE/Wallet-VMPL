@@ -54,7 +54,7 @@ def load_data(file_path):
                 measurements[component.strip()] = float(value_match.group(1))
         
         data[section_name] = measurements
-    
+    print(data)
     return data
 
 def calculate_categories(raw_data):
@@ -76,8 +76,8 @@ def calculate_categories(raw_data):
         },
         'Wallet\n(cold)': {
             'QEMU': wallet_data['QEMU'],
-            'Monitor/OVMF': wallet_data['Monitor'],
-            'Guest-OS': wallet_data['Linux/OVMF'],
+            'Monitor/OVMF': wallet_data['Monitor'] + wallet_data['OVMF'],
+            'Guest-OS': wallet_data['Linux'],
             # 'Runtime': wallet_data['Runtime'],
             # 'Zygote': wallet_data['Zygote'],
             # 'Trustlet': wallet_data['Trustlet'],

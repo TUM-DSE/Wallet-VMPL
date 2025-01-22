@@ -6,6 +6,8 @@ BEGIN {
     @ = 0;
     @EVENT[0]   = "Monitor: Start";
     @EVENT[1]   = "Monitor: Load Guest";
+    @EVENT[25]  = "OVMF Start";
+    @EVENT[52]  = "OVMF END";
     @EVENT[100] = "Linux: systemd init end";
     @EVENT[101] = "Runtime: Monitor connection";
     @EVENT[102] = "Runtime: Monitor connection End";
