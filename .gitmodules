@@ -17,7 +17,7 @@
 	url = https://github.com/virtee/snpguest.git
 [submodule "gramine-svsm"]
 	path = gramine-svsm
-	url = https://github.com/TUM-DSE/gramine-svsm
+	url = git@github.com:TUM-DSE/gramine-svsm.git
 [submodule "Benchmarks/SeBS"]
 	path = Benchmarks/SeBS
 	url = git@github.com:TUM-DSE/SeBS.git
