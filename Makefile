@@ -13,7 +13,7 @@ FEATURE?=
 LOG_LEVEL?="print"
 BOOTTIME_ITERATION?=10
 
-GRAMINE_BUILD?=debug
+GRAMINE_BUILD?=release
 
 IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
