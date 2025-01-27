@@ -23,7 +23,7 @@ USERADDR = $(shell expr $(shell id -u) - 1000)
 
 REQUIREMENTS=requirements.txt
 
-.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark_sebs benchmark_sebs
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark_sebs benchmark_sebs sebs_fs
 
 #Build OVMF Firmware
 build_firmware:
@@ -143,14 +143,19 @@ trustlet_test:
 
 run_benchmark_sebs:
 	if [ "$(name)" == "110.dynamic-html" ]; then \
+  		cp module/libpal-html.so module/libpal.so; \
   		cp module/libsysdb-html.so module/libsysdb.so; \
 	elif [ "$(name)" == "210.thumbnailer" ]; then \
+	  	cp module/libpal-thumbnailer.so module/libpal.so; \
 		cp module/libsysdb-thumbnailer.so module/libsysdb.so; \
 	elif [ "$(name)" == "411.image-recognition" ]; then \
+	  	cp module/libpal-image-recognition.so module/libpal.so; \
 		cp module/libsysdb-image-recognition.so module/libsysdb.so; \
 	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
+	  	cp module/libpal-igraph.so module/libpal.so; \
 		cp module/libsysdb-igraph.so module/libsysdb.so; \
 	elif [ "$(name)" == "504.dna-visualisation" ]; then \
+	  	cp module/libpal-dna.so module/libpal.so; \
 		cp module/libsysdb-dna.so module/libsysdb.so; \
 	else \
 	  	sleep 20; \
@@ -228,6 +233,83 @@ simple_python_fs:
 	cd runtime/filesystem/python; ./create.sh
 	rm -r runtime/pip
 	mv runtime/tmp_ runtime/pip
+
+sebs_fs: python
+	sudo rm -rf runtime/filesystem/sebs/fs/lib
+	sudo rm -rf runtime/filesystem/sebs/fs/python
+	mkdir -p runtime/filesystem/sebs/fs/lib
+	mkdir -p runtime/filesystem/sebs/fs/python
+
+	# make python deps and prepare stdlib, libcpuid
+	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ sebs_fs
+	make -C runtime/ libcpuid.so
+
+	# prepare pip
+	if [ ! -d runtime/filesystem/sebs/pip ]; then \
+  		pip install --target=runtime/filesystem/sebs/pip/110/ -r Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/requirements.txt; \
+  		pip install --target=runtime/filesystem/sebs/pip/210/ -r Benchmarks/SeBS/benchmarks/200.multimedia/210.thumbnailer/python/requirements.txt.3.11; \
+  		pip install --target=runtime/filesystem/sebs/pip/411/ -r Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/requirements.txt.3.11; \
+  		pip install --target=runtime/filesystem/sebs/pip/501/ -r Benchmarks/SeBS/benchmarks/500.scientific/501.graph-pagerank/python/requirements.txt.3.11; \
+  		pip install --target=runtime/filesystem/sebs/pip/504/ -r Benchmarks/SeBS/benchmarks/500.scientific/504.dna-visualisation/python/requirements.txt; \
+  	fi
+
+	rm -r runtime/filesystem/sebs/fs/dependencies || true
+	cd runtime/filesystem/sebs; \
+	if [ "$(name)" == "110.dynamic-html" ]; then \
+  		while IFS= read -r file; do \
+            if [ -e "pip/110/$$file" ]; then \
+                mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
+                cp "pip/110/$$file" "fs/dependencies/$$(dirname "$$file")"; \
+            else \
+                echo "File pip/110/$$file does not exist"; \
+            fi \
+        done < "pip/110.txt"; \
+        \
+        cp ../../../Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/templates/template.html fs/dependencies; \
+	elif [ "$(name)" == "210.thumbnailer" ]; then \
+  		while IFS= read -r file; do \
+            if [ -e "pip/210/$$file" ]; then \
+                mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
+                cp "pip/210/$$file" "fs/dependencies/$$(dirname "$$file")"; \
+            else \
+                echo "File pip/210/$$file does not exist"; \
+            fi \
+        done < "pip/210.txt"; \
+	elif [ "$(name)" == "411.image-recognition" ]; then \
+  		while IFS= read -r file; do \
+            if [ -e "pip/411/$$file" ]; then \
+                mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
+                cp "pip/411/$$file" "fs/dependencies/$$(dirname "$$file")"; \
+            else \
+                echo "File pip/411/$$file does not exist"; \
+            fi \
+        done < "pip/411.txt"; \
+	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
+  		while IFS= read -r file; do \
+            if [ -e "pip/501/$$file" ]; then \
+                mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
+                cp "pip/501/$$file" "fs/dependencies/$$(dirname "$$file")"; \
+            else \
+                echo "File pip/501/$$file does not exist"; \
+            fi \
+        done < "pip/501.txt"; \
+        \
+        cp ../../../Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/imagenet_class_index.json fs/dependencies; \
+	elif [ "$(name)" == "504.dna-visualisation" ]; then \
+  		while IFS= read -r file; do \
+            if [ -e "pip/504/$$file" ]; then \
+                mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
+                cp "pip/504/$$file" "fs/dependencies/$$(dirname "$$file")"; \
+            else \
+                echo "File pip/504/$$file does not exist"; \
+            fi \
+        done < "pip/504.txt"; \
+	else \
+	  	echo "Wrong benchmark name."; \
+	  	exit 1; \
+	fi
+
+	cd runtime/filesystem/sebs; ./create.sh
 
 
 boottime_setup:

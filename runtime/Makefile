@@ -32,5 +32,9 @@ python_fs: python python_app
 	cd filesystem/python/; ./python_deps.sh
 	rm -f python-install/lib/python3.11/config/libpython3.11.a
 
+sebs_fs:
+	cd filesystem/sebs/; ./python_deps.sh
+	rm -f python-install/lib/python3.11/config/libpython3.11.a
+
 prepare_python_libs:
 	pip install --target=pip/ -r requirements.txt
