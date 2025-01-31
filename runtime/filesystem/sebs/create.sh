@@ -13,8 +13,6 @@ cp ${LIBPATH}/libm.so.6 fs/lib/
 cp ${LIBPATH}/ld-linux-x86-64.so.2 fs/lib/
 cp ${LIBPATH}/libpthread.so.0 fs/lib/
 
-# cp ${LIBPATH}/libdl.so.2 fs/lib/
-
 cp ../../libcpuid.so fs/lib/
 
 if [ ! -f fs/python/stdlib.zip ]; then
@@ -22,7 +20,7 @@ if [ ! -f fs/python/stdlib.zip ]; then
     (cd ${PYTHONPATH}/lib/python3.11/; zip -r ../../../filesystem/sebs/fs/python/stdlib.zip *)
 fi
 
-rm -r sebs/fs_out
+rm -r fs_out
 FS_IN="sebs/fs/" FS_OUT="sebs/fs_out/" python ../fs.py
 
 rm -rf ${LIBOSPATH}/src/fs/static/files

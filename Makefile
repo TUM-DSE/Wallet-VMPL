@@ -236,7 +236,7 @@ simple_python_fs:
 
 sebs_fs: python
 	sudo rm -rf runtime/filesystem/sebs/fs/lib
-	sudo rm -rf runtime/filesystem/sebs/fs/python
+	# sudo rm -rf runtime/filesystem/sebs/fs/python
 	mkdir -p runtime/filesystem/sebs/fs/lib
 	mkdir -p runtime/filesystem/sebs/fs/python
 
@@ -284,6 +284,13 @@ sebs_fs: python
                 echo "File pip/411/$$file does not exist"; \
             fi \
         done < "pip/411.txt"; \
+        \
+        cp ../../../Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/imagenet_class_index.json fs/dependencies; \
+        \
+        cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so.2 fs/lib; \
+        cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/librt.so.1 fs/lib; \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/501/$$file" ]; then \
@@ -294,7 +301,9 @@ sebs_fs: python
             fi \
         done < "pip/501.txt"; \
         \
-        cp ../../../Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/imagenet_class_index.json fs/dependencies; \
+        cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so.2 fs/lib; \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "504.dna-visualisation" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/504/$$file" ]; then \
@@ -304,6 +313,9 @@ sebs_fs: python
                 echo "File pip/504/$$file does not exist"; \
             fi \
         done < "pip/504.txt"; \
+        \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	else \
 	  	echo "Wrong benchmark name."; \
 	  	exit 1; \
