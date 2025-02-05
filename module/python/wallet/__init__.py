@@ -76,6 +76,10 @@ class Trustlet(TrustedProcess):
     def __init__(self, process_id):
         TrustedProcess.__init__(self, process_id)
 
+    def invoke_trustlet_bin(self, argument: bytes, output_size: int) -> bytes:
+        ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+        return ret
+
     def invoke_trustlet(self, argument: str, output_size: int) -> str:
         ret = _w.invoke_trustlet(self.process_id, argument, output_size)
         return ret
