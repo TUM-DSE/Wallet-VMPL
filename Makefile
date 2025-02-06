@@ -145,9 +145,18 @@ run_benchmark_sebs:
 	if [ "$(name)" == "110.dynamic-html" ]; then \
   		cp module/libpal-html.so module/libpal.so; \
   		cp module/libsysdb-html.so module/libsysdb.so; \
+	elif [ "$(name)" == "120.uploader" ]; then \
+	  	cp module/libpal-none.so module/libpal.so; \
+		cp module/libsysdb-none.so module/libsysdb.so; \
 	elif [ "$(name)" == "210.thumbnailer" ]; then \
 	  	cp module/libpal-thumbnailer.so module/libpal.so; \
 		cp module/libsysdb-thumbnailer.so module/libsysdb.so; \
+	elif [ "$(name)" == "220.video-processing" ]; then \
+	  	cp module/libpal-video.so module/libpal.so; \
+		cp module/libsysdb-video.so module/libsysdb.so; \
+	elif [ "$(name)" == "311.compression" ]; then \
+	  	cp module/libpal-none.so module/libpal.so; \
+		cp module/libsysdb-none.so module/libsysdb.so; \
 	elif [ "$(name)" == "411.image-recognition" ]; then \
 	  	cp module/libpal-image-recognition.so module/libpal.so; \
 		cp module/libsysdb-image-recognition.so module/libsysdb.so; \
@@ -241,7 +250,7 @@ sebs_fs: python
 	mkdir -p runtime/filesystem/sebs/fs/python
 
 	# make python deps and prepare stdlib, libcpuid
-	docker run --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ sebs_fs
+	docker run --rm --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ sebs_fs
 	make -C runtime/ libcpuid.so
 
 	# prepare pip
@@ -253,7 +262,8 @@ sebs_fs: python
   		pip install --target=runtime/filesystem/sebs/pip/504/ -r Benchmarks/SeBS/benchmarks/500.scientific/504.dna-visualisation/python/requirements.txt; \
   	fi
 
-	rm -r runtime/filesystem/sebs/fs/dependencies || true
+	rm -rf runtime/filesystem/sebs/fs/dependencies || true
+	mkdir -p runtime/filesystem/sebs/fs/dependencies
 	cd runtime/filesystem/sebs; \
 	if [ "$(name)" == "110.dynamic-html" ]; then \
   		while IFS= read -r file; do \
@@ -266,6 +276,8 @@ sebs_fs: python
         done < "pip/110.txt"; \
         \
         cp ../../../Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/templates/template.html fs/dependencies; \
+	elif [ "$(name)" == "120.uploader" ]; then \
+	    :; \
 	elif [ "$(name)" == "210.thumbnailer" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/210/$$file" ]; then \
@@ -275,6 +287,12 @@ sebs_fs: python
                 echo "File pip/210/$$file does not exist"; \
             fi \
         done < "pip/210.txt"; \
+	elif [ "$(name)" == "220.video-processing" ]; then \
+	    docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container sh -c "apt update && apt install -y --no-install-recommends ffmpeg && \
+	    	cp /usr/bin/ffmpeg /build/fs/dependencies/"; \
+	    cp ../../../Benchmarks/SeBS/benchmarks/200.multimedia/220.video-processing/resources/watermark.png fs/dependencies; \
+	elif [ "$(name)" == "311.compression" ]; then \
+	    :; \
 	elif [ "$(name)" == "411.image-recognition" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/411/$$file" ]; then \
@@ -289,8 +307,8 @@ sebs_fs: python
         \
         cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so.2 fs/lib; \
         cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/librt.so.1 fs/lib; \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/501/$$file" ]; then \
@@ -302,8 +320,8 @@ sebs_fs: python
         done < "pip/501.txt"; \
         \
         cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so.2 fs/lib; \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "504.dna-visualisation" ]; then \
   		while IFS= read -r file; do \
             if [ -e "pip/504/$$file" ]; then \
@@ -314,8 +332,8 @@ sebs_fs: python
             fi \
         done < "pip/504.txt"; \
         \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
-        docker run --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
+        docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	else \
 	  	echo "Wrong benchmark name."; \
 	  	exit 1; \
