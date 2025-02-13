@@ -70,4 +70,5 @@ enum invocation_return_type {
 int create_trustlet(const int zygote_id, char* func);
 char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size);
 char* invoke_trustlet_bin(const int trustlet_id, void* args, uint64_t args_size, uint64_t output_size);
+int delete_trustlet(const int trustlet_id);
 #endif // TRUSTLET_H_

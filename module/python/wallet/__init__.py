@@ -106,6 +106,9 @@ class Trustlet(TrustedProcess):
         return
     # end of helper functions for attestation microbenchmarks
 
+    def delete(self):
+        _w.delete_trustlet(self.process_id)
+
 class Zygote(TrustedProcess):
     def __init__(self, process_id):
         TrustedProcess.__init__(self, process_id)
@@ -134,3 +137,5 @@ class Zygote(TrustedProcess):
         return
     # end of helper functions for attestation microbenchmarks
 
+    def delete(self):
+        _w.delete_zygote(self.process_id)

@@ -389,3 +389,14 @@ void create_channel(const int trustlet_id_1, const int trustlet_id_2){
     call.channel.trustlet_id_2 = trustlet_id_2;
     ioctl(con, VMPL_WR, &call);
 }
+
+int delete_trustlet(const int trustlet_id) {
+    struct monitor_call call;
+    call.type = deleteTrustlet;
+    call.process_id = trustlet_id;
+#ifndef NODEBUG
+    assert(con);
+    printf("Delete trustlet %d\n", trustlet_id);
+#endif
+    return ioctl(con, VMPL_WR, &call);
+}
