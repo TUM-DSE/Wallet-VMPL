@@ -263,7 +263,6 @@ sebs_fs: python
   	fi
 
 	rm -rf runtime/filesystem/sebs/fs/dependencies || true
-	mkdir -p runtime/filesystem/sebs/fs/dependencies
 	cd runtime/filesystem/sebs; \
 	if [ "$(name)" == "110.dynamic-html" ]; then \
   		while IFS= read -r file; do \
@@ -288,6 +287,7 @@ sebs_fs: python
             fi \
         done < "pip/210.txt"; \
 	elif [ "$(name)" == "220.video-processing" ]; then \
+	    mkdir -p fs/dependencies; \
 	    docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container sh -c "apt update && apt install -y --no-install-recommends ffmpeg && \
 	    	cp /usr/bin/ffmpeg /build/fs/dependencies/"; \
 	    cp ../../../Benchmarks/SeBS/benchmarks/200.multimedia/220.video-processing/resources/watermark.png fs/dependencies; \
