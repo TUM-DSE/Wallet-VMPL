@@ -35,7 +35,7 @@ print(func)
 lib = ctypes.CDLL("./libwallet.so")
 lib.monitor_connect()
 lib.create_zygote.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p)
-zid = lib.create_zygote(b"../libpal.so",b"manifest.sebs",b"../libsysdb.so")
+zid = lib.create_zygote(b"../libpal.so",b"manifest.in",b"../libsysdb.so")
 lib.create_trustlet.argtypes = (ctypes.c_int,ctypes.c_char_p)
 
 tid1 = lib.create_trustlet(zid, func)
@@ -43,15 +43,20 @@ tid1 = lib.create_trustlet(zid, func)
 lib.invoke_trustlet.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_ulonglong)
 lib.invoke_trustlet.restype = ctypes.c_char_p
 
-
+start_time = time.time_ns()
 res = lib.invoke_trustlet(tid1,data,115384320)
+end_time = time.time_ns()
 
-print(res)
-print("Done with first invocation")
+#print(res)
+print("Done with first invocation: ", end_time-start_time)
 
+#exit(0)
+
+start_time = time.time_ns()
 res = lib.invoke_trustlet(tid1,data,115384320)
-print(res)
-print("Done with second invocation")
+end_time = time.time_ns()
+#print(res)
+print("Done with second invocation: ", end_time-start_time)
 
 #res2 = lib.invoke_trustlet(tid1,b"{}",0)
 #print(res2)

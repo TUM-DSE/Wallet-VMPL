@@ -3,36 +3,36 @@ entrypoint = "/python/python"
 
 
 [loader]
-log_level = "debug"
+log_level = "error"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
 argv = ["python3", "-c", """
 import json
-print('import ctypes');
+#print('import ctypes');
 import ctypes
-print('string_at')
+#print('string_at')
 a=ctypes.string_at(0x140_0000_0000)
-print(a)
+#print(a)
 exec(a)
 while True:
       print('Trying to get input', flush=True)
       b=ctypes.string_at(0x280_0000_0000)
-      print('Input received',flush=True)
+      #print('Input received',flush=True)
       b = json.loads(b)
-      print('Trying to execute',flush=True)
+      #print('Trying to execute',flush=True)
       res = handler(b)
-      print('Execution done', flush=True)
+      #print('Execution done', flush=True)
       out= json.dumps(res).encode()
-      print('output encoded',flush=True)
-      print(f'output len {len(out)}', flush=True)
+      #print('output encoded',flush=True)
+      #print(f'output len {len(out)}', flush=True)
       ptr=ctypes.POINTER(ctypes.c_char*len(out))
       dst=ctypes.cast(0x300_0000_0000, ptr)
       ctypes.memmove(dst, out, len(out))
-      c=ctypes.string_at(0x300_0000_0000)
-      print('done!')
+      #c=ctypes.string_at(0x300_0000_0000)
+      #print('done!')
       import ctypes
       lib = ctypes.CDLL('/lib/libcpuid.so')
       lib.notify_monitor();
-      print("RESTARTING", flush=True)
+      #print("RESTARTING", flush=True)
 """]
 
 [loader.env]

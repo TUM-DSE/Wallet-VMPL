@@ -5,6 +5,7 @@ KERNEL_PATCH?=${ROOT_PATH}/kernel.patch
 USER?=$(shell whoami)
 GUEST_PATH?=${ROOT_PATH}/tmp/
 CORES?=1
+MEM?=8
 
 SOURCE_IMAGE=tmp
 IMAGE_NAME=guest
@@ -88,8 +89,11 @@ del_guest_net:
 
 svsm/svsm.bin: build_svsm
 
+SVSM_DEBUG?=enable-gdb
+
+
 build_svsm:
-	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="enable-gdb ${FEATURE} ${LOG_LEVEL}" RELEASE=True
+	cd svsm; FW_FILE=../firmware/OVMF.fd make FEATURES="${SVSM_DEBUG} ${LOG_LEVEL} ${FEATURE}" RELEASE=True
 node/bin/node:
 	cd node; make
 	cp node/bin/node module/
@@ -119,7 +123,7 @@ run:
 	-enable-kvm \
 	-cpu EPYC-v4,host-phys-bits=true  \
 	-machine q35,confidential-guest-support=sev0,memory-backend=ram1 \
-	-object memory-backend-memfd,id=ram1,size=8G,share=true \
+	-object memory-backend-memfd,id=ram1,size=${MEM}G,share=true \
 	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file=svsm/bin/coconut-qemu.igvm \
 	-smp ${CORES} \
 	-no-reboot \
@@ -233,6 +237,9 @@ IPC_ITERATIONS?=5
 IPC_SIZE?=64
 ssh_ipc:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
+
+ssh_alloc:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/test/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
 
 ipc:
 	cd Benchmarks/IPC/wallet/; ./run.sh
