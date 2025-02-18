@@ -272,7 +272,7 @@ sebs_fs: python
             else \
                 echo "File pip/110/$$file does not exist"; \
             fi \
-        done < "pip/110.txt"; \
+        done < "pip_lists/110.txt"; \
         \
         cp ../../../Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/templates/template.html fs/dependencies; \
 	elif [ "$(name)" == "120.uploader" ]; then \
@@ -285,7 +285,7 @@ sebs_fs: python
             else \
                 echo "File pip/210/$$file does not exist"; \
             fi \
-        done < "pip/210.txt"; \
+        done < "pip_lists/210.txt"; \
 	elif [ "$(name)" == "220.video-processing" ]; then \
 	    mkdir -p fs/dependencies; \
 	    docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container sh -c "apt update && apt install -y --no-install-recommends ffmpeg && \
@@ -301,7 +301,7 @@ sebs_fs: python
             else \
                 echo "File pip/411/$$file does not exist"; \
             fi \
-        done < "pip/411.txt"; \
+        done < "pip_lists/411.txt"; \
         \
         cp ../../../Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/imagenet_class_index.json fs/dependencies; \
         \
@@ -317,7 +317,7 @@ sebs_fs: python
             else \
                 echo "File pip/501/$$file does not exist"; \
             fi \
-        done < "pip/501.txt"; \
+        done < "pip_lists/501.txt"; \
         \
         cp ../../../gramine-svsm/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so.2 fs/lib; \
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
@@ -330,7 +330,7 @@ sebs_fs: python
             else \
                 echo "File pip/504/$$file does not exist"; \
             fi \
-        done < "pip/504.txt"; \
+        done < "pip_lists/504.txt"; \
         \
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
