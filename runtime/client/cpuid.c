@@ -19,3 +19,7 @@ void call_outb_with_value(uint64_t value) {
 void resize_channel(uint64_t select, uint64_t size) {
     __asm__ volatile("mov $0x4FFFFFA1, %%rax; mov %0, %%rcx; mov %1, %%rdx; cpuid":: "r" (select), "r" (size):"rax", "rbx", "rcx", "rdx");
 }
+
+void nop(){
+    __asm__ volatile("mov $0x4FFFFFF5, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
+}
