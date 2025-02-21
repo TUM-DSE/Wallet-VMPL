@@ -49,7 +49,7 @@ VMPLkernel6.5.tar.gz:
 #Get guest image
 ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 	-wget -nc ${UBUNTU_IMAGE} -O $@
-	#rm ${IMAGE_NAME}.qcow2
+    #rm ${IMAGE_NAME}.qcow2
 
 #config: tmp.qcow2#
 #	virt-copy-out -a tmp.qcow2 /boot/config-5.15.0-89-generic .
@@ -119,7 +119,7 @@ run:
 	-enable-kvm \
 	-cpu EPYC-v4,host-phys-bits=true  \
 	-machine q35,confidential-guest-support=sev0,memory-backend=ram1 \
-	-object memory-backend-memfd,id=ram1,size=8G,share=true \
+	-object memory-backend-memfd,id=ram1,size=32G,share=true \
 	-object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file=svsm/bin/coconut-qemu.igvm \
 	-smp ${CORES} \
 	-no-reboot \
@@ -143,8 +143,8 @@ trustlet_test:
 
 run_benchmark_sebs:
 	if [ "$(name)" == "110.dynamic-html" ]; then \
-  		cp module/libpal-html.so module/libpal.so; \
-  		cp module/libsysdb-html.so module/libsysdb.so; \
+		cp module/libpal-html.so module/libpal.so; \
+		cp module/libsysdb-html.so module/libsysdb.so; \
 	elif [ "$(name)" == "120.uploader" ]; then \
 	  	cp module/libpal-none.so module/libpal.so; \
 		cp module/libsysdb-none.so module/libsysdb.so; \
@@ -171,7 +171,7 @@ run_benchmark_sebs:
 	  	echo "Wrong benchmark name."; \
 	  	exit 1; \
 	fi
-	sleep 20
+	sleep 5
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) && poweroff"
 
 benchmark_sebs: run run_benchmark_sebs
@@ -245,27 +245,27 @@ simple_python_fs:
 
 sebs_fs: python
 	sudo rm -rf runtime/filesystem/sebs/fs/lib
-	# sudo rm -rf runtime/filesystem/sebs/fs/python
+    # sudo rm -rf runtime/filesystem/sebs/fs/python
 	mkdir -p runtime/filesystem/sebs/fs/lib
 	mkdir -p runtime/filesystem/sebs/fs/python
-
-	# make python deps and prepare stdlib, libcpuid
+	mkdir -p runtime/filesystem/sebs/fs/dependencies
+    # make python deps and prepare stdlib, libcpuid
 	docker run --rm --privileged -v ${PWD}/runtime:/build -it gramine-build-container make -C build/ sebs_fs
 	make -C runtime/ libcpuid.so
 
-	# prepare pip
-	if [ ! -d runtime/filesystem/sebs/pip ]; then \
-  		pip install --target=runtime/filesystem/sebs/pip/110/ -r Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/requirements.txt; \
-  		pip install --target=runtime/filesystem/sebs/pip/210/ -r Benchmarks/SeBS/benchmarks/200.multimedia/210.thumbnailer/python/requirements.txt.3.11; \
-  		pip install --target=runtime/filesystem/sebs/pip/411/ -r Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/requirements.txt.3.11; \
-  		pip install --target=runtime/filesystem/sebs/pip/501/ -r Benchmarks/SeBS/benchmarks/500.scientific/501.graph-pagerank/python/requirements.txt.3.11; \
-  		pip install --target=runtime/filesystem/sebs/pip/504/ -r Benchmarks/SeBS/benchmarks/500.scientific/504.dna-visualisation/python/requirements.txt; \
-  	fi
+    # prepare pip
+	if [ ! -d runtime/filesystem/sebs/pip/110 ]; then \
+		pip install --target=runtime/filesystem/sebs/pip/110/ -r Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/requirements.txt; \
+		pip install --target=runtime/filesystem/sebs/pip/210/ -r Benchmarks/SeBS/benchmarks/200.multimedia/210.thumbnailer/python/requirements.txt.3.11; \
+		pip install --target=runtime/filesystem/sebs/pip/411/ -r Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/requirements.txt.3.11; \
+		pip install --target=runtime/filesystem/sebs/pip/501/ -r Benchmarks/SeBS/benchmarks/500.scientific/501.graph-pagerank/python/requirements.txt.3.11; \
+		pip install --target=runtime/filesystem/sebs/pip/504/ -r Benchmarks/SeBS/benchmarks/500.scientific/504.dna-visualisation/python/requirements.txt; \
+	fi
 
 	rm -rf runtime/filesystem/sebs/fs/dependencies || true
 	cd runtime/filesystem/sebs; \
 	if [ "$(name)" == "110.dynamic-html" ]; then \
-  		while IFS= read -r file; do \
+		while IFS= read -r file; do \
             if [ -e "pip/110/$$file" ]; then \
                 mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
                 cp "pip/110/$$file" "fs/dependencies/$$(dirname "$$file")"; \
@@ -276,9 +276,9 @@ sebs_fs: python
         \
         cp ../../../Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/templates/template.html fs/dependencies; \
 	elif [ "$(name)" == "120.uploader" ]; then \
-	    :; \
+	    mkdir -p fs/dependencies/; \
 	elif [ "$(name)" == "210.thumbnailer" ]; then \
-  		while IFS= read -r file; do \
+		while IFS= read -r file; do \
             if [ -e "pip/210/$$file" ]; then \
                 mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
                 cp "pip/210/$$file" "fs/dependencies/$$(dirname "$$file")"; \
@@ -292,9 +292,9 @@ sebs_fs: python
 	    	cp /usr/bin/ffmpeg /build/fs/dependencies/"; \
 	    cp ../../../Benchmarks/SeBS/benchmarks/200.multimedia/220.video-processing/resources/watermark.png fs/dependencies; \
 	elif [ "$(name)" == "311.compression" ]; then \
-	    :; \
+	    mkdir -p fs/dependencies/; \
 	elif [ "$(name)" == "411.image-recognition" ]; then \
-  		while IFS= read -r file; do \
+		while IFS= read -r file; do \
             if [ -e "pip/411/$$file" ]; then \
                 mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
                 cp "pip/411/$$file" "fs/dependencies/$$(dirname "$$file")"; \
@@ -310,7 +310,7 @@ sebs_fs: python
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
-  		while IFS= read -r file; do \
+		while IFS= read -r file; do \
             if [ -e "pip/501/$$file" ]; then \
                 mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
                 cp "pip/501/$$file" "fs/dependencies/$$(dirname "$$file")"; \
@@ -323,7 +323,7 @@ sebs_fs: python
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libstdc++.so.6 /build/fs/lib/; \
         docker run --rm --privileged -v $${PWD}:/build -it gramine-build-container cp /lib/x86_64-linux-gnu/libgcc_s.so.1 /build/fs/lib/; \
 	elif [ "$(name)" == "504.dna-visualisation" ]; then \
-  		while IFS= read -r file; do \
+		while IFS= read -r file; do \
             if [ -e "pip/504/$$file" ]; then \
                 mkdir -p "fs/dependencies/$$(dirname "$$file")"; \
                 cp "pip/504/$$file" "fs/dependencies/$$(dirname "$$file")"; \
