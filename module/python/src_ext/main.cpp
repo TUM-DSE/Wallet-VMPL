@@ -32,6 +32,12 @@ PYBIND11_MODULE(_wallet, m) {
           py::arg("libos_path"));
     m.def("create_trustlet", &create_trustlet,
           py::arg("zygote_id"), py::arg("function_code"));
+    m.def("invoke_trustlet_bin",
+        [](const int trustlet_id, std::string args, uint64_t output_size) {
+            char* ptr = invoke_trustlet_bin(trustlet_id, args.data(), args.size(), output_size);
+            return py::bytes(std::string(ptr, output_size));
+        },
+        py::arg("trustlet_id"), py::arg("args"), py::arg("output_size"));
     m.def("invoke_trustlet", &invoke_trustlet,
           py::arg("trustlet_id"), py::arg("args"), py::arg("output_size"));
     m.def("attest_monitor", &attest_monitor);

@@ -66,7 +66,6 @@ class Wallet:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close_device()
-        self.fd = None
 
 
 class TrustedProcess:
@@ -77,8 +76,12 @@ class Trustlet(TrustedProcess):
     def __init__(self, process_id):
         TrustedProcess.__init__(self, process_id)
 
-    def invoke_trustlet(self, argument: str) -> str:
-        ret = _w.invoke_trustlet(self.process_id, argument, 0)
+    def invoke_trustlet_bin(self, argument: bytes, output_size: int) -> bytes:
+        ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+        return ret
+
+    def invoke_trustlet(self, argument: str, output_size: int) -> str:
+        ret = _w.invoke_trustlet(self.process_id, argument, output_size)
         return ret
 
     def attest_execution(self, input: str, input_len: int, output: str, output_len: int) -> str:
@@ -108,8 +111,10 @@ class Zygote(TrustedProcess):
         TrustedProcess.__init__(self, process_id)
 
     def create_trustlet(self, function_code: FileName) -> Trustlet:
-        #if not Path(function_code).exists():
-        #    raise Exception(f"Function Code {function_code} not found")
+        if not Path(function_code).exists():
+            raise Exception(f"Function Code {function_code} not found")
+        with open(function_code, mode='r') as file:
+            function_code = file.read()
         trustlet_id = _w.create_trustlet(self.process_id, function_code)
         if trustlet_id < 0:
             raise Exception(f"Failed to create trustlet")

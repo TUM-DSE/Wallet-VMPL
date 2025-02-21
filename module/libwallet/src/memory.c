@@ -36,6 +36,14 @@ void load_data(char* in, char** out){
     *out = buf;
 }
 
+void load_data_with_len(char* in, char** out, uint64_t len){
+    uint64_t actual_size = ROUND_UP_SIZE(len);
+    uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);
+    for(int i = 0; i < actual_size; i++)
+        buf[i] = in[i];
+    *out = buf;
+}
+
 void* allocate_buffer(uint64_t size) {
     uint64_t actual_size = ROUND_UP_SIZE(size);
     uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);
