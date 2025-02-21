@@ -377,3 +377,9 @@ shutdown:
 boottime:
 	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh
 	cd Benchmarks/Boottime/wallet/; python parse_boottime.py
+
+sebs_images:
+	cd scripts/; ./sebs.sh
+
+run_sebs:
+	cd Benchmarks; ./run_sebs.sh
