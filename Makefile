@@ -254,7 +254,7 @@ sebs_fs: python
 	make -C runtime/ libcpuid.so
 
     # prepare pip
-	if [ ! -d runtime/filesystem/sebs/pip/110 ]; then \
+	if [ ! -d runtime/filesystem/sebs/pip ]; then \
 		pip install --target=runtime/filesystem/sebs/pip/110/ -r Benchmarks/SeBS/benchmarks/100.webapps/110.dynamic-html/python/requirements.txt; \
 		pip install --target=runtime/filesystem/sebs/pip/210/ -r Benchmarks/SeBS/benchmarks/200.multimedia/210.thumbnailer/python/requirements.txt.3.11; \
 		pip install --target=runtime/filesystem/sebs/pip/411/ -r Benchmarks/SeBS/benchmarks/400.inference/411.image-recognition/python/requirements.txt.3.11; \
