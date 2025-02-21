@@ -4,8 +4,7 @@ set -eux
 (cd module; make clean; make -C libwallet/ clean; rm -r python/build || true)
 docker volume prune -f
 
-(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko)
-apt install -y build-essential python3-dev python3-venv python3-pip docker.io jq
+(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko || true)
 
 cd Benchmarks/SeBS/
 rm -r cache/ || true

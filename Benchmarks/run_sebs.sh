@@ -17,7 +17,6 @@ benchmarks=(
 )
 
 delete() {
-    #cp -r "Benchmarks/SeBS/$1" Benchmarks/SeBS_new_res/
     sudo rm -rf "Benchmarks/SeBS/$1"
 }
 
