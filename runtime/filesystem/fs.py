@@ -20,7 +20,7 @@ C_NODE_DEFINE = """
     node->perm = PSEUDO_PERM_LINK; \\
     } while (0)
 
-#define __ADD_DIR(name) struct pseudo_node* tmp = pseudo_add_dir(root, name); struct pseudo_node* root = tmp;
+#define __ADD_DIR(name) struct pseudo_node* tmp = pseudo_add_dir(root, name); struct pseudo_node* root = tmp; (void)root;
 
 """
 
@@ -123,8 +123,8 @@ class Filestructure:
             pseudo_header += f"int init_static_fs_{struct.name}(void);\n"
 
             c_file += f"\nint init_static_fs_{struct.name}() "+\
-                f"{{\n    struct pseudo_node* root = pseudo_add_root_dir(\"{struct.name}\");\n" +\
-                "    struct pseudo_node* node;\n"
+                f"{{\n    struct pseudo_node* root = pseudo_add_root_dir(\"{struct.name}\"); (void)root;\n" +\
+                "    struct pseudo_node* node; (void)node;\n"
             c_file += struct._create_fs_sub(struct.name, "    ")
             c_file += "\n    return 0;\n}\n"
 
