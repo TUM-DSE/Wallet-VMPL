@@ -115,6 +115,15 @@ def calculate_categories(raw_data):
             # 'Zygote': 0,
             # 'Trustlet': 0,
             'Fn Invocation': wallet_data['Invoke']
+        },
+        'Kata\nContainers': {
+            'Fn Invocation': raw_data['Kata Containers']['Total']
+        },
+        'Gramine': {
+            'Fn Invocation': raw_data['Gramine']['Total']
+        },
+        'Native': {
+            'Fn Invocation': raw_data['Native']['Total']
         }
     }
     

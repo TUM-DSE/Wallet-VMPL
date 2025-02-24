@@ -18,3 +18,12 @@ QEMU: 1174.2316864000002 ms, std: 6.560702119278534 ms
 OVMF: 3990.1129171999996 ms, std: 176.71658068510524 ms
 Linux: 3075.247159 ms, std: 44.9972819253403 ms
 Runtime: 67.7155024 ms, std: 3.515427495608726 ms
+
+Kata Containers:
+Total: 1313.122894 ms
+
+Gramine:
+Total: 41.342497 ms
+
+Native:
+Total: 4.326689 ms
