@@ -1,0 +1,4 @@
+14:54:05,419 INFO SeBS-7dfe: Created experiment output at /root/Benchmarks/SeBS/311.compression
+14:54:05,434 INFO Wallet-4412: Using existing deployment wallet-72bdd064 that matches prefix wallet!
+14:54:05,439 INFO Experiment.PerfCost-dad8: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/sequential_results.json
+14:54:05,444 INFO Experiment.PerfCost-dad8: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/cold_results.json

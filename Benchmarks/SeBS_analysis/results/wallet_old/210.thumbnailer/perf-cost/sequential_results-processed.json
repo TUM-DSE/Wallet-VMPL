@@ -1,0 +1,100 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "20e54719-36eb-43cc-8259-f371b7b64e83": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376115.516707",
+          "end": "1736376115.753585",
+          "is_cold": false,
+          "request_id": "20e54719-36eb-43cc-8259-f371b7b64e83",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "20e54719-36eb-43cc-8259-f371b7b64e83",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 236878,
+          "client": 243234,
+          "client_begin": "2025-01-08 22:41:55.512132",
+          "client_end": "2025-01-08 22:41:55.755366",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "294e0769-356e-4625-b5d7-92a49fd7410b": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736376105.189371",
+          "end": "1736376105.498016",
+          "is_cold": false,
+          "request_id": "294e0769-356e-4625-b5d7-92a49fd7410b",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "294e0769-356e-4625-b5d7-92a49fd7410b",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 308645,
+          "client": 315345,
+          "client_begin": "2025-01-08 22:41:45.184419",
+          "client_end": "2025-01-08 22:41:45.499764",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "210.thumbnailer-python-3.11": {}
+  },
+  "begin_time": 1736376077.114664,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736376120.762217,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

@@ -1,0 +1,4 @@
+14:48:16,9 INFO SeBS-c92f: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+14:48:16,23 INFO Wallet-c9da: Using existing deployment wallet-a780cbfe that matches prefix wallet!
+14:48:16,27 INFO Experiment.PerfCost-cb2e: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+14:48:16,32 INFO Experiment.PerfCost-cb2e: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json

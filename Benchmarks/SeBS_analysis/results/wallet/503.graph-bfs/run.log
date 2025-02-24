@@ -1,18 +1,68 @@
-22:55:04,384 INFO SeBS-cf05: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
-22:55:04,460 INFO Wallet-6153: Generating unique resource name wallet-995e8dca
-22:55:04,464 INFO minio.Minio-8b5a: Initialize a new bucket for benchmarks
-22:55:04,471 INFO minio.Minio-8b5a: Created bucket sebs-benchmarks-wallet-995e8dca
-22:55:04,559 INFO Benchmark-e541: Building benchmark 503.graph-bfs. Reason: no cached code package.
-22:55:04,749 INFO Benchmark-e541: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
-22:55:04,820 INFO Wallet-6153: Function size 0.000004 MB
-22:55:04,860 INFO Benchmark-e541: Created code package (source hash: 0836453fe988a0d7143a2c061a8276b7), for run on wallet with python:3.11
-22:55:05,166 INFO Wallet-6153: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
-22:55:05,870 INFO Experiment.PerfCost-6b35: Begin experiment
-22:55:05,872 INFO Experiment.PerfCost-6b35: Begin sequential experiments
-22:55:32,461 INFO Experiment.PerfCost-6b35: Processed 1 samples out of 2, 0 errors
-22:55:42,536 INFO Experiment.PerfCost-6b35: Processed 2 samples out of 2, 0 errors
-22:55:47,545 INFO Experiment.PerfCost-6b35: Mean 97.65599999999999 [ms], median 97.65599999999999 [ms], std 33.84799999999999, CV 34.66044073072826
-22:55:47,559 INFO Experiment.PerfCost-6b35: Parametric CI (Student's t-distribution) 0.95 from -332.42361791875345 to 527.7356179187534, within 440.40265617960335% of mean
-22:55:47,566 INFO Experiment.PerfCost-6b35: Parametric CI (Student's t-distribution) 0.99 from -2056.9973748809584 to 2252.3093748809583, within 2206.3707041871044% of mean
-22:55:47,641 INFO Wallet.WalletFunction-fe5e: Stopping function
-22:55:47,644 INFO Wallet.WalletFunction-fe5e: Function stopped succesfully
+03:08:10,619 INFO SeBS-f87f: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
+03:08:10,697 INFO Wallet-2a5d: Generating unique resource name wallet-14d5e8e0
+03:08:10,699 INFO minio.Minio-20b6: Initialize a new bucket for benchmarks
+03:08:10,704 INFO minio.Minio-20b6: Created bucket sebs-benchmarks-wallet-14d5e8e0
+03:08:10,862 INFO Benchmark-b6d3: Building benchmark 503.graph-bfs. Reason: no cached code package.
+03:08:11,48 INFO Benchmark-b6d3: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+03:08:11,115 INFO Wallet-2a5d: Function size 0.000005 MB
+03:08:11,153 INFO Benchmark-b6d3: Created code package (source hash: e14bcc3bcab187ba2e266fb9df1a4fd4), for run on wallet with python:3.11
+03:08:11,467 INFO Wallet-2a5d: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+03:08:12,142 INFO Experiment.PerfCost-9098: Begin experiment
+03:08:12,143 INFO Experiment.PerfCost-9098: Begin sequential experiments
+03:08:19,864 INFO Experiment.PerfCost-9098: Processed 1 samples out of 3, 0 errors
+03:08:29,930 INFO Experiment.PerfCost-9098: Processed 2 samples out of 3, 0 errors
+03:08:40,3 INFO Wallet.WalletFunction-62b2: Stopping function
+03:08:40,4 INFO Wallet.WalletFunction-62b2: Function stopped succesfully
+03:08:40,5 ERROR Experiment.PerfCost-9098: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 36, in process_request
+    ret = pickle.loads(ret)
+_pickle.UnpicklingError: pickle data was truncated
+</pre>
+        </body>
+    </html>
+
+03:08:40,5 INFO Experiment.PerfCost-9098: Processed 2 samples out of 3, 1 errors
+03:08:52,639 INFO Experiment.PerfCost-9098: Processed 3 samples out of 3, 1 errors
+03:08:57,647 INFO Experiment.PerfCost-9098: Mean 912.2379999999999 [ms], median 60.695 [ms], std 1209.251479433731, CV 132.55877078500689
+03:08:57,653 INFO Experiment.PerfCost-9098: Parametric CI (Student's t-distribution) 0.95 from -2766.830930822485 to 4591.306930822485, within 403.3014334880245% of mean
+03:08:57,655 INFO Experiment.PerfCost-9098: Parametric CI (Student's t-distribution) 0.99 from -7574.196894400861 to 9398.672894400861, within 930.287369568124% of mean
+03:08:57,765 INFO Experiment.PerfCost-9098: Begin cold experiments
+03:08:57,768 INFO Wallet.WalletFunction-62b2: Stopping function
+03:08:57,768 INFO Wallet.WalletFunction-62b2: Function stopped succesfully
+03:09:05,401 INFO Experiment.PerfCost-9098: Processed 1 samples out of 3, 0 errors
+03:09:10,407 INFO Wallet.WalletFunction-62b2: Stopping function
+03:09:10,408 INFO Wallet.WalletFunction-62b2: Function stopped succesfully
+03:09:18,33 INFO Experiment.PerfCost-9098: Processed 2 samples out of 3, 0 errors
+03:09:23,39 INFO Wallet.WalletFunction-62b2: Stopping function
+03:09:23,40 INFO Wallet.WalletFunction-62b2: Function stopped succesfully
+03:09:30,675 INFO Experiment.PerfCost-9098: Processed 3 samples out of 3, 0 errors
+03:09:35,681 INFO Experiment.PerfCost-9098: Mean 2623.381 [ms], median 2625.271 [ms], std 3.243812057852238, CV 0.12365005532373063
+03:09:35,684 INFO Experiment.PerfCost-9098: Parametric CI (Student's t-distribution) 0.95 from 2613.5119129139457 to 2633.250087086054, within 0.3761972464561629% of mean
+03:09:35,686 INFO Experiment.PerfCost-9098: Parametric CI (Student's t-distribution) 0.99 from 2600.616173736131 to 2646.145826263869, within 0.8677666821505933% of mean
+03:09:35,801 INFO Wallet.WalletFunction-62b2: Stopping function
+03:09:35,802 INFO Wallet.WalletFunction-62b2: Function stopped succesfully

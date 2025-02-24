@@ -1,4 +1,4 @@
-22:48:13,323 INFO SeBS-9676: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
-22:48:13,341 INFO Wallet-b76f: Using existing deployment wallet-74730118 that matches prefix wallet!
-22:48:13,350 INFO Experiment.PerfCost-089f: Skipping already processed /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
-22:48:13,353 INFO Experiment.PerfCost-089f: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+02:10:26,303 INFO SeBS-6385: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+02:10:26,318 INFO Wallet-b771: Using existing deployment wallet-d243e494 that matches prefix wallet!
+02:10:26,322 INFO Experiment.PerfCost-5e13: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
+02:10:26,327 INFO Experiment.PerfCost-5e13: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json

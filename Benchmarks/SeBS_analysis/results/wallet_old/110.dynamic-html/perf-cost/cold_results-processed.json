@@ -1,0 +1,100 @@
+{
+  "_invocations": {
+    "110.dynamic-html-python-3.11": {
+      "09693f8c-a281-4c12-b154-3321b1eca7f5": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736375788.540751",
+          "end": "1736375792.898484",
+          "is_cold": false,
+          "request_id": "09693f8c-a281-4c12-b154-3321b1eca7f5",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "09693f8c-a281-4c12-b154-3321b1eca7f5",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 4357733,
+          "client": 19569300,
+          "client_begin": "2025-01-08 22:36:13.331049",
+          "client_end": "2025-01-08 22:36:32.900349",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "cb87d5d3-67bd-4a3d-bf06-f06bf8f5e0b8": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1736375819.332187",
+          "end": "1736375824.377517",
+          "is_cold": false,
+          "request_id": "cb87d5d3-67bd-4a3d-bf06-f06bf8f5e0b8",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "cb87d5d3-67bd-4a3d-bf06-f06bf8f5e0b8",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 5045330,
+          "client": 21465010,
+          "client_begin": "2025-01-08 22:36:42.914589",
+          "client_end": "2025-01-08 22:37:04.379599",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "110.dynamic-html-python-3.11": {}
+  },
+  "begin_time": 1736375768.323155,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1736375829.387436,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 2,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 2
+  }
+}

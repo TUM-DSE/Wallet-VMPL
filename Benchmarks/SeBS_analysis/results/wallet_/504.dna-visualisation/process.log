@@ -1,0 +1,4 @@
+15:19:10,952 INFO SeBS-5c6b: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+15:19:10,971 INFO Wallet-3e50: Using existing deployment wallet-ae4f8be2 that matches prefix wallet!
+15:19:10,976 INFO Experiment.PerfCost-57d6: Processing data in /root/Benchmarks/SeBS/504.dna-visualisation/perf-cost/sequential_results.json
+15:19:10,981 INFO Experiment.PerfCost-57d6: Processing data in /root/Benchmarks/SeBS/504.dna-visualisation/perf-cost/cold_results.json

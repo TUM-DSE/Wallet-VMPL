@@ -1,27 +1,27 @@
 {
   "_invocations": {
     "210.thumbnailer-python-3.11": {
-      "20e54719-36eb-43cc-8259-f371b7b64e83": {
+      "38dfca6d-e7b6-4d8d-8a12-cbd8d4b44f89": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1736376115.516707",
-          "end": "1736376115.753585",
+          "begin": "1740103752.726834",
+          "end": "1740103752.794929",
           "is_cold": false,
-          "request_id": "20e54719-36eb-43cc-8259-f371b7b64e83",
+          "request_id": "38dfca6d-e7b6-4d8d-8a12-cbd8d4b44f89",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 116453240.0,
-                "download_size": 3578502,
-                "upload_size": 10342
+                "compute_time": 80606160.0,
+                "download_size": 1640578,
+                "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-ab384f24",
-                "key": "210.thumbnailer-0-output/2_aerial-shot-architecture-bird-s-eye-view-2440013.4d3aee33.jpg"
+                "bucket": "sebs-benchmarks-wallet-d243e494",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.bd43841e.jpg"
               }
             }
           }
@@ -30,42 +30,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "20e54719-36eb-43cc-8259-f371b7b64e83",
+        "request_id": "38dfca6d-e7b6-4d8d-8a12-cbd8d4b44f89",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 236878,
-          "client": 243234,
-          "client_begin": "2025-01-08 22:41:55.512132",
-          "client_end": "2025-01-08 22:41:55.755366",
+          "benchmark": 68095,
+          "client": 73956,
+          "client_begin": "2025-02-21 02:09:12.716072",
+          "client_end": "2025-02-21 02:09:12.790028",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "294e0769-356e-4625-b5d7-92a49fd7410b": {
+      "61e1e9fa-5e53-4ce6-a2de-2ddb897f1032": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1736376105.189371",
-          "end": "1736376105.498016",
+          "begin": "1740103762.810174",
+          "end": "1740103762.877713",
           "is_cold": false,
-          "request_id": "294e0769-356e-4625-b5d7-92a49fd7410b",
+          "request_id": "61e1e9fa-5e53-4ce6-a2de-2ddb897f1032",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 116520380.0,
-                "download_size": 3578502,
-                "upload_size": 10342
+                "compute_time": 77992020.0,
+                "download_size": 1640578,
+                "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-ab384f24",
-                "key": "210.thumbnailer-0-output/2_aerial-shot-architecture-bird-s-eye-view-2440013.eb1cc80d.jpg"
+                "bucket": "sebs-benchmarks-wallet-d243e494",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.164b830b.jpg"
               }
             }
           }
@@ -74,17 +74,61 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "294e0769-356e-4625-b5d7-92a49fd7410b",
+        "request_id": "61e1e9fa-5e53-4ce6-a2de-2ddb897f1032",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 308645,
-          "client": 315345,
-          "client_begin": "2025-01-08 22:41:45.184419",
-          "client_end": "2025-01-08 22:41:45.499764",
+          "benchmark": 67539,
+          "client": 73123,
+          "client_begin": "2025-02-21 02:09:22.800050",
+          "client_end": "2025-02-21 02:09:22.873173",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "cc85cc2e-7d2c-452e-bbc8-0fa23fb660da": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740103772.897410",
+          "end": "1740103772.963187",
+          "is_cold": false,
+          "request_id": "cc85cc2e-7d2c-452e-bbc8-0fa23fb660da",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 77281140.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-d243e494",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.687b479e.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "cc85cc2e-7d2c-452e-bbc8-0fa23fb660da",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 65777,
+          "client": 71666,
+          "client_begin": "2025-02-21 02:09:32.884333",
+          "client_end": "2025-02-21 02:09:32.955999",
           "http_startup": 0,
           "initialization": 0
         }
@@ -92,7 +136,7 @@
     }
   },
   "_metrics": {},
-  "begin_time": 1736376077.114664,
+  "begin_time": 1740103744.755453,
   "config": {
     "deployment": {
       "name": "wallet"
@@ -104,11 +148,12 @@
           "benchmark": "210.thumbnailer",
           "concurrent-invocations": 1,
           "experiments": [
-            "sequential"
+            "sequential",
+            "cold"
           ],
           "input-size": "small",
           "memory-sizes": [],
-          "repetitions": 2
+          "repetitions": 3
         }
       },
       "flags": {},
@@ -120,7 +165,7 @@
       "update_storage": false
     }
   },
-  "end_time": 1736376120.762217,
+  "end_time": 1740103777.961889,
   "result_bucket": null,
   "statistics": {
     "cold_count": 0,
@@ -128,6 +173,6 @@
     "failures_count": 0,
     "incorrect": [],
     "incorrect_count": 0,
-    "samples_generated": 2
+    "samples_generated": 3
   }
 }

@@ -1,0 +1,181 @@
+{
+  "_invocations": {
+    "120.uploader-python-3.11": {
+      "5a576fb4-8581-452d-b6c9-7c3780c56d59": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740103095.807238",
+          "end": "1740103096.316871",
+          "is_cold": false,
+          "request_id": "5a576fb4-8581-452d-b6c9-7c3780c56d59",
+          "result": {
+            "output": {
+              "measurement": {
+                "download_size": 0,
+                "download_time": 0,
+                "upload_size": 7034848
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-253b32ee",
+                "key": "120.uploader-0-output/1.4.0.29bb6a0c.zip",
+                "url": "https://github.com/STEllAR-GROUP/hpx/archive/refs/tags/1.4.0.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "5a576fb4-8581-452d-b6c9-7c3780c56d59",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 509633,
+          "client": 2866743,
+          "client_begin": "2025-02-21 01:58:13.206616",
+          "client_end": "2025-02-21 01:58:16.073359",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "792b25ce-a078-4c86-a38b-eb96a5e7682f": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740103082.932901",
+          "end": "1740103083.915718",
+          "is_cold": false,
+          "request_id": "792b25ce-a078-4c86-a38b-eb96a5e7682f",
+          "result": {
+            "output": {
+              "measurement": {
+                "download_size": 0,
+                "download_time": 0,
+                "upload_size": 7034848
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-253b32ee",
+                "key": "120.uploader-0-output/1.4.0.ae7b405c.zip",
+                "url": "https://github.com/STEllAR-GROUP/hpx/archive/refs/tags/1.4.0.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "792b25ce-a078-4c86-a38b-eb96a5e7682f",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 982817,
+          "client": 3298381,
+          "client_begin": "2025-02-21 01:57:59.895409",
+          "client_end": "2025-02-21 01:58:03.193790",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "fa3d80b3-be81-48a0-b2f2-b949f7cf7461": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740103069.627336",
+          "end": "1740103070.706426",
+          "is_cold": false,
+          "request_id": "fa3d80b3-be81-48a0-b2f2-b949f7cf7461",
+          "result": {
+            "output": {
+              "measurement": {
+                "download_size": 0,
+                "download_time": 0,
+                "upload_size": 7034848
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-253b32ee",
+                "key": "120.uploader-0-output/1.4.0.1120c4b7.zip",
+                "url": "https://github.com/STEllAR-GROUP/hpx/archive/refs/tags/1.4.0.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "fa3d80b3-be81-48a0-b2f2-b949f7cf7461",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1079090,
+          "client": 3400240,
+          "client_begin": "2025-02-21 01:57:46.482415",
+          "client_end": "2025-02-21 01:57:49.882655",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1740103061.474611,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "120.uploader",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "sequential",
+            "cold"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 3
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1740103101.079403,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 3,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 3
+  }
+}

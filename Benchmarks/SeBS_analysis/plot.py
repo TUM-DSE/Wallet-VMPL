@@ -6,6 +6,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import pprint as pprint
 
 # Common graph settings
 mpl.use("Agg")
@@ -20,19 +21,20 @@ LEGEND_FONTSIZE = 6
 ANNOTATION_SIZE = 4
 figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
-VARIANTS = ['native', 'gramine', 'vm', 'kata', 'cvm', 'wallet']
+VARIANTS = ['native', 'gramine', 'vm', 'kata', 'cvm', 'wallet', 'wallet_']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
     'gramine' : 'Gramine',
     'vm'      : 'VM',
     'kata'    : 'Kata',
     'cvm'     : 'CVM',
-    'wallet'  : 'Wallet'
+    'wallet'  : 'Wallet*',
+    'wallet_' : 'Wallet'
 }
 
 BENCHMARKS = [
     '110.dynamic-html', '120.uploader', '210.thumbnailer', 
-    '220.video-processing', '311.compression', '411.image-recognition',
+    '220.video-processing', '311.compression',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs', 
     '504.dna-visualisation'
 ]
@@ -111,7 +113,7 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     
     # Calculate bar positions
     n_variants = len(VARIANTS)
-    width = 0.15  # Width of each bar
+    width = 0.10  # Width of each bar
     variant_positions = np.arange(len(benchmarks))
     
     # Plot bars for each variant
@@ -148,7 +150,8 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     
     # Add gridlines
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
-    ax.set_ylim(bottom=0)
+    if(y_scale not in "log"):
+        ax.set_ylim(bottom=0)
     
     # Adjust layout
     plt.tight_layout()
@@ -166,7 +169,9 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
 def main():
     # Load and process data
     df, common_benchmarks = load_and_process_data()
-    
+
+    diff_csv(df)
+
     # Create separate plots for each metric and execution type
     metrics = ['exec_time', 'client_time']
     exec_types = ['cold', 'hot']
@@ -177,6 +182,28 @@ def main():
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
     
     print("Plots saved in output directory")
+
+def diff_csv(df):
+
+    for w in ["wallet", "wallet_"]:
+        lr = []
+
+        for b in BENCHMARKS:
+            if b in "220.video-processing":
+                continue
+            d = df[df["benchmark"] == b]
+            dc = d[d["variant"] == "cvm"]
+            dw = d[d["variant"] == w]
+            for e in ["hot", "cold"]:
+                f = dc[dc["type"] == e]["client_time"]
+                g = dw[dw["type"] == e]["client_time"]
+                cc = float(f.iloc[0])
+                cw = float(g.iloc[0])
+                t = cc / cw * 100
+                lr.append((b,e,t))
+        p = pd.DataFrame(lr, columns = ["benchmark","type","diff"])
+
+        p.to_csv(f"output/{w}.csv")
 
 if __name__ == "__main__":
     main()

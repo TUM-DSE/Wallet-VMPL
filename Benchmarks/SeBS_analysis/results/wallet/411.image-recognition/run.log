@@ -1,0 +1,14 @@
+02:33:06,793 INFO SeBS-7170: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
+02:33:06,864 INFO Wallet-5796: Generating unique resource name wallet-2eda73a0
+02:33:06,866 INFO minio.Minio-9e9a: Initialize a new bucket for benchmarks
+02:33:06,871 INFO minio.Minio-9e9a: Created bucket sebs-benchmarks-wallet-2eda73a0
+02:33:06,908 INFO Benchmark-1c0e: Building benchmark 411.image-recognition. Reason: no cached code package.
+02:33:07,114 INFO Benchmark-1c0e: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+02:33:07,188 INFO Wallet-5796: Function size 0.000005 MB
+02:33:07,235 INFO Benchmark-1c0e: Created code package (source hash: f34e47ae2a4f4bec4305df5cb9e62eb5), for run on wallet with python:3.11
+02:33:07,589 INFO Wallet-5796: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+02:33:09,324 INFO Experiment.PerfCost-5ace: Begin experiment
+02:33:09,325 INFO Experiment.PerfCost-5ace: Begin sequential experiments
+02:33:34,345 INFO Wallet.WalletFunction-4df5: Stopping function
+02:33:34,345 INFO Wallet.WalletFunction-4df5: Function stopped succesfully
+02:33:34,360 INFO Wallet.WalletFunction-4df5: Not stopping function as it was not running

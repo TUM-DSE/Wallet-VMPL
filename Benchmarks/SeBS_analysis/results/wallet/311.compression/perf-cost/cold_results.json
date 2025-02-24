@@ -1,0 +1,178 @@
+{
+  "_invocations": {
+    "311.compression-python-3.11": {
+      "3380cb7d-5d88-4dfe-859f-cbe3196d6125": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740104506.045649",
+          "end": "1740104507.350738",
+          "is_cold": false,
+          "request_id": "3380cb7d-5d88-4dfe-859f-cbe3196d6125",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1309489100.0,
+                "download_size": 10063841,
+                "upload_size": 9326900
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-7de2e826",
+                "key": "311.compression-0-output/acmart-master.d763d144.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "3380cb7d-5d88-4dfe-859f-cbe3196d6125",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1305089,
+          "client": 3662506,
+          "client_begin": "2025-02-21 02:21:43.554110",
+          "client_end": "2025-02-21 02:21:47.216616",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "4ea0f258-6c67-4b62-8964-998eb08230d2": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740104519.651718",
+          "end": "1740104520.891033",
+          "is_cold": false,
+          "request_id": "4ea0f258-6c67-4b62-8964-998eb08230d2",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1314192120.0,
+                "download_size": 10063841,
+                "upload_size": 9326901
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-7de2e826",
+                "key": "311.compression-0-output/acmart-master.7ee28727.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "4ea0f258-6c67-4b62-8964-998eb08230d2",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1239315,
+          "client": 3598445,
+          "client_begin": "2025-02-21 02:21:57.229286",
+          "client_end": "2025-02-21 02:22:00.827731",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "9fc0e387-fd4a-4e7c-9eb6-47cd443a8a5b": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1740104533.242626",
+          "end": "1740104534.485698",
+          "is_cold": false,
+          "request_id": "9fc0e387-fd4a-4e7c-9eb6-47cd443a8a5b",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1305768100.0,
+                "download_size": 10063841,
+                "upload_size": 9326900
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-7de2e826",
+                "key": "311.compression-0-output/acmart-master.be9b9fed.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "9fc0e387-fd4a-4e7c-9eb6-47cd443a8a5b",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1243072,
+          "client": 3581639,
+          "client_begin": "2025-02-21 02:22:10.840500",
+          "client_end": "2025-02-21 02:22:14.422139",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1740104498.544831,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "311.compression",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "sequential",
+            "cold"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 3
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1740104539.428186,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 3,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 3
+  }
+}
