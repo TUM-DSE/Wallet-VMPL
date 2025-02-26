@@ -30,6 +30,7 @@ PYBIND11_MODULE(_wallet, m) {
     m.def("create_zygote", &create_zygote,
           py::arg("zygote_path"), py::arg("manifest_path"),
           py::arg("libos_path"));
+    m.def("delete_zygote", &delete_zygote, py::arg("zygote_id"));
     m.def("create_trustlet", &create_trustlet,
           py::arg("zygote_id"), py::arg("function_code"));
     m.def("invoke_trustlet_bin",
@@ -40,6 +41,7 @@ PYBIND11_MODULE(_wallet, m) {
         py::arg("trustlet_id"), py::arg("args"), py::arg("output_size"));
     m.def("invoke_trustlet", &invoke_trustlet,
           py::arg("trustlet_id"), py::arg("args"), py::arg("output_size"));
+    m.def("delete_trustlet", &delete_trustlet, py::arg("trustlet_id"));
     m.def("attest_monitor", &attest_monitor);
     m.def("attest_execution", &attest_execution,
           py::arg("trusted_process_id"), py::arg("input"), py::arg("input_len"),

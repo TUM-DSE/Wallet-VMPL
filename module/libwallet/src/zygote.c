@@ -56,3 +56,14 @@ int create_zygote(const char* pal, const char* m, const char* os) {
     #endif
     return ret;
 }
+
+int delete_zygote(const int zygote_id) {
+    struct monitor_call call;
+    call.type = deleteZygote;
+    call.process_id = zygote_id;
+#ifndef NODEBUG
+    assert(con);
+    printf("Delete zygote %d\n", zygote_id);
+#endif
+    return ioctl(con, VMPL_WR, &call);
+}
