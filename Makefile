@@ -211,6 +211,7 @@ simple_fs:
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/nop nop.c
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/helloworld helloworld.c
 	cd runtime/filesystem/simple/src/; gcc -o ../fs/lib/cpuid cpuid.c
+	cd Benchmarks/cow/; make -B cow; cp cow ../../runtime/filesystem/simple/fs/lib/
 	cd runtime/filesystem/simple/; ./create.sh
 
 IPC_BIN?=Benchmarks/IPC/wallet/com
