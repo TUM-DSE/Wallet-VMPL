@@ -1,0 +1,40 @@
+12:06:50,72 INFO SeBS-8b9d: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+12:06:50,150 INFO Wallet-e0f7: Generating unique resource name wallet-243b5b1a
+12:06:50,153 INFO minio.Minio-4118: Initialize a new bucket for benchmarks
+12:06:50,158 INFO minio.Minio-4118: Created bucket sebs-benchmarks-wallet-243b5b1a
+12:06:50,390 INFO Benchmark-2683: Building benchmark 110.dynamic-html. Reason: no cached code package.
+12:06:50,503 INFO Benchmark-2683: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+12:06:50,537 INFO Wallet-e0f7: Function size 0.000005 MB
+12:06:50,564 INFO Benchmark-2683: Created code package (source hash: e7a95b83113d579026367a2ffdb134aa), for run on wallet with python:3.11
+12:06:50,776 INFO Wallet-e0f7: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+12:06:51,446 INFO Experiment.PerfCost-ab78: Begin experiment
+12:06:51,446 INFO Experiment.PerfCost-ab78: Begin sequential experiments
+12:07:00,493 INFO Experiment.PerfCost-ab78: Processed 1 samples out of 5, 0 errors
+12:07:10,515 INFO Experiment.PerfCost-ab78: Processed 2 samples out of 5, 0 errors
+12:07:20,538 INFO Experiment.PerfCost-ab78: Processed 3 samples out of 5, 0 errors
+12:07:30,558 INFO Experiment.PerfCost-ab78: Processed 4 samples out of 5, 0 errors
+12:07:40,581 INFO Experiment.PerfCost-ab78: Processed 5 samples out of 5, 0 errors
+12:07:45,590 INFO Experiment.PerfCost-ab78: Mean 13.2028 [ms], median 11.511 [ms], std 3.6235010362907305, CV 27.444943771705475
+12:07:45,596 INFO Experiment.PerfCost-ab78: Parametric CI (Student's t-distribution) 0.95 from 8.172574142055726 to 18.233025857944273, within 38.09968989869023% of mean
+12:07:45,598 INFO Experiment.PerfCost-ab78: Parametric CI (Student's t-distribution) 0.99 from 4.861328731121832 to 21.54427126887817, within 63.179562432803415% of mean
+12:07:45,605 INFO Experiment.PerfCost-ab78: Begin cold experiments
+12:07:45,608 INFO Wallet.WalletFunction-8cda: Stopping function
+12:07:45,609 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
+12:07:55,187 INFO Experiment.PerfCost-ab78: Processed 1 samples out of 5, 0 errors
+12:08:00,193 INFO Wallet.WalletFunction-8cda: Stopping function
+12:08:00,194 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
+12:08:10,314 INFO Experiment.PerfCost-ab78: Processed 2 samples out of 5, 0 errors
+12:08:15,320 INFO Wallet.WalletFunction-8cda: Stopping function
+12:08:15,321 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
+12:08:26,5 INFO Experiment.PerfCost-ab78: Processed 3 samples out of 5, 0 errors
+12:08:31,11 INFO Wallet.WalletFunction-8cda: Stopping function
+12:08:31,11 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
+12:08:40,114 INFO Experiment.PerfCost-ab78: Processed 4 samples out of 5, 0 errors
+12:08:45,125 INFO Wallet.WalletFunction-8cda: Stopping function
+12:08:45,126 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
+12:08:53,824 INFO Experiment.PerfCost-ab78: Processed 5 samples out of 5, 0 errors
+12:08:58,831 INFO Experiment.PerfCost-ab78: Mean 4629.7916000000005 [ms], median 4571.188 [ms], std 706.9800229872412, CV 15.270234258216744
+12:08:58,833 INFO Experiment.PerfCost-ab78: Parametric CI (Student's t-distribution) 0.95 from 3648.345987852224 to 5611.237212147777, within 21.19848358072481% of mean
+12:08:58,835 INFO Experiment.PerfCost-ab78: Parametric CI (Student's t-distribution) 0.99 from 3002.2900509854753 to 6257.293149014526, within 35.15280361678752% of mean
+12:08:58,842 INFO Wallet.WalletFunction-8cda: Stopping function
+12:08:58,843 INFO Wallet.WalletFunction-8cda: Function stopped succesfully
