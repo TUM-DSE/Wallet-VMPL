@@ -21,7 +21,7 @@ sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
 TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 7
+TICKS_FONTSIZE = 6
 LEGEND_FONTSIZE = 6
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("pastel")
@@ -62,17 +62,35 @@ def calculate_categories(raw_data):
     wallet_data = raw_data.get('Wallet', {})
     
     categories = {
+        'Native': {
+            'QEMU': 0,
+            'Monitor/OVMF': 0,
+            'Guest-OS': 0,
+            'Invocation': raw_data['Native']['Total']
+        },
+        'Gramine': {
+            'QEMU': 0,
+            'Monitor/OVMF': 0,
+            'Guest-OS': 0,
+            'Invocation': raw_data['Gramine']['Total']
+        },
+        'Kata': {
+            'QEMU': 0,
+            'Monitor/OVMF': 0,
+            'Guest-OS': 0,
+            'Invocation': raw_data['Kata Containers']['Total']
+        },
         'VM': {
             'QEMU': raw_data['VM']['QEMU'],
             'Monitor/OVMF': raw_data['VM']['OVMF'],
             'Guest-OS': raw_data['VM']['Linux'],
-            'Fn Invocation': raw_data['VM']['Runtime']
+            'Invocation': raw_data['VM']['Runtime']
         },
         'CVM': {
             'QEMU': raw_data['CVM']['QEMU'],
             'Monitor/OVMF': raw_data['CVM']['OVMF'],
             'Guest-OS': raw_data['CVM']['Linux'],
-            'Fn Invocation': raw_data['CVM']['Runtime']
+            'Invocation': raw_data['CVM']['Runtime']
         },
         'Wallet\n(cold)': {
             'QEMU': wallet_data['QEMU'],
@@ -82,7 +100,7 @@ def calculate_categories(raw_data):
             # 'Zygote': wallet_data['Zygote'],
             # 'Trustlet': wallet_data['Trustlet'],
             # 'Invoke': wallet_data['Invoke']
-            'Fn Invocation': wallet_data['Runtime'] + wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
+            'Invocation': wallet_data['Runtime'] + wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
         },
         # Wallet empty
         # 'W-em': {
@@ -93,7 +111,7 @@ def calculate_categories(raw_data):
         #     'Zygote': wallet_data['Zygote'],
         #     'Trustlet': wallet_data['Trustlet'],
         #     'Invoke': wallet_data['Invoke']
-        #     'Fn Invocation': wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
+        #     'Invocation': wallet_data['Zygote'] + wallet_data['Trustlet'] + wallet_data['Invoke']
         # },
         # Wallet semi-hot
         'Wallet\n(warm)': {
@@ -104,7 +122,7 @@ def calculate_categories(raw_data):
             # 'Zygote': 0,
             # 'Trustlet': wallet_data['Trustlet'],
             # 'Invoke': wallet_data['Invoke']
-            'Fn Invocation': wallet_data['Trustlet'] + wallet_data['Invoke']
+            'Invocation': wallet_data['Trustlet'] + wallet_data['Invoke']
         },
         # Wallet hot
         'Wallet\n(hot)': {
@@ -114,17 +132,8 @@ def calculate_categories(raw_data):
             # 'Runtime': 0,
             # 'Zygote': 0,
             # 'Trustlet': 0,
-            'Fn Invocation': wallet_data['Invoke']
-        },
-        'Kata': {
-            'Fn Invocation': raw_data['Kata Containers']['Total']
-        },
-        '\nGramine': {
-            'Fn Invocation': raw_data['Gramine']['Total']
-        },
-        'Native': {
-            'Fn Invocation': raw_data['Native']['Total']
-        }
+            'Invocation': wallet_data['Invoke']
+        }        
     }
     
     return categories
@@ -192,8 +201,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     
     # Enhance legend
     if not motivation:
-      legend = plt.legend(bbox_to_anchor=(0.63, 0.98), loc='upper left', 
-                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+      legend = plt.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left', 
+                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, framealpha=0.5)
       legend.get_frame().set_edgecolor('black')
 
     # Increase the border a bit to fit the annotations
