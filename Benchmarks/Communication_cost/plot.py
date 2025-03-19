@@ -68,7 +68,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     # Filter variants for motivation plot
-    variants = ['VM', 'CVM'] if motivation else ['VM', 'CVM', 'Wallet']
+    variants = ['VM', 'CVM'] if motivation else ['Gramine', 'Native', 'VM','Kata Containers', 'CVM', 'Wallet']
     
     # Collect all message sizes and create mapping to indices
     size_to_index = {size: i for i, size in enumerate(message_sizes, 1)}
@@ -115,7 +115,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
         legend = plt.legend(bbox_to_anchor=(0.32, 0.98), loc='upper right',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     else:
-        legend = plt.legend(bbox_to_anchor=(0.23, 0.6), loc='upper right',
+        legend = plt.legend(bbox_to_anchor=(0.02, 0.95), loc='upper left',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     legend.get_frame().set_edgecolor('black')
     

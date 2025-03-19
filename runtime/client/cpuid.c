@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#define CALL_MONITOR(x) \
+    __asm__ volatile("mov "x", %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
+
 void notify_monitor(){
     __asm__ volatile("mov $0x4FFFFFF8, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
 }
@@ -22,4 +25,8 @@ void resize_channel(uint64_t select, uint64_t size) {
 
 void nop(){
     __asm__ volatile("mov $0x4FFFFFF5, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
+}
+
+void finalize_zygote() {
+    __asm__ volatile("mov $0x4FFFFFF4, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
 }

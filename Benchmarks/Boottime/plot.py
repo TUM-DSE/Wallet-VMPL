@@ -115,6 +115,15 @@ def calculate_categories(raw_data):
             # 'Zygote': 0,
             # 'Trustlet': 0,
             'Fn Invocation': wallet_data['Invoke']
+        },
+        'Kata': {
+            'Fn Invocation': raw_data['Kata Containers']['Total']
+        },
+        '\nGramine': {
+            'Fn Invocation': raw_data['Gramine']['Total']
+        },
+        'Native': {
+            'Fn Invocation': raw_data['Native']['Total']
         }
     }
     
@@ -149,7 +158,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     if motivation:
         df.plot(kind='bar', stacked=True, ax=ax, color='C0', edgecolor='C0', width=0.8, legend=False)
     else:
-        df.plot(kind='bar', stacked=True, ax=ax, color=palette, linewidth = 0, edgecolor='black', width=0.8)
+        df.plot(kind='bar', stacked=True, ax=ax, color=palette, linewidth = 0, edgecolor='black', width=0.6)
     
     # Add hatches for better distinction
     bars = ax.patches

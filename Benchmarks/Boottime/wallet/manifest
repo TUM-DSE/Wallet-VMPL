@@ -5,7 +5,7 @@ entrypoint = "/python/python"
 [loader]
 log_level = "error"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-argv = ["python3", "-c", "import ctypes; lib = ctypes.CDLL('/lib/libcpuid.so'); lib.call_outb(); lib.trustlet_exit();"]
+argv = ["python3", "-c", "import ctypes; lib = ctypes.CDLL('/lib/libcpuid.so'); lib.finalize_zygote(); lib.call_outb(); lib.trustlet_exit();"]
 
 [loader.env]
 LD_LIBRARY_PATH = "/lib:/python"

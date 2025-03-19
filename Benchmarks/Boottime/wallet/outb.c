@@ -16,6 +16,8 @@ static inline void outb_exec(int value) {
 }
 
 int main() {
+  //For Zygote
+  __asm__ volatile("mov $0x4FFFFFF4, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
   outb_exec(LINUX_STARTUP_VALUE);
   return 0;
 }
