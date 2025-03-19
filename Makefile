@@ -270,18 +270,23 @@ boottime_setup_vm:
 ipc_setup:
 	make simple_ipc_fs
 	make gramine
+	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
+	make run > /dev/null &
+	sleep 30
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make ipc_setup"
 	cp module/libsysdb.so Benchmarks/IPC/wallet/
 	cp module/libpal.so Benchmarks/IPC/wallet/
 
 IPC_ITERATIONS?=5
 IPC_SIZE?=64
 ssh_ipc:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS} ${ZYGOTE_ID}"
 
 ssh_alloc:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/test/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
 
 ipc:
+	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
 	cd Benchmarks/IPC/wallet/; ./run.sh
 
 shutdown:
