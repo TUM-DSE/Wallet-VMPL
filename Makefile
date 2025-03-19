@@ -104,7 +104,6 @@ clean:
 
 submodules:
 	git submodule update --init --recursive svsm;
-	git submodule update --init --recursive edk2
 	cd edk2; git submodule set-url -- UnitTestFrameworkPkg/Library/SubhookLib/subhook https://github.com/tianocore/edk2-subhook.git
 	git submodule update --init --recursive edk2
 	cd edk2; git apply ../patches/ovmf_outb.patch
