@@ -63,7 +63,7 @@ def calculate_categories(df):
         #     'Function': 0
         # },
         # CVM short
-        'CVM': {
+        'CVM\n(SEV-SNP)': {
             'CVM TCB': monitor_cold + zygote_cold + trustlet_cold + function,
             'Monitor': 0,
             'Zygote': 0,
