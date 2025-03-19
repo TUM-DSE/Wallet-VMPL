@@ -29,5 +29,4 @@ void nop(){
 
 void finalize_zygote() {
     __asm__ volatile("mov $0x4FFFFFF4, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
-    __asm__ volatile("mov $0x4FFFFFA1, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
 }
