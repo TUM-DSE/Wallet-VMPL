@@ -15,26 +15,25 @@ def main():
     pool = Pool(processes=(cpu_count()))
     tmp_file_num = 0
 
-    #num_nodes = [16, 64, 256, 1024]
-    #num_nodes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
-    num_nodes = [1, 4, 16, 64, 256, 1024]
-    cache_sizes = [1, 2, 4, 8, 16, 32]
+    num_nodes = [1,16,256,1024]
+    cache_sizes = [10, 100]
+    cache_time = 600
 
     cvm_cold_boot_time = 8.3073
     cvm_warm_boot_time = 0.0677
-    cvm_max_execution_slots = 1
+    cvm_max_execution_slots = 64
     cvm_header = "************* CVM ****************\n"
 
     vm_cold_boot_time = 3.6999
     vm_warm_boot_time = 0.0663
-    vm_max_execution_slots = 1
+    vm_max_execution_slots = 64
     vm_header = "************* VM ****************\n"
 
-    w_percentage_soft_warm = [0, 0.3, 0.6, 0.9]
-    w_cold_boot_time = 4.3061
-    w_warm_boot_time = 1.6766
-    w_soft_warm_time = 2.4124
-    w_max_execution_slots = 1
+    w_percentage_soft_warm = [0, 0.5]
+    w_cold_boot_time = 1.56118
+    w_warm_boot_time = 0.005
+    w_soft_warm_time = 0.0057
+    w_max_execution_slots = 64
     w_header = "************* WALLET ****************\n"
 
     #main_sim(1, vm_cold_boot_time, vm_warm_boot_time, 0, 1, 300, vm_max_execution_slots, 0);
@@ -42,16 +41,16 @@ def main():
     for n in num_nodes:
         for cache_size in cache_sizes:
             # CVM simulation
-            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, 300, cvm_max_execution_slots, 0))
+            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, cache_time, cvm_max_execution_slots, 0))
             tmp_file_num += 1
 
             # VM simulation
-            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', vm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, 300, vm_max_execution_slots, 0))
+            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', vm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, cache_time, vm_max_execution_slots, 0))
             tmp_file_num += 1
 
             # Wallet simulation
             for percent_soft_warm in w_percentage_soft_warm:
-                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', w_header, n, w_cold_boot_time, w_warm_boot_time, w_soft_warm_time, cache_size, 300, w_max_execution_slots, percent_soft_warm))
+                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', w_header, n, w_cold_boot_time, w_warm_boot_time, w_soft_warm_time, cache_size, cache_time, w_max_execution_slots, percent_soft_warm))
                 tmp_file_num += 1
 
     pool.close()

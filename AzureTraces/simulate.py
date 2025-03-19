@@ -8,8 +8,6 @@ import argparse
 # my scripts
 from scheduler import SimpleScheduler
 
-
-
 class Function:
     arrival_time: float
     start_time: float
@@ -54,7 +52,7 @@ def update_cached_functions(nodes, simulation_increment, caching_time):
                 if node.function_last_call_time[i] > caching_time:
                     log(f'Evicting stale function {node.functions_registered[i]} from cache slot {i} on node {node.node_id}')
                     node.function_slots_free[i] = True
-    
+
 
 def get_earliest_func_finish(nodes):
     func_earliest = None
@@ -76,13 +74,13 @@ def get_earliest_func_finish(nodes):
 
     return node_earliest, slot_earliest, func_earliest
 
-                
-            
 
-def update_simulation(nodes, next_function_time, simulation_time, caching_time, 
+
+
+def update_simulation(nodes, next_function_time, simulation_time, caching_time,
                       run_until_node_free):
 
-    # increase time until either a function finished executing 
+    # increase time until either a function finished executing
     # or until the next function arrives
     old_simulation_time = simulation_time
 
@@ -104,7 +102,7 @@ def update_simulation(nodes, next_function_time, simulation_time, caching_time,
         return simulation_increment, simulation_time, new_func
 
 
-    # check if we have a function that finished first or if we have a 
+    # check if we have a function that finished first or if we have a
     # function that arrives first
 
 
@@ -139,9 +137,9 @@ def cache_function(node, f):
     for i in range(node.max_functions):
         if node.function_slots_free[i] == True:
             node.function_slots_free[i] = False
-            node.functions_registered[i] = f_id 
+            node.functions_registered[i] = f_id
             node.function_last_call_time[i] = 0
-            return i            
+            return i
 
     # if no free slot available, replace the least recently used
 
@@ -183,7 +181,8 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     random.seed()
 
     # read csv
-    input_file = 'AzureFunctionsInvocationTraceForTwoWeeksJan2021_preprocessed.csv'
+    # input_file = 'AzureFunctionsInvocationTraceForTwoWeeksJan2021_preprocessed.csv'
+    input_file = 'resampled_preprocessed.csv'
     with open(input_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         header = np.array(next(reader), dtype=object)  # Read the header row
@@ -205,10 +204,11 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
 
     scheduler = SimpleScheduler()
     delays = np.empty(len(rows))
+    per_func_delays = dict()
     pbar = tqdm(total=len(rows))
     cur_func = 0
     while cur_func < len(rows):
-        
+
         row = rows[cur_func]
 
         # create function
@@ -217,6 +217,9 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
         f.duration = float(row[duration])
         f.application_hash = row[app_hash]
         f.func_hash = row[func_hash]
+        curr_f_id = f.application_hash + "-" + f.func_hash
+        if not (curr_f_id in per_func_delays):
+            per_func_delays[curr_f_id] = []
 
         # get possible node for next function
         f_delay = 0;
@@ -227,7 +230,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
             log(f'[{sim_time}] No free nodes available')
             _, sim_time, _ = update_simulation(nodes, f_sched_time, sim_time, caching_time, True)
             assigned_node, _ , _ = scheduler.pick_next_node(nodes, f)
-        
+
         # we now have a canditate node, simulate until this function can run
         # take into account any delays
         f_sched_time = max(sim_time, f.arrival_time)
@@ -266,6 +269,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
         f_delay = f.start_time - f.arrival_time
         total_delay = total_delay + f_delay
         delays[cur_func] = f_delay
+        per_func_delays[curr_f_id].append(f_delay)
 
         if soft_warm == True:
             soft_warm_boots = soft_warm_boots + 1
@@ -293,13 +297,19 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     print('------------------------------------------------')
     print(f'Statistics:')
     print(f'Total simulation time: {sim_time}')
-    print(f'Cold boot rate: {cold_boots / len(rows)}')
-    print(f'Soft warm boot rate: {soft_warm_boots / len(rows)}')
-    print(f'Warm boot rate: {warm_boots / len(rows)}')
+    print(f'Cold boot rate: {cold_boots / len(rows)} ({cold_boots})')
+    print(f'Soft warm boot rate: {soft_warm_boots / len(rows)} ({soft_warm_boots})')
+    print(f'Warm boot rate: {warm_boots / len(rows)} ({warm_boots})')
     print(f'Function delay:')
     print(f'    Avg: {np.average(delays)}')
     print(f'    Median: {np.median(delays)}')
     print(f'    Std: {np.std(delays)}')
+    print(f'Delays:')
+    func_ids = list(per_func_delays.keys())
+    for id in func_ids:
+        print(f"     {id} : {per_func_delays[id]}")
+
+
     print(f'')
     print(f'Configuration:')
     print(f'num_nodes: {num_nodes}')
