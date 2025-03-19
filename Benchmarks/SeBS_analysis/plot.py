@@ -24,10 +24,10 @@ figheight = 2.2
 VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
-    'gramine' : 'Gramine',
-    'kata'    : 'Kata',
-    'vm'      : 'VM',
-    'cvm'     : 'CVM',
+    'gramine' : 'LibOS (Gramine)',
+    'kata'    : 'Containers (Kata)',
+    'vm'      : 'VM (KVM-Linux)',
+    'cvm'     : 'CVM (SEV-SNP)',
     'wallet_cow_prealloc'  : 'Wallet',
     'wallet_cow_no_prealloc' : 'Wallet',
 }
@@ -368,16 +368,17 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-    ax.set_xlabel('Benchmark', fontsize=TICKS_FONTSIZE)
+    # ax.set_xlabel('Benchmark', fontsize=TICKS_FONTSIZE)
     ax.set_xticks(variant_positions)
     xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
-    ax.set_xticklabels(xlabels, rotation=0, fontsize=TICKS_FONTSIZE)
-    # as labels are long, alternate their positions
-    for i, label in enumerate(ax.get_xticklabels()):
-        if i % 2 == 0:
-            label.set_y(+0.03)  # Move slightly downward
-        else:
-            label.set_y(-0.03)  # Move slightly further downward
+    ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    # ax.set_xticklabels(xlabels, rotation=0, fontsize=TICKS_FONTSIZE)
+    # # as labels are long, alternate their positions
+    # for i, label in enumerate(ax.get_xticklabels()):
+    #     if i % 2 == 0:
+    #         label.set_y(+0.03)  # Move slightly downward
+    #     else:
+    #         label.set_y(-0.03)  # Move slightly further downward
     
     # title = f'{metric.replace("_", " ").title()} ({exec_type} start)'
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
@@ -412,32 +413,32 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
 def main():
     global VARIANTS
     # Load and process data
-    # df, common_benchmarks = load_and_process_data()
+    df, common_benchmarks = load_and_process_data()
 
-    #diff_csv(df)
+    # diff_csv(df)
     # Create separate plots for each metric and execution type
-    # metrics = ['exec_time', 'client_time']
-    # exec_types = ['cold', 'hot']
+    metrics = ['exec_time', 'client_time']
+    exec_types = ['cold', 'hot']
 
-    # old_df = df
+    old_df = df
 
-    # filter = df["variant"].str.contains("no_prealloc")
-    # df = df[~filter]
-    # VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
+    filter = df["variant"].str.contains("no_prealloc")
+    df = df[~filter]
+    VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
 
-    # for metric in metrics:
-    #     for exec_type in exec_types:
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
+    for metric in metrics:
+        for exec_type in exec_types:
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
 
-    # VARIANTS = ['wallet_cow_prealloc', 'wallet_cow_no_prealloc']
-    # filter = old_df["variant"].str.contains("wallet")
-    # df = old_df[filter]
-    # LABEL_MAPPINGS['wallet_cow_prealloc']  = 'Wallet (preallocation)'
-    # for metric in metrics:
-    #     for exec_type in exec_types:
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', "linear", "comp")
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log', "comp")
+    VARIANTS = ['wallet_cow_prealloc', 'wallet_cow_no_prealloc']
+    filter = old_df["variant"].str.contains("wallet")
+    df = old_df[filter]
+    LABEL_MAPPINGS['wallet_cow_prealloc']  = 'Wallet (preallocation)'
+    for metric in metrics:
+        for exec_type in exec_types:
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', "linear", "comp")
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log', "comp")
 
     # Load and process data and derive the invocation latency values
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
