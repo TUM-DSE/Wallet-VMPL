@@ -27,10 +27,10 @@ palette = sns.color_palette("deep")
 
 LABEL_MAPPINGS = {
     'Native'              : 'Native',
-    'Gramine'             : 'Gramine',
-    'VM'                  : 'VM',
-    'Kata Containers'     : 'Kata',
-    'CVM'                 : 'CVM',
+    'Gramine'             : 'LibOS (Gramine)',
+    'VM'                  : 'VM (KVM-Linux)',
+    'Kata Containers'     : 'Containers (Kata)',
+    'CVM'                 : 'CVM (SEV-SNP)',
     'Wallet'              : 'Wallet',
 }
 
@@ -124,7 +124,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
         legend = plt.legend(bbox_to_anchor=(0.32, 0.98), loc='upper right',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     else:
-        legend = plt.legend(bbox_to_anchor=(0.02, 0.95), loc='upper left',
+        legend = plt.legend(bbox_to_anchor=(0.02, 0.93), loc='upper left',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, framealpha=0.5)
     legend.get_frame().set_edgecolor('black')
     
