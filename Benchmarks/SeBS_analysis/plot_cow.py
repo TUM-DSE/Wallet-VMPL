@@ -21,9 +21,9 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
-VARIANTS = ['wallet_', 'wallet_cow_prealloc']
+VARIANTS = ['wallet', 'wallet_cow_prealloc']
 LABEL_MAPPINGS = {
-    'wallet_' : 'Wallet - CoW Disabled',
+    'wallet' : 'Wallet - CoW Disabled',
     'wallet_cow_prealloc'  : 'Wallet - CoW Enabled',
 }
 
@@ -185,12 +185,12 @@ def invocation_latency(variants, benchmarks):
 
 def plot_wallet_invocation_latency_cdf(df, output_dir):
     """Create CDF plots comparing just wallet variants for both invocation latency and client time"""
-    wallet_variants = ['wallet_', 'wallet_cow_prealloc']
+    wallet_variants = ['wallet', 'wallet_cow_prealloc']
     
     # Update labels for clarity
     custom_labels = {
         'wallet_cow_prealloc': 'Wallet (CoW enabled)',
-        'wallet_': 'Wallet (CoW disabled)'
+        'wallet': 'Wallet (CoW disabled)'
     }
     
     # Setup color palette for just these two variants
@@ -247,19 +247,19 @@ def plot_wallet_invocation_latency_cdf(df, output_dir):
     plt.tight_layout()
     
     # Save plots
-    plt.savefig(output_dir / 'wallet_invocation_latency_cdf_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'wallet_invocation_latency_cdf_linear.png', format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_invocation_latency_cdf_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_invocation_latency_cdf_linear.png', format='png', dpi=300, bbox_inches='tight')
     
     plt.close()
 
 def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
     """Create stacked bar chart for wallet variants only"""
-    wallet_variants = ['wallet_', 'wallet_cow_prealloc']
+    wallet_variants = ['wallet', 'wallet_cow_prealloc']
     
     # Update labels for clarity
     custom_labels = {
         'wallet_cow_prealloc': 'Wallet (CoW enabled)',
-        'wallet_': 'Wallet (CoW disabled)'
+        'wallet': 'Wallet (CoW disabled)'
     }
     
     # Filter data for just these wallet variants
@@ -338,20 +338,20 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
         plt.tight_layout()
         
         # Save plot (linear scale)
-        plt.savefig(output_dir / f'wallet_client_time_cow_{exec_type}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-        plt.savefig(output_dir / f'wallet_client_time_cow_{exec_type}.png', format='png', dpi=300, bbox_inches='tight')
+        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.png', format='png', dpi=300, bbox_inches='tight')
         
         plt.close()
 
 def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     """Create grouped bar charts for wallet variants, including a log-scale version."""
     
-    wallet_variants = ['wallet_', 'wallet_cow_prealloc']
+    wallet_variants = ['wallet', 'wallet_cow_prealloc']
     exec_types = ['cold', 'hot']
     
     # Define labels and order
     custom_labels = {
-        'wallet_': 'CoW Disabled',
+        'wallet': 'CoW Disabled',
         'wallet_cow_prealloc': 'CoW Enabled'
     }
     colors_group = [None] * len(VARIANTS*2)
@@ -365,7 +365,7 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     wallet_df = df[df['variant'].isin(wallet_variants)]
     
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
-    
+  
     # Benchmarks + Geometric Mean
     all_benchmarks = benchmarks + ['geomean']
     
@@ -375,21 +375,17 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     positions = np.arange(len(all_benchmarks))  # X positions
     
     bar_positions = []
-    
-    colors = palette
-    
     # Iterate in new order: Cold first, then Hot
     for j, exec_type in enumerate(exec_types):  # cold, hot
         for i, variant in enumerate(wallet_variants):  # CoW Disabled, CoW Enabled
             # Shift bar positions for correct alignment
             offset = ((j * len(wallet_variants) + i) - n_variants / 2 + 0.5) * width
             variant_exec_df = wallet_df[(wallet_df['variant'] == variant) & (wallet_df['type'] == exec_type)]
-            
             values = []
             for bench in benchmarks:
                 bench_data = variant_exec_df[variant_exec_df['benchmark'] == bench]
                 values.append(bench_data['client_time'].values[0] if not bench_data.empty else np.nan)
-            
+
             # Compute geomean
             geomean = np.exp(np.mean(np.log(values))) if np.all(np.array(values) > 0) else np.nan
             values.append(geomean)
@@ -418,16 +414,36 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     # Save linear-scale plot
     output_dir = Path(output_dir)
     plt.tight_layout()
-    plt.savefig(output_dir / 'wallet_client_time_grouped.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'wallet_client_time_grouped.png', format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_client_time_grouped.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_client_time_grouped.png', format='png', dpi=300, bbox_inches='tight')
     
     # Create log-scale version
     fig_log, ax_log = plt.subplots(figsize=(figwidth, figheight))
     
-    for i, (bar_pos, label) in enumerate(zip(bar_positions, ax.get_legend().get_texts())):
-        values = [bar.get_height() for bar in ax.patches[i::n_variants]]
-        ax_log.bar(bar_pos, values, width, label=label.get_text(), color=colors_group[i], hatch=hatches_group[i], edgecolor='black')
-    
+    color_idx = 0
+    # Iterate through variants in the same order as for the linear plot
+    for j, exec_type in enumerate(exec_types):  # cold, hot
+        for i, variant in enumerate(wallet_variants):  # CoW Disabled, CoW Enabled           
+            # Get the data
+            variant_exec_df = wallet_df[(wallet_df['variant'] == variant) & (wallet_df['type'] == exec_type)]
+            values = []
+            for bench in benchmarks:
+                bench_data = variant_exec_df[variant_exec_df['benchmark'] == bench]
+                values.append(bench_data['client_time'].values[0] if not bench_data.empty else np.nan)
+                
+            # Compute geomean the same way
+            geomean = np.exp(np.mean(np.log(values))) if np.all(np.array(values) > 0) else np.nan
+            values.append(geomean)
+            
+            # Calculate positions with the same offset as in the linear plot
+            offset = ((j * len(wallet_variants) + i) - n_variants / 2 + 0.5) * width
+            
+            # Plot bars
+            label = f"{exec_type.capitalize()} - {custom_labels[variant]}"
+            ax_log.bar(positions + offset, values, width, label=label, 
+                      color=colors_group[color_idx], hatch=hatches_group[color_idx], edgecolor='black')
+            color_idx+=1
+        
     ax_log.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     ax_log.set_xticks(positions)
     ax_log.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
@@ -441,8 +457,8 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     
     # Save log-scale plot
     plt.tight_layout()
-    plt.savefig(output_dir / 'wallet_client_time_grouped_log.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'wallet_client_time_grouped_log.png', format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.png', format='png', dpi=300, bbox_inches='tight')
     
     plt.close(fig)
     plt.close(fig_log)
@@ -450,8 +466,8 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
 def main():
     global VARIANTS
 
-    # Add wallet variant comparison plots
-    VARIANTS = ['wallet_', 'wallet_cow_prealloc']
+    # Add wallet variants with preallocation for comparison plots
+    VARIANTS = ['wallet', 'wallet_cow_prealloc']
     
     # Get data for invocation latency CDF
     invocation_df, common_benchmarks = derive_incovation_data()

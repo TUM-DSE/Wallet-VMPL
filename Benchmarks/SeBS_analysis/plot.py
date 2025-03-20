@@ -320,7 +320,7 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
         
         plt.close()
 
-def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale='linear', name=""):
+def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale='linear'):
     """Create grouped bar chart for the given metric and execution type"""
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     
@@ -346,8 +346,6 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     # Calculate bar positions
     n_variants = len(VARIANTS)
     width = 0.10  # Width of each bar
-    if name == "comp":
-        width = 0.30
     variant_positions = np.arange(len(all_benchmarks))
 
     # Plot bars for each variant
@@ -401,12 +399,8 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     output_dir.mkdir(parents=True, exist_ok=True)
     
     filename = f'{metric}_{exec_type}'
-    if name == "comp":
-        plt.savefig(output_dir / (filename + f'_comp_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
-        plt.savefig(output_dir / (filename + f'_comp_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
-    else:
-        plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
-        plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
 
     plt.close()
 
@@ -419,8 +413,6 @@ def main():
     metrics = ['exec_time', 'client_time']
     exec_types = ['cold', 'hot']
 
-    old_df = df
-
     filter = df["variant"].str.contains("no_prealloc")
     df = df[~filter]
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
@@ -429,15 +421,6 @@ def main():
         for exec_type in exec_types:
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
-
-    VARIANTS = ['wallet_cow_prealloc', 'wallet_cow_no_prealloc']
-    filter = old_df["variant"].str.contains("wallet")
-    df = old_df[filter]
-    LABEL_MAPPINGS['wallet_cow_prealloc']  = 'Wallet (preallocation)'
-    for metric in metrics:
-        for exec_type in exec_types:
-            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', "linear", "comp")
-            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log', "comp")
 
     # Load and process data and derive the invocation latency values
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
