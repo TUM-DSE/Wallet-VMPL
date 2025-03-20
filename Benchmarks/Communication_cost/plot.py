@@ -19,9 +19,9 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 6
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("deep")
 

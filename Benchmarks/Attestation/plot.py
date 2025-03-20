@@ -19,9 +19,9 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 6
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
@@ -151,7 +151,8 @@ def create_plot(categories, output_dir, y_scale='linear'):
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
   
     # x-axis label
-    ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    # ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
     # Title in the upper plot
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
 
@@ -262,7 +263,8 @@ def create_cutoff_plot(categories, output_dir):
     )
   
     # x-axis label
-    ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    # ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    ax2.set_xlabel('', fontsize=TICKS_FONTSIZE)
     # Title in the upper plot
     ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     

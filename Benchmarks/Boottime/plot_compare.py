@@ -20,12 +20,14 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 7
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("pastel")
 hatches = ["", "//", "xx", "\\\\", ".."]
+
+motivation_categories = ['VM\n(KVM-Linux)', 'CVM\n(SEV-SNP)']
 
 def load_data(file_path):
     """Parse the input file containing measurements"""
@@ -135,7 +137,6 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     """Create stacked bar chart"""
     motivation = False
     if motivation:
-        motivation_categories = ['VM', 'CVM']
         categories = {k: categories[k] for k in motivation_categories if k in categories}
         figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
         figheight = 1.5
@@ -186,7 +187,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-    ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    # ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
     plt.xticks(fontsize=TICKS_FONTSIZE, rotation=0)
     # ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")

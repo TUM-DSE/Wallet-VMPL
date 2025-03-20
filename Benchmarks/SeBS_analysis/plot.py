@@ -15,9 +15,9 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 6
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
@@ -415,7 +415,6 @@ def main():
     # Load and process data
     df, common_benchmarks = load_and_process_data()
 
-    # diff_csv(df)
     # Create separate plots for each metric and execution type
     metrics = ['exec_time', 'client_time']
     exec_types = ['cold', 'hot']
@@ -448,28 +447,6 @@ def main():
     plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output')
     
     print("Plots saved in output directory")
-
-def diff_csv(df):
-
-    for w in ["wallet", "wallet_"]:
-        lr = []
-
-        for b in BENCHMARKS:
-            if b in "220.video-processing":
-                continue
-            d = df[df["benchmark"] == b]
-            dc = d[d["variant"] == "cvm"]
-            dw = d[d["variant"] == w]
-            for e in ["hot", "cold"]:
-                f = dc[dc["type"] == e]["client_time"]
-                g = dw[dw["type"] == e]["client_time"]
-                cc = float(f.iloc[0])
-                cw = float(g.iloc[0])
-                t = cc / cw * 100
-                lr.append((b,e,t))
-        p = pd.DataFrame(lr, columns = ["benchmark","type","diff"])
-
-        p.to_csv(f"output/{w}.csv")
 
 if __name__ == "__main__":
     main()

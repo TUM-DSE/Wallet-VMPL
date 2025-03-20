@@ -20,9 +20,9 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 6
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("pastel")
 hatches = ["", "//", "xx", "\\\\", ".."]
@@ -221,7 +221,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
     
     # Fix xticks rotation
-    plt.xticks(rotation=0)
+    plt.xticks(rotation=25)
     
     # Add y-axis label in the middle
     ax2.annotate(
@@ -235,7 +235,8 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     )
   
     # x-axis label
-    ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    # ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
+    ax2.set_xlabel('', fontsize=TICKS_FONTSIZE)
     
     # Title in the upper plot
     ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
@@ -264,7 +265,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
 
 def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     """Create stacked bar chart"""
-
+    
     if motivation:
         categories = {k: categories[k] for k in motivation_categories if k in categories}
         figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
@@ -317,8 +318,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-    ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
-    plt.xticks(fontsize=TICKS_FONTSIZE, rotation=0)
+    ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
+    plt.xticks(fontsize=TICKS_FONTSIZE, rotation=25)
     # ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
@@ -363,8 +364,7 @@ def main():
     # Load and process data
     raw_data = load_data(args.input_file)
     categories = calculate_categories(raw_data)
-    
-    print(categories)
+
     # Create plots for all categories
     create_cutoff_plot(categories, args.output_dir)
     create_plot(categories, args.output_dir)
