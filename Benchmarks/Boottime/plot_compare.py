@@ -224,7 +224,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
 
 def create_configurable_triple_cutoff_plot(categories, output_dir, upper_range=(248, 258), 
                                         middle_range=(232, 247), lower_range=(0, 16), 
-                                        filename_prefix='boot_time_opt_triple_cutoff', figsize=(1.5, 2.2)):
+                                        filename_prefix='boot_time_opt_triple_cutoff', figsize=(1.5, 1.8)):
     """Create stacked bar chart with two broken y-axes for boot time data with configurable ranges"""
     # Convert to DataFrame
     data = []
@@ -321,7 +321,7 @@ def create_configurable_triple_cutoff_plot(categories, output_dir, upper_range=(
     # legend.get_frame().set_edgecolor('black')
 
     handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper left', bbox_to_anchor=(0.22, 0.9), fontsize=LEGEND_FONTSIZE-1, frameon=True, edgecolor='black')
+    fig.legend(handles, labels, loc='upper left', bbox_to_anchor=(0.22, 0.88), fontsize=LEGEND_FONTSIZE-1, frameon=True, edgecolor='black')
 
     # Add gridlines for better readability
     ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
