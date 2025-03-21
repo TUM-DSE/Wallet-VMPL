@@ -34,6 +34,8 @@ palette = sns.color_palette("deep", n_colors=6)
 figwidth = 3.3
 figheight = 2.2
 
+TRACE_NAME = "default"
+
 def find_section_boundaries(text):
     """Find the start indices of all variant sections in the text."""
     pattern = r'\*{13}\s*\w+\s*\*{16}'
@@ -180,7 +182,7 @@ def parallel_plot_node_size(args):
     node_configs = [config for config in configs if config['num_nodes'] == node_size]
     
     # Generate plot
-    output_path_base = os.path.join(output_dir, f"node_size_{node_size}")
+    output_path_base = os.path.join(output_dir, f"{TRACE_NAME}_node_size_{node_size}")
     title = f"Invocation Latency CDF - {node_size} Nodes"
     return generate_cdf_plot(node_configs, output_path_base, title)
 
@@ -195,7 +197,7 @@ def parallel_plot_node_cache(args):
         return None
         
     # Generate plot
-    output_path_base = os.path.join(output_dir, f"node_{node_size}_cache_{cache_size}")
+    output_path_base = os.path.join(output_dir, f"{TRACE_NAME}_node_{node_size}_cache_{cache_size}")
     title = f"Invocation Latency CDF - {node_size} Nodes, {cache_size} Cache"
     return generate_cdf_plot(filtered_configs, output_path_base, title)
 
@@ -227,6 +229,8 @@ def process_by_node_and_cache(configs, output_dir, pool):
     return [r for r in results if r is not None]
 
 def main():
+    global TRACE_NAME
+    
     start_time = time.time()
     
     # Create output directory
@@ -238,8 +242,9 @@ def main():
         with open(sys.argv[1], 'r') as f:
             results_text = f.read()
     else:
-        results_text = sys.stdin.read()
-    
+        print("Please provide a file as a first argument")
+        exit()
+    TRACE_NAME = sys.argv[1].split("/")[-1].split(".txt")[0]
     print(f"File read completed in {time.time() - start_time:.2f} seconds")
     chunking_start = time.time()
     
@@ -282,7 +287,7 @@ def main():
     if configs:
         with Pool(processes=num_cores) as pool:
             # Generate overall CDF plot (not parallelized as it's just one plot)
-            overall_output_path = os.path.join(output_dir, "overall_cdf")
+            overall_output_path = os.path.join(output_dir, f"{TRACE_NAME}_overall_cdf")
             generate_cdf_plot(configs, overall_output_path, "Overall Invocation Latency CDF")
             
             # Generate plots by node size in parallel
@@ -305,6 +310,7 @@ def main():
     # Count the total number of generated files
     pdf_count = len([f for f in os.listdir(output_dir) if f.endswith('.pdf')])
     png_count = len([f for f in os.listdir(output_dir) if f.endswith('.png')])
+
     print(f"Total files generated: {pdf_count} PDFs and {png_count} PNGs")
 
 if __name__ == "__main__":
