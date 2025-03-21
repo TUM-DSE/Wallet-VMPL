@@ -69,7 +69,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     # Filter variants for motivation plot
     variants = ['VM', 'CVM'] if motivation else ['Gramine', 'Native', 'VM','Kata Containers', 'CVM', 'Wallet']
-    
+
     # Collect all message sizes and create mapping to indices
     size_to_index = {size: i for i, size in enumerate(message_sizes, 1)}
     
@@ -89,12 +89,12 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             
             # Convert sizes to indices for plotting
             indices = [size_to_index[s] for s in sizes]
-            
+
             ax.errorbar(indices, means, yerr=stds, label=variant,
                        color=palette[i], marker='o', markersize=1.5,
                        linewidth=1, capsize=1, capthick=0.4,
                        elinewidth=0.4)
-    
+
     # Customize the plot
     ax.set_yscale(y_scale)
     
