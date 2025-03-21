@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -27,6 +28,16 @@ figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
 figheight = 2.2
 palette = sns.color_palette("pastel")
 hatches = ["", "//", "xx", "\\\\", ".."]
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def load_data(csv_path):
     """Load and parse CSV data"""
@@ -174,6 +185,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     
     plt.savefig(output_dir / f'attestation_report_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / f'attestation_report_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'attestation_report_{y_scale}.pdf')
     
     plt.close()
 
@@ -287,6 +299,7 @@ def create_cutoff_plot(categories, output_dir):
     
     plt.savefig(output_dir / 'attestation_report_cutoff.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'attestation_report_cutoff.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'attestation_report_cutoff.pdf')
     
     plt.close()
 

@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import pprint as pprint
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -40,6 +41,16 @@ linestyles = ["-", "--", "-.", ":", "-"]
 
 INVOCATION_LATENCY_PATH="output/invocation_latency_cow.csv"
 INVOCATION_LATENCY_MEAN_PATH="output/invocation_latency_mean_cow.csv"
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def load_and_process_data():
     """Load and process data from all variants and benchmarks"""
@@ -80,10 +91,10 @@ def load_and_process_data():
                 hot_mask = df['type'] == 'sequential'
 
                 
-                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
+                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
                 
                 # Add both cold and hot data
                 data.append({
@@ -249,6 +260,7 @@ def plot_wallet_invocation_latency_cdf(df, output_dir):
     # Save plots
     plt.savefig(output_dir / 'wallet_cow_invocation_latency_cdf_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'wallet_cow_invocation_latency_cdf_linear.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'wallet_cow_invocation_latency_cdf_linear.pdf')
     
     plt.close()
 
@@ -316,7 +328,7 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
                          color=wallet_palette[i])
         
         # Customize the plot
-        ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+        ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
         plt.yticks(fontsize=TICKS_FONTSIZE)
         ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
         ax.set_xticks(variant_positions)
@@ -340,6 +352,7 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
         # Save plot (linear scale)
         plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.pdf', format='pdf', dpi=300, bbox_inches='tight')
         plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.png', format='png', dpi=300, bbox_inches='tight')
+        crop_pdf(output_dir / f'wallet_cow_client_time_{exec_type}.pdf')
         
         plt.close()
 
@@ -397,7 +410,7 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
             bar_positions.append(positions + offset)
     
     # Customize plot
-    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     ax.set_xticks(positions)
     xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
     ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
@@ -416,6 +429,7 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     plt.tight_layout()
     plt.savefig(output_dir / 'wallet_cow_client_time_grouped.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'wallet_cow_client_time_grouped.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'wallet_cow_client_time_grouped.pdf')
     
     # Create log-scale version
     fig_log, ax_log = plt.subplots(figsize=(figwidth, figheight))
@@ -444,7 +458,7 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
                       color=colors_group[color_idx], hatch=hatches_group[color_idx], edgecolor='black')
             color_idx+=1
         
-    ax_log.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax_log.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     ax_log.set_xticks(positions)
     ax_log.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
     
@@ -459,6 +473,7 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     plt.tight_layout()
     plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'wallet_cow_client_time_grouped_log.pdf')
     
     plt.close(fig)
     plt.close(fig_log)

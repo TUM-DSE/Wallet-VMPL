@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import pprint as pprint
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -45,6 +46,16 @@ linestyles = ["-", "--", "-.", ":", "-"]
 
 INVOCATION_LATENCY_PATH="output/invocation_latency.csv"
 INVOCATION_LATENCY_MEAN_PATH="output/invocation_latency_mean.csv"
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def load_and_process_data():
     """Load and process data from all variants and benchmarks"""
@@ -85,10 +96,10 @@ def load_and_process_data():
                 hot_mask = df['type'] == 'sequential'
 
                 
-                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
+                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
                 
                 # Add both cold and hot data
                 data.append({
@@ -266,6 +277,7 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
     
     plt.savefig(output_dir / 'invocation_latency_cdf.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'invocation_latency_cdf.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'invocation_latency_cdf.pdf')
     
     # Also create individual CDFs with linear scale
     
@@ -317,6 +329,7 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
         # Save plot
         plt.savefig(output_dir / f'invocation_latency_cdf_{exec_type}_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
         plt.savefig(output_dir / f'invocation_latency_cdf_{exec_type}_linear.png', format='png', dpi=300, bbox_inches='tight')
+        crop_pdf(output_dir / f'invocation_latency_cdf_{exec_type}_linear.pdf')
         
         plt.close()
 
@@ -363,7 +376,7 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     
     # Customize the plot
     ax.set_yscale(y_scale)
-    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     # ax.set_xlabel('Benchmark', fontsize=TICKS_FONTSIZE)
@@ -401,6 +414,7 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
     filename = f'{metric}_{exec_type}'
     plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / (filename + f'_{y_scale}.pdf'))
 
     plt.close()
 

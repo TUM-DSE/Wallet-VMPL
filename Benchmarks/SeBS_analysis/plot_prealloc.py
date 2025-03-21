@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import pprint as pprint
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -42,6 +43,16 @@ BENCHMARKS = [
 palette = sns.color_palette("pastel", n_colors=len(VARIANTS))
 hatches = ["", "//", "xx", "\\\\", ".."]
 linestyles = ["-", "--", "-.", ":", "-"]
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def load_and_process_data():
     """Load and process data from all variants and benchmarks"""
@@ -82,10 +93,10 @@ def load_and_process_data():
                 hot_mask = df['type'] == 'sequential'
 
                 
-                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to ms
-                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to ms
+                cold_exec = df[cold_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                cold_client = df[cold_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_exec = df[hot_mask]['exec_time'].mean() / 1000 / 1000  # Convert μs to s
+                hot_client = df[hot_mask]['client_time'].mean() / 1000 / 1000  # Convert μs to s
                 
                 # Add both cold and hot data
                 data.append({
@@ -172,7 +183,7 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     
     # Customize the plot
     ax.set_yscale(y_scale)
-    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xticks(positions)
@@ -199,6 +210,7 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     
     plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'wallet_prealloc_{metric}_{y_scale}.pdf')
     
     plt.close()
 

@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -33,6 +34,16 @@ LABEL_MAPPINGS = {
     'CVM'                 : 'CVM (SEV-SNP)',
     'Wallet'              : 'Wallet',
 }
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def format_bytes(value):
     """Format byte sizes into human readable format"""
@@ -148,6 +159,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     plot_type = 'motivation_' if motivation else ''
     plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'{plot_type}IPC_{y_scale}.pdf')
     
     plt.close()
 

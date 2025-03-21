@@ -8,6 +8,7 @@ import numpy as np
 import argparse
 from pathlib import Path
 import re
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -26,6 +27,16 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("pastel")
 hatches = ["", "//", "xx", "\\\\", ".."]
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 motivation_categories = ['VM\n(KVM-Linux)', 'CVM\n(SEV-SNP)']
 
@@ -260,6 +271,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     
     plt.savefig(output_dir / 'boot_time_cutoff.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / 'boot_time_cutoff.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'boot_time_cutoff.pdf')
     
     plt.close()
 
@@ -351,6 +363,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     plot_type = 'motivation_' if motivation else ''
     plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'{plot_type}boot_time_{y_scale}.pdf')
     
     plt.close()
 
