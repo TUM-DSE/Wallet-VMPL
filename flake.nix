@@ -144,6 +144,7 @@
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
+		texliveMedium
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
