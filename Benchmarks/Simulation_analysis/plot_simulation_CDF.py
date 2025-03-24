@@ -60,14 +60,16 @@ def parse_section(section_text):
     num_nodes_match = re.search(r'num_nodes:\s*(\d+)', section_text)
     max_cache_match = re.search(r'max_functions_cached_per_node:\s*(\d+)', section_text)
     soft_warm_pct_match = re.search(r'percentage_soft_warm:\s*(\d+(?:\.\d+)*)', section_text)
+    exec_slots_match = re.search(r'max_executions_slots:\s*(\d+)', section_text)
     
-    if not (num_nodes_match and max_cache_match and soft_warm_pct_match):
+    if not (num_nodes_match and max_cache_match and soft_warm_pct_match and exec_slots_match):
         print(f"Warning: Could not extract all configuration parameters for {variant}")
         return None
         
     num_nodes = int(num_nodes_match.group(1))
     max_cache = int(max_cache_match.group(1))
     soft_warm_pct = float(soft_warm_pct_match.group(1))
+    exec_slots = int(exec_slots_match.group(1))
     
     # Extract delays
     delays = []
@@ -84,7 +86,8 @@ def parse_section(section_text):
         'num_nodes': num_nodes,
         'max_cache': max_cache,
         'soft_warm_pct': soft_warm_pct,
-        'delays': delays
+        'delays': delays,
+        'exec_slots': exec_slots
     }
 
 def parallel_parse_section(args):
@@ -119,10 +122,11 @@ def generate_cdf_plot(configs, output_path_base, title, ylim=(0, 1.05)):
         max_cache = config['max_cache']
         soft_warm_pct = config['soft_warm_pct']
         delays = config['delays']
+        exec_slots=config['exec_slots']
         
         if not delays:
             continue
-            
+
         # Sort the data for CDF
         sorted_data = np.sort(delays)
         
@@ -130,7 +134,12 @@ def generate_cdf_plot(configs, output_path_base, title, ylim=(0, 1.05)):
         y_values = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         
         # Create label with configuration details
-        label = f"{variant} - cache:{max_cache}, warm:{soft_warm_pct}%"
+        label = ""
+        if variant == 'WALLET':
+            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}"
+        else: 
+            label = f"{variant} - c:{max_cache}, e:{exec_slots}"
+            
         
         # Plot the CDF with different line styles and colors
         style_idx = i % len(line_styles)
@@ -139,7 +148,7 @@ def generate_cdf_plot(configs, output_path_base, title, ylim=(0, 1.05)):
                  color=colors[color_idx], label=label, linewidth=1)
     
     plt.grid(True, linestyle='--', alpha=0.7)
-    plt.xlabel('Invocation Latency (seconds)', fontsize=TITLE_FONTSIZE)
+    plt.xlabel('Scheduling Delay (seconds)', fontsize=TITLE_FONTSIZE)
     plt.ylabel('Cumulative Distribution', fontsize=TITLE_FONTSIZE)
     plt.title(title, fontsize=TITLE_FONTSIZE)
     plt.legend(loc='lower right', fontsize=LEGEND_FONTSIZE)
@@ -183,6 +192,20 @@ def parallel_plot_node_size(args):
     
     # Generate plot
     output_path_base = os.path.join(output_dir, f"{TRACE_NAME}_node_size_{node_size}")
+    title = f"Invocation Latency CDF - {node_size} Nodes"
+    return generate_cdf_plot(node_configs, output_path_base, title)
+
+def parallel_plot_filtered(args):
+    """Process a single node size plot for parallel execution."""
+    configs, node_size, exec_slots, output_dir = args
+    # Filter configs for this node size
+    node_configs = [config for config in configs 
+                    if config['num_nodes'] == node_size and
+                    config['exec_slots'] == exec_slots
+                    ]
+    
+    # Generate plot
+    output_path_base = os.path.join(output_dir, f"{TRACE_NAME}_filtered_n_{node_size}_e_{exec_slots}")
     title = f"Invocation Latency CDF - {node_size} Nodes"
     return generate_cdf_plot(node_configs, output_path_base, title)
 
@@ -299,6 +322,16 @@ def main():
             print("Generating node+cache combination plots in parallel...")
             combo_plots = process_by_node_and_cache(configs, output_dir, pool)
             print(f"Generated {len(combo_plots)} node+cache combination plots")
+
+            # Generate plots by node size + cache combination in parallel
+            print("Generating filtered plots in parallel...")
+            parallel_plot_filtered((configs, 100, 2, output_dir))
+            parallel_plot_filtered((configs, 100, 4, output_dir))
+            parallel_plot_filtered((configs, 100, 8, output_dir))
+            parallel_plot_filtered((configs, 100, 32, output_dir))
+            parallel_plot_filtered((configs, 100, 1, output_dir))
+
+
         
         print(f"Plotting completed in {time.time() - plotting_start:.2f} seconds")
     else:
@@ -312,6 +345,7 @@ def main():
     png_count = len([f for f in os.listdir(output_dir) if f.endswith('.png')])
 
     print(f"Total files generated: {pdf_count} PDFs and {png_count} PNGs")
+
 
 if __name__ == "__main__":
     main()
