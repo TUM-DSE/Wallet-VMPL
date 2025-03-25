@@ -29,6 +29,11 @@ file = open("simulation_log.txt", "w")
 log_active = False
 max_logs = 10000
 cur_logs = 0
+
+# Globals for simulation
+max_cache_util  = 0
+cur_cache_util = 0
+
 def log(msg):
     #print(msg)
     #time.sleep(1)
@@ -44,7 +49,8 @@ def log(msg):
 
 
 
-def update_cached_functions(nodes, simulation_increment, caching_time, cur_cache_util):
+def update_cached_functions(nodes, simulation_increment, caching_time):
+    global cur_cache_util
     for node in nodes:
         for i in range(node.max_functions):
             if node.function_slots_free[i] == False:
@@ -53,7 +59,6 @@ def update_cached_functions(nodes, simulation_increment, caching_time, cur_cache
                     #log(f'Evicting stale function {node.functions_registered[i]} from cache slot {i} on node {node.node_id}')
                     node.function_slots_free[i] = True
                     cur_cache_util = cur_cache_util - 1
-    return cur_cache_util
 
 
 def get_earliest_func_finish(nodes):
@@ -81,7 +86,7 @@ def get_earliest_func_finish(nodes):
 
 
 def update_simulation(nodes, next_function_time, simulation_time, caching_time,
-                      run_until_node_free, cur_cache_util):
+                      run_until_node_free):
 
     # increase time until either a function finished executing
     # or until the next function arrives
@@ -101,8 +106,8 @@ def update_simulation(nodes, next_function_time, simulation_time, caching_time,
         simulation_increment = simulation_time - old_simulation_time
         #log(f'[{simulation_time}] Function {node_earliest.execution_slots[slot_earliest].func_hash} has finished executing on node {node_earliest.node_id} slot {slot_earliest}')
         node_earliest.execution_slots[slot_earliest] = None
-        cur_cache_util = update_cached_functions(nodes, simulation_increment, caching_time, cur_cache_util)
-        return simulation_increment, simulation_time, new_func, cur_cache_util
+        update_cached_functions(nodes, simulation_increment, caching_time)
+        return simulation_increment, simulation_time, new_func
 
 
     # check if we have a function that finished first or if we have a
@@ -120,8 +125,8 @@ def update_simulation(nodes, next_function_time, simulation_time, caching_time,
         simulation_increment = simulation_time - old_simulation_time
         #log(f'[{simulation_time}] Function {node_earliest.execution_slots[slot_earliest].func_hash} has finished executing on node {node_earliest.node_id} slot {slot_earliest}')
         node_earliest.execution_slots[slot_earliest] = None
-        cur_cache_util = update_cached_functions(nodes, simulation_increment, caching_time, cur_cache_util)
-        return simulation_increment, simulation_time, new_func, cur_cache_util
+        update_cached_functions(nodes, simulation_increment, caching_time)
+        return simulation_increment, simulation_time, new_func
     else:
         if(next_function_time < simulation_time):
             print("Error: going back in time!")
@@ -130,11 +135,13 @@ def update_simulation(nodes, next_function_time, simulation_time, caching_time,
         simulation_time = next_function_time
         new_func = True;
         simulation_increment = simulation_time - old_simulation_time
-        cur_cache_util = update_cached_functions(nodes,simulation_increment, caching_time, cur_cache_util)
+        update_cached_functions(nodes,simulation_increment, caching_time)
         #log(f'[{simulation_time}] New function at {next_function_time} can start executing')
-        return simulation_increment, simulation_time, new_func, cur_cache_util
+        return simulation_increment, simulation_time, new_func
 
-def cache_function(node, f, cur_cache_util, max_cache_util):
+def cache_function(node, f):
+    global cur_cache_util
+    global max_cache_util
     f_id = f.application_hash + f.func_hash
     # try to find a free spot in the cache
     for i in range(node.max_functions):
@@ -145,7 +152,7 @@ def cache_function(node, f, cur_cache_util, max_cache_util):
             cur_cache_util = cur_cache_util + 1
             if cur_cache_util > max_cache_util:
                 max_cache_util = cur_cache_util
-            return i, cur_cache_util, max_cache_util
+            return i
 
     # if no free slot available, replace the least recently used
 
@@ -158,7 +165,7 @@ def cache_function(node, f, cur_cache_util, max_cache_util):
     #log(f'Function {f_id} is replacing cached function {node.functions_registered[max_slot]} in slot {max_slot} on node {node.node_id}')
     node.functions_registered[max_slot] = f_id
     node.function_last_call_time[max_slot] = 0
-    return max_slot, cur_cache_util, max_cache_util
+    return max_slot
 
 def is_any_active(nodes):
     for node in nodes:
@@ -182,8 +189,6 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     cold_boots = 0
     soft_warm_boots = 0
     warm_boots = 0
-    max_cache_util  = 0
-    cur_cache_util = 0
     total_cache_slots = 0
 
     #initialize rng
@@ -241,16 +246,16 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
         f_sched_time = max(sim_time, f.arrival_time)
         while(assigned_node == None):
             #log(f'[{sim_time}] No free nodes available')
-            _, sim_time, _, cur_cache_util = update_simulation(nodes, f_sched_time, sim_time, caching_time, True, cur_cache_util)
+            _, sim_time, _  = update_simulation(nodes, f_sched_time, sim_time, caching_time, True)
             assigned_node, _ , _ = scheduler.pick_next_node(nodes, f)
 
         # we now have a canditate node, simulate until this function can run
         # take into account any delays
         f_sched_time = max(sim_time, f.arrival_time)
-        _, sim_time, func_scheduled, cur_cache_util = update_simulation(nodes, f_sched_time, sim_time, caching_time, False, cur_cache_util)
+        _, sim_time, func_scheduled = update_simulation(nodes, f_sched_time, sim_time, caching_time, False)
         while func_scheduled == False:
             f_sched_time = max(sim_time, f.arrival_time)
-            _, sim_time, func_scheduled, cur_cache_util = update_simulation(nodes, f_sched_time, sim_time, caching_time,  False, cur_cache_util)
+            _, sim_time, func_scheduled = update_simulation(nodes, f_sched_time, sim_time, caching_time,  False)
 
         # finally time to schedule function
         f.start_time = sim_time
@@ -276,7 +281,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
 
         # assign function to node
         assigned_node.execution_slots[assigned_slot] = f
-        cache_slot, cur_cache_util, max_cache_util = cache_function(assigned_node, f, cur_cache_util, max_cache_util)
+        cache_slot = cache_function(assigned_node, f)
         #log(f'Function {f.application_hash + f.func_hash} has been cached in slot {cache_slot} on node {assigned_node.node_id}')
 
         f_delay = f.start_time - f.arrival_time
@@ -298,7 +303,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
 
     # TODO: Finish executing currently running functions
     while is_any_active(nodes):
-        _, sim_time, _, cur_cache_util = update_simulation(nodes, 0, sim_time, caching_time, True, cur_cache_util)
+        _, sim_time, _ = update_simulation(nodes, 0, sim_time, caching_time, True)
 
 
     pbar.close()

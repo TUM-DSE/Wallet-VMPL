@@ -15,8 +15,9 @@ def main():
     pool = Pool(processes=(cpu_count()))
     tmp_file_num = 0
 
-    num_nodes = [1,16,256,1024]
-    cache_sizes = [10, 100]
+    num_nodes = [100]
+    cache_sizes = [50, 500, 1000]
+    execution_slots = [1, 2, 4, 32]
     cache_time = 600
 
     cvm_cold_boot_time = 8.3073
@@ -39,19 +40,24 @@ def main():
     #main_sim(1, vm_cold_boot_time, vm_warm_boot_time, 0, 1, 300, vm_max_execution_slots, 0);
 
     for n in num_nodes:
-        for cache_size in cache_sizes:
-            # CVM simulation
-            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, cache_time, cvm_max_execution_slots, 0))
-            tmp_file_num += 1
+        for exec_slot in execution_slots:
+            for cache_size in cache_sizes:
+                cvm_max_execution_slots = exec_slot
+                vm_max_execution_slots =  exec_slot
+                w_max_execution_slots = exec_slot
 
-            # VM simulation
-            pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', vm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, cache_time, vm_max_execution_slots, 0))
-            tmp_file_num += 1
-
-            # Wallet simulation
-            for percent_soft_warm in w_percentage_soft_warm:
-                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', w_header, n, w_cold_boot_time, w_warm_boot_time, w_soft_warm_time, cache_size, cache_time, w_max_execution_slots, percent_soft_warm))
+                # CVM simulation
+                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, cache_time, cvm_max_execution_slots, 0))
                 tmp_file_num += 1
+
+                # VM simulation
+                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', vm_header, n, vm_cold_boot_time, vm_warm_boot_time, 0, cache_size, cache_time, vm_max_execution_slots, 0))
+                tmp_file_num += 1
+
+                # Wallet simulation
+                for percent_soft_warm in w_percentage_soft_warm:
+                    pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', w_header, n, w_cold_boot_time, w_warm_boot_time, w_soft_warm_time, cache_size, cache_time, w_max_execution_slots, percent_soft_warm))
+                    tmp_file_num += 1
 
     pool.close()
     pool.join()
