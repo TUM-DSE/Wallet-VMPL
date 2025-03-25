@@ -31,7 +31,7 @@ TICKS_FONTSIZE = 5
 LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("deep", n_colors=6)
-figwidth = 3.3
+figwidth = 4.3
 figheight = 2.2
 
 TRACE_NAME = "default"
@@ -61,8 +61,9 @@ def parse_section(section_text):
     max_cache_match = re.search(r'max_functions_cached_per_node:\s*(\d+)', section_text)
     soft_warm_pct_match = re.search(r'percentage_soft_warm:\s*(\d+(?:\.\d+)*)', section_text)
     exec_slots_match = re.search(r'max_executions_slots:\s*(\d+)', section_text)
+    cache_util_match = re.search(r'(?<=Max cache utilization:\s)(\d+(?:\.\d+)*)', section_text)
     
-    if not (num_nodes_match and max_cache_match and soft_warm_pct_match and exec_slots_match):
+    if not (num_nodes_match and max_cache_match and soft_warm_pct_match and exec_slots_match and cache_util_match):
         print(f"Warning: Could not extract all configuration parameters for {variant}")
         return None
         
@@ -70,6 +71,7 @@ def parse_section(section_text):
     max_cache = int(max_cache_match.group(1))
     soft_warm_pct = float(soft_warm_pct_match.group(1))
     exec_slots = int(exec_slots_match.group(1))
+    cache_util = float(cache_util_match.group(1))
     
     # Extract delays
     delays = []
@@ -87,7 +89,8 @@ def parse_section(section_text):
         'max_cache': max_cache,
         'soft_warm_pct': soft_warm_pct,
         'delays': delays,
-        'exec_slots': exec_slots
+        'exec_slots': exec_slots,
+        'cache_util': cache_util
     }
 
 def parallel_parse_section(args):
@@ -123,6 +126,7 @@ def generate_cdf_plot(configs, output_path_base, title, ylim=(0, 1.05)):
         soft_warm_pct = config['soft_warm_pct']
         delays = config['delays']
         exec_slots=config['exec_slots']
+        cache_util=config['cache_util']
         
         if not delays:
             continue
@@ -136,9 +140,9 @@ def generate_cdf_plot(configs, output_path_base, title, ylim=(0, 1.05)):
         # Create label with configuration details
         label = ""
         if variant == 'WALLET':
-            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}"
+            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100}%"
         else: 
-            label = f"{variant} - c:{max_cache}, e:{exec_slots}"
+            label = f"{variant} - c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100}%"
             
         
         # Plot the CDF with different line styles and colors
@@ -324,12 +328,8 @@ def main():
             print(f"Generated {len(combo_plots)} node+cache combination plots")
 
             # Generate plots by node size + cache combination in parallel
-            print("Generating filtered plots in parallel...")
-            parallel_plot_filtered((configs, 100, 2, output_dir))
-            parallel_plot_filtered((configs, 100, 4, output_dir))
-            parallel_plot_filtered((configs, 100, 8, output_dir))
-            parallel_plot_filtered((configs, 100, 32, output_dir))
-            parallel_plot_filtered((configs, 100, 1, output_dir))
+   #         print("Generating filtered plots in parallel...")
+ #           parallel_plot_filtered((configs, 100, 2, output_dir))
 
 
         
@@ -345,7 +345,6 @@ def main():
     png_count = len([f for f in os.listdir(output_dir) if f.endswith('.png')])
 
     print(f"Total files generated: {pdf_count} PDFs and {png_count} PNGs")
-
 
 if __name__ == "__main__":
     main()
