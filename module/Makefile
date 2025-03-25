@@ -80,3 +80,7 @@ boottime_setup_vm:
 	cd ${BOOT_PATH}/vm/; make outb.so
 	cd ${BOOT_PATH}/vm/; make outb
 	shutdown now
+
+ipc_setup: vmpl.ko install
+	sleep 5
+	shutdown now
