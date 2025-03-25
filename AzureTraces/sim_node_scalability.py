@@ -3,31 +3,33 @@ from multiprocessing import Pool, cpu_count
 import sys
 import os
 
-def proc(output_file, header, nb_nodes, cold_boot, warm_boot, soft_warm_boot, cache_size, cache_duration, execution_slots, soft_warm_rate, pbar_position):
+def proc(output_file, header, nb_nodes, cold_boot, warm_boot, soft_warm_boot, cache_size, cache_duration, execution_slots, soft_warm_rate, pbar_position, input_file):
     f = open(output_file, "w")
     f.write(header)
     with f as sys.stdout:
-        main_sim(nb_nodes, cold_boot, warm_boot, soft_warm_boot, cache_size, cache_duration, execution_slots, soft_warm_rate, pbar_position)
+        main_sim(nb_nodes, cold_boot, warm_boot, soft_warm_boot, cache_size, cache_duration, execution_slots, soft_warm_rate, pbar_position, input_file)
     #f.close()
 
 def main():
     n_proc = cpu_count
     pool = Pool(processes=(cpu_count()))
     tmp_file_num = 0
-    input_file = 'wallet500.txt'
+    input_file = sys.argv[1]
 
-    num_nodes = [100]
+    num_nodes = [1, 10, 25, 50]
     cache_sizes = [50, 100, 250]
     execution_slots = [10]
     cache_time = 600
 
     cvm_cold_boot_time = 8.3073
-    cvm_warm_boot_time = 0.0677
+    #cvm_warm_boot_time = 0.0677
+    cvm_warm_boot_time = 0.003
     cvm_max_execution_slots = 64
     cvm_header = "************* CVM ****************\n"
 
     vm_cold_boot_time = 3.6999
-    vm_warm_boot_time = 0.0663
+    #vm_warm_boot_time = 0.0663
+    vm_warm_boot_time = 0.003
     vm_max_execution_slots = 64
     vm_header = "************* VM ****************\n"
 
@@ -40,6 +42,7 @@ def main():
 
     #main_sim(1, vm_cold_boot_time, vm_warm_boot_time, 0, 1, 300, vm_max_execution_slots, 0);
 
+    print(f'Starting {len(num_nodes) * len(cache_sizes) * len(execution_slots) * (len(w_percentage_soft_warm) + 2) } simulations')
     for n in num_nodes:
         for exec_slot in execution_slots:
             for cache_size in cache_sizes:

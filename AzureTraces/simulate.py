@@ -223,7 +223,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     scheduler = SimpleScheduler()
     delays = np.empty(len(rows))
     per_func_delays = dict()
-    pbar = tqdm(total=len(rows), position=pbar_position)
+    pbar = tqdm(total=len(rows), position=0)
     cur_func = 0
     while cur_func < len(rows):
 
