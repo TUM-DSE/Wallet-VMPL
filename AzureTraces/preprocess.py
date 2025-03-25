@@ -3,9 +3,10 @@
 
 import csv
 import numpy as np
+import sys
 
 # Read the CSV file
-input_file = 'resampled.csv'
+input_file = sys.argv[1]
 with open(input_file, 'r') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     header = np.array(next(reader), dtype=object)  # Read the header row
@@ -82,7 +83,7 @@ sorted_rows = sorted(rows, key=lambda x: float(x[4]))
 #sorted_rows = [x[1] for x in sorted_rows_with_start_timestamps]
 
 # Write the sorted rows to a new CSV file
-output_file = 'resampled_preprocessed.csv'
+output_file = sys.argv[2]
 with open(output_file, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(header)

@@ -4,6 +4,7 @@ from tqdm import tqdm
 import time
 import random
 import argparse
+import sys
 
 # my scripts
 from scheduler import SimpleScheduler
@@ -174,7 +175,7 @@ def is_any_active(nodes):
                 return True
     return False
 
-def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm):
+def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file):
 
     # index into the csv
     app_hash = 0
@@ -197,7 +198,6 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     # read csv
     # input_file = 'AzureFunctionsInvocationTraceForTwoWeeksJan2021_preprocessed.csv'
     # input_file = 'resampled_preprocessed.csv'
-    input_file = 'wallet4000_preprocessed.csv'
     with open(input_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         header = np.array(next(reader), dtype=object)  # Read the header row
@@ -223,7 +223,7 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
     scheduler = SimpleScheduler()
     delays = np.empty(len(rows))
     per_func_delays = dict()
-    pbar = tqdm(total=len(rows))
+    pbar = tqdm(total=len(rows), position=pbar_position)
     cur_func = 0
     while cur_func < len(rows):
 
@@ -353,6 +353,7 @@ if __name__ == '__main__':
     parser.add_argument('-caching_time', type=float, default= 300, help='The time (in seconds) after which an unused cached function will be automatically evicted.')
     parser.add_argument('-execution_slots', type=int, default=3, help='The number of functions that can be executed concurrently on a node.')
     parser.add_argument('-percentage_soft_warm', type=float, default=0, help='The percentage of cold boots that get turned into soft warm boots.')
+    parser.add_argument('-input_file', type=str, default='', required=True, help='The input file that contains the trace')
     args = parser.parse_args()
 
     # default parameter values
@@ -364,7 +365,8 @@ if __name__ == '__main__':
     caching_time = args.caching_time
     max_execution_slots = args.execution_slots
     percentage_soft_warm = args.percentage_soft_warm
-    out = main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm)
+    input_file = args.input_file
+    out = main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file)
     print(out)
 
 
