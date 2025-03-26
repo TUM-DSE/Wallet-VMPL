@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
+import subprocess
 
 # Common graph settings
 mpl.use("Agg")
@@ -19,11 +20,30 @@ sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
 sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
 
-TITLE_FONTSIZE = 8
-TICKS_FONTSIZE = 7
-LEGEND_FONTSIZE = 6
+TITLE_FONTSIZE = 7
+TICKS_FONTSIZE = 5
+LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("deep")
+
+LABEL_MAPPINGS = {
+    'Native'              : 'Native',
+    'Gramine'             : 'LibOS (Gramine)',
+    'VM'                  : 'VM (KVM-Linux)',
+    'Kata Containers'     : 'Containers (Kata)',
+    'CVM'                 : 'CVM (SEV-SNP)',
+    'Wallet'              : 'Wallet',
+}
+
+def crop_pdf(input_path):
+    """Use pdfcrop to crop the PDF file."""
+    try:
+        subprocess.run(['pdfcrop', input_path, input_path], check=True)
+        print(f"Successfully cropped {input_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error cropping PDF {input_path}: {e}")
+    except FileNotFoundError:
+        print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
 def format_bytes(value):
     """Format byte sizes into human readable format"""
@@ -68,8 +88,8 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
     # Filter variants for motivation plot
-    variants = ['VM', 'CVM'] if motivation else ['Gramine', 'Native', 'VM','Kata Containers', 'CVM', 'Wallet']
-
+    variants = ['VM', 'CVM'] if motivation else ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
+    
     # Collect all message sizes and create mapping to indices
     size_to_index = {size: i for i, size in enumerate(message_sizes, 1)}
     
@@ -90,7 +110,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             # Convert sizes to indices for plotting
             indices = [size_to_index[s] for s in sizes]
 
-            ax.errorbar(indices, means, yerr=stds, label=variant,
+            ax.errorbar(indices, means, yerr=stds, label=LABEL_MAPPINGS[variant],
                        color=palette[i], marker='o', markersize=1.5,
                        linewidth=1, capsize=1, capthick=0.4,
                        elinewidth=0.4)
@@ -115,8 +135,8 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
         legend = plt.legend(bbox_to_anchor=(0.32, 0.98), loc='upper right',
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     else:
-        legend = plt.legend(bbox_to_anchor=(0.02, 0.95), loc='upper left',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+        legend = plt.legend(bbox_to_anchor=(0.02, 0.93), loc='upper left',
+                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, framealpha=0.5)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines
@@ -139,6 +159,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     plot_type = 'motivation_' if motivation else ''
     plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'{plot_type}IPC_{y_scale}.pdf')
     
     plt.close()
 
