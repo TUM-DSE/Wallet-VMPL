@@ -5,7 +5,7 @@ mkdir -p log/run
 
 benchmarks=(
     "110.dynamic-html"
-    "120.uploader"
+    #"120.uploader"
     "210.thumbnailer"
     "220.video-processing"
     "311.compression"
@@ -22,6 +22,11 @@ delete() {
 
 run() {
     echo "Starting VM for $1"
+    if [ "${4}" == "breakdown" ]; then
+        sudo bpftrace boot_time_eval.bt &> "log/run/$3-$1-$2" &
+        PIDT=$!
+    fi
+
     MEM=128 make run &> "log/run/$3-$1" &
     PID=$!
 
@@ -36,6 +41,9 @@ run() {
     make run_benchmark_sebs name="$1" WARM_COLD="${3}" &> "log/run/$3-$1-bench"
 
     kill ${PID}
+    if [ "${4}" == "breakdown" ]; then
+        kill ${PIDT}
+    fi
     sleep 10
 }
 
@@ -59,7 +67,7 @@ build_monitor $1
 for b in ${benchmarks[@]}; do
     date
     delete $b
-    run $b $1 $3
+    run $b $1 $3 $4
     copy_to_target $b $2
 done
 

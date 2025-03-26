@@ -307,8 +307,9 @@ sebs_images:
 
 RESULT_PATH_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_prealloc
 RESULT_PATH_NO_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_no_prealloc
+TRACE_SEBS?=
 run_sebs:
 	mkdir -p ${RESULT_PATH_PREALLOC}
 	mkdir -p ${RESULT_PATH_NO_PREALLOC}
-	cd Benchmarks; ./run_sebs.sh "no_prealloc" "${RESULT_PATH_NO_PREALLOC}" "${WARM_COLD}"
-	cd Benchmarks; ./run_sebs.sh "prealloc" "${RESULT_PATH_PREALLOC}" "${WARM_COLD}"
+	cd Benchmarks; ./run_sebs.sh "no_prealloc" "${RESULT_PATH_NO_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"
+	cd Benchmarks; ./run_sebs.sh "prealloc" "${RESULT_PATH_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"
