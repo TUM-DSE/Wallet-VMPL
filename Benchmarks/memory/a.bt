@@ -1,0 +1,25 @@
+
+#define BENCHMARK_PORT 0xf4
+
+BEGIN {
+    @EVENT[128]   = "pvalidate start";
+    @EVENT[129]   = "pvalidate end";
+    @EVENT[130]   = "rmpadjust start";
+    @EVENT[131]   = "rmpadjust end";
+}
+
+tracepoint:kvm:kvm_pio {
+    if (args->port == BENCHMARK_PORT) {
+        @C[args->val] = nsecs;
+        printf("%llu, %d, %s\n", nsecs, args->val, @EVENT[args->val]);
+    }
+}
+
+END {
+    printf("\n");
+    printf("BENCHMARK RESULTS\n");
+    printf("PVALIDATE: %llu\n", @C[129] - @C[128]);
+    printf("RMPADJUST: %llu\n", @C[131] - @C[130]);
+    clear(@C);
+    clear(@EVENT);
+}

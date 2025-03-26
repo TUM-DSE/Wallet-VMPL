@@ -305,6 +305,21 @@ static long load_data(struct monitor_call* mcall){
 	return 0;
 }
 
+static long get_stat_(struct monitor_call* mcall){
+	printk(KERN_INFO "get_stat\n");
+	struct svsm_call call;
+	call.rax = MONITORCALLID(mcall->type);
+	do_monitor_call(&call);
+	return 0;
+}
+
+static long reset_stat_(struct monitor_call* mcall){
+	printk(KERN_INFO "reset_stat\n");
+	struct svsm_call call;
+	call.rax = MONITORCALLID(mcall->type);
+	do_monitor_call(&call);
+	return 0;
+}
 
 static long parse_request(struct file *file, unsigned int cmd, unsigned long arg){
 
@@ -342,6 +357,11 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 
 	case invokeTrustlet:
 		return invoke_trustlet(&call);
+
+	case get_stat:
+		return get_stat_(&call);
+	case reset_stat:
+		return reset_stat_(&call);
 
 	default:
 		printk(KERN_ERR "Invalid type");
