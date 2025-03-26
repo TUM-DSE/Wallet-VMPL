@@ -144,6 +144,14 @@ def cache_function(node, f):
     global cur_cache_util
     global max_cache_util
     f_id = f.application_hash + f.func_hash
+
+    # check if function is already cached
+    for i in range(node.max_functions):
+        if node.function_slots_free[i] == False and node.functions_registered[i] == f_id:
+            # reset last used
+            node.function_last_call_time[i] = 0
+            return i
+
     # try to find a free spot in the cache
     for i in range(node.max_functions):
         if node.function_slots_free[i] == True:
