@@ -264,7 +264,7 @@ def plot_wallet_invocation_latency_cdf(df, output_dir):
     
     plt.close()
 
-def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
+def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir, geo_only=False):
     """Create stacked bar chart for wallet variants only"""
     wallet_variants = ['wallet', 'wallet_cow_prealloc']
     
@@ -282,7 +282,10 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
     
     # Create plots for each execution type
     for exec_type in ['cold', 'hot']:
-        fig, ax = plt.subplots(figsize=(figwidth, figheight))
+        figw = figwidth
+        if geo_only:
+            figw = 3.3/2
+        fig, ax = plt.subplots(figsize=(figw, figheight))
         
         # Filter data for the specific execution type
         filtered_df = wallet_df[wallet_df['type'] == exec_type]
@@ -303,6 +306,9 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
         
         # Add geomean data to display
         all_benchmarks = benchmarks + ['geomean']
+
+        if geo_only:
+            all_benchmarks = ['geomean']
         
         # Calculate bar positions
         n_variants = len(wallet_variants)
@@ -314,12 +320,13 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
             variant_data = filtered_df[filtered_df['variant'] == variant]
             # Prepare data including geomean
             values = []
-            for bench in benchmarks:
-                bench_data = variant_data[variant_data['benchmark'] == bench]
-                if not bench_data.empty:
-                    values.append(bench_data['client_time'].values[0])
-                else:
-                    values.append(np.nan)
+            if not geo_only:
+                for bench in benchmarks:
+                    bench_data = variant_data[variant_data['benchmark'] == bench]
+                    if not bench_data.empty:
+                        values.append(bench_data['client_time'].values[0])
+                    else:
+                        values.append(np.nan)
             values.append(geomeans[variant])  # Add geomean value at the end
             
             positions = variant_positions + (i - n_variants/2 + 0.5) * width
@@ -332,8 +339,14 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
         plt.yticks(fontsize=TICKS_FONTSIZE)
         ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
         ax.set_xticks(variant_positions)
-        xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
-        ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+        if geo_only:
+            xlabels = ['Geo. Mean']
+            rotation = 0
+            ax.set_ylim(0.1, 10)
+        else:
+            xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
+            rotation = 15
+        ax.set_xticklabels(xlabels, rotation=rotation, fontsize=TICKS_FONTSIZE)
         
         # Title and styling
         ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
@@ -348,15 +361,17 @@ def plot_wallet_comparison_stacked_bars(df, benchmarks, output_dir):
         
         # Adjust layout
         plt.tight_layout()
+
+        suffix = "_geomean" if geo_only else ""
         
         # Save plot (linear scale)
-        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}.png', format='png', dpi=300, bbox_inches='tight')
-        crop_pdf(output_dir / f'wallet_cow_client_time_{exec_type}.pdf')
+        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+        plt.savefig(output_dir / f'wallet_cow_client_time_{exec_type}{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+        crop_pdf(output_dir / f'wallet_cow_client_time_{exec_type}{suffix}.pdf')
         
         plt.close()
 
-def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
+def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir, geo_only=False):
     """Create grouped bar charts for wallet variants, including a log-scale version."""
     
     wallet_variants = ['wallet', 'wallet_cow_prealloc']
@@ -364,8 +379,10 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     
     # Define labels and order
     custom_labels = {
-        'wallet': 'CoW Disabled',
-        'wallet_cow_prealloc': 'CoW Enabled'
+        #'wallet': 'CoW Disabled',
+        #'wallet_cow_prealloc': 'CoW Enabled'
+        'wallet': '(w/o CoW)',
+        'wallet_cow_prealloc': '(w/ CoW)'
     }
     colors_group = [None] * len(VARIANTS*2)
     colors_group[0] = palette[0]
@@ -376,11 +393,17 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     
     # Filter only the relevant data
     wallet_df = df[df['variant'].isin(wallet_variants)]
-    
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+
+    figw = figwidth
+    if geo_only:
+        figw = 3.3/2
+    fig, ax = plt.subplots(figsize=(figw, figheight))
   
     # Benchmarks + Geometric Mean
     all_benchmarks = benchmarks + ['geomean']
+
+    if geo_only:
+        all_benchmarks = ['geomean']
     
     # Bar positions and widths
     n_variants = len(wallet_variants) * len(exec_types)  # 4 bars per benchmark
@@ -401,10 +424,14 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
 
             # Compute geomean
             geomean = np.exp(np.mean(np.log(values))) if np.all(np.array(values) > 0) else np.nan
-            values.append(geomean)
+            if geo_only:
+                values = [geomean]
+            else:
+                values.append(geomean)
             
             # Plot bars
-            label = f"{exec_type.capitalize()} - {custom_labels[variant]}"
+            #label = f"{exec_type.capitalize()} - {custom_labels[variant]}"
+            label = f"{exec_type.capitalize()} {custom_labels[variant]}"
             ax.bar(positions + offset, values, width, label=label, color=colors_group[i*2], hatch=hatches_group[j], edgecolor='black')
             
             bar_positions.append(positions + offset)
@@ -412,8 +439,14 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     # Customize plot
     ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     ax.set_xticks(positions)
-    xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
-    ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    if geo_only:
+        xlabels = ['Geo. Mean']
+        rotation = 0
+        ax.set_ylim(0.1, 10)
+    else:
+        xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
+        rotation = 15
+    ax.set_xticklabels(xlabels, rotation=rotation, fontsize=TICKS_FONTSIZE)
     
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
@@ -423,13 +456,15 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
     # Grid and formatting
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
     ax.set_ylim(bottom=0)
+
+    suffix = "_geomean" if geo_only else ""
     
     # Save linear-scale plot
     output_dir = Path(output_dir)
     plt.tight_layout()
-    plt.savefig(output_dir / 'wallet_cow_client_time_grouped.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'wallet_cow_client_time_grouped.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / 'wallet_cow_client_time_grouped.pdf')
+    plt.savefig(output_dir / f'wallet_cow_client_time_grouped{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'wallet_cow_client_time_grouped{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'wallet_cow_client_time_grouped{suffix}.pdf')
     
     # Create log-scale version
     fig_log, ax_log = plt.subplots(figsize=(figwidth, figheight))
@@ -447,7 +482,10 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
                 
             # Compute geomean the same way
             geomean = np.exp(np.mean(np.log(values))) if np.all(np.array(values) > 0) else np.nan
-            values.append(geomean)
+            if geo_only:
+                values = [geomean]
+            else:
+                values.append(geomean)
             
             # Calculate positions with the same offset as in the linear plot
             offset = ((j * len(wallet_variants) + i) - n_variants / 2 + 0.5) * width
@@ -460,20 +498,21 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir):
         
     ax_log.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
     ax_log.set_xticks(positions)
-    ax_log.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    ax_log.set_xticklabels(xlabels, rotation=rotation, fontsize=TICKS_FONTSIZE)
     
     ax_log.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     ax_log.set_yscale('log')
     ax_log.yaxis.grid(True, linestyle='--', alpha=0.7)
+    plt.yticks(fontsize=TICKS_FONTSIZE)
     
     ax_log.legend(loc='upper right', fontsize=LEGEND_FONTSIZE)
     
     # Save log-scale plot
     plt.tight_layout()
-    plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'wallet_cow_client_time_grouped_log.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / 'wallet_cow_client_time_grouped_log.pdf')
+    plt.savefig(output_dir / f'wallet_cow_client_time_grouped_log{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'wallet_cow_client_time_grouped_log{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'wallet_cow_client_time_grouped_log{suffix}.pdf')
     
     plt.close(fig)
     plt.close(fig_log)
@@ -499,6 +538,8 @@ def main():
     # Create client time bar plots
     plot_wallet_comparison_stacked_bars(client_df, common_benchmarks, output_dir)
     plot_wallet_comparison_grouped_bars(client_df, common_benchmarks, output_dir)
+    plot_wallet_comparison_stacked_bars(client_df, common_benchmarks, output_dir, geo_only=True)
+    plot_wallet_comparison_grouped_bars(client_df, common_benchmarks, output_dir, geo_only=True)
     
     print("Wallet comparison plots saved in output directory")
 

@@ -119,9 +119,12 @@ def load_and_process_data():
     
     return pd.DataFrame(data), list(common_benchmarks)
 
-def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='linear'):
+def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='linear', geo_only=False):
     """Create grouped bar chart with all four wallet variants in a single plot"""
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    figw = figwidth
+    if geo_only:
+        figw = 3.3/2
+    fig, ax = plt.subplots(figsize=(figw, figheight))
     
     # Prepare data for the four combinations
     cold_no_prealloc = df[(df['type'] == 'cold') & (df['variant'] == 'wallet_cow_no_prealloc')]
@@ -137,6 +140,9 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     
     # Add geomean data to display
     all_benchmarks = benchmarks + ['geomean']
+
+    if geo_only:
+        all_benchmarks = ['geomean']
     
     # Calculate bar positions
     width = 0.15  # Width of each bar
@@ -150,35 +156,51 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     
     # Plot bars for each combination
     # Cold no prealloc
-    cold_no_prealloc_values = list(cold_no_prealloc[metric].values)
-    cold_no_prealloc_values.append(geomean_cold_no_prealloc)
+    if geo_only:
+        cold_no_prealloc_values = [geomean_cold_no_prealloc]
+    else:
+        cold_no_prealloc_values = list(cold_no_prealloc[metric].values)
+        cold_no_prealloc_values.append(geomean_cold_no_prealloc)
     positions_cold_no = positions - width*1.5
     bars1 = ax.bar(positions_cold_no, cold_no_prealloc_values, width, 
-                 label='Cold start (w/o preallocation)',
+                   #label='Cold start (w/o preallocation)',
+                   label='Cold (w/o prealloc)',
                  color=cold_color, edgecolor='black', hatch=no_hatch)
     
     # Cold with prealloc
-    cold_prealloc_values = list(cold_prealloc[metric].values)
-    cold_prealloc_values.append(geomean_cold_prealloc)
+    if geo_only:
+        cold_prealloc_values = [geomean_cold_prealloc]
+    else:
+        cold_prealloc_values = list(cold_prealloc[metric].values)
+        cold_prealloc_values.append(geomean_cold_prealloc)
     positions_cold_yes = positions - width*0.5
     bars2 = ax.bar(positions_cold_yes, cold_prealloc_values, width, 
-                 label='Cold start (w/ preallocation)',
+                   #label='Cold start (w/ preallocation)',
+                   label='Cold (w/ prealloc)',
                  color=cold_color, edgecolor='black', hatch=yes_hatch)
     
     # Hot no prealloc
-    hot_no_prealloc_values = list(hot_no_prealloc[metric].values)
-    hot_no_prealloc_values.append(geomean_hot_no_prealloc)
+    if geo_only:
+        hot_no_prealloc_values = [geomean_hot_no_prealloc]
+    else:
+        hot_no_prealloc_values = list(hot_no_prealloc[metric].values)
+        hot_no_prealloc_values.append(geomean_hot_no_prealloc)
     positions_hot_no = positions + width*0.5
     bars3 = ax.bar(positions_hot_no, hot_no_prealloc_values, width, 
-                 label='Hot start (w/o preallocation)',
+                   #label='Hot start (w/o preallocation)',
+                   label='Hot (w/o prealloc)',
                  color=hot_color, edgecolor='black', hatch=no_hatch)
     
     # Hot with prealloc
-    hot_prealloc_values = list(hot_prealloc[metric].values)
-    hot_prealloc_values.append(geomean_hot_prealloc)
+    if geo_only:
+        hot_prealloc_values = [geomean_hot_prealloc]
+    else:
+        hot_prealloc_values = list(hot_prealloc[metric].values)
+        hot_prealloc_values.append(geomean_hot_prealloc)
     positions_hot_yes = positions + width*1.5
     bars4 = ax.bar(positions_hot_yes, hot_prealloc_values, width, 
-                 label='Hot start (w/ preallocation)',
+                   # label='Hot start (w/ preallocation)',
+                   label='Hot (w/ prealloc)',
                  color=hot_color, edgecolor='black', hatch=yes_hatch)
     
     # Customize the plot
@@ -187,8 +209,15 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xticks(positions)
-    xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
-    ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    if geo_only:
+        #xlabels = ['Geo. Mean']
+        xlabels = ['Geo. Mean']
+        rotation = 0
+        ax.set_ylim(0.1, 10)
+    else:
+        xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
+        rotation = 15
+    ax.set_xticklabels(xlabels, rotation=rotation, fontsize=TICKS_FONTSIZE)
     
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
@@ -207,10 +236,12 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = '_geomean' if geo_only else ''
     
-    plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'wallet_prealloc_{metric}_{y_scale}.pdf')
+    plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'wallet_prealloc_{metric}_{y_scale}{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'wallet_prealloc_{metric}_{y_scale}{suffix}.pdf')
     
     plt.close()
 
@@ -226,6 +257,8 @@ def main():
     for metric in metrics:
         create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear')
         create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log')
+        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear', geo_only=True)
+        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log', geo_only=True)
     
     print("Plots saved in output directory")
 
