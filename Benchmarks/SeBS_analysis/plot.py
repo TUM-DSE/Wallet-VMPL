@@ -11,6 +11,9 @@ import subprocess
 
 # Common graph settings
 mpl.use("Agg")
+mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
+mpl.rcParams["pdf.fonttype"] = 42
+mpl.rcParams["ps.fonttype"] = 42
 mpl.rcParams["font.family"] = "libertine"
 sns.set_style("whitegrid")
 sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
