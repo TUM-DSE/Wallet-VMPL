@@ -16,20 +16,20 @@ def main():
     tmp_file_num = 0
     input_file = sys.argv[1]
 
-    num_nodes = [1, 10, 25, 50]
-    cache_sizes = [50, 100, 250]
-    execution_slots = [10]
+    num_nodes = [70, 80, 90, 100, 110, 120, 130, 140]
+    cache_sizes = [64]
+    execution_slots = [4]
     cache_time = 600
 
     cvm_cold_boot_time = 8.3073
-    #cvm_warm_boot_time = 0.0677
-    cvm_warm_boot_time = 0.003
+    cvm_warm_boot_time = 0.0677
+    #cvm_warm_boot_time = 0.003
     cvm_max_execution_slots = 64
     cvm_header = "************* CVM ****************\n"
 
     vm_cold_boot_time = 3.6999
-    #vm_warm_boot_time = 0.0663
-    vm_warm_boot_time = 0.003
+    vm_warm_boot_time = 0.0663
+    #vm_warm_boot_time = 0.003
     vm_max_execution_slots = 64
     vm_header = "************* VM ****************\n"
 
@@ -40,7 +40,10 @@ def main():
     w_max_execution_slots = 64
     w_header = "************* WALLET ****************\n"
 
-    #main_sim(1, vm_cold_boot_time, vm_warm_boot_time, 0, 1, 300, vm_max_execution_slots, 0);
+    k_cold_boot_time = 1.394
+    k_warm_boot_time = 0
+    k_max_execution_slots = 64
+    k_header = "************* KATA ****************\n"
 
     print(f'Starting {len(num_nodes) * len(cache_sizes) * len(execution_slots) * (len(w_percentage_soft_warm) + 2) } simulations')
     for n in num_nodes:
@@ -49,6 +52,7 @@ def main():
                 cvm_max_execution_slots = exec_slot
                 vm_max_execution_slots =  exec_slot
                 w_max_execution_slots = exec_slot
+                k_max_execution_slots = exec_slot
 
                 # CVM simulation
                 pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', cvm_header, n, cvm_cold_boot_time, cvm_warm_boot_time, 0, cache_size, cache_time, cvm_max_execution_slots, 0, tmp_file_num, input_file))
@@ -62,6 +66,10 @@ def main():
                 for percent_soft_warm in w_percentage_soft_warm:
                     pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', w_header, n, w_cold_boot_time, w_warm_boot_time, w_soft_warm_time, cache_size, cache_time, w_max_execution_slots, percent_soft_warm, tmp_file_num, input_file))
                     tmp_file_num += 1
+
+                # Kata simulation
+                pool.apply_async(proc, args=(f'tmp_file_{tmp_file_num}.txt', k_header, n, k_cold_boot_time, k_warm_boot_time, 0, cache_size, cache_time, k_max_execution_slots, 0, tmp_file_num, input_file))
+                tmp_file_num += 1
 
     pool.close()
     pool.join()
