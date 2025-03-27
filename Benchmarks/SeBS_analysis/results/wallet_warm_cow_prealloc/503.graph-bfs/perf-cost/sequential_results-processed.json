@@ -1,0 +1,198 @@
+{
+  "_invocations": {
+    "503.graph-bfs-python-3.11": {
+      "5f41763f-1efc-4dba-9fb7-c09930920603": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1742847732.095131",
+          "end": "1742847732.890703",
+          "is_cold": false,
+          "request_id": "5f41763f-1efc-4dba-9fb7-c09930920603",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "5f41763f-1efc-4dba-9fb7-c09930920603",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 795572,
+          "client": 812158,
+          "client_begin": "2025-03-24 20:22:12.086193",
+          "client_end": "2025-03-24 20:22:12.898351",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "6ac3edb7-48f6-49c4-bd05-8f9ecc9fd6d0": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1742847687.076902",
+          "end": "1742847687.875031",
+          "is_cold": false,
+          "request_id": "6ac3edb7-48f6-49c4-bd05-8f9ecc9fd6d0",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "6ac3edb7-48f6-49c4-bd05-8f9ecc9fd6d0",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 798129,
+          "client": 816070,
+          "client_begin": "2025-03-24 20:21:27.066536",
+          "client_end": "2025-03-24 20:21:27.882606",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "821505c9-37fb-4cd4-a3f7-0ecacc1d1c5f": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1742847710.445972",
+          "end": "1742847711.244109",
+          "is_cold": false,
+          "request_id": "821505c9-37fb-4cd4-a3f7-0ecacc1d1c5f",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "821505c9-37fb-4cd4-a3f7-0ecacc1d1c5f",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 798137,
+          "client": 2549376,
+          "client_begin": "2025-03-24 20:21:48.710387",
+          "client_end": "2025-03-24 20:21:51.259763",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "849f238f-bc78-48cf-b00f-4b26a18075b5": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1742847721.274616",
+          "end": "1742847722.071292",
+          "is_cold": false,
+          "request_id": "849f238f-bc78-48cf-b00f-4b26a18075b5",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "849f238f-bc78-48cf-b00f-4b26a18075b5",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 796676,
+          "client": 814758,
+          "client_begin": "2025-03-24 20:22:01.264517",
+          "client_end": "2025-03-24 20:22:02.079275",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "d6dd27f9-6200-4dfb-a218-1fa228339d38": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1742847742.920421",
+          "end": "1742847743.724866",
+          "is_cold": false,
+          "request_id": "d6dd27f9-6200-4dfb-a218-1fa228339d38",
+          "result": {}
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "d6dd27f9-6200-4dfb-a218-1fa228339d38",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 804445,
+          "client": 822464,
+          "client_begin": "2025-03-24 20:22:22.909993",
+          "client_end": "2025-03-24 20:22:23.732457",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {
+    "503.graph-bfs-python-3.11": {}
+  },
+  "begin_time": 1742847681.250149,
+  "config": {
+    "deployment": {
+      "name": "wallet_warm"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {},
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1742847748.73845,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 1,
+    "failures": [
+      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 38, in process_request\n    ret = pickle.loads(ret)\n_pickle.UnpicklingError: pickle data was truncated\n</pre>\n        </body>\n    </html>\n"
+    ],
+    "failures_count": 1,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}

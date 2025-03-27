@@ -1,0 +1,4 @@
+18:14:12,277 INFO SeBS-c778: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+18:14:12,291 INFO WalletWarm-983f: Using existing deployment wallet-72e40d7a that matches prefix wallet!
+18:14:12,295 INFO Experiment.PerfCost-fcb1: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+18:14:12,300 INFO Experiment.PerfCost-fcb1: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
