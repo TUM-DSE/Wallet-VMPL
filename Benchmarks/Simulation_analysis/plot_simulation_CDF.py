@@ -175,19 +175,19 @@ def crop_pdf(input_path):
     except FileNotFoundError:
         print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
-def plot_p99_delay_latency(configs, output_dir):
+def plot_percentile_delay_latency(configs, output_dir):
     """
-    Create a plot of P99 delay latency across different node sizes for multiple variants.
-    
+    Create a plot of P99 and P50 delay latency across different node sizes for multiple variants.
+
     Args:
         configs (list): List of configuration dictionaries
         output_dir (str): Directory to save output plots
-    
+
     Returns:
         str: Path to the generated plot
     """
     plt.figure(figsize=(figwidth, figheight))
-    
+
     # Use different line styles and markers for better distinction
     line_styles = ['-', '--', '-.', ':']
     markers = ['o', 's', '^', 'D', 'v']
@@ -196,81 +196,111 @@ def plot_p99_delay_latency(configs, output_dir):
     # Get unique node sizes
     unique_node_sizes = sorted(set(config['num_nodes'] for config in configs))
 
+    # Prepare to store plot data
+    plot_data = {
+        'P99': {},
+        'P50': {}
+    }
+
     # Iterate through each variant
-    for i, variant in enumerate(set(config['variant'] for config in configs)):
+    for variant in set(config['variant'] for config in configs):
         # Filter configs for this variant
         variant_configs = [config for config in configs if config['variant'] == variant]
-        
+
         # Prepare data for this variant
         variant_p99_delays = []
+        variant_p50_delays = []
         variant_node_sizes = []
-        variant_details = []
 
         for node_size in unique_node_sizes:
             # Find configurations for this variant and node size
             node_configs = [config for config in variant_configs if config['num_nodes'] == node_size]
-            
-            if node_configs:
-                # Calculate P99 delays for these configurations
-                p99_delays = [np.percentile(config['delays'], 99) for config in node_configs if config['delays']]
-                
-                if p99_delays:
-                    # Use the median P99 delay if multiple configurations exist
-                    median_p99_delay = np.median(p99_delays)
-                    
-                    variant_p99_delays.append(median_p99_delay)
-                    variant_node_sizes.append(node_size)
-                    
-                    # Create a representative detail string from the first config
-                    config = node_configs[0]
-                    if variant == 'WALLET':
-                        detail = f"{variant} - c:{config['max_cache']}, w:{config['soft_warm_pct'] * 100}%, e:{config['exec_slots']}"
-                    else:
-                        detail = f"{variant} - c:{config['max_cache']}, e:{config['exec_slots']}"
-                    variant_details.append(detail)
 
-        # Plot for this variant
-        style_idx = i % len(line_styles)
-        color_idx = i % len(colors)
-        marker_idx = i % len(markers)
-        
-        plt.plot(variant_node_sizes, variant_p99_delays, 
-                 marker=markers[marker_idx], 
-                 linestyle=line_styles[style_idx], 
-                 color=colors[color_idx], 
-                 label=variant, 
-                 linewidth=1)
-    
-    plt.title('P99 Delay Latency by Number of Nodes', fontsize=TITLE_FONTSIZE)
+            if node_configs:
+                # Calculate P99 and P50 delays for these configurations
+                p99_delays = [np.percentile(config['delays'], 99) for config in node_configs if config['delays']]
+                p50_delays = [np.percentile(config['delays'], 50) for config in node_configs if config['delays']]
+
+                if p99_delays and p50_delays:
+                    # Use the median percentile if multiple configurations exist
+                    median_p99_delay = np.median(p99_delays)
+                    median_p50_delay = np.median(p50_delays)
+
+                    variant_p99_delays.append(median_p99_delay)
+                    variant_p50_delays.append(median_p50_delay)
+                    variant_node_sizes.append(node_size)
+
+        # Store data for plotting
+        plot_data['P99'][variant] = {
+            'node_sizes': variant_node_sizes,
+            'delays': variant_p99_delays
+        }
+        plot_data['P50'][variant] = {
+            'node_sizes': variant_node_sizes,
+            'delays': variant_p50_delays
+        }
+
+    # Plot P99 and P50 for each variant
+    percentiles = ['P99', 'P50']
+    for percentile_idx, percentile in enumerate(percentiles):
+        for variant_idx, variant in enumerate(plot_data[percentile]):
+            # Get data for this variant and percentile
+            node_sizes = plot_data[percentile][variant]['node_sizes']
+            delays = plot_data[percentile][variant]['delays']
+
+            # Select style and color
+            style_idx = variant_idx % len(line_styles)
+            color_idx = variant_idx % len(colors)
+            marker_idx = variant_idx % len(markers)
+
+            # Adjust line style and marker for different percentiles
+            linestyle = line_styles[style_idx]
+            marker = markers[marker_idx]
+            color = colors[color_idx]
+
+            # Modify style for P50 to distinguish from P99
+            if percentile == 'P50':
+                linestyle = ':' if linestyle == '-' else '-.'
+                marker = 'x'
+
+            # Plot with a label that includes the percentile
+            plt.plot(node_sizes, delays,
+                     marker=marker,
+                     linestyle=linestyle,
+                     color=color,
+                     label=f'{variant} - {percentile}',
+                     linewidth=1)
+
+    plt.title('Delay Latency Percentiles by Number of Nodes', fontsize=TITLE_FONTSIZE)
     plt.xlabel('Number of Nodes', fontsize=TITLE_FONTSIZE)
-    plt.ylabel('P99 Delay Latency (seconds)', fontsize=TITLE_FONTSIZE)
-    
+    plt.ylabel('Delay Latency (seconds)', fontsize=TITLE_FONTSIZE)
+
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.xticks(unique_node_sizes, fontsize=TICKS_FONTSIZE)
     plt.yticks(fontsize=TICKS_FONTSIZE)
-    
+
     plt.legend(loc='best', fontsize=LEGEND_FONTSIZE)
-    
+
     plt.tight_layout()
-    
+
     # Ensure the output directory exists
     os.makedirs(os.path.dirname(f'{output_dir}/pdf'), exist_ok=True)
     os.makedirs(os.path.dirname(f'{output_dir}/png'), exist_ok=True)
-    
+
     # Save as PDF
-    pdf_path = f"{output_dir}/pdf/{TRACE_NAME}_p99_delay_nodes.pdf"
+    pdf_path = f"{output_dir}/pdf/{TRACE_NAME}_percentile_delay_nodes.pdf"
     plt.savefig(pdf_path)
-    
+
     # Save as PNG with high DPI for quality
-    png_path = f"{output_dir}/png/{TRACE_NAME}_p99_delay_nodes.png"
+    png_path = f"{output_dir}/png/{TRACE_NAME}_percentile_delay_nodes.png"
     plt.savefig(png_path, dpi=300)
-    
+
     plt.close()
-    
+
     # Crop the PDF if possible
     if pdf_path.endswith('.pdf'):
         crop_pdf(pdf_path)
-    
+
     return pdf_path
 
 def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim=(0, 1.05)):
@@ -490,7 +520,7 @@ def main():
             generate_cdf_plot(configs, output_dir, f"{TRACE_NAME}_overall_cdf_slowdowns", "Overall Invocation Latency CDF", "slowdowns")
 
             # Generate P99
-            plot_p99_delay_latency(configs, output_dir)
+            plot_percentile_delay_latency(configs, output_dir)
             
             # Generate plots by node size in parallel
             print("Generating node size plots in parallel...")
