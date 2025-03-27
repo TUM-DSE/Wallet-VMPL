@@ -75,8 +75,10 @@ def calculate_categories(raw_data):
     """Calculate values for each category"""
     wallet_data = raw_data.get("Wallet", {})
     wallet_data_pre = raw_data.get("Wallet Preallocation", {})
+    # name = 'Wallet w/o\npreallocation'
+    wallet_data_name = 'w/o prealloc'
     categories = {
-        'Wallet w/o\npreallocation': {
+        wallet_data_name : {
            'VMM (QEMU)': wallet_data['QEMU'],
             'Monitor': wallet_data['Monitor'],
             'Firmware (OVMF)': wallet_data['OVMF'],
@@ -110,8 +112,10 @@ def calculate_categories(raw_data):
         # }
     }
     wallet_data = wallet_data_pre
+    # wallet_data_pre_name = 'Wallet w/\npreallocation'
+    wallet_data_pre_name = 'w/ prealloc'
     categories2 = {
-        'Wallet w/\npreallocation': {
+        wallet_data_pre_name: {
            'VMM (QEMU)': wallet_data['QEMU'],
             'Monitor': wallet_data['Monitor'],
             'Firmware (OVMF)': wallet_data['OVMF'],
@@ -369,7 +373,8 @@ def main():
     create_plot(categories, args.output_dir)
     create_plot(categories, args.output_dir, 'log')
 
-    create_configurable_triple_cutoff_plot(categories, args.output_dir)
+    figsize = (3.3/2, 2.0)
+    create_configurable_triple_cutoff_plot(categories, args.output_dir, figsize=figsize)
     print(f"Plots saved in {args.output_dir}")
 
 if __name__ == "__main__":

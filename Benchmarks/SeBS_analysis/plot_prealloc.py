@@ -122,9 +122,11 @@ def load_and_process_data():
 def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='linear', geo_only=False):
     """Create grouped bar chart with all four wallet variants in a single plot"""
     figw = figwidth
+    figh = figheight
     if geo_only:
         figw = 3.3/2
-    fig, ax = plt.subplots(figsize=(figw, figheight))
+        figh = 2.0
+    fig, ax = plt.subplots(figsize=(figw, figh))
     
     # Prepare data for the four combinations
     cold_no_prealloc = df[(df['type'] == 'cold') & (df['variant'] == 'wallet_cow_no_prealloc')]
