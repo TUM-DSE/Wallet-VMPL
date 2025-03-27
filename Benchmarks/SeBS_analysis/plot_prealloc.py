@@ -208,6 +208,22 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
                    # label='Hot start (w/ preallocation)',
                    label='Hot (w/ prealloc)',
                  color=hot_color, edgecolor='black', hatch=yes_hatch)
+
+    if geo_only:
+        # add value labels on top of bars
+        for i, bar in enumerate(bars1):
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2f}",
+                    ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+        for i, bar in enumerate(bars2):
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2f}",
+                    ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+        for i, bar in enumerate(bars3):
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2f}",
+                    ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+        for i, bar in enumerate(bars4):
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f"{bar.get_height():.2f}",
+                    ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+
     
     # Customize the plot
     ax.set_yscale(y_scale)
@@ -220,15 +236,19 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
         xlabels = ['Geo. Mean']
         rotation = 0
         ax.set_ylim(0.1, 10)
+        legend_loc = 'upper right'
+        bbox_to_anchor=(0.98, 0.99)
     else:
         xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
         rotation = 15
+        legend_loc = 'upper left'
+        bbox_to_anchor=(0.01, 0.98)
     ax.set_xticklabels(xlabels, rotation=rotation, fontsize=TICKS_FONTSIZE)
     
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Enhance legend
-    legend = plt.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left',
+    legend = plt.legend(bbox_to_anchor=bbox_to_anchor, loc=legend_loc,
                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     
     # Add gridlines
