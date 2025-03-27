@@ -1,0 +1,4 @@
+18:20:54,952 INFO SeBS-07c3: Created experiment output at /root/Benchmarks/SeBS/311.compression
+18:20:54,966 INFO WalletWarm-e5a4: Using existing deployment wallet-58d67764 that matches prefix wallet!
+18:20:54,970 INFO Experiment.PerfCost-b407: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/cold_results.json
+18:20:54,975 INFO Experiment.PerfCost-b407: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/sequential_results.json

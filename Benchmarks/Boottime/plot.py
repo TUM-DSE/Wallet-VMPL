@@ -90,20 +90,20 @@ def calculate_categories(raw_data):
             'Monitor': 0,
             'Firmware (OVMF)': 0,
             'OS/Guest-OS': 0,
-            'Runtime': 0,
+            'Runtime': raw_data['Gramine']['Runtime'],
             'Zygote': 0,
             'Trustlet': 0,
-            'Invoke': raw_data['Gramine']['Total'],
+            'Invoke': raw_data['Gramine']['Invoke'],
         },
         'Containers\n(Kata)': {
-            'VMM (QEMU)': 0,
+            'VMM (QEMU)': raw_data['Kata Containers']['QEMU'],
             'Monitor': 0,
-            'Firmware (OVMF)': 0,
-            'OS/Guest-OS': 0,
+            'Firmware (OVMF)': raw_data['Kata Containers']['OVMF'],
+            'OS/Guest-OS': raw_data['Kata Containers']['Linux'],
             'Runtime': 0,
             'Zygote': 0,
             'Trustlet': 0,
-            'Invoke': raw_data['Kata Containers']['Total'],
+            'Invoke': raw_data['Kata Containers']['Runtime'],
         },
         'VM\n(KVM-Linux)': {
             'VMM (QEMU)': raw_data['VM']['QEMU'],
@@ -125,11 +125,21 @@ def calculate_categories(raw_data):
             'Trustlet': 0,
             'Invoke': raw_data['CVM']['Runtime'],
         },
-        'Wallet\n(cold)': {
+        'Wallet\n(init)': {
             'VMM (QEMU)': wallet_data['QEMU'],
             'Monitor': wallet_data['Monitor'],
             'Firmware (OVMF)': wallet_data['OVMF'],
             'OS/Guest-OS': wallet_data['Linux'],
+            'Runtime': 0,
+            'Zygote': 0,
+            'Trustlet': 0,
+            'Invoke': 0,
+        },
+        'Wallet\n(cold)': {
+            'VMM (QEMU)': 0,
+            'Monitor': 0,
+            'Firmware (OVMF)': 0,
+            'OS/Guest-OS': 0,
             'Runtime': wallet_data['Runtime'],
             'Zygote': wallet_data['Zygote'],
             'Trustlet': wallet_data['Trustlet'],
@@ -179,8 +189,8 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(figwidth, figheight))
 
     # Set y-axis limits with a break
-    ax1.set_ylim(400, 18000)  # upper section for high values
-    ax2.set_ylim(0, 90)        # lower section for most data
+    ax1.set_ylim(400, 13200)  # upper section for high values
+    ax2.set_ylim(0, 240)        # lower section for most data
     
     # Hide the spines between ax1 and ax2
     ax1.spines.bottom.set_visible(False)
@@ -197,7 +207,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
 
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8)
+    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
     df.plot(kind='bar', stacked=True, ax=ax2, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
     
     # Add hatches for better distinction
@@ -232,7 +242,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
     
     # Fix xticks rotation
-    plt.xticks(rotation=25)
+    plt.xticks(rotation=40)
     
     # Add y-axis label in the middle
     ax2.annotate(
@@ -253,9 +263,13 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Insert legend in the top right position
-    legend = ax1.legend(bbox_to_anchor=(0.03, 0.97), loc='upper left',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
-    legend.get_frame().set_edgecolor('black')
+    # legend = ax1.legend(bbox_to_anchor=(0.03, 0.97), loc='upper left',
+                      #  borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+    # legend.get_frame().set_edgecolor('black')
+    
+    handles, labels = ax1.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper left', bbox_to_anchor=(0.19, 0.87), edgecolor='black',
+                          borderaxespad=0., fontsize=LEGEND_FONTSIZE, frameon=True, framealpha=0.3)
     
     # Add gridlines for better readability
     ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -283,7 +297,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
         figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
         figheight = 1.5
     else:
-        figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
+        figwidth = 3.9 # 3.3 inch for single column, 7 inch for double column
         figheight = 2.2
 
     # Convert to DataFrame

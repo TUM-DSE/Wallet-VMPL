@@ -1,0 +1,39 @@
+19:42:10,943 INFO SeBS-0b27: Created experiment output at /root/Benchmarks/SeBS/311.compression
+19:42:11,17 INFO WalletWarm-ca17: Generating unique resource name wallet-140ad74a
+19:42:11,20 INFO minio.Minio-e245: Initialize a new bucket for benchmarks
+19:42:11,25 INFO minio.Minio-e245: Created bucket sebs-benchmarks-wallet-140ad74a
+19:42:11,171 INFO Benchmark-5592: Building benchmark 311.compression. Reason: no cached code package.
+19:42:11,250 INFO Benchmark-5592: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+19:42:11,281 INFO WalletWarm-ca17: Function size 0.000004 MB
+19:42:11,303 INFO Benchmark-5592: Created code package (source hash: 215abcf11a5b09fade69cad30b314ca7), for run on wallet_warm with python:3.11
+19:42:11,461 INFO WalletWarm-ca17: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+19:42:12,534 INFO Experiment.PerfCost-cbc5: Begin experiment
+19:42:12,534 INFO Experiment.PerfCost-cbc5: Begin cold experiments
+19:42:12,538 INFO WalletWarm.WalletFunction-75b6: Not stopping function as it was not running
+19:42:21,152 INFO Experiment.PerfCost-cbc5: Processed 1 samples out of 5, 0 errors
+19:42:26,158 INFO WalletWarm.WalletFunction-75b6: Stopping function
+19:42:26,159 INFO WalletWarm.WalletFunction-75b6: Function stopped succesfully
+19:42:34,663 INFO Experiment.PerfCost-cbc5: Processed 2 samples out of 5, 0 errors
+19:42:39,669 INFO WalletWarm.WalletFunction-75b6: Stopping function
+19:42:39,669 INFO WalletWarm.WalletFunction-75b6: Function stopped succesfully
+19:42:48,248 INFO Experiment.PerfCost-cbc5: Processed 3 samples out of 5, 0 errors
+19:42:53,254 INFO WalletWarm.WalletFunction-75b6: Stopping function
+19:42:53,254 INFO WalletWarm.WalletFunction-75b6: Function stopped succesfully
+19:43:01,899 INFO Experiment.PerfCost-cbc5: Processed 4 samples out of 5, 0 errors
+19:43:06,905 INFO WalletWarm.WalletFunction-75b6: Stopping function
+19:43:06,906 INFO WalletWarm.WalletFunction-75b6: Function stopped succesfully
+19:43:15,479 INFO Experiment.PerfCost-cbc5: Processed 5 samples out of 5, 0 errors
+19:43:20,488 INFO Experiment.PerfCost-cbc5: Mean 3577.2616000000003 [ms], median 3575.266 [ms], std 46.99971104847347, CV 1.3138460728864076
+19:43:20,494 INFO Experiment.PerfCost-cbc5: Parametric CI (Student's t-distribution) 0.95 from 3512.0155411568776 to 3642.507658843123, within 1.8239107490244124% of mean
+19:43:20,495 INFO Experiment.PerfCost-cbc5: Parametric CI (Student's t-distribution) 0.99 from 3469.0660357018473 to 3685.457164298153, within 3.0245359830031138% of mean
+19:43:20,499 INFO Experiment.PerfCost-cbc5: Begin sequential experiments
+19:43:28,473 INFO Experiment.PerfCost-cbc5: Processed 1 samples out of 5, 0 errors
+19:43:39,939 INFO Experiment.PerfCost-cbc5: Processed 2 samples out of 5, 0 errors
+19:43:51,394 INFO Experiment.PerfCost-cbc5: Processed 3 samples out of 5, 0 errors
+19:44:02,898 INFO Experiment.PerfCost-cbc5: Processed 4 samples out of 5, 0 errors
+19:44:14,366 INFO Experiment.PerfCost-cbc5: Processed 5 samples out of 5, 0 errors
+19:44:19,373 INFO Experiment.PerfCost-cbc5: Mean 1460.9384 [ms], median 1456.845 [ms], std 16.410007697743495, CV 1.123251171831988
+19:44:19,375 INFO Experiment.PerfCost-cbc5: Parametric CI (Student's t-distribution) 0.95 from 1438.1576572256708 to 1483.7191427743292, within 1.5593226089703136% of mean
+19:44:19,377 INFO Experiment.PerfCost-cbc5: Parametric CI (Student's t-distribution) 0.99 from 1423.1617838594618 to 1498.7150161405382, within 2.585777479771781% of mean
+19:44:19,380 INFO WalletWarm.WalletFunction-75b6: Stopping function
+19:44:19,388 INFO WalletWarm.WalletFunction-75b6: Function stopped succesfully

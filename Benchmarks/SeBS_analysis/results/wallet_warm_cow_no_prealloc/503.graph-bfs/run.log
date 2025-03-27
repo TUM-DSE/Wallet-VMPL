@@ -1,0 +1,32 @@
+18:34:49,75 INFO SeBS-af31: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
+18:34:49,150 INFO WalletWarm-be9c: Generating unique resource name wallet-aae6db46
+18:34:49,153 INFO minio.Minio-f418: Initialize a new bucket for benchmarks
+18:34:49,158 INFO minio.Minio-f418: Created bucket sebs-benchmarks-wallet-aae6db46
+18:34:49,320 INFO Benchmark-ddd2: Building benchmark 503.graph-bfs. Reason: no cached code package.
+18:34:49,530 INFO Benchmark-ddd2: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+18:34:49,608 INFO WalletWarm-be9c: Function size 0.000005 MB
+18:34:49,651 INFO Benchmark-ddd2: Created code package (source hash: 693b2b32a88d140fc886ab0d72ec2ba1), for run on wallet_warm with python:3.11
+18:34:50,10 INFO WalletWarm-be9c: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+18:34:50,728 INFO Experiment.PerfCost-29d7: Begin experiment
+18:34:50,729 INFO Experiment.PerfCost-29d7: Begin cold experiments
+18:34:50,733 INFO WalletWarm.WalletFunction-f378: Not stopping function as it was not running
+18:35:00,533 INFO Experiment.PerfCost-29d7: Processed 1 samples out of 5, 0 errors
+18:35:05,538 INFO WalletWarm.WalletFunction-f378: Stopping function
+18:35:05,539 INFO WalletWarm.WalletFunction-f378: Function stopped succesfully
+18:35:16,92 INFO Experiment.PerfCost-29d7: Processed 2 samples out of 5, 0 errors
+18:35:21,98 INFO WalletWarm.WalletFunction-f378: Stopping function
+18:35:21,99 INFO WalletWarm.WalletFunction-f378: Function stopped succesfully
+18:35:32,494 INFO Experiment.PerfCost-29d7: Processed 3 samples out of 5, 0 errors
+18:35:37,500 INFO WalletWarm.WalletFunction-f378: Stopping function
+18:35:37,501 INFO WalletWarm.WalletFunction-f378: Function stopped succesfully
+18:35:48,69 INFO Experiment.PerfCost-29d7: Processed 4 samples out of 5, 0 errors
+18:35:53,71 INFO WalletWarm.WalletFunction-f378: Stopping function
+18:35:53,71 INFO WalletWarm.WalletFunction-f378: Function stopped succesfully
+18:36:02,385 INFO Experiment.PerfCost-29d7: Processed 5 samples out of 5, 0 errors
+18:36:07,389 INFO Experiment.PerfCost-29d7: Mean 5320.1484 [ms], median 5546.093 [ms], std 714.3188293280809, CV 13.426671130603818
+18:36:07,395 INFO Experiment.PerfCost-29d7: Parametric CI (Student's t-distribution) 0.95 from 4328.514891380714 to 6311.781908619286, within 18.639207669832775% of mean
+18:36:07,397 INFO Experiment.PerfCost-29d7: Parametric CI (Student's t-distribution) 0.99 from 3675.7525706673878 to 6964.544229332612, within 30.90883384630046% of mean
+18:36:07,587 INFO Experiment.PerfCost-29d7: Begin sequential experiments
+18:36:08,917 INFO WalletWarm.WalletFunction-f378: Stopping function
+18:36:08,920 INFO WalletWarm.WalletFunction-f378: Function stopped succesfully
+18:36:08,936 INFO WalletWarm.WalletFunction-f378: Not stopping function as it was not running
