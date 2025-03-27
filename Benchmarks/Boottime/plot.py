@@ -283,7 +283,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
         figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
         figheight = 1.5
     else:
-        figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
+        figwidth = 3.9 # 3.3 inch for single column, 7 inch for double column
         figheight = 2.2
 
     # Convert to DataFrame

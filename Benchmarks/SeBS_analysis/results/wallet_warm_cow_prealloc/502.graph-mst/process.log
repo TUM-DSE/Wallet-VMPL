@@ -1,0 +1,4 @@
+20:09:45,997 INFO SeBS-626a: Created experiment output at /root/Benchmarks/SeBS/502.graph-mst
+20:09:46,12 INFO WalletWarm-db8a: Using existing deployment wallet-a1d05214 that matches prefix wallet!
+20:09:46,16 INFO Experiment.PerfCost-b06c: Processing data in /root/Benchmarks/SeBS/502.graph-mst/perf-cost/sequential_results.json
+20:09:46,21 INFO Experiment.PerfCost-b06c: Processing data in /root/Benchmarks/SeBS/502.graph-mst/perf-cost/cold_results.json

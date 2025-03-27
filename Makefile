@@ -144,7 +144,7 @@ ssh:
 trustlet_test:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
 
-
+WARM_COLD?=wallet
 run_benchmark_sebs:
 	if [ "$(name)" == "110.dynamic-html" ]; then \
 		cp module/libpal-html.so module/libpal.so; \
@@ -176,7 +176,7 @@ run_benchmark_sebs:
 	  	exit 1; \
 	fi
 	sleep 5
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) && poweroff"
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) ${WARM_COLD} && poweroff"
 
 benchmark_sebs: run run_benchmark_sebs
 
@@ -270,18 +270,23 @@ boottime_setup_vm:
 ipc_setup:
 	make simple_ipc_fs
 	make gramine
+	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
+	make run > /dev/null &
+	sleep 30
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make ipc_setup"
 	cp module/libsysdb.so Benchmarks/IPC/wallet/
 	cp module/libpal.so Benchmarks/IPC/wallet/
 
 IPC_ITERATIONS?=5
 IPC_SIZE?=64
 ssh_ipc:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS} ${ZYGOTE_ID}"
 
 ssh_alloc:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/test/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
 
 ipc:
+	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
 	cd Benchmarks/IPC/wallet/; ./run.sh
 
 shutdown:
@@ -290,18 +295,21 @@ shutdown:
 boottime:
 	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
 	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh
-	cd Benchmarks/Boottime/wallet/; python parse_boottime.py
+	cd Benchmarks/Boottime/wallet/; python parse_boottime.py > "no_prealloc.res"
 	cp Benchmarks/Boottime/wallet/result.csv Benchmarks/Boottime/wallet/result_without_prealloc.csv
 	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
 	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh "prealloc"
-	cd Benchmarks/Boottime/wallet/; python parse_boottime.py
+	cd Benchmarks/Boottime/wallet/; python parse_boottime.py > "prealloc.res"
 	cp Benchmarks/Boottime/wallet/result.csv Benchmarks/Boottime/wallet/result_prealloc.csv
 
 sebs_images:
 	cd scripts/; ./sebs.sh
 
+RESULT_PATH_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_prealloc
+RESULT_PATH_NO_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_no_prealloc
+TRACE_SEBS?=
 run_sebs:
-	mkdir -p Benchmarks/SeBS_analysis/results/wallet_cow_no_prealloc
-	mkdir -p Benchmarks/SeBS_analysis/results/wallet_cow_prealloc
-	cd Benchmarks; ./run_sebs.sh "no_prealloc" "Benchmarks/SeBS_analysis/results/wallet_cow_no_prealloc"
-	cd Benchmarks; ./run_sebs.sh "prealloc" "Benchmarks/SeBS_analysis/results/wallet_cow_prealloc"
+	mkdir -p ${RESULT_PATH_PREALLOC}
+	mkdir -p ${RESULT_PATH_NO_PREALLOC}
+	cd Benchmarks; ./run_sebs.sh "no_prealloc" "${RESULT_PATH_NO_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"
+	cd Benchmarks; ./run_sebs.sh "prealloc" "${RESULT_PATH_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"

@@ -28,6 +28,9 @@ enum monitor_call_type {
     execute_elf = 32,
 
     create_data_struct = 50,
+
+    get_stat = 100,
+    reset_stat = 101,
 };
 
 enum attestation_report_type {

@@ -1,0 +1,20 @@
+[loader]
+entrypoint = "file:{{ gramine.libos }}"
+log_level = "debug"
+insecure__use_cmdline_argv = true
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib" # ":/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
+
+[libos]
+entrypoint = "/gramine"
+
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { path = "/gramine", uri = "file:/root/gramine" },
+  { type = "untrusted_shm", path = "/dev/shm", uri = "dev:/dev/shm" },
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" }
+  #{ path = "/lib/x86_64-linux-gnu", uri = "file:/lib/x86_64-linux-gnu" }
+  #{ path = "/usr/lib/x86_64-linux-gnu", uri = "file:/usr/lib/x86_64-linux-gnu" }
+]
