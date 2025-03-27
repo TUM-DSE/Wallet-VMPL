@@ -175,6 +175,104 @@ def crop_pdf(input_path):
     except FileNotFoundError:
         print("pdfcrop command not found. Please install texlive-extra-utils package.")
 
+def plot_p99_delay_latency(configs, output_dir):
+    """
+    Create a plot of P99 delay latency across different node sizes for multiple variants.
+    
+    Args:
+        configs (list): List of configuration dictionaries
+        output_dir (str): Directory to save output plots
+    
+    Returns:
+        str: Path to the generated plot
+    """
+    plt.figure(figsize=(figwidth, figheight))
+    
+    # Use different line styles and markers for better distinction
+    line_styles = ['-', '--', '-.', ':']
+    markers = ['o', 's', '^', 'D', 'v']
+    colors = palette
+
+    # Get unique node sizes
+    unique_node_sizes = sorted(set(config['num_nodes'] for config in configs))
+
+    # Iterate through each variant
+    for i, variant in enumerate(set(config['variant'] for config in configs)):
+        # Filter configs for this variant
+        variant_configs = [config for config in configs if config['variant'] == variant]
+        
+        # Prepare data for this variant
+        variant_p99_delays = []
+        variant_node_sizes = []
+        variant_details = []
+
+        for node_size in unique_node_sizes:
+            # Find configurations for this variant and node size
+            node_configs = [config for config in variant_configs if config['num_nodes'] == node_size]
+            
+            if node_configs:
+                # Calculate P99 delays for these configurations
+                p99_delays = [np.percentile(config['delays'], 99) for config in node_configs if config['delays']]
+                
+                if p99_delays:
+                    # Use the median P99 delay if multiple configurations exist
+                    median_p99_delay = np.median(p99_delays)
+                    
+                    variant_p99_delays.append(median_p99_delay)
+                    variant_node_sizes.append(node_size)
+                    
+                    # Create a representative detail string from the first config
+                    config = node_configs[0]
+                    if variant == 'WALLET':
+                        detail = f"{variant} - c:{config['max_cache']}, w:{config['soft_warm_pct'] * 100}%, e:{config['exec_slots']}"
+                    else:
+                        detail = f"{variant} - c:{config['max_cache']}, e:{config['exec_slots']}"
+                    variant_details.append(detail)
+
+        # Plot for this variant
+        style_idx = i % len(line_styles)
+        color_idx = i % len(colors)
+        marker_idx = i % len(markers)
+        
+        plt.plot(variant_node_sizes, variant_p99_delays, 
+                 marker=markers[marker_idx], 
+                 linestyle=line_styles[style_idx], 
+                 color=colors[color_idx], 
+                 label=variant, 
+                 linewidth=1)
+    
+    plt.title('P99 Delay Latency by Number of Nodes', fontsize=TITLE_FONTSIZE)
+    plt.xlabel('Number of Nodes', fontsize=TITLE_FONTSIZE)
+    plt.ylabel('P99 Delay Latency (seconds)', fontsize=TITLE_FONTSIZE)
+    
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.xticks(unique_node_sizes, fontsize=TICKS_FONTSIZE)
+    plt.yticks(fontsize=TICKS_FONTSIZE)
+    
+    plt.legend(loc='best', fontsize=LEGEND_FONTSIZE)
+    
+    plt.tight_layout()
+    
+    # Ensure the output directory exists
+    os.makedirs(os.path.dirname(f'{output_dir}/pdf'), exist_ok=True)
+    os.makedirs(os.path.dirname(f'{output_dir}/png'), exist_ok=True)
+    
+    # Save as PDF
+    pdf_path = f"{output_dir}/pdf/{TRACE_NAME}_p99_delay_nodes.pdf"
+    plt.savefig(pdf_path)
+    
+    # Save as PNG with high DPI for quality
+    png_path = f"{output_dir}/png/{TRACE_NAME}_p99_delay_nodes.png"
+    plt.savefig(png_path, dpi=300)
+    
+    plt.close()
+    
+    # Crop the PDF if possible
+    if pdf_path.endswith('.pdf'):
+        crop_pdf(pdf_path)
+    
+    return pdf_path
+
 def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim=(0, 1.05)):
     """Generate CDF plot for the given configurations and save to output_path."""
     plt.figure(figsize=(figwidth, figheight))
@@ -390,6 +488,9 @@ def main():
             overall_output_path = os.path.join(output_dir, )
             generate_cdf_plot(configs, output_dir, f"{TRACE_NAME}_overall_cdf_delays", "Overall Invocation Latency CDF", "delays")
             generate_cdf_plot(configs, output_dir, f"{TRACE_NAME}_overall_cdf_slowdowns", "Overall Invocation Latency CDF", "slowdowns")
+
+            # Generate P99
+            plot_p99_delay_latency(configs, output_dir)
             
             # Generate plots by node size in parallel
             print("Generating node size plots in parallel...")
