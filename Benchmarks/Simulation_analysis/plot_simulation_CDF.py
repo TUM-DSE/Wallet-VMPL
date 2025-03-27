@@ -125,8 +125,9 @@ def parse_section(section_text):
     soft_warm_pct_match = re.search(r'percentage_soft_warm:\s*(\d+(?:\.\d+)*)', section_text)
     exec_slots_match = re.search(r'max_executions_slots:\s*(\d+)', section_text)
     cache_util_match = re.search(r'(?<=Max cache utilization:\s)(\d+(?:\.\d+)*)', section_text)
+    cold_rate_match = re.search(r'(?<=Cold boot rate:\s)(\d+(?:\.\d+)*)', section_text)
     
-    if not (num_nodes_match and max_cache_match and soft_warm_pct_match and exec_slots_match and cache_util_match):
+    if not (num_nodes_match and max_cache_match and soft_warm_pct_match and exec_slots_match and cache_util_match and cold_rate_match):
         print(f"Warning: Could not extract all configuration parameters for {variant}")
         return None
         
@@ -135,6 +136,7 @@ def parse_section(section_text):
     soft_warm_pct = float(soft_warm_pct_match.group(1))
     exec_slots = int(exec_slots_match.group(1))
     cache_util = float(cache_util_match.group(1))
+    cold_rate = float(cold_rate_match.group(1))
     
     sections = split_text_by_indentation(section_text)
 
@@ -151,7 +153,8 @@ def parse_section(section_text):
         'delays': delays,
         'exec_slots': exec_slots,
         'cache_util': cache_util,
-        'slowdowns': slowdowns
+        'slowdowns': slowdowns,
+        'cold_rate': cold_rate
     }
 
 def parallel_parse_section(args):
@@ -190,6 +193,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
         values = config[value_type]
         exec_slots=config['exec_slots']
         cache_util=config['cache_util']
+        cold_rate=config['cold_rate']
         
         if not values:
             continue
@@ -203,9 +207,9 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
         # Create label with configuration details
         label = ""
         if variant == 'WALLET':
-            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100}%"
+            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100}, cr:{cold_rate * 100}%"
         else: 
-            label = f"{variant} - c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100}%"
+            label = f"{variant} - c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100}%, cr:{cold_rate * 100}%"
             
         
         # Plot the CDF with different line styles and colors
