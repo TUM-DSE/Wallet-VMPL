@@ -1,0 +1,15 @@
+boot_time_eval.bt:34-37: WARNING: attaching to uprobe target file '/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin/qemu-system-x86_64' but matched 3 binaries
+Attaching 4 probes...
+1743000528229180411: 0 Monitor: Start
+1743000762209599081: 1 Monitor: Load Guest
+1743000762391894134: 25 
+1743000763315569532: 25 
+1743000763315727573: 25 
+1743000763321328865: 26 
+1743000763325556065: 50 
+1743000763412595518: 51 
+1743000766030474382: 52 
+
+
+
+
