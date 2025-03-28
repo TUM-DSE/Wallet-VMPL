@@ -70,30 +70,97 @@ def load_data(file_path):
     
     return data
 
-def calculate_categories(raw_data):
+def calculate_categories(raw_data, type_="all"):
     """Calculate values for each category"""
+    # BENCHMARKS = [
+    # '110.dynamic-html', #'120.uploader',
+    # '210.thumbnailer',
+    # '311.compression',
+    # '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
+    # '504.dna-visualisation'
+    # ]
+    # XXX: this is the order that other plot uses
     BENCHMARKS = [
-    '110.dynamic-html', #'120.uploader',
     '210.thumbnailer',
+    '502.graph-mst',
+    '110.dynamic-html',
+    '501.graph-pagerank',
+    '504.dna-visualisation',
+    '503.graph-bfs',
     '311.compression',
-    '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
-    '504.dna-visualisation'
     ]
     categories = {}
     for b in BENCHMARKS:
         df = raw_data[raw_data["benchmark"].str.contains(b)]
-        categories[b] = {
-            "Zygote Image Copy": df["zygote_data_copy"].mean() / 1e6,
-            "Zygote Initilization": df["zygote_init"].mean() / 1e6 ,
-            "Trustlet Creation": df["trustlet_creation"].mean() / 1e6,
-            "Trustlet Add Function": df["trustlet_function"].mean() / 1e6,
-            "Invoke Data Copy": df["invoke_data"].mean() / 1e6,
-            "Invoke Setup": df["invoke_setup"].mean() / 1e6,
-            "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
-            #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
-            "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
-        }
-    print(categories)
+        name = b.split('.')[1] # remove the number
+        if type_ == "all":
+            categories[name] = {
+                "Zygote Image Copy": df["zygote_data_copy"].mean() / 1e6,
+                "Zygote Initilization": df["zygote_init"].mean() / 1e6 ,
+                "Trustlet Creation": df["trustlet_creation"].mean() / 1e6,
+                "Trustlet Add Function": df["trustlet_function"].mean() / 1e6,
+                "Trustlet Creation": (df["trustlet_creation"].mean() + df["trustlet_function"].mean()) / 1e6,
+                #"Invoke Data Copy": df["invoke_data"].mean() / 1e6,
+                #"Invoke Setup": df["invoke_setup"].mean() / 1e6,
+                "Invoke Setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
+                "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
+                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
+                "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
+            }
+        elif type_ == "all_simple":
+            categories[name] = {
+                "Zygote creation": (df["zygote_init"].mean() + df["zygote_data_copy"].mean()) / 1e6,
+                "Trustlet creation": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
+                #"Invoke Setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
+                "Input copy": df["invoke_data_copy"].mean() / 1e6,
+                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
+                "Output copy": df["invoke_result_copy"].mean()/ 1e6,
+            }
+        elif type_ == "zygote":
+            categories[name] = {
+                "Zygote creation": (df["zygote_init"].mean() + df["zygote_data_copy"].mean()) / 1e6,
+            }
+        elif type_ == "zygote_full":
+            categories[name] = {
+                "Zygote Image Copy": df["zygote_data_copy"].mean() / 1e6,
+                "Zygote Initilization": df["zygote_init"].mean() / 1e6 ,
+            }
+        elif type_ == "trustlet":
+            categories[name] = {
+                "Trustlet creation": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
+            }
+        elif type_ == "trustlet_full":
+            categories[name] = {
+                "Trustlet creation": df["trustlet_creation"].mean() / 1e6,
+                "Trustlet add function": df["trustlet_function"].mean() / 1e6,
+            }
+        elif type_ == "invoke":
+            categories[name] = {
+                "Trustlet creation": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
+                "Invoke setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
+                "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
+                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
+                "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
+            }
+        elif type_ == "datacopy":
+            categories[name] = {
+                "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
+                "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
+            }
+        elif type_ == "invoke_full":
+            categories[name] = {
+                "Trustlet Creation": df["trustlet_creation"].mean() / 1e6,
+                "Trustlet Add Function": df["trustlet_function"].mean() / 1e6,
+                "Invoke Data Copy": df["invoke_data"].mean() / 1e6,
+                "Invoke Setup": df["invoke_setup"].mean() / 1e6,
+                "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
+                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
+                "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
+            }
+        else:
+            print(f"Invalid: {type_}")
+            exit(1)
+        print(categories)
     return categories
 
 def create_cutoff_plot(categories, output_dir, y_scale='linear'):
@@ -154,10 +221,14 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
                 total += value
         
         # Add total on top of each bar - choose the axis depending where the total is
+        format_ = f'{total:.1f}'
+        print(f"type: {type_}, total: {total}")
+        if type_ == "trustlet":
+            format_ = f'{total:.2f}'
         if total > 50:
-            ax1.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+            ax1.text(i, total, format_, ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
         else:
-            ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+            ax2.text(i, total, format_, ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
     # Customize the plot
     # Tick size
@@ -210,7 +281,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     
     plt.close()
 
-def create_plot(categories, output_dir, y_scale='linear', motivation=False):
+def create_plot(categories, output_dir, y_scale='linear', motivation=False, type_="all"):
     """Create stacked bar chart"""
     
     if motivation:
@@ -218,8 +289,9 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
         figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
         figheight = 1.5
     else:
-        figwidth = 3.9 # 3.3 inch for single column, 7 inch for double column
-        figheight = 2.2
+        figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
+        #figheight = 2.2
+        figheight = 2.0
 
     # Convert to DataFrame
     data = []
@@ -272,7 +344,13 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     
     # Enhance legend
     if not motivation:
-      legend = plt.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left', 
+      if type_ == "invoke" or type_ == "datacopy":
+        bbox_to_anchor = (0.01, 0.98)
+        loc = 'upper left'
+      else:
+        bbox_to_anchor = (0.01, 0.02)
+        loc = 'lower left'
+      legend = plt.legend(bbox_to_anchor=bbox_to_anchor, loc=loc, 
                         borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, framealpha=0.5)
       legend.get_frame().set_edgecolor('black')
 
@@ -280,7 +358,10 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     if (y_scale == "linear"):
       ax.set_ylim(top=y_max + 0.1*y_max)
     else:
-      ax.set_ylim(top=2*y_max)
+      #ax.set_ylim(top=2*y_max)
+      ax.set_ylim([0, y_max*1.1])
+    ax.tick_params(axis = 'y', which = 'both', labelsize = TICKS_FONTSIZE)
+
     
     # Add gridlines for better readability
     ax.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -296,9 +377,9 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     output_dir.mkdir(parents=True, exist_ok=True)
     
     plot_type = 'motivation_' if motivation else ''
-    plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'{plot_type}boot_time_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'{plot_type}boot_time_{y_scale}.pdf')
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.pdf')
     
     plt.close()
 
@@ -311,12 +392,15 @@ def main():
     
     # Load and process data
     raw_data = pd.read_csv("results.csv")
-    categories = calculate_categories(raw_data)
 
-    # Create plots for all categories
-    #create_cutoff_plot(categories, args.output_dir)
-    create_plot(categories, args.output_dir)
-    create_plot(categories, args.output_dir, 'log')
+    for type_ in ["all", "all_simple", "zygote", "trustlet", "invoke", "zygote_full",
+                  "invoke_full", "datacopy"]:
+        categories = calculate_categories(raw_data, type_=type_)
+        # Create plots for all categories
+        #create_cutoff_plot(categories, args.output_dir)
+        create_plot(categories, args.output_dir, type_=type_)
+        create_plot(categories, args.output_dir, 'log', type_=type_)
+
     # Create plots for VM and CVM only for motivation
     print(f"Plots saved in {args.output_dir}")
 
