@@ -381,6 +381,19 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False):
     
     plt.close()
 
+def print_summary(categories):
+    """Print a summary of each bar's total time and breakdown"""
+    print("\n==== Boot Time Summary ====")
+    for category, components in categories.items():
+        total = sum(components.values())
+        print(f"\n{category}:")
+        print(f"  Total: {total:.2f} ms")
+        print("  Breakdown:")
+        for component, value in components.items():
+            if value > 0:
+                percentage = (value / total) * 100
+                print(f"    - {component}: {value:.2f} ms ({percentage:.1f}%)")
+
 def main():
     parser = argparse.ArgumentParser(description='Generate stacked bar charts from boot time data')
     parser.add_argument('input_file', type=str, help='Path to the input file')
@@ -400,6 +413,9 @@ def main():
     create_plot(categories, args.output_dir, motivation=True)
     create_plot(categories, args.output_dir, 'log', motivation=True)
     print(f"Plots saved in {args.output_dir}")
+    
+    # Print summary of each bar
+    print_summary(categories)
 
 if __name__ == "__main__":
     main()
