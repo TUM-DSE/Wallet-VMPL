@@ -359,6 +359,32 @@ def create_configurable_triple_cutoff_plot(categories, output_dir, upper_range=(
     
     plt.close()
 
+def print_summary(input_file, output_dir, categories):
+    """Print a summary of the processed data and generated plots"""
+    print("\n" + "=" * 50)
+    print("SUMMARY:")
+    print(f"Input file: {input_file}")
+    print(f"Output directory: {output_dir}")
+    print(f"Categories processed: {len(categories)}")
+    print(f"Generated plots: linear scale, logarithmic scale, triple cutoff")
+    
+    # Print detailed time breakdown for each variant
+    print("\nDETAILED TIME BREAKDOWN:")
+    for variant, components in categories.items():
+        # Calculate total time
+        total_time = sum(components.values())
+        print(f"\n{variant} - Total: {total_time:.3f}s")
+        
+        # Print component breakdown
+        print("-" * 40)
+        print(f"{'Component':<20} {'Time (s)':<10} {'% of Total':<10}")
+        print("-" * 40)
+        for component, time in components.items():
+            percentage = (time / total_time) * 100
+            print(f"{component:<20} {time:.3f}s{'':<5} {percentage:.1f}%")
+    
+    print("=" * 50)
+
 def main():
     parser = argparse.ArgumentParser(description='Generate stacked bar charts from boot time data')
     parser.add_argument('input_file', type=str, help='Path to the input file')
@@ -376,6 +402,9 @@ def main():
     figsize = (3.3/2, 2.0)
     create_configurable_triple_cutoff_plot(categories, args.output_dir, figsize=figsize)
     print(f"Plots saved in {args.output_dir}")
+    
+    # Print summary at the end
+    print_summary(args.input_file, args.output_dir, categories)
 
 if __name__ == "__main__":
     main()
