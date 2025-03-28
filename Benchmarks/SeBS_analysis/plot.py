@@ -217,8 +217,12 @@ def invocation_latency(variants, benchmarks):
     df = pd.read_csv(output_file_path)
     return df
 
-def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
+def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir, collect_results=None):
     """Create CDF plots of invocation latencies for all variants"""
+    
+    # Storage for percentile and stddev data
+    stats_results = []
+    stats_results.append("\nInvocation Latency Statistics:")
     
     # Setup the plot
     fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight))
@@ -230,6 +234,10 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
         # Filter for the current execution type
         type_df = df[df['type'] == exec_type]
         
+        stats_results.append(f"\n{titles[idx]}:")
+        stats_results.append(f"{'Variant':<20} {'P50 (s)':<10} {'P99 (s)':<10} {'StdDev (s)':<10}")
+        stats_results.append("-" * 50)
+        
         # Plot CDF for each variant
         for i, variant in enumerate(variants):
             variant_data = type_df[type_df['variant'] == variant]
@@ -239,6 +247,14 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
                 
             # Sort the data for CDF
             latencies = variant_data['invocation_latency'].sort_values().values
+            
+            # Calculate P50, P99, and standard deviation
+            if len(latencies) > 0:
+                p50 = np.percentile(latencies, 50)
+                p99 = np.percentile(latencies, 99)
+                stddev = np.std(latencies)
+                stats_results.append(f"{LABEL_MAPPINGS[variant]:<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
+            
             # Create CDF points
             y_values = np.arange(1, len(latencies) + 1) / len(latencies)
             
@@ -264,7 +280,11 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir):
         
         # Add log scale option for x-axis
         ax.set_xscale('log')
-        
+    
+    # Collect the statistics results if a collector is provided
+    if collect_results is not None:
+        collect_results.extend(stats_results)
+    
     # Add a single legend for both plots
     handles, labels = axes[1].get_legend_handles_labels()
     fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, -0.1),
@@ -506,7 +526,7 @@ def main():
     df, common_benchmarks = derive_incovation_data()
     print(df, common_benchmarks)
     # Create invocation latency CDF plots
-    plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output')
+    plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
     
     print("Plots saved in output directory")
     
