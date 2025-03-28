@@ -421,8 +421,68 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
 
     plt.close()
 
+def print_performance_comparison(df, benchmarks, metric, exec_type, collect_results=None):
+    """
+    Print geometric means and calculate how much percent Wallet is better or worse than other baselines
+    
+    If collect_results is provided, results will be stored there for later display.
+    """
+    # Filter data for the specific execution type
+    filtered_df = df[df['type'] == exec_type]
+    
+    # Calculate geometric means for each variant
+    geomeans = {}
+    for variant in VARIANTS:
+        variant_data = filtered_df[filtered_df['variant'] == variant]
+        # Calculate geometric mean (using log and exp to avoid numerical issues)
+        values = variant_data[metric].values
+        # Avoid zeros or negative values for geometric mean
+        if np.all(values > 0):
+            geomean = np.exp(np.mean(np.log(values)))
+            geomeans[variant] = geomean
+        else:
+            # Fallback if there are zeros or negative values
+            geomeans[variant] = np.nan
+    
+    # Store or print the results
+    result_lines = []
+    result_lines.append(f"\n{metric} ({exec_type} start) - Geometric Means:")
+    for variant in VARIANTS:
+        result_lines.append(f"  {LABEL_MAPPINGS[variant]}: {geomeans[variant]:.6f} s")
+    
+    # Get the Wallet value
+    wallet_variant = 'wallet_cow_prealloc'
+    wallet_value = geomeans.get(wallet_variant)
+    
+    if wallet_value is None:
+        result_lines.append(f"No data for Wallet in {metric} ({exec_type} start)")
+    else:
+        # Compare Wallet with other variants
+        result_lines.append(f"\n{metric} ({exec_type} start) - Wallet Comparison:")
+        for variant in VARIANTS:
+            if variant != wallet_variant:
+                baseline_value = geomeans.get(variant)
+                if baseline_value is not None and not np.isnan(baseline_value):
+                    # Calculate percentage difference: (wallet - baseline) / baseline * 100
+                    pct_diff = (wallet_value - baseline_value) / baseline_value * 100
+                    comparison = "slower" if pct_diff > 0 else "faster"
+                    result_lines.append(f"  Wallet is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]}")
+                else:
+                    result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
+    
+    # If collect_results is provided, add the results there
+    if collect_results is not None:
+        collect_results.extend(result_lines)
+    
+    # Also print immediately if needed
+    # for line in result_lines:
+    #     print(line)
+
 def main():
     global VARIANTS
+    # Storage for all performance comparison results
+    all_comparison_results = []
+    
     # Load and process data
     df, common_benchmarks = load_and_process_data()
 
@@ -438,6 +498,8 @@ def main():
         for exec_type in exec_types:
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
+            # Collect performance comparison results instead of printing immediately
+            print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
 
     # Load and process data and derive the invocation latency values
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
@@ -447,6 +509,14 @@ def main():
     plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output')
     
     print("Plots saved in output directory")
+    
+    # Print all performance comparison results at the end
+    print("\n" + "="*50)
+    print("PERFORMANCE COMPARISON SUMMARY")
+    print("="*50)
+    for line in all_comparison_results:
+        print(line)
+    print("="*50)
 
 if __name__ == "__main__":
     main()
