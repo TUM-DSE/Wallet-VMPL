@@ -521,6 +521,169 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir, geo_only=Fal
     plt.close(fig)
     plt.close(fig_log)
 
+def print_performance_summary(df, benchmarks):
+    """Print geometric mean values and performance improvements."""
+    wallet_variants = ['wallet', 'wallet_cow_prealloc']
+    exec_types = ['cold', 'hot']
+    
+    # Filter data for wallet variants
+    wallet_df = df[df['variant'].isin(wallet_variants)]
+    
+    print("\n===== PERFORMANCE SUMMARY =====")
+    print("Geometric Mean Client Times (seconds):")
+    
+    improvements = {}
+    
+    for exec_type in exec_types:
+        print(f"\n{exec_type.capitalize()} Start:")
+        
+        geomeans = {}
+        for variant in wallet_variants:
+            variant_data = wallet_df[(wallet_df['variant'] == variant) & (wallet_df['type'] == exec_type)]
+            values = variant_data['client_time'].values
+            
+            # Calculate geometric mean (using log and exp to avoid numerical issues)
+            if len(values) > 0 and np.all(values > 0):
+                geomean = np.exp(np.mean(np.log(values)))
+                geomeans[variant] = geomean
+                variant_label = "With CoW" if variant == 'wallet_cow_prealloc' else "Without CoW"
+                print(f"  {variant_label}: {geomean:.4f}s")
+            else:
+                print(f"  {variant}: No valid data")
+                geomeans[variant] = np.nan
+        
+        # Calculate improvement
+        if 'wallet' in geomeans and 'wallet_cow_prealloc' in geomeans:
+            if not np.isnan(geomeans['wallet']) and not np.isnan(geomeans['wallet_cow_prealloc']):
+                improvement = ((geomeans['wallet'] - geomeans['wallet_cow_prealloc']) / geomeans['wallet']) * 100
+                improvements[exec_type] = improvement
+                print(f"  Improvement with CoW: {improvement:.2f}%")
+            else:
+                print("  Improvement: Cannot calculate (missing data)")
+        else:
+            print("  Improvement: Cannot calculate (missing variants)")
+    
+    # Per-benchmark performance improvements
+    print("\n\nPer-Benchmark Performance Improvements:")
+    
+    for exec_type in exec_types:
+        print(f"\n{exec_type.capitalize()} Start:")
+        
+        for bench in benchmarks:
+            without_cow_data = wallet_df[(wallet_df['variant'] == 'wallet') & 
+                                        (wallet_df['type'] == exec_type) & 
+                                        (wallet_df['benchmark'] == bench)]
+            with_cow_data = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
+                                     (wallet_df['type'] == exec_type) & 
+                                     (wallet_df['benchmark'] == bench)]
+            
+            if not without_cow_data.empty and not with_cow_data.empty:
+                without_cow_time = without_cow_data['client_time'].values[0]
+                with_cow_time = with_cow_data['client_time'].values[0]
+                
+                if without_cow_time > 0:  # Avoid division by zero
+                    bench_improvement = ((without_cow_time - with_cow_time) / without_cow_time) * 100
+                    bench_name = bench.split('.')[1]  # Extract readable name from benchmark ID
+                    print(f"  {bench_name}: {without_cow_time:.4f}s → {with_cow_time:.4f}s (Improvement: {bench_improvement:.2f}%)")
+                else:
+                    print(f"  {bench}: Cannot calculate (zero or negative time)")
+            else:
+                print(f"  {bench}: Missing data")
+    
+    print("\n================================")
+    
+    # Add the formatted table
+    print("\n\nPerformance Comparison Table:")
+    print("Benchmark                 Cold (w/o) Cold (w/)  Cold Impr. Hot (w/o)  Hot (w/)   Hot Impr. ")
+    print("--------------------------------------------------------------------------------")
+    
+    # Collect data for all benchmarks
+    benchmark_data = []
+    cold_improvements = []
+    hot_improvements = []
+    
+    for bench in benchmarks:
+        bench_name = bench.split('.')[1]
+        
+        cold_without = wallet_df[(wallet_df['variant'] == 'wallet') & 
+                                (wallet_df['type'] == 'cold') & 
+                                (wallet_df['benchmark'] == bench)]
+        cold_with = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
+                            (wallet_df['type'] == 'cold') & 
+                            (wallet_df['benchmark'] == bench)]
+        
+        hot_without = wallet_df[(wallet_df['variant'] == 'wallet') & 
+                              (wallet_df['type'] == 'hot') & 
+                              (wallet_df['benchmark'] == bench)]
+        hot_with = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
+                           (wallet_df['type'] == 'hot') & 
+                           (wallet_df['benchmark'] == bench)]
+        
+        # Initialize values
+        cold_wo_time = cold_w_time = hot_wo_time = hot_w_time = np.nan
+        cold_impr = hot_impr = np.nan
+        
+        # Extract values if data exists
+        if not cold_without.empty:
+            cold_wo_time = cold_without['client_time'].values[0]
+        if not cold_with.empty:
+            cold_w_time = cold_with['client_time'].values[0]
+        if not hot_without.empty:
+            hot_wo_time = hot_without['client_time'].values[0]
+        if not hot_with.empty:
+            hot_w_time = hot_with['client_time'].values[0]
+        
+        # Calculate improvements
+        if cold_wo_time > 0 and not np.isnan(cold_w_time):
+            cold_impr = ((cold_wo_time - cold_w_time) / cold_wo_time) * 100
+            cold_improvements.append(cold_impr)
+        
+        if hot_wo_time > 0 and not np.isnan(hot_w_time):
+            hot_impr = ((hot_wo_time - hot_w_time) / hot_wo_time) * 100
+            hot_improvements.append(hot_impr)
+        
+        benchmark_data.append({
+            'name': bench_name,
+            'cold_wo': cold_wo_time,
+            'cold_w': cold_w_time,
+            'cold_impr': cold_impr,
+            'hot_wo': hot_wo_time,
+            'hot_w': hot_w_time,
+            'hot_impr': hot_impr
+        })
+    
+    # Print each row
+    for data in benchmark_data:
+        name = data['name']
+        cold_wo = f"{data['cold_wo']:.4f}s" if not np.isnan(data['cold_wo']) else "N/A"
+        cold_w = f"{data['cold_w']:.4f}s" if not np.isnan(data['cold_w']) else "N/A"
+        cold_impr = f"{data['cold_impr']:.2f}%" if not np.isnan(data['cold_impr']) else "N/A"
+        hot_wo = f"{data['hot_wo']:.4f}s" if not np.isnan(data['hot_wo']) else "N/A"
+        hot_w = f"{data['hot_w']:.4f}s" if not np.isnan(data['hot_w']) else "N/A"
+        hot_impr = f"{data['hot_impr']:.2f}%" if not np.isnan(data['hot_impr']) else "N/A"
+        
+        print(f"{name:<25} {cold_wo:<10} {cold_w:<10} {cold_impr:<10} {hot_wo:<10} {hot_w:<10} {hot_impr:<10}")
+    
+    print("--------------------------------------------------------------------------------")
+    
+    # Calculate geometric means of improvements
+    if len(cold_improvements) > 0:
+        cold_geomean = np.exp(np.mean(np.log(np.array(cold_improvements)))) if np.all(np.array(cold_improvements) > 0) else np.nan
+        cold_geomean_str = f"{cold_geomean:.2f}%" if not np.isnan(cold_geomean) else "N/A"
+    else:
+        cold_geomean_str = "N/A"
+        
+    if len(hot_improvements) > 0:
+        hot_geomean = np.exp(np.mean(np.log(np.array(hot_improvements)))) if np.all(np.array(hot_improvements) > 0) else np.nan
+        hot_geomean_str = f"{hot_geomean:.2f}%" if not np.isnan(hot_geomean) else "N/A"
+    else:
+        hot_geomean_str = "N/A"
+    
+    print(f"Geometric Mean{' '*41}{cold_geomean_str:<10} {' '*21}{hot_geomean_str:<10}")
+    
+    print("\n================================")
+    return improvements
+
 def main():
     global VARIANTS
 
@@ -546,6 +709,9 @@ def main():
     plot_wallet_comparison_grouped_bars(client_df, common_benchmarks, output_dir, geo_only=True)
     
     print("Wallet comparison plots saved in output directory")
+    
+    # Print performance summary
+    print_performance_summary(client_df, common_benchmarks)
 
 if __name__ == "__main__":
     main()

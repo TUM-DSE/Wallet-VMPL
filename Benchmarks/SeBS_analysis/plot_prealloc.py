@@ -144,6 +144,42 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     geomean_hot_no_prealloc = np.exp(np.mean(np.log(hot_no_prealloc[metric].values))) if len(hot_no_prealloc) > 0 and np.all(hot_no_prealloc[metric].values > 0) else np.nan
     geomean_hot_prealloc = np.exp(np.mean(np.log(hot_prealloc[metric].values))) if len(hot_prealloc) > 0 and np.all(hot_prealloc[metric].values > 0) else np.nan
     
+    # Calculate performance improvements for geo means
+    cold_improvement = (geomean_cold_no_prealloc - geomean_cold_prealloc) / geomean_cold_no_prealloc * 100 if not np.isnan(geomean_cold_no_prealloc) and not np.isnan(geomean_cold_prealloc) else np.nan
+    hot_improvement = (geomean_hot_no_prealloc - geomean_hot_prealloc) / geomean_hot_no_prealloc * 100 if not np.isnan(geomean_hot_no_prealloc) and not np.isnan(geomean_hot_prealloc) else np.nan
+    
+    # Calculate per-benchmark improvements
+    benchmark_improvements = {}
+    for i, bench in enumerate(benchmarks):
+        cold_no = cold_no_prealloc[cold_no_prealloc['benchmark'] == bench][metric].values[0] if len(cold_no_prealloc[cold_no_prealloc['benchmark'] == bench]) > 0 else np.nan
+        cold_pre = cold_prealloc[cold_prealloc['benchmark'] == bench][metric].values[0] if len(cold_prealloc[cold_prealloc['benchmark'] == bench]) > 0 else np.nan
+        hot_no = hot_no_prealloc[hot_no_prealloc['benchmark'] == bench][metric].values[0] if len(hot_no_prealloc[hot_no_prealloc['benchmark'] == bench]) > 0 else np.nan
+        hot_pre = hot_prealloc[hot_prealloc['benchmark'] == bench][metric].values[0] if len(hot_prealloc[hot_prealloc['benchmark'] == bench]) > 0 else np.nan
+        
+        cold_bench_improvement = (cold_no - cold_pre) / cold_no * 100 if not np.isnan(cold_no) and not np.isnan(cold_pre) and cold_no > 0 else np.nan
+        hot_bench_improvement = (hot_no - hot_pre) / hot_no * 100 if not np.isnan(hot_no) and not np.isnan(hot_pre) and hot_no > 0 else np.nan
+        
+        benchmark_improvements[bench] = {
+            'cold_improvement': cold_bench_improvement,
+            'hot_improvement': hot_bench_improvement,
+            'cold_no_prealloc': cold_no,
+            'cold_prealloc': cold_pre,
+            'hot_no_prealloc': hot_no,
+            'hot_prealloc': hot_pre
+        }
+    
+    # Return the geometric means and improvements instead of printing them
+    results = {
+        'metric': metric,
+        'cold_no_prealloc': geomean_cold_no_prealloc,
+        'cold_prealloc': geomean_cold_prealloc,
+        'hot_no_prealloc': geomean_hot_no_prealloc,
+        'hot_prealloc': geomean_hot_prealloc,
+        'cold_improvement': cold_improvement,
+        'hot_improvement': hot_improvement,
+        'benchmark_improvements': benchmark_improvements
+    }
+    
     # Add geomean data to display
     all_benchmarks = benchmarks + ['geomean']
 
@@ -270,6 +306,8 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     crop_pdf(output_dir / f'wallet_prealloc_{metric}_{y_scale}{suffix}.pdf')
     
     plt.close()
+    
+    return results
 
 def main():
     global VARIANTS
@@ -279,14 +317,75 @@ def main():
     
     # Create separate plots for each metric and execution type
     metrics = ['exec_time', 'client_time']
+    
+    # Collection to store all results
+    all_results = []
+    
     # Create new combined plots with all four wallet variants
     for metric in metrics:
-        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear')
-        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log')
-        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear', geo_only=True)
-        create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log', geo_only=True)
+        results_linear = create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear')
+        results_log = create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log')
+        results_linear_geo = create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'linear', geo_only=True)
+        results_log_geo = create_wallet_combined_plot(df, common_benchmarks, metric, 'output', 'log', geo_only=True)
+        
+        # Only add one result per metric (they all have the same geometric means)
+        all_results.append(results_linear)
     
-    print("Plots saved in output directory")
+    # Print all geometric means and improvements at the end
+    print("\n======= PERFORMANCE SUMMARY =======")
+    for result in all_results:
+        metric = result['metric']
+        print(f"\n--- Geometric Means for {metric} ---")
+        print(f"Cold start (w/o prealloc): {result['cold_no_prealloc']:.4f}s")
+        print(f"Cold start (w/ prealloc): {result['cold_prealloc']:.4f}s")
+        print(f"Hot start (w/o prealloc): {result['hot_no_prealloc']:.4f}s")
+        print(f"Hot start (w/ prealloc): {result['hot_prealloc']:.4f}s")
+        
+        # Print performance improvements
+        if not np.isnan(result['cold_improvement']):
+            print(f"Cold start improvement with preallocation: {result['cold_improvement']:.2f}%")
+        
+        if not np.isnan(result['hot_improvement']):
+            print(f"Hot start improvement with preallocation: {result['hot_improvement']:.2f}%")
+        
+        # Print per-benchmark improvements
+        print(f"\n--- Per-Benchmark Improvements for {metric} ---")
+        print(f"{'Benchmark':<25} {'Cold (w/o)':<10} {'Cold (w/)':<10} {'Cold Impr.':<10} {'Hot (w/o)':<10} {'Hot (w/)':<10} {'Hot Impr.':<10}")
+        print("-" * 80)
+        
+        # Collect improvement values for geometric mean calculation
+        cold_improvements = []
+        hot_improvements = []
+        
+        for bench, data in result['benchmark_improvements'].items():
+            bench_name = bench.split('.')[1]
+            cold_no = f"{data['cold_no_prealloc']:.4f}s" if not np.isnan(data['cold_no_prealloc']) else "N/A"
+            cold_pre = f"{data['cold_prealloc']:.4f}s" if not np.isnan(data['cold_prealloc']) else "N/A"
+            hot_no = f"{data['hot_no_prealloc']:.4f}s" if not np.isnan(data['hot_no_prealloc']) else "N/A"
+            hot_pre = f"{data['hot_prealloc']:.4f}s" if not np.isnan(data['hot_prealloc']) else "N/A"
+            
+            cold_impr = f"{data['cold_improvement']:.2f}%" if not np.isnan(data['cold_improvement']) else "N/A"
+            hot_impr = f"{data['hot_improvement']:.2f}%" if not np.isnan(data['hot_improvement']) else "N/A"
+            
+            print(f"{bench_name:<25} {cold_no:<10} {cold_pre:<10} {cold_impr:<10} {hot_no:<10} {hot_pre:<10} {hot_impr:<10}")
+            
+            # Collect non-NaN improvement values for geometric mean
+            if not np.isnan(data['cold_improvement']):
+                cold_improvements.append(data['cold_improvement'])
+            if not np.isnan(data['hot_improvement']):
+                hot_improvements.append(data['hot_improvement'])
+        
+        # Calculate geometric means of improvements
+        geo_mean_cold_impr = np.exp(np.mean(np.log(np.abs(cold_improvements)))) if cold_improvements and np.all(np.array(cold_improvements) != 0) else np.nan
+        geo_mean_hot_impr = np.exp(np.mean(np.log(np.abs(hot_improvements)))) if hot_improvements and np.all(np.array(hot_improvements) != 0) else np.nan
+        
+        # Print the geometric mean row
+        print("-" * 80)
+        geo_mean_cold_str = f"{geo_mean_cold_impr:.2f}%" if not np.isnan(geo_mean_cold_impr) else "N/A"
+        geo_mean_hot_str = f"{geo_mean_hot_impr:.2f}%" if not np.isnan(geo_mean_hot_impr) else "N/A"
+        print(f"{'Geometric Mean':<25} {'':<10} {'':<10} {geo_mean_cold_str:<10} {'':<10} {'':<10} {geo_mean_hot_str:<10}")
+    
+    print("\nPlots saved in output directory")
 
 if __name__ == "__main__":
     main()
