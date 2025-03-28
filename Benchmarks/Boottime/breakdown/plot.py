@@ -409,8 +409,8 @@ def create_side_by_side_plot(categories, output_dir):
     # Set y-axis limits with two breaks
     max_zygote = df[df['Component'] == "Zygote creation"]['Time (ms)'].max()
     ax1.set_ylim(250, max_zygote-150)  # Upper section for high values (Zygote)
-    ax2.set_ylim(1, 250)                 # Middle section for medium values
-    ax3.set_ylim(0, 1)                  # Lower section for small values
+    ax2.set_ylim(0.6, 250)                 # Middle section for medium values
+    ax3.set_ylim(0, 0.6)                  # Lower section for small values
     
     # Hide the spines between axes
     ax1.spines.bottom.set_visible(False)
@@ -454,9 +454,9 @@ def create_side_by_side_plot(categories, output_dir):
     
     # Define y-axis section boundaries
     top_min = 250
-    middle_min = 1
+    middle_min = 0.6
     middle_max = 250
-    bottom_max = 1
+    bottom_max = 0.6
     
     for i, component in enumerate(components_to_show):
         component_data = df[df['Component'] == component]
@@ -537,6 +537,50 @@ def create_side_by_side_plot(categories, output_dir):
     crop_pdf(output_path)
     
     plt.close()
+    
+    # Print summary of values for each component
+    print("\n=== Summary of Component Values (ms) ===")
+    print(f"{'Benchmark':<20}", end="")
+    for comp in components_to_show:
+        print(f"{comp:<20}", end="")
+    print()
+    
+    # Print dashes for formatting
+    print("-" * (20 + 20 * len(components_to_show)))
+    
+    # Initialize sum for calculating averages
+    component_sums = {comp: 0.0 for comp in components_to_show}
+    
+    # Print values for each benchmark
+    for benchmark in ordered_benchmarks:
+        print(f"{benchmark:<20}", end="")
+        for comp in components_to_show:
+            value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            print(f"{value:<20.3f}", end="")
+            component_sums[comp] += value
+        print()
+        
+    # Print averages
+    print("-" * (20 + 20 * len(components_to_show)))
+    print(f"{'Average':<20}", end="")
+    for comp in components_to_show:
+        avg_value = component_sums[comp] / len(ordered_benchmarks)
+        print(f"{avg_value:<20.3f}", end="")
+    print()
+    print("=" * (20 + 20 * len(components_to_show)))
+    
+    # Print total time for each benchmark
+    print("\n=== Total Time per Benchmark (ms) ===")
+    for benchmark in ordered_benchmarks:
+        total = 0
+        for comp in components_to_show:
+            total += df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+        print(f"{benchmark:<20}: {total:.3f}")
+    
+    total_avg = sum(component_sums.values()) / len(ordered_benchmarks)
+    print("-" * 40)
+    print(f"{'Average Total':<20}: {total_avg:.3f}")
+    print("=" * 40)
 
 def main():
     parser = argparse.ArgumentParser(description='Generate stacked bar charts from boot time data')
@@ -547,10 +591,18 @@ def main():
     
     # Load and process data
     raw_data = pd.read_csv("results.csv")
+    
+    # Store the all_simple categories for final summary
+    all_simple_categories = None
 
     for type_ in ["all", "all_simple", "zygote", "trustlet", "invoke", "zygote_full",
                   "invoke_full", "datacopy"]:
         categories = calculate_categories(raw_data, type_=type_)
+        
+        # Store all_simple categories for final summary
+        if type_ == "all_simple":
+            all_simple_categories = categories
+        
         # Create plots for all categories
         #create_cutoff_plot(categories, args.output_dir)
         create_plot(categories, args.output_dir, type_=type_)
@@ -560,8 +612,82 @@ def main():
         if type_ == "all_simple":
             create_side_by_side_plot(categories, args.output_dir)
 
-    # Create plots for VM and CVM only for motivation
+    # Print plots saved message
     print(f"Plots saved in {args.output_dir}")
+    
+    # Print final summary at the end of execution
+    if all_simple_categories:
+        components_to_show = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
+        
+        # Convert to DataFrame for easier processing
+        data = []
+        for benchmark, components in all_simple_categories.items():
+            for component_name in components_to_show:
+                value = components.get(component_name, 0)
+                data.append({
+                    'Benchmark': benchmark,
+                    'Component': component_name,
+                    'Time (ms)': value
+                })
+        
+        df = pd.DataFrame(data)
+        
+        # Define benchmark order
+        benchmark_order = [
+            "thumbnailer", 
+            "graph-mst", 
+            "dynamic-html", 
+            "graph-pagerank", 
+            "dna-visualisation", 
+            "graph-bfs", 
+            "compression"
+        ]
+        
+        # Filter and order benchmarks
+        available_benchmarks = df['Benchmark'].unique()
+        ordered_benchmarks = [b for b in benchmark_order if b in available_benchmarks]
+        
+        # Print summary table
+        print("\n=== FINAL SUMMARY: Component Values (ms) ===")
+        print(f"{'Benchmark':<20}", end="")
+        for comp in components_to_show:
+            print(f"{comp:<20}", end="")
+        print()
+        
+        print("-" * (20 + 20 * len(components_to_show)))
+        
+        # Initialize component sums for averages
+        component_sums = {comp: 0.0 for comp in components_to_show}
+        
+        # Print values for each benchmark
+        for benchmark in ordered_benchmarks:
+            print(f"{benchmark:<20}", end="")
+            for comp in components_to_show:
+                value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+                print(f"{value:<20.3f}", end="")
+                component_sums[comp] += value
+            print()
+            
+        # Print averages
+        print("-" * (20 + 20 * len(components_to_show)))
+        print(f"{'Average':<20}", end="")
+        for comp in components_to_show:
+            avg_value = component_sums[comp] / len(ordered_benchmarks)
+            print(f"{avg_value:<20.3f}", end="")
+        print()
+        
+        # Print total time for each benchmark
+        print("\n=== FINAL SUMMARY: Total Time per Benchmark (ms) ===")
+        for benchmark in ordered_benchmarks:
+            total = 0
+            for comp in components_to_show:
+                total += df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            print(f"{benchmark:<20}: {total:.3f}")
+        
+        total_avg = sum(component_sums.values()) / len(ordered_benchmarks)
+        print("-" * 40)
+        print(f"{'Average Total':<20}: {total_avg:.3f}")
+        print("=" * 40)
 
 if __name__ == "__main__":
     main()
