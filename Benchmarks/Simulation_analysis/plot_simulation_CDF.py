@@ -31,7 +31,7 @@ TICKS_FONTSIZE = 5
 LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 palette = sns.color_palette("deep", n_colors=6)
-figwidth = 4.3
+figwidth = 3.3
 figheight = 2.2
 
 TRACE_NAME = "default"

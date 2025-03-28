@@ -24,8 +24,8 @@ TITLE_FONTSIZE = 7
 TICKS_FONTSIZE = 5
 LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
-figwidth = 4.3  # 3.3 inch for single column, 7 inch for double column
-figheight = 2.2
+figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
+figheight = 2.0
 VARIANTS = ['wallet', 'wallet_cow_prealloc']
 LABEL_MAPPINGS = {
     'wallet' : 'Wallet - CoW Disabled',
