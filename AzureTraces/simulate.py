@@ -183,7 +183,7 @@ def is_any_active(nodes):
                 return True
     return False
 
-def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file):
+def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft_warm_time, soft_warm_std, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file):
 
     # index into the csv
     app_hash = 0
@@ -273,14 +273,20 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
         #look for nodes again, just in case there is a better one than the previous candidate
         assigned_node, assigned_slot, cold_boot = scheduler.pick_next_node(nodes, f)
         soft_warm = False
+
+        f_initial_duration = f.duration
+        f_boot_time = 0
         if cold_boot == True:
             if random.random() < percentage_soft_warm:
-                f.duration = f.duration + soft_warm_time
+                f_boot_time = np.random.normal(soft_warm_time, soft_warm_std) 
+                f.duration = f.duration + f_boot_time
                 soft_warm = True
             else:
-                f.duration = f.duration + cold_boot_time
+                f_boot_time = np.random.normal(cold_boot_time, cold_std)
+                f.duration = f.duration + f_boot_time
         else:
-            f.duration = f.duration + warm_boot_time
+            f_boot_time = np.random.normal(warm_boot_time, warm_std)
+            f.duration = f.duration + f_boot_time
 
         f.end_time = f.start_time + f.duration
 
@@ -294,9 +300,9 @@ def main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_func
         cache_slot = cache_function(assigned_node, f)
         log(f'[{sim_time} ]Function {f.application_hash + f.func_hash} has been cached in slot {cache_slot} on node {assigned_node.node_id}')
 
-        f_delay = f.start_time - f.arrival_time
+        f_delay = f.start_time - f.arrival_time + f_boot_time
         f_end_to_end = f.end_time - f.arrival_time
-        f_slowdown = f_end_to_end / f.duration
+        f_slowdown = f_end_to_end / f_initial_duration
         total_delay = total_delay + f_delay
         delays[cur_func] = f_delay
         per_func_delays[curr_f_id].append(f_delay)
@@ -383,7 +389,7 @@ if __name__ == '__main__':
     max_execution_slots = args.execution_slots
     percentage_soft_warm = args.percentage_soft_warm
     input_file = args.input_file
-    out = main_sim(num_nodes, cold_boot_time, warm_boot_time, soft_warm_time, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file)
+    out = main_sim(num_nodes, cold_boot_time, 0, warm_boot_time, 0, soft_warm_time, 0, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file)
     print(out)
 
 
