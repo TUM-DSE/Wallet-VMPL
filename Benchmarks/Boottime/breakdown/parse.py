@@ -87,13 +87,18 @@ BENCHMARKS = [
 ]
 
 print("zygote_data_copy,zygote_init,trustlet_creation,trustlet_function,invoke_data,invoke_setup", end = "")
-print(",invoke_data_copy,invoke_time,invoke_result_copy,total_time,benchmark,alloc")
+print(",invoke_data_copy,invoke_time,invoke_result_copy,total_time,benchmark,alloc,cow")
 for a in ["no_prealloc", "prealloc"]:
-    for b in BENCHMARKS:
-        file_name = f"wallet-{b}-{a}"
-        file_path = "results/" + file_name
-        data = parse(file_path)
-        for p in data:
-            p = [str(x) for x in p]
-            print(",".join(p),end="")
-            print(f",{b},{a}")
+    for cow in ["", "-no_cow"]:
+        for b in BENCHMARKS:
+            file_name = f"wallet-{b}-{a}{cow}"
+            file_path = "results/" + file_name
+            data = parse(file_path)
+            if "-no_cow" in cow:
+                c = "cow"
+            else:
+                c = "no_cow"
+            for p in data:
+                p = [str(x) for x in p]
+                print(",".join(p),end="")
+                print(f",{b},{a},{c}")

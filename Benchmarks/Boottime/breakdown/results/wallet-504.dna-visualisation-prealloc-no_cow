@@ -1,0 +1,200 @@
+boot_time_eval.bt:34-37: WARNING: attaching to uprobe target file '/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin/qemu-system-x86_64' but matched 3 binaries
+Attaching 4 probes...
+1743193932068597798: 0 Monitor: Start
+1743194173269867739: 1 Monitor: Load Guest
+1743194173453148741: 25 
+1743194174356495998: 25 
+1743194174356651153: 25 
+1743194174362191056: 26 
+1743194174366407363: 50 
+1743194174452893188: 51 
+1743194177064611043: 52 
+1743194556293055577: 254 Monitor: request start
+1743194556293113908: 200 Monitor: zygote_data start
+1743194557050820517: 201 Monitor: zygote_data end
+1743194557050857317: 202 Monitor: zygote_init end
+1743194557050883927: 255 Monitor: request end
+1743194557055651112: 254 Monitor: request start
+1743194557055676690: 203 Monitor: trustlet_dup start
+1743194557147562494: 204 Monitor: trustlet_dup end
+1743194557147669658: 205 Monitor: trustlet_func_copy end
+1743194557147684566: 255 Monitor: request end
+1743194557826317593: 254 Monitor: request start
+1743194557826359272: 210 Monitor: copy_invoke_data start
+1743194557826393427: 211 Monitor: copy_invoke_data end
+1743194557826410399: 212 Monitor: invoke_setup end
+1743194557826430408: 213 Monitor: invoke_data_copy end
+1743194558842555719: 220 Monitor: invoke_result_copy
+1743194558842616956: 221 Monitor: invoke_result_copy end
+1743194558842628047: 214 Monitor: invoke end
+1743194558842638026: 255 Monitor: request end
+1743194558866023531: 254 Monitor: request start
+1743194558866051154: 210 Monitor: copy_invoke_data start
+1743194558866079648: 211 Monitor: copy_invoke_data end
+1743194558866096430: 212 Monitor: invoke_setup end
+1743194558884062862: 213 Monitor: invoke_data_copy end
+1743194567749231607: 220 Monitor: invoke_result_copy
+1743194567749311630: 221 Monitor: invoke_result_copy end
+1743194567749323612: 214 Monitor: invoke end
+1743194567749334072: 255 Monitor: request end
+1743194568451940974: 254 Monitor: request start
+1743194568451968716: 210 Monitor: copy_invoke_data start
+1743194568452000607: 211 Monitor: copy_invoke_data end
+1743194568452017870: 212 Monitor: invoke_setup end
+1743194568638602055: 213 Monitor: invoke_data_copy end
+1743194568750545727: 220 Monitor: invoke_result_copy
+1743194568885572720: 221 Monitor: invoke_result_copy end
+1743194568885595043: 214 Monitor: invoke end
+1743194568885605001: 255 Monitor: request end
+1743194580922383674: 254 Monitor: request start
+1743194580922427698: 200 Monitor: zygote_data start
+1743194581429479597: 201 Monitor: zygote_data end
+1743194581429517649: 202 Monitor: zygote_init end
+1743194581429528510: 255 Monitor: request end
+1743194581433754716: 254 Monitor: request start
+1743194581433787628: 203 Monitor: trustlet_dup start
+1743194581527236574: 204 Monitor: trustlet_dup end
+1743194581527322397: 205 Monitor: trustlet_func_copy end
+1743194581527335152: 255 Monitor: request end
+1743194582221794682: 254 Monitor: request start
+1743194582221828426: 210 Monitor: copy_invoke_data start
+1743194582221865967: 211 Monitor: copy_invoke_data end
+1743194582221883781: 212 Monitor: invoke_setup end
+1743194582221904420: 213 Monitor: invoke_data_copy end
+1743194583206081275: 220 Monitor: invoke_result_copy
+1743194583206143713: 221 Monitor: invoke_result_copy end
+1743194583206154935: 214 Monitor: invoke end
+1743194583206164804: 255 Monitor: request end
+1743194583222377962: 254 Monitor: request start
+1743194583222407187: 210 Monitor: copy_invoke_data start
+1743194583222436122: 211 Monitor: copy_invoke_data end
+1743194583222452553: 212 Monitor: invoke_setup end
+1743194583240176564: 213 Monitor: invoke_data_copy end
+1743194592055443508: 220 Monitor: invoke_result_copy
+1743194592055515876: 221 Monitor: invoke_result_copy end
+1743194592055527428: 214 Monitor: invoke end
+1743194592055538389: 255 Monitor: request end
+1743194592673659688: 254 Monitor: request start
+1743194592673689695: 210 Monitor: copy_invoke_data start
+1743194592673723719: 211 Monitor: copy_invoke_data end
+1743194592673740481: 212 Monitor: invoke_setup end
+1743194592862148675: 213 Monitor: invoke_data_copy end
+1743194592975187629: 220 Monitor: invoke_result_copy
+1743194593117203832: 221 Monitor: invoke_result_copy end
+1743194593117227837: 214 Monitor: invoke end
+1743194593117238207: 255 Monitor: request end
+1743194605083705472: 254 Monitor: request start
+1743194605083748183: 200 Monitor: zygote_data start
+1743194605583090273: 201 Monitor: zygote_data end
+1743194605583127474: 202 Monitor: zygote_init end
+1743194605583138354: 255 Monitor: request end
+1743194605587720797: 254 Monitor: request start
+1743194605587752988: 203 Monitor: trustlet_dup start
+1743194605682061278: 204 Monitor: trustlet_dup end
+1743194605682139988: 205 Monitor: trustlet_func_copy end
+1743194605682171368: 255 Monitor: request end
+1743194606398393337: 254 Monitor: request start
+1743194606398425128: 210 Monitor: copy_invoke_data start
+1743194606398460776: 211 Monitor: copy_invoke_data end
+1743194606398477728: 212 Monitor: invoke_setup end
+1743194606398498367: 213 Monitor: invoke_data_copy end
+1743194607378423538: 220 Monitor: invoke_result_copy
+1743194607378487139: 221 Monitor: invoke_result_copy end
+1743194607378498260: 214 Monitor: invoke end
+1743194607378508239: 255 Monitor: request end
+1743194607394774087: 254 Monitor: request start
+1743194607394805126: 210 Monitor: copy_invoke_data start
+1743194607394834492: 211 Monitor: copy_invoke_data end
+1743194607394850943: 212 Monitor: invoke_setup end
+1743194607412239987: 213 Monitor: invoke_data_copy end
+1743194616280403673: 220 Monitor: invoke_result_copy
+1743194616280470160: 221 Monitor: invoke_result_copy end
+1743194616280481211: 214 Monitor: invoke end
+1743194616280491380: 255 Monitor: request end
+1743194616898847315: 254 Monitor: request start
+1743194616898877292: 210 Monitor: copy_invoke_data start
+1743194616898912018: 211 Monitor: copy_invoke_data end
+1743194616898929411: 212 Monitor: invoke_setup end
+1743194617090319765: 213 Monitor: invoke_data_copy end
+1743194617203877346: 220 Monitor: invoke_result_copy
+1743194617346490333: 221 Monitor: invoke_result_copy end
+1743194617346516403: 214 Monitor: invoke end
+1743194617346527283: 255 Monitor: request end
+1743194629246730976: 254 Monitor: request start
+1743194629246770602: 200 Monitor: zygote_data start
+1743194629736883443: 201 Monitor: zygote_data end
+1743194629736920884: 202 Monitor: zygote_init end
+1743194629736932005: 255 Monitor: request end
+1743194629741516693: 254 Monitor: request start
+1743194629741544926: 203 Monitor: trustlet_dup start
+1743194629839646549: 204 Monitor: trustlet_dup end
+1743194629839718876: 205 Monitor: trustlet_func_copy end
+1743194629839730829: 255 Monitor: request end
+1743194630570592285: 254 Monitor: request start
+1743194630570623053: 210 Monitor: copy_invoke_data start
+1743194630570656918: 211 Monitor: copy_invoke_data end
+1743194630570674672: 212 Monitor: invoke_setup end
+1743194630570695561: 213 Monitor: invoke_data_copy end
+1743194631533415137: 220 Monitor: invoke_result_copy
+1743194631533479139: 221 Monitor: invoke_result_copy end
+1743194631533490480: 214 Monitor: invoke end
+1743194631533500800: 255 Monitor: request end
+1743194631549708217: 254 Monitor: request start
+1743194631549738515: 210 Monitor: copy_invoke_data start
+1743194631549769964: 211 Monitor: copy_invoke_data end
+1743194631549787177: 212 Monitor: invoke_setup end
+1743194631567290378: 213 Monitor: invoke_data_copy end
+1743194640472981923: 220 Monitor: invoke_result_copy
+1743194640473059080: 221 Monitor: invoke_result_copy end
+1743194640473071964: 214 Monitor: invoke end
+1743194640473082344: 255 Monitor: request end
+1743194641087749445: 254 Monitor: request start
+1743194641087791796: 210 Monitor: copy_invoke_data start
+1743194641087831000: 211 Monitor: copy_invoke_data end
+1743194641087850006: 212 Monitor: invoke_setup end
+1743194641278897939: 213 Monitor: invoke_data_copy end
+1743194641391484754: 220 Monitor: invoke_result_copy
+1743194641532148936: 221 Monitor: invoke_result_copy end
+1743194641532187369: 214 Monitor: invoke end
+1743194641532198210: 255 Monitor: request end
+1743194653496931745: 254 Monitor: request start
+1743194653496966922: 200 Monitor: zygote_data start
+1743194653993944145: 201 Monitor: zygote_data end
+1743194653993975164: 202 Monitor: zygote_init end
+1743194653993986145: 255 Monitor: request end
+1743194653998120486: 254 Monitor: request start
+1743194653998148710: 203 Monitor: trustlet_dup start
+1743194654091969092: 204 Monitor: trustlet_dup end
+1743194654092031331: 205 Monitor: trustlet_func_copy end
+1743194654092042742: 255 Monitor: request end
+1743194654807301010: 254 Monitor: request start
+1743194654807331849: 210 Monitor: copy_invoke_data start
+1743194654807367927: 211 Monitor: copy_invoke_data end
+1743194654807384609: 212 Monitor: invoke_setup end
+1743194654807405238: 213 Monitor: invoke_data_copy end
+1743194655777187333: 220 Monitor: invoke_result_copy
+1743194655777246585: 221 Monitor: invoke_result_copy end
+1743194655777257676: 214 Monitor: invoke end
+1743194655777278787: 255 Monitor: request end
+1743194655794033945: 254 Monitor: request start
+1743194655794061107: 210 Monitor: copy_invoke_data start
+1743194655794091405: 211 Monitor: copy_invoke_data end
+1743194655794108447: 212 Monitor: invoke_setup end
+1743194655812024934: 213 Monitor: invoke_data_copy end
+1743194664623338659: 220 Monitor: invoke_result_copy
+1743194664623406438: 221 Monitor: invoke_result_copy end
+1743194664623417729: 214 Monitor: invoke end
+1743194664623427858: 255 Monitor: request end
+1743194665387271598: 254 Monitor: request start
+1743194665387308728: 210 Monitor: copy_invoke_data start
+1743194665387347342: 211 Monitor: copy_invoke_data end
+1743194665387365486: 212 Monitor: invoke_setup end
+1743194665577923798: 213 Monitor: invoke_data_copy end
+1743194665689555357: 220 Monitor: invoke_result_copy
+1743194665822840478: 221 Monitor: invoke_result_copy end
+1743194665822864894: 214 Monitor: invoke end
+1743194665822874773: 255 Monitor: request end
+
+
+
+
