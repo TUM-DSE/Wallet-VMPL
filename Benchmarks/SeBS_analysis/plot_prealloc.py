@@ -309,6 +309,87 @@ def create_wallet_combined_plot(df, benchmarks, metric, output_dir, y_scale='lin
     
     return results
 
+def create_improvement_plot(results, output_dir):
+    """Create a bar plot showing the geometric mean of performance improvements"""
+    # Filter for exec_time results only
+    exec_time_results = next((r for r in results if r['metric'] == 'exec_time'), None)
+    if not exec_time_results:
+        print("Error: Could not find exec_time results")
+        return
+    
+    # Calculate the geometric means from the benchmark improvements
+    cold_improvements = []
+    hot_improvements = []
+    
+    for bench, data in exec_time_results['benchmark_improvements'].items():
+        if not np.isnan(data['cold_improvement']):
+            cold_improvements.append(data['cold_improvement'])
+        if not np.isnan(data['hot_improvement']):
+            hot_improvements.append(data['hot_improvement'])
+    
+    geo_mean_cold_impr = np.exp(np.mean(np.log(np.abs(cold_improvements)))) if cold_improvements and np.all(np.array(cold_improvements) != 0) else np.nan
+    geo_mean_hot_impr = np.exp(np.mean(np.log(np.abs(hot_improvements)))) if hot_improvements and np.all(np.array(hot_improvements) != 0) else np.nan
+    
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(figwidth/2, figheight))
+    
+    # Define bar width and spacing
+    bar_width = 0.25
+    bar_spacing = 0.3  # Smaller spacing between bars (was default 1.0)
+    
+    # Define custom x positions for bars to place them closer together
+    x_positions = [0, bar_width + bar_spacing]
+    category_labels = ['Cold Start', 'Hot Start']
+    improvements = [geo_mean_cold_impr, geo_mean_hot_impr]
+    
+    # Use different colors for bars
+    colors = [palette[0], palette[1]]
+    
+    # Plot bars at custom positions
+    bars = ax.bar(x_positions, improvements, color=colors, edgecolor='black', width=bar_width)
+    
+    # Add value labels on top of bars
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.5,
+                f'{height:.2f}%', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+    
+    # Set custom x-tick positions and labels
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels(category_labels, fontsize=TICKS_FONTSIZE)
+    
+    # Customize the plot
+    ax.set_ylabel('Performance Improvement (%)', fontsize=TICKS_FONTSIZE)
+    ax.set_title('Higher is better ↑', fontsize=TITLE_FONTSIZE, color="navy")
+    plt.yticks(fontsize=TICKS_FONTSIZE)
+    
+    # Set x-axis limits to center the bars and add left margin
+    # Change from: ax.set_xlim(-bar_width/2, x_positions[-1] + bar_width)
+    ax.set_xlim(-bar_width, x_positions[-1] + bar_width)
+    
+    # Add gridlines
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    
+    # Set y-axis limit to start from 0
+    ax.set_ylim(bottom=0)
+    
+    # Add more space at the top
+    ylim = ax.get_ylim()
+    ax.set_ylim(bottom=0, top=ylim[1] * 1.1)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save the plot
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / 'prealloc_performance_improvement_geomean.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'prealloc_performance_improvement_geomean.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'prealloc_performance_improvement_geomean.pdf')
+    
+    plt.close()
+
 def main():
     global VARIANTS
     # Load and process the wallet cow variants only
@@ -330,6 +411,9 @@ def main():
         
         # Only add one result per metric (they all have the same geometric means)
         all_results.append(results_linear)
+    
+    # Create the improvement geometric mean plot
+    create_improvement_plot(all_results, 'output')
     
     # Print all geometric means and improvements at the end
     print("\n======= PERFORMANCE SUMMARY =======")
