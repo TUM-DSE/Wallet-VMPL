@@ -25,7 +25,7 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
-VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc']
+VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc', 'wallet_warm_cow_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
     'gramine' : 'LibOS (Gramine)',
@@ -34,6 +34,7 @@ LABEL_MAPPINGS = {
     'cvm'     : 'CVM (SEV-SNP)',
     'wallet_cow_prealloc'  : 'Wallet',
     'wallet_cow_no_prealloc' : 'Wallet',
+    'wallet_warm_cow_prealloc' : 'Wallet (warm)',
 }
 
 BENCHMARKS = [
@@ -441,6 +442,322 @@ def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale=
 
     plt.close()
 
+def create_complete_plot_warm_hot(df, benchmarks, metric, output_dir, y_scale='linear'):
+    """Create grouped bar chart with both warm and hot data for Wallet"""
+    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    
+    # We'll use hot data for standard variants as "warm"
+    # For Wallet, we'll use wallet_warm_cow_prealloc for warm and wallet_cow_prealloc for hot
+    warm_df = df[df['type'] == 'hot']  # Now using 'hot' for warm data for standard variants
+    hot_df = df[df['type'] == 'hot']   # Still using 'hot' for Wallet hot data
+    
+    # Make sure we have Wallet warm variant in the dataframe
+    wallet_warm_variant = 'wallet_warm_cow_prealloc'
+    wallet_hot_variant = 'wallet_cow_prealloc'
+    
+    # Check if wallet_warm_variant exists in the dataframe
+    if wallet_warm_variant not in df['variant'].unique():
+        print(f"Warning: {wallet_warm_variant} not found in data. Using {wallet_hot_variant} for warm data.")
+        # Fall back to using the hot variant for both warm and hot
+        wallet_warm_data = warm_df[warm_df['variant'] == wallet_hot_variant]
+    else:
+        wallet_warm_data = df[df['variant'] == wallet_warm_variant]
+    
+    # Calculate geometric means for each variant
+    warm_geomeans = {}
+    hot_geomeans = {}
+    
+    # First calculate warm geomeans for standard variants (using hot data)
+    for variant in VARIANTS:
+        if variant != wallet_hot_variant:  # Skip Wallet since we'll handle it separately
+            variant_warm_data = warm_df[warm_df['variant'] == variant]
+            values = variant_warm_data[metric].values
+            if len(values) > 0 and np.all(values > 0):
+                warm_geomeans[variant] = np.exp(np.mean(np.log(values)))
+            else:
+                warm_geomeans[variant] = np.nan
+    
+    # For Wallet warm and hot, we need special handling
+    # Find wallet warm data geomean
+    if len(wallet_warm_data) > 0:
+        # Get only the values for common benchmarks
+        common_bench_warm_wallet = []
+        for bench in benchmarks:
+            bench_data = wallet_warm_data[wallet_warm_data['benchmark'] == bench]
+            if len(bench_data) > 0:
+                common_bench_warm_wallet.append(bench_data[metric].values[0])
+        
+        if len(common_bench_warm_wallet) > 0 and np.all(np.array(common_bench_warm_wallet) > 0):
+            warm_geomeans[wallet_hot_variant] = np.exp(np.mean(np.log(common_bench_warm_wallet)))
+        else:
+            warm_geomeans[wallet_hot_variant] = np.nan
+    else:
+        warm_geomeans[wallet_hot_variant] = np.nan
+        print(f"Warning: No data found for {wallet_warm_variant}")
+    
+    # Find wallet hot data
+    wallet_hot_data = hot_df[hot_df['variant'] == wallet_hot_variant]
+    if len(wallet_hot_data) > 0:
+        values = wallet_hot_data[metric].values
+        if len(values) > 0 and np.all(values > 0):
+            hot_geomeans[wallet_hot_variant] = np.exp(np.mean(np.log(values)))
+        else:
+            hot_geomeans[wallet_hot_variant] = np.nan
+    else:
+        hot_geomeans[wallet_hot_variant] = np.nan
+    
+    # Add geomean data to display
+    all_benchmarks = benchmarks + ['geomean']
+    
+    # Calculate bar positions
+    n_variants = len(VARIANTS)
+    width = 0.10  # Width of each bar
+    variant_positions = np.arange(len(all_benchmarks))
+    
+    # Create labels with warm distinction for the legend
+    variant_labels = []
+    for variant in VARIANTS:
+        if variant == wallet_hot_variant:
+            variant_labels.append(f"{LABEL_MAPPINGS[variant]} (warm)")
+        else:
+            variant_labels.append(LABEL_MAPPINGS[variant])
+    
+    # Store bars for legend
+    all_bars = []
+    
+    # Plot bars for each variant
+    for i, variant in enumerate(VARIANTS):
+        positions = variant_positions + (i - n_variants/2 + 0.5) * width
+        
+        # For standard variants, plot hot data as "warm"
+        if variant != wallet_hot_variant:
+            variant_warm_data = warm_df[warm_df['variant'] == variant]
+            warm_values = []
+            
+            # Ensure we get data for each benchmark in the same order
+            for bench in benchmarks:
+                bench_data = variant_warm_data[variant_warm_data['benchmark'] == bench]
+                if len(bench_data) > 0:
+                    warm_values.append(bench_data[metric].values[0])
+                else:
+                    # Missing data point
+                    warm_values.append(np.nan)
+            
+            # Add geomean at the end
+            warm_values.append(warm_geomeans[variant])
+            
+            # Plot warm data for standard variants
+            bars = ax.bar(positions, warm_values, width, 
+                         label=variant_labels[i],
+                         color=palette[i], edgecolor='black', hatch=hatches[i%len(hatches)])
+            all_bars.append(bars)
+        else:
+            # For Wallet, plot warm data first
+            wallet_warm_values = []
+            
+            # Ensure we get wallet warm data for each benchmark in the same order
+            for bench in benchmarks:
+                bench_data = wallet_warm_data[wallet_warm_data['benchmark'] == bench]
+                if len(bench_data) > 0:
+                    wallet_warm_values.append(bench_data[metric].values[0])
+                else:
+                    # Missing data point
+                    wallet_warm_values.append(np.nan)
+            
+            # Add geomean at the end
+            wallet_warm_values.append(warm_geomeans[variant])
+            
+            # Plot warm data for Wallet if we have data
+            if len(wallet_warm_values) == len(positions):
+                bars = ax.bar(positions, wallet_warm_values, width, 
+                             label=variant_labels[i],
+                             color=palette[i], edgecolor='black', hatch=hatches[i%len(hatches)])
+                all_bars.append(bars)
+            
+            # Plot hot data for Wallet
+            hot_values = []
+            
+            # Ensure we get hot data for each benchmark in the same order
+            for bench in benchmarks:
+                bench_data = wallet_hot_data[wallet_hot_data['benchmark'] == bench]
+                if len(bench_data) > 0:
+                    hot_values.append(bench_data[metric].values[0])
+                else:
+                    # Missing data point
+                    hot_values.append(np.nan)
+            
+            # Add geomean at the end
+            hot_values.append(hot_geomeans[variant])
+            
+            # Use a different color for hot data
+            hot_color = 'tab:red'  # Different from the palette colors
+            hot_bars = ax.bar(positions, hot_values, width, 
+                            label=f"{LABEL_MAPPINGS[variant]} (hot)",
+                            color=hot_color, edgecolor='black', hatch='xx')
+            all_bars.append(hot_bars)
+    
+    # Customize the plot
+    ax.set_yscale(y_scale)
+    ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
+    plt.yticks(fontsize=TICKS_FONTSIZE)
+    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
+    ax.set_xticks(variant_positions)
+    xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
+    ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Create legend with custom ordering
+    legend_bars = []
+    legend_labels = []
+    
+    # Add all variants except Wallet hot
+    for i, bars in enumerate(all_bars):
+        if i == len(all_bars) - 1:  # Skip the last one (Wallet hot) for now
+            continue
+        legend_bars.append(bars)
+        if i == len(VARIANTS) - 1:  # If this is Wallet warm
+            legend_labels.append(f"{LABEL_MAPPINGS[wallet_hot_variant]} (warm)")
+        else:
+            legend_labels.append(variant_labels[i])
+    
+    # Add Wallet hot at the end
+    legend_bars.append(all_bars[-1])
+    legend_labels.append(f"{LABEL_MAPPINGS[wallet_hot_variant]} (hot)")
+    
+    # Create legend
+    legend = ax.legend(legend_bars, legend_labels, 
+                      bbox_to_anchor=(0.01, 0.98), loc='upper left',
+                      borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+    
+    # Add gridlines
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    if(y_scale not in "log"):
+        ax.set_ylim(bottom=0)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f'{metric}_warm_hot'
+    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / (filename + f'_{y_scale}.pdf'))
+
+    plt.close()
+
+def create_complete_plot_wallet_variants(df, benchmarks, metric, output_dir, y_scale='linear'):
+    """Create grouped bar chart with four different Wallet variants"""
+    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    
+    # Define the wallet variants we want to plot
+    wallet_variants = [
+        ('wallet_cow_prealloc', 'cold', 'Wallet (cold)'),
+        ('wallet_cow_prealloc', 'hot', 'Wallet (hot)'),
+        ('wallet_warm_cow_prealloc', 'cold', 'Wallet (cold/warm)'),
+        ('wallet_warm_cow_prealloc', 'hot', 'Wallet (warm)')
+    ]
+    
+    # Use a different color palette for the wallet variants
+    wallet_palette = sns.color_palette("husl", n_colors=len(wallet_variants))
+    wallet_hatches = ["", "//", "xx", "\\\\"]
+    
+    # Calculate geometric means for each variant
+    geomeans = {}
+    for variant_name, exec_type, label in wallet_variants:
+        variant_data = df[(df['variant'] == variant_name) & (df['type'] == exec_type)]
+        
+        # Calculate geometric mean (using log and exp to avoid numerical issues)
+        values = []
+        for bench in benchmarks:
+            bench_data = variant_data[variant_data['benchmark'] == bench]
+            if len(bench_data) > 0:
+                values.append(bench_data[metric].values[0])
+        
+        # Avoid zeros or negative values for geometric mean
+        if len(values) > 0 and np.all(np.array(values) > 0):
+            geomean = np.exp(np.mean(np.log(np.array(values))))
+            geomeans[(variant_name, exec_type)] = geomean
+        else:
+            # Fallback if there are zeros or negative values
+            geomeans[(variant_name, exec_type)] = np.nan
+    
+    # Add geomean data to display
+    all_benchmarks = benchmarks + ['geomean']
+    
+    # Calculate bar positions
+    n_variants = len(wallet_variants)
+    width = 0.15  # Width of each bar
+    variant_positions = np.arange(len(all_benchmarks))
+    
+    # Store bars for legend
+    all_bars = []
+    
+    # Plot bars for each variant
+    for i, (variant_name, exec_type, label) in enumerate(wallet_variants):
+        positions = variant_positions + (i - n_variants/2 + 0.5) * width
+        
+        variant_data = df[(df['variant'] == variant_name) & (df['type'] == exec_type)]
+        values = []
+        
+        # Ensure we get data for each benchmark in the same order
+        for bench in benchmarks:
+            bench_data = variant_data[variant_data['benchmark'] == bench]
+            if len(bench_data) > 0:
+                values.append(bench_data[metric].values[0])
+            else:
+                # Missing data point
+                values.append(np.nan)
+        
+        # Add geomean at the end
+        values.append(geomeans.get((variant_name, exec_type), np.nan))
+        
+        # Plot data if we have enough values
+        if len(values) == len(positions):
+            bars = ax.bar(positions, values, width,
+                         label=label,
+                         color=wallet_palette[i], edgecolor='black', 
+                         hatch=wallet_hatches[i % len(wallet_hatches)])
+            all_bars.append(bars)
+    
+    # Customize the plot
+    ax.set_yscale(y_scale)
+    ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
+    plt.yticks(fontsize=TICKS_FONTSIZE)
+    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
+    ax.set_xticks(variant_positions)
+    xlabels = [benchmark.split('.')[1] for benchmark in benchmarks] + ['Geo. Mean']
+    ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+    
+    ax.set_title('Wallet Variants Comparison (lower is better ↓)', 
+                 pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Create legend
+    legend = ax.legend(bbox_to_anchor=(0.01, 0.98), loc='upper left',
+                      borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+    
+    # Add gridlines
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    if y_scale not in "log":
+        ax.set_ylim(bottom=0)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f'{metric}_wallet_variants'
+    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / (filename + f'_{y_scale}.pdf'))
+
+    plt.close()
+
 def print_performance_comparison(df, benchmarks, metric, exec_type, collect_results=None):
     """
     Print geometric means and calculate how much percent Wallet is better or worse than other baselines
@@ -520,6 +837,16 @@ def main():
             create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
             # Collect performance comparison results instead of printing immediately
             print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
+    
+    # Create combined warm/hot plots for each metric
+    for metric in metrics:
+        create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output')
+        create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output', 'log')
+        
+    # Create wallet variant comparison plots
+    for metric in metrics:
+        create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output')
+        create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output', 'log')
 
     # Load and process data and derive the invocation latency values
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
