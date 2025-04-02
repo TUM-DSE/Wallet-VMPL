@@ -70,7 +70,7 @@ def load_data(file_path):
     
     return data
 
-def calculate_categories(raw_data, type_="all"):
+def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
     """Calculate values for each category"""
     # BENCHMARKS = [
     # '110.dynamic-html', #'120.uploader',
@@ -89,9 +89,20 @@ def calculate_categories(raw_data, type_="all"):
     '503.graph-bfs',
     '311.compression',
     ]
+    
+    # Filter by alloc and cow if specified
+    filtered_data = raw_data
+    if alloc is not None:
+        filtered_data = filtered_data[filtered_data["alloc"] == alloc]
+    if cow is not None:
+        filtered_data = filtered_data[filtered_data["cow"] == cow]
+    
     categories = {}
     for b in BENCHMARKS:
-        df = raw_data[raw_data["benchmark"].str.contains(b)]
+        df = filtered_data[filtered_data["benchmark"].str.contains(b)]
+        if df.empty:  # Skip benchmarks with no data matching the filters
+            continue
+            
         name = b.split('.')[1] # remove the number
         if type_ == "all":
             categories[name] = {
@@ -100,20 +111,15 @@ def calculate_categories(raw_data, type_="all"):
                 "Trustlet Creation": df["trustlet_creation"].mean() / 1e6,
                 "Trustlet Add Function": df["trustlet_function"].mean() / 1e6,
                 "Trustlet Creation": (df["trustlet_creation"].mean() + df["trustlet_function"].mean()) / 1e6,
-                #"Invoke Data Copy": df["invoke_data"].mean() / 1e6,
-                #"Invoke Setup": df["invoke_setup"].mean() / 1e6,
                 "Invoke Setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
                 "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
-                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
                 "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
             }
         elif type_ == "all_simple":
             categories[name] = {
                 "Zygote creation": (df["zygote_init"].mean() + df["zygote_data_copy"].mean()) / 1e6,
                 "Trustlet creation": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
-                #"Invoke Setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
                 "Input copy": df["invoke_data_copy"].mean() / 1e6,
-                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
                 "Output copy": df["invoke_result_copy"].mean()/ 1e6,
             }
         elif type_ == "zygote":
@@ -139,7 +145,6 @@ def calculate_categories(raw_data, type_="all"):
                 "Trustlet creation": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
                 "Invoke setup": (df["invoke_data"].mean() + df["invoke_setup"].mean()) / 1e6,
                 "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
-                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
                 "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
             }
         elif type_ == "datacopy":
@@ -154,7 +159,6 @@ def calculate_categories(raw_data, type_="all"):
                 "Invoke Data Copy": df["invoke_data"].mean() / 1e6,
                 "Invoke Setup": df["invoke_setup"].mean() / 1e6,
                 "Invoke Data Copy": df["invoke_data_copy"].mean() / 1e6,
-                #"Invoke Execution Time": df["invoke_time"].mean() / 1e6,
                 "Invoke Result Copy": df["invoke_result_copy"].mean()/ 1e6,
             }
         else:
@@ -163,7 +167,7 @@ def calculate_categories(raw_data, type_="all"):
         print(categories)
     return categories
 
-def create_cutoff_plot(categories, output_dir, y_scale='linear'):
+def create_cutoff_plot(categories, output_dir, y_scale='linear', suffix=''):
     """Create stacked bar chart with a broken y-axis for boot time data"""
     # Convert to DataFrame
     data = []
@@ -271,17 +275,17 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0.03)
 
-    # Save plots
+    # Save plots with suffix
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / 'boot_time_cutoff.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'boot_time_cutoff.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / 'boot_time_cutoff.pdf')
+    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'boot_time_cutoff{suffix}.pdf')
     
     plt.close()
 
-def create_plot(categories, output_dir, y_scale='linear', motivation=False, type_="all"):
+def create_plot(categories, output_dir, y_scale='linear', motivation=False, type_="all", suffix=''):
     """Create stacked bar chart"""
     
     if motivation:
@@ -372,18 +376,18 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     # Adjust layout to prevent label cutoff
     plt.tight_layout()
     
-    # Save plots
+    # Save plots with suffix
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     plot_type = 'motivation_' if motivation else ''
-    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}.pdf')
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf')
     
     plt.close()
 
-def create_side_by_side_plot(categories, output_dir):
+def create_side_by_side_plot(categories, output_dir, suffix=''):
     """Create side-by-side bar chart with a broken y-axis for time data"""
     # Convert to DataFrame in the right format for grouped bar chart
     data = []
@@ -530,8 +534,8 @@ def create_side_by_side_plot(categories, output_dir):
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0.05)
     
-    # Save plots
-    output_path = Path(output_dir) / 'runtime_init_linear_time.pdf'
+    # Save plots with suffix
+    output_path = Path(output_dir) / f'runtime_init_linear_time{suffix}.pdf'
     plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
     plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
     crop_pdf(output_path)
@@ -539,7 +543,7 @@ def create_side_by_side_plot(categories, output_dir):
     plt.close()
     
     # Print summary of values for each component
-    print("\n=== Summary of Component Values (ms) ===")
+    print(f"\n=== Summary of Component Values (ms) {suffix} ===")
     print(f"{'Benchmark':<20}", end="")
     for comp in components_to_show:
         print(f"{comp:<20}", end="")
@@ -570,7 +574,7 @@ def create_side_by_side_plot(categories, output_dir):
     print("=" * (20 + 20 * len(components_to_show)))
     
     # Print total time for each benchmark
-    print("\n=== Total Time per Benchmark (ms) ===")
+    print(f"\n=== Total Time per Benchmark (ms) {suffix} ===")
     for benchmark in ordered_benchmarks:
         total = 0
         for comp in components_to_show:
@@ -592,102 +596,200 @@ def main():
     # Load and process data
     raw_data = pd.read_csv("results.csv")
     
-    # Store the all_simple categories for final summary
-    all_simple_categories = None
-
-    for type_ in ["all", "all_simple", "zygote", "trustlet", "invoke", "zygote_full",
-                  "invoke_full", "datacopy"]:
-        categories = calculate_categories(raw_data, type_=type_)
-        
-        # Store all_simple categories for final summary
-        if type_ == "all_simple":
-            all_simple_categories = categories
-        
-        # Create plots for all categories
-        #create_cutoff_plot(categories, args.output_dir)
-        create_plot(categories, args.output_dir, type_=type_)
-        create_plot(categories, args.output_dir, 'log', type_=type_)
-        
-        # Create the side-by-side plot for all_simple
-        if type_ == "all_simple":
-            create_side_by_side_plot(categories, args.output_dir)
-
-    # Print plots saved message
-    print(f"Plots saved in {args.output_dir}")
+    # Define combinations of alloc and cow to process
+    combinations = [
+        {"alloc": "prealloc", "cow": "cow", "suffix": "_prealloc_cow", "name": "Prealloc + CoW"},
+        {"alloc": "prealloc", "cow": "no_cow", "suffix": "_prealloc_no_cow", "name": "Prealloc + No CoW"},
+        {"alloc": "no_prealloc", "cow": "cow", "suffix": "_no_prealloc_cow", "name": "No Prealloc + CoW"},
+        {"alloc": "no_prealloc", "cow": "no_cow", "suffix": "_no_prealloc_no_cow", "name": "No Prealloc + No CoW"},
+        {"alloc": None, "cow": None, "suffix": "_all", "name": "All Configurations"}  # Process all data together
+    ]
     
-    # Print final summary at the end of execution
-    if all_simple_categories:
-        components_to_show = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
+    # Dictionary to store summary data for all combinations
+    all_summaries = {}
+    
+    # Process each combination
+    for combo in combinations:
+        alloc = combo["alloc"]
+        cow = combo["cow"]
+        suffix = combo["suffix"]
+        name = combo["name"]
+        print(f"\n\n=== Processing {alloc or 'all'} + {cow or 'all'} ===")
         
-        # Convert to DataFrame for easier processing
-        data = []
-        for benchmark, components in all_simple_categories.items():
-            for component_name in components_to_show:
-                value = components.get(component_name, 0)
-                data.append({
-                    'Benchmark': benchmark,
-                    'Component': component_name,
-                    'Time (ms)': value
-                })
+        # Store the all_simple categories for final summary
+        all_simple_categories = None
+
+        for type_ in ["all", "all_simple", "zygote", "trustlet", "invoke", "zygote_full",
+                      "invoke_full", "datacopy"]:
+            categories = calculate_categories(raw_data, type_=type_, alloc=alloc, cow=cow)
+            
+            # Skip if no data for this combination
+            if not categories:
+                continue
+                
+            # Store all_simple categories for final summary
+            if type_ == "all_simple":
+                all_simple_categories = categories
+            
+            # Create plots for all categories
+            #create_cutoff_plot(categories, args.output_dir, suffix=suffix)
+            create_plot(categories, args.output_dir, type_=type_, suffix=suffix)
+            create_plot(categories, args.output_dir, 'log', type_=type_, suffix=suffix)
+            
+            # Create the side-by-side plot for all_simple
+            if type_ == "all_simple":
+                create_side_by_side_plot(categories, args.output_dir, suffix=suffix)
+
+        # Print plots saved message
+        print(f"Plots for {alloc or 'all'} + {cow or 'all'} saved in {args.output_dir}")
         
-        df = pd.DataFrame(data)
-        
-        # Define benchmark order
-        benchmark_order = [
-            "thumbnailer", 
-            "graph-mst", 
-            "dynamic-html", 
-            "graph-pagerank", 
-            "dna-visualisation", 
-            "graph-bfs", 
-            "compression"
-        ]
-        
-        # Filter and order benchmarks
-        available_benchmarks = df['Benchmark'].unique()
-        ordered_benchmarks = [b for b in benchmark_order if b in available_benchmarks]
-        
-        # Print summary table
-        print("\n=== FINAL SUMMARY: Component Values (ms) ===")
-        print(f"{'Benchmark':<20}", end="")
-        for comp in components_to_show:
-            print(f"{comp:<20}", end="")
-        print()
-        
-        print("-" * (20 + 20 * len(components_to_show)))
-        
-        # Initialize component sums for averages
-        component_sums = {comp: 0.0 for comp in components_to_show}
-        
-        # Print values for each benchmark
-        for benchmark in ordered_benchmarks:
-            print(f"{benchmark:<20}", end="")
+        # Collect summary data for this combination
+        if all_simple_categories:
+            components_to_show = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
+            
+            # Print the final summary table
+            print(f"\n=== FINAL SUMMARY: {alloc or 'all'} + {cow or 'all'} ===")
+            # Create and print summary table...
+            data = []
+            for benchmark, components in all_simple_categories.items():
+                for component_name in components_to_show:
+                    value = components.get(component_name, 0)
+                    data.append({
+                        'Benchmark': benchmark,
+                        'Component': component_name,
+                        'Time (ms)': value
+                    })
+            
+            df = pd.DataFrame(data)
+            
+            # Define benchmark order
+            benchmark_order = [
+                "thumbnailer", 
+                "graph-mst", 
+                "dynamic-html", 
+                "graph-pagerank", 
+                "dna-visualisation", 
+                "graph-bfs", 
+                "compression"
+            ]
+            
+            # Filter and order benchmarks
+            available_benchmarks = df['Benchmark'].unique()
+            ordered_benchmarks = [b for b in benchmark_order if b in available_benchmarks]
+            
+            # Print summary table
+            print(f"\n=== FINAL SUMMARY: Component Values (ms) {suffix} ===")
+            print(f"{'Benchmark':<20}", end="")
             for comp in components_to_show:
-                value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
-                print(f"{value:<20.3f}", end="")
-                component_sums[comp] += value
+                print(f"{comp:<20}", end="")
             print()
             
-        # Print averages
-        print("-" * (20 + 20 * len(components_to_show)))
-        print(f"{'Average':<20}", end="")
-        for comp in components_to_show:
-            avg_value = component_sums[comp] / len(ordered_benchmarks)
-            print(f"{avg_value:<20.3f}", end="")
-        print()
-        
-        # Print total time for each benchmark
-        print("\n=== FINAL SUMMARY: Total Time per Benchmark (ms) ===")
-        for benchmark in ordered_benchmarks:
-            total = 0
+            print("-" * (20 + 20 * len(components_to_show)))
+            
+            # Initialize component sums for averages
+            component_sums = {comp: 0.0 for comp in components_to_show}
+            benchmark_totals = {}
+            
+            # Print values for each benchmark
+            for benchmark in ordered_benchmarks:
+                print(f"{benchmark:<20}", end="")
+                benchmark_total = 0
+                for comp in components_to_show:
+                    value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+                    print(f"{value:<20.3f}", end="")
+                    component_sums[comp] += value
+                    benchmark_total += value
+                print()
+                benchmark_totals[benchmark] = benchmark_total
+            
+            # Calculate average for each component
+            component_avgs = {comp: component_sums[comp] / len(ordered_benchmarks) for comp in components_to_show}
+            total_avg = sum(component_sums.values()) / len(ordered_benchmarks)
+                
+            # Print averages
+            print("-" * (20 + 20 * len(components_to_show)))
+            print(f"{'Average':<20}", end="")
             for comp in components_to_show:
-                total += df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
-            print(f"{benchmark:<20}: {total:.3f}")
+                avg_value = component_sums[comp] / len(ordered_benchmarks)
+                print(f"{avg_value:<20.3f}", end="")
+            print()
+            
+            # Print total time for each benchmark
+            print(f"\n=== FINAL SUMMARY: Total Time per Benchmark (ms) {suffix} ===")
+            for benchmark in ordered_benchmarks:
+                total = benchmark_totals[benchmark]
+                print(f"{benchmark:<20}: {total:.3f}")
+            
+            print("-" * 40)
+            print(f"{'Average Total':<20}: {total_avg:.3f}")
+            print("=" * 40)
+            
+            # Store summary data for consolidated table
+            all_summaries[name] = {
+                'benchmarks': ordered_benchmarks,
+                'component_avgs': component_avgs,
+                'benchmark_totals': benchmark_totals,
+                'total_avg': total_avg
+            }
+    
+    # Print consolidated summary comparing all combinations
+    print("\n\n" + "=" * 80)
+    print(f"{'CONSOLIDATED SUMMARY OF ALL CONFIGURATIONS':^80}")
+    print("=" * 80)
+    
+    # Assuming all combinations have the same benchmarks
+    if all_summaries:
+        # Get the list of benchmarks from the first summary (they should be the same for all)
+        first_key = list(all_summaries.keys())[0]
+        benchmarks = all_summaries[first_key]['benchmarks']
+        components = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
         
-        total_avg = sum(component_sums.values()) / len(ordered_benchmarks)
-        print("-" * 40)
-        print(f"{'Average Total':<20}: {total_avg:.3f}")
-        print("=" * 40)
+        # Print average component times for each configuration
+        print("\n--- Average Component Times (ms) ---\n")
+        header = f"{'Component':<20}"
+        for combo_name in all_summaries.keys():
+            header += f"{combo_name:<20}"
+        print(header)
+        print("-" * (20 + 20 * len(all_summaries)))
+        
+        for component in components:
+            row = f"{component:<20}"
+            for combo_name, summary in all_summaries.items():
+                row += f"{summary['component_avgs'][component]:<20.3f}"
+            print(row)
+        
+        # Print total average for each configuration
+        print("-" * (20 + 20 * len(all_summaries)))
+        row = f"{'Total Average':<20}"
+        for combo_name, summary in all_summaries.items():
+            row += f"{summary['total_avg']:<20.3f}"
+        print(row)
+        
+        # Print benchmark totals for each configuration
+        print("\n--- Total Time per Benchmark (ms) ---\n")
+        header = f"{'Benchmark':<20}"
+        for combo_name in all_summaries.keys():
+            header += f"{combo_name:<20}"
+        print(header)
+        print("-" * (20 + 20 * len(all_summaries)))
+        
+        for benchmark in benchmarks:
+            row = f"{benchmark:<20}"
+            for combo_name, summary in all_summaries.items():
+                if benchmark in summary['benchmark_totals']:
+                    row += f"{summary['benchmark_totals'][benchmark]:<20.3f}"
+                else:
+                    row += f"{'N/A':<20}"
+            print(row)
+        
+        # Print average total again
+        print("-" * (20 + 20 * len(all_summaries)))
+        row = f"{'Average Total':<20}"
+        for combo_name, summary in all_summaries.items():
+            row += f"{summary['total_avg']:<20.3f}"
+        print(row)
+        
+        print("\n" + "=" * 80)
 
 if __name__ == "__main__":
     main()
