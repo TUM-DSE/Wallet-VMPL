@@ -93,10 +93,10 @@ def plot_memory_usage(csv_path="memory.csv"):
     # Create the bars with the new styling (using MB values)
     cow_bars = ax.bar(x - width/2, avg_memory['cow_mb'], width, label='CoW shared', 
                       color=palette[0], hatch=hatches[0], 
-                      edgecolor='black', linewidth=0.5)
+                      edgecolor='black', linewidth=0.0)
     no_cow_bars = ax.bar(x + width/2, avg_memory['no_cow_mb'], width, label='Non-shared', 
                          color=palette[1], hatch=hatches[1], 
-                         edgecolor='black', linewidth=0.5)
+                         edgecolor='black', linewidth=0.0)
     
     # Add value annotations with MB formatting
     for bar in cow_bars:
@@ -119,6 +119,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Set labels and title with MB units
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
+    ax.set_ylim([0,140])
     ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE)
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)

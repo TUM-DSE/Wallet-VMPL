@@ -346,7 +346,7 @@ def create_improvement_plot(results, output_dir):
     colors = [palette[0], palette[1]]
     
     # Plot bars at custom positions
-    bars = ax.bar(x_positions, improvements, color=colors, edgecolor='black', width=bar_width)
+    bars = ax.bar(x_positions, improvements, color=colors, edgecolor='black', width=bar_width, linewidth=0)
     
     # Add value labels on top of bars
     for bar in bars:
