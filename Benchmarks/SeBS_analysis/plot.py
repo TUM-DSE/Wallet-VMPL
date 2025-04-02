@@ -815,6 +815,83 @@ def print_performance_comparison(df, benchmarks, metric, exec_type, collect_resu
     # for line in result_lines:
     #     print(line)
 
+def create_side_by_side_plot(df, benchmarks, output_dir):
+    """Create side-by-side subplots for client_time with cold and hot execution types"""
+    fig, axes = plt.subplots(1, 2, figsize=(7, figheight), sharey=True)
+    
+    exec_types = ['cold', 'hot']
+    titles = ['(a) Cold Start', '(b) Hot Start']
+    all_bars = []  # Store bars for shared legend
+    
+    for idx, exec_type in enumerate(exec_types):
+        ax = axes[idx]
+        # Filter data for the specific execution type
+        filtered_df = df[df['type'] == exec_type]
+        
+        # Calculate bar positions
+        n_variants = len(VARIANTS)
+        width = 0.12  # Width of each bar
+        variant_positions = np.arange(len(benchmarks))
+        
+        # Plot bars for each variant
+        for i, variant in enumerate(VARIANTS):
+            variant_data = filtered_df[filtered_df['variant'] == variant]
+            # Prepare data excluding geomean
+            values = []
+            for bench in benchmarks:
+                bench_data = variant_data[variant_data['benchmark'] == bench]
+                if len(bench_data) > 0:
+                    values.append(bench_data['client_time'].values[0])
+                else:
+                    values.append(np.nan)
+                    
+            positions = variant_positions + (i - n_variants/2 + 0.5) * width
+            bars = ax.bar(positions, values, width, 
+                         label=LABEL_MAPPINGS[variant],
+                         color=palette[i], edgecolor='black', hatch=hatches[i%len(hatches)])
+            
+            # Only store bars for legend from the first subplot
+            if idx == 0:
+                all_bars.append(bars[0])
+        
+        # Customize the subplot
+        ax.set_yscale('log')
+        ax.set_title(titles[idx], fontsize=TITLE_FONTSIZE)
+        ax.set_xticks(variant_positions)
+        xlabels = [benchmark.split('.')[1] for benchmark in benchmarks]
+        ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+        ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+        
+        # Only add y-label to the first subplot
+        if idx == 0:
+            ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
+        
+        # Add gridlines
+        ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    
+    # Add a shared legend below the subplots
+    fig.legend(all_bars, [LABEL_MAPPINGS[variant] for variant in VARIANTS], 
+              loc='lower center', bbox_to_anchor=(0.5, -0.12),
+              ncol=len(VARIANTS), fontsize=LEGEND_FONTSIZE)
+    
+    # Add an overall title indicating log scale
+    #fig.suptitle('Client Time (Lower is better ↓)', fontsize=TITLE_FONTSIZE+1, y=0.98)
+    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, y=0.98, color='navy')
+    
+    # Adjust layout
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.2)  # Make room for the legend
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / 'client_time_cold_hot.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'client_time_cold_hot.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'client_time_cold_hot.pdf')
+    
+    plt.close()
+
 def main():
     global VARIANTS
     # Storage for all performance comparison results
@@ -847,6 +924,9 @@ def main():
     for metric in metrics:
         create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output')
         create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output', 'log')
+    
+    # Create side-by-side plot for client_time (cold and hot)
+    create_side_by_side_plot(df, common_benchmarks, 'output')
 
     # Load and process data and derive the invocation latency values
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
