@@ -268,8 +268,8 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     # legend.get_frame().set_edgecolor('black')
     
     handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper left', bbox_to_anchor=(0.19, 0.87), edgecolor='black',
-                          borderaxespad=0., fontsize=LEGEND_FONTSIZE, frameon=True, framealpha=0.3)
+    fig.legend(handles, labels, loc='upper left', bbox_to_anchor=(0.14, 0.01), edgecolor='black',
+                          borderaxespad=0., fontsize=LEGEND_FONTSIZE, frameon=True, ncols=4)
     
     # Add gridlines for better readability
     ax1.yaxis.grid(True, linestyle='--', alpha=0.7)

@@ -224,8 +224,8 @@ def create_cutoff_plot(categories, output_dir):
     ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
 
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8)
-    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
+    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
+    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, linewidth=0, edgecolor='black', width=0.8)
     
     # Add hatches for better distinction
     bars1 = ax1.patches
@@ -281,8 +281,8 @@ def create_cutoff_plot(categories, output_dir):
     ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Insert legend in the top right position
-    legend = ax1.legend(bbox_to_anchor=(0.73, 0.97), loc='upper left', 
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+    legend = ax2.legend(bbox_to_anchor=(0.2, -0.47), loc='upper left', 
+                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=3)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
