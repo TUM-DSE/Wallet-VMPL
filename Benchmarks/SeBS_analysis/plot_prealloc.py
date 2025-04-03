@@ -339,7 +339,7 @@ def create_improvement_plot(results, output_dir):
     
     # Define custom x positions for bars to place them closer together
     x_positions = [0, bar_width + bar_spacing]
-    category_labels = ['Cold Start', 'Hot Start']
+    category_labels = ['Cold Start', 'Warm Start']
     improvements = [geo_mean_cold_impr, geo_mean_hot_impr]
     
     # Use different colors for bars
