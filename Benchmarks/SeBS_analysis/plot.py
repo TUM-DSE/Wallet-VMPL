@@ -820,7 +820,7 @@ def create_side_by_side_plot(df, benchmarks, output_dir):
     fig, axes = plt.subplots(1, 2, figsize=(7, figheight), sharey=True)
     
     exec_types = ['cold', 'hot']
-    titles = ['(a) Cold Start', '(b) Hot Start']
+    titles = ['(a) Cold Start', '(b) Warm Start']
     all_bars = []  # Store bars for shared legend
     
     for idx, exec_type in enumerate(exec_types):
