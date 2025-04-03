@@ -56,10 +56,14 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Group by benchmark and calculate the average
     avg_memory = df.groupby('bench').mean().reset_index()
+
+    # the csv contains number of 4K pages, convert to bytes
+    avg_memory['cow'] = avg_memory['cow'] * 4096
+    avg_memory['no_cow'] = avg_memory['no_cow'] * 4096
     
-    # Convert KB to MB
-    avg_memory['cow_mb'] = avg_memory['cow'] / 1024
-    avg_memory['no_cow_mb'] = avg_memory['no_cow'] / 1024
+    # Convert to MB
+    avg_memory['cow_mb'] = avg_memory['cow'] / 1024 / 1024
+    avg_memory['no_cow_mb'] = avg_memory['no_cow'] / 1024 / 1024
     
     # Define custom order for benchmarks
     custom_order = {
@@ -101,7 +105,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     # Add value annotations with MB formatting
     for bar in cow_bars:
         height = bar.get_height()
-        ax.annotate(f'{height:.1f}',
+        ax.annotate(f'{height:.0f}',
                     xy=(bar.get_x() + bar.get_width() / 2, height),
                     xytext=(0, 1),
                     textcoords="offset points",
@@ -110,7 +114,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     for bar in no_cow_bars:
         height = bar.get_height()
-        ax.annotate(f'{height:.1f}',
+        ax.annotate(f'{height:.0f}',
                     xy=(bar.get_x() + bar.get_width() / 2, height),
                     xytext=(0, 1),
                     textcoords="offset points",
@@ -119,7 +123,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Set labels and title with MB units
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
-    ax.set_ylim([0,140])
+    ax.set_ylim([0,560])
     ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE)
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)
@@ -155,8 +159,8 @@ def main():
         
         for _, row in avg_memory.iterrows():
             bench = row['bench']
-            cow_mem = row['cow'] / 1024  # Convert to MB
-            no_cow_mem = row['no_cow'] / 1024  # Convert to MB
+            cow_mem = row['cow'] / 1024 / 1024 # Convert to MB
+            no_cow_mem = row['no_cow'] / 1024 / 1024 # Convert to MB
             total_cow += cow_mem
             total_no_cow += no_cow_mem
             
