@@ -128,12 +128,14 @@
                 cargo-depgraph
                 cloc
                 cargo-cache
+		libcgroup
                 python3
                 python311Packages.requests
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
                 unzip
+		numactl
                 python311Packages.pip
                 python311Packages.numpy
                 python311Packages.click
