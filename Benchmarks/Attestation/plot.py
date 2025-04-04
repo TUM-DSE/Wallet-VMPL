@@ -89,16 +89,16 @@ def calculate_categories(df):
             'Trustlet': trustlet_cold,
             'Function': function
         },
-        # Wallet warm (semi-hot)
-        'Wallet\n(warm)': {
+        # Wallet lukewarm
+        'Wallet\n(lukewarm)': {
             'CVM TCB': 0,
             'Monitor': monitor_hot,
             'Zygote': zygote_hot,
             'Trustlet': trustlet_cold,
             'Function': function
         },
-        # Wallet hot
-        'Wallet\n(hot)': {
+        # Wallet warm
+        'Wallet\n(warm)': {
             'CVM TCB': 0,
             'Monitor': monitor_hot,
             'Zygote': zygote_hot,

@@ -145,8 +145,8 @@ def calculate_categories(raw_data):
             'Trustlet': wallet_data['Trustlet'],
             'Invoke': wallet_data['Invoke'],
         },
-        # Wallet warm
-        'Wallet\n(warm)': {
+        # Wallet lukewarm
+        'Wallet\n(lukewarm)': {
             'VMM (QEMU)': 0,
             'Monitor': 0,
             'Firmware (OVMF)': 0,
@@ -156,8 +156,8 @@ def calculate_categories(raw_data):
             'Trustlet': wallet_data['Trustlet'],
             'Invoke': wallet_data['Invoke'],
         },
-        # Wallet hot
-        'Wallet\n(hot)': {
+        # Wallet warm
+        'Wallet\n(warm)': {
             'VMM (QEMU)': 0,
             'Monitor': 0,
             'Firmware (OVMF)': 0,
@@ -242,7 +242,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
     
     # Fix xticks rotation
-    plt.xticks(rotation=40)
+    plt.xticks(rotation=42)
     
     # Add y-axis label in the middle
     ax2.annotate(
