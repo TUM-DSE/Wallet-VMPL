@@ -1118,7 +1118,7 @@ def create_lukewarm_comparison_plot(df, benchmarks, metric, output_dir, y_scale=
     
     # Add lukewarm Wallet data at the end as an additional variant
     lukewarm_color = 'tab:orange'  # Different color for lukewarm
-    lukewarm_hatch = '++'  # Different hatch pattern
+    lukewarm_hatch = '-'  # Different hatch pattern
     
     # Prepare lukewarm data including geomean
     lukewarm_plot_values = []
@@ -1225,7 +1225,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     
     # Add lukewarm Wallet data to left subplot
     lukewarm_color = 'tab:orange'  # Different color for lukewarm
-    lukewarm_hatch = '++'  # Different hatch pattern
+    lukewarm_hatch = '-'  # Different hatch pattern
     
     # Prepare lukewarm data without geomean
     lukewarm_plot_values = []
