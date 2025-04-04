@@ -1162,6 +1162,100 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
 
     plt.close()
 
+def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_results=None):
+    """
+    Print geometric means and calculate how much percent Wallet and Wallet (Lukewarm) 
+    are better or worse than other baselines
+    
+    If collect_results is provided, results will be stored there for later display.
+    """
+    # Filter data for cold execution type (for standard variants and cold wallet)
+    cold_df = df[df['type'] == 'cold']
+    
+    # Get lukewarm data - warm data from wallet_warm_cow_prealloc variant
+    lukewarm_variant = 'wallet_warm_cow_prealloc'
+    lukewarm_df = df[df['variant'] == lukewarm_variant]
+    lukewarm_df = lukewarm_df[lukewarm_df['type'] == 'hot']  # Hot runs from warm wallet variant
+    
+    # Calculate geometric means for cold variants
+    cold_geomeans = {}
+    for variant in VARIANTS:
+        variant_data = cold_df[cold_df['variant'] == variant]
+        values = variant_data[metric].values
+        if np.all(values > 0):
+            geomean = np.exp(np.mean(np.log(values)))
+            cold_geomeans[variant] = geomean
+        else:
+            cold_geomeans[variant] = np.nan
+    
+    # Calculate geometric mean for lukewarm data
+    lukewarm_values = []
+    for bench in benchmarks:
+        bench_data = lukewarm_df[lukewarm_df['benchmark'] == bench]
+        if len(bench_data) > 0:
+            lukewarm_values.append(bench_data[metric].values[0])
+    
+    if len(lukewarm_values) > 0 and np.all(np.array(lukewarm_values) > 0):
+        lukewarm_geomean = np.exp(np.mean(np.log(np.array(lukewarm_values))))
+    else:
+        lukewarm_geomean = np.nan
+    
+    # Store or print the results
+    result_lines = []
+    result_lines.append(f"\n{metric} (Cold vs Lukewarm) - Geometric Means:")
+    
+    # Print cold geometric means
+    for variant in VARIANTS:
+        result_lines.append(f"  {LABEL_MAPPINGS[variant]} (cold): {cold_geomeans[variant]:.6f} s")
+    
+    # Print lukewarm geometric mean
+    result_lines.append(f"  Wallet (Lukewarm): {lukewarm_geomean:.6f} s")
+    
+    # Get Wallet cold value for comparison
+    wallet_variant = 'wallet_cow_prealloc'
+    wallet_cold_value = cold_geomeans.get(wallet_variant)
+    
+    # Compare cold Wallet with other cold variants
+    if wallet_cold_value is not None:
+        result_lines.append(f"\n{metric} - Cold Wallet Comparison:")
+        for variant in VARIANTS:
+            if variant != wallet_variant:
+                baseline_value = cold_geomeans.get(variant)
+                if baseline_value is not None and not np.isnan(baseline_value):
+                    pct_diff = (wallet_cold_value - baseline_value) / baseline_value * 100
+                    comparison = "slower" if pct_diff > 0 else "faster"
+                    result_lines.append(f"  Wallet (cold) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]}")
+                else:
+                    result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
+    
+    # Compare Lukewarm Wallet with cold variants
+    if not np.isnan(lukewarm_geomean):
+        result_lines.append(f"\n{metric} - Lukewarm Wallet Comparison:")
+        # First compare with cold Wallet
+        if wallet_cold_value is not None and not np.isnan(wallet_cold_value):
+            pct_diff = (lukewarm_geomean - wallet_cold_value) / wallet_cold_value * 100
+            comparison = "slower" if pct_diff > 0 else "faster"
+            result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than Wallet (cold)")
+        
+        # Then compare with other cold variants
+        for variant in VARIANTS:
+            if variant != wallet_variant:  # Skip comparing with itself
+                baseline_value = cold_geomeans.get(variant)
+                if baseline_value is not None and not np.isnan(baseline_value):
+                    pct_diff = (lukewarm_geomean - baseline_value) / baseline_value * 100
+                    comparison = "slower" if pct_diff > 0 else "faster"
+                    result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]}")
+                else:
+                    result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
+    
+    # If collect_results is provided, add the results there
+    if collect_results is not None:
+        collect_results.extend(result_lines)
+    
+    # Also print immediately if needed
+    # for line in result_lines:
+    #     print(line)
+
 def main():
     global VARIANTS
     # Storage for all performance comparison results
@@ -1195,13 +1289,15 @@ def main():
         create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output')
         create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output', 'log')
     
-    # Add the lukewarm comparison plots
+    # Add the lukewarm comparison plots and performance analysis
     for metric in metrics:
         create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output')
         create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output', 'log')
         # Add the new side-by-side lukewarm plots
         create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output')
         create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output', 'log')
+        # Add performance comparison for lukewarm plots
+        print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
     
     # Create side-by-side plot for client_time (cold and hot)
     create_side_by_side_plot(df, common_benchmarks, 'output')
