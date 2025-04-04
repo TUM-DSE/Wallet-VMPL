@@ -357,6 +357,167 @@ def plot_invocation_latency_cdf(df, variants, benchmarks, output_dir, collect_re
         
         plt.close()
 
+def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_dir, collect_results=None):
+    """
+    Create CDF plots of invocation latencies for all variants, including a lukewarm variant
+    """
+    # Storage for percentile and stddev data
+    stats_results = []
+    stats_results.append("\nInvocation Latency Statistics (with Lukewarm):")
+    
+    # Get the lukewarm variant data
+    # Since invocation_latency data might not be processed for lukewarm directly,
+    # we need to derive it from the original data
+    lukewarm_variant = 'wallet_warm_cow_prealloc'
+    
+    # Build paths to the lukewarm data (similar logic as in invocation_latency())
+    lukewarm_data = []
+    
+    # We'll process lukewarm data the same way as in invocation_latency
+    import json
+    from datetime import datetime
+    
+    for bench in benchmarks:
+        # Try to find data in "warm" or "sequential" results
+        result_paths = [
+            Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/warm_results-processed.json"),
+            Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/sequential_results-processed.json")
+        ]
+        
+        for result_path in result_paths:
+            if result_path.exists():
+                with open(result_path) as f:
+                    d = json.load(f)
+                if d.get("_invocations"):
+                    d = d["_invocations"]
+                    d = d[list(d.keys())[0]]
+                    for k in d.keys():
+                        e = d[k]
+                        start = datetime.strptime(e["times"]["client_begin"], "%Y-%m-%d %H:%M:%S.%f").timestamp()
+                        end = float(e["output"]["begin"])
+                        if end > start:  # Skip invalid data points
+                            lukewarm_data.append({
+                                'benchmark': bench,
+                                'type': 'warm',  # Mark as warm for lukewarm
+                                'invocation_latency': end - start
+                            })
+                break  # Use first valid result file found
+    
+    # Setup the plot for cold start invocation latency
+    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    #title = "Cold Start Invocation Latency with Lukewarm Comparison"
+    title = "Cold Start Invocation Latency"
+    
+    # Store statistical data
+    stats_results.append(f"\n{title}:")
+    stats_results.append(f"{'Variant':<20} {'P50 (s)':<10} {'P99 (s)':<10} {'StdDev (s)':<10}")
+    stats_results.append("-" * 50)
+    
+    # Plot CDF for each variant
+    for i, variant in enumerate(variants):
+        variant_data = df[df['type'] == 'cold'][df['variant'] == variant]
+        
+        if len(variant_data) == 0:
+            continue
+            
+        # Sort the data for CDF
+        latencies = variant_data['invocation_latency'].sort_values().values
+        
+        # Calculate P50, P99, and standard deviation
+        if len(latencies) > 0:
+            p50 = np.percentile(latencies, 50)
+            p99 = np.percentile(latencies, 99)
+            stddev = np.std(latencies)
+            stats_results.append(f"{LABEL_MAPPINGS[variant]:<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
+        
+        # Create CDF points
+        y_values = np.arange(1, len(latencies) + 1) / len(latencies)
+        
+        # Plot the CDF
+        ax.plot(latencies, y_values, label=LABEL_MAPPINGS[variant], 
+                color=palette[i], linewidth=1.5, alpha=1, linestyle=linestyles[i%len(linestyles)])
+    
+    # Add lukewarm data if available
+    if lukewarm_data:
+        # Convert to DataFrame for easier processing
+        lukewarm_df = pd.DataFrame(lukewarm_data)
+        lukewarm_latencies = lukewarm_df['invocation_latency'].sort_values().values
+        
+        if len(lukewarm_latencies) > 0:
+            # Calculate statistics for lukewarm
+            p50_lukewarm = np.percentile(lukewarm_latencies, 50)
+            p99_lukewarm = np.percentile(lukewarm_latencies, 99)
+            stddev_lukewarm = np.std(lukewarm_latencies)
+            stats_results.append(f"{'Wallet (Lukewarm)':<20} {p50_lukewarm:<10.6f} {p99_lukewarm:<10.6f} {stddev_lukewarm:<10.6f}")
+            
+            # Create CDF points for lukewarm
+            lukewarm_y_values = np.arange(1, len(lukewarm_latencies) + 1) / len(lukewarm_latencies)
+            
+            # Plot lukewarm data with a distinctive color/style
+            lukewarm_color = 'tab:orange'  # Different color for lukewarm
+            lukewarm_style = '-.'  # Different line style
+            
+            ax.plot(lukewarm_latencies, lukewarm_y_values, 
+                   label="Wallet (Lukewarm)", 
+                   color=lukewarm_color, linewidth=2.0, alpha=1, linestyle=lukewarm_style)
+            
+            # Compare lukewarm with cold wallet
+            cold_wallet_data = df[(df['type'] == 'cold') & (df['variant'] == 'wallet_cow_prealloc')]
+            if len(cold_wallet_data) > 0:
+                cold_wallet_p50 = np.percentile(cold_wallet_data['invocation_latency'].values, 50)
+                pct_diff = (p50_lukewarm - cold_wallet_p50) / cold_wallet_p50 * 100
+                comparison = "slower" if pct_diff > 0 else "faster"
+                stats_results.append(f"\nLukewarm vs Cold Wallet (P50): {abs(pct_diff):.2f}% {comparison}")
+    else:
+        stats_results.append("No lukewarm invocation data available")
+    
+    # Add horizontal lines at specific percentiles
+    percentiles = [0.5, 0.95, 0.99]
+    for p in percentiles:
+        ax.axhline(y=p, color='gray', linestyle='--', alpha=0.5, linewidth=0.8)
+        ax.text(ax.get_xlim()[1]*0.98, p, f"{int(p*100)}%", 
+                verticalalignment='bottom', horizontalalignment='right', 
+                fontsize=ANNOTATION_SIZE)
+    
+    # Customize the plot
+    ax.set_title(title, fontsize=TITLE_FONTSIZE)
+    ax.set_xlabel('Latency (seconds)', fontsize=TICKS_FONTSIZE)
+    ax.set_ylabel('Cumulative Probability', fontsize=TICKS_FONTSIZE)
+    ax.set_ylim(0, 1.05)
+    ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    
+    # Add log scale
+    ax.set_xscale('log')
+    
+    # Add legend
+    ax.legend(fontsize=LEGEND_FONTSIZE, loc='lower right', bbox_to_anchor=(0.80, 0.02))
+    
+    # Collect the statistics results if a collector is provided
+    if collect_results is not None:
+        collect_results.extend(stats_results)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.png', format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf')
+    
+    # Also create linear scale version
+    ax.set_xscale('linear')
+    plt.tight_layout()
+    
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.png', format='png', dpi=300, bbox_inches='tight') 
+    crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf')
+    
+    plt.close()
+
 def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale='linear'):
     """Create grouped bar chart for the given metric and execution type"""
     fig, ax = plt.subplots(figsize=(figwidth, figheight))
@@ -1308,6 +1469,8 @@ def main():
     print(df, common_benchmarks)
     # Create invocation latency CDF plots
     plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
+    # Create invocation latency CDF with lukewarm comparison
+    plot_invocation_latency_cdf_with_lukewarm(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
     
     print("Plots saved in output directory")
     
