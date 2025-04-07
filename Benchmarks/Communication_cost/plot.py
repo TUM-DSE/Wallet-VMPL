@@ -1,57 +1,15 @@
 #!/usr/bin/env python3
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
-import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
-
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
-palette = sns.color_palette("deep")
-
-LABEL_MAPPINGS = {
-    'Native'              : 'Native',
-    'Gramine'             : 'LibOS (Gramine)',
-    'VM'                  : 'VM (KVM-Linux)',
-    'Kata Containers'     : 'Containers (Kata)',
-    'CVM'                 : 'CVM (SEV-SNP)',
-    'Wallet'              : 'Wallet',
-}
-
-def crop_pdf(input_path):
-    """Use pdfcrop to crop the PDF file."""
-    try:
-        subprocess.run(['pdfcrop', input_path, input_path], check=True)
-        print(f"Successfully cropped {input_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error cropping PDF {input_path}: {e}")
-    except FileNotFoundError:
-        print("pdfcrop command not found. Please install texlive-extra-utils package.")
-
-def format_bytes(value):
-    """Format byte sizes into human readable format"""
-    for unit in ['B', 'KB', 'MB']:
-        if value < 1024:
-            return f"{value:.0f}{unit}"
-        value /= 1024
-    return f"{value:.0f}MB"
+# Import centralized plotting configuration
+import sys
+sys.path.append('..')
+from motivation_plotting_config import *
 
 def load_data(file_path):
     """Parse the input file containing measurements"""
@@ -75,20 +33,15 @@ def load_data(file_path):
     
     return data
 
-def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
+def create_line_plot(data, output_dir, y_scale='linear'):
     """Create line plot with error bars"""
-    if motivation:
-        figwidth = 2.2  # 3.3 inch for single column, 7 inch for double column
-        figheight = 1.5
-        message_sizes = [64.0, 1024.0, 16384.0, 262144.0, 1048576.0]
-    else:
-        figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
-        figheight = 2.2
-        message_sizes = [64.0, 256.0, 1024.0, 8192.0, 16384.0, 65536.0, 262144.0, 1048576.0]
+    message_sizes = [64.0, 256.0, 1024.0, 8192.0, 16384.0, 65536.0, 262144.0, 1048576.0]
     
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
-    # Filter variants for motivation plot
-    variants = ['VM', 'CVM'] if motivation else ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
+    # Create standardized plot
+    fig, ax = create_standardized_plot()
+    
+    # Filter variants
+    variants = ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
     
     # Collect all message sizes and create mapping to indices
     size_to_index = {size: i for i, size in enumerate(message_sizes, 1)}
@@ -110,37 +63,27 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             # Convert sizes to indices for plotting
             indices = [size_to_index[s] for s in sizes]
 
-            ax.errorbar(indices, means, yerr=stds, label=LABEL_MAPPINGS[variant],
-                       color=palette[i], marker='o', markersize=1.5,
-                       linewidth=1, capsize=1, capthick=0.4,
-                       elinewidth=0.4)
+            ax.errorbar(indices, means, yerr=stds, label=LABEL_MAPPINGS_SYSTEM[variant],
+                       color=PALETTE_REGULAR[i], marker='o', markersize=MARKER_SIZE,
+                       linewidth=LINE_WIDTH, capsize=ERROR_BAR_CAP_SIZE, capthick=ERROR_BAR_LINE_WIDTH,
+                       elinewidth=ERROR_BAR_LINE_WIDTH)
 
+    # Apply consistent styling
+    apply_consistent_style(ax, 
+                        title=LOWER_BETTER_TITLE,
+                        xlabel="Message size",
+                        ylabel="Time (ms)")
+    
+    # Fix xticks rotation
+    plt.xticks(rotation=25)
+    
     # Customize the plot
     ax.set_yscale(y_scale)
     
-    # Set x-ticks at actual data points with alternating labels
+    # Set x-ticks at actual data points
     ax.set_xticks(range(1, len(message_sizes) + 1))
     labels = [format_bytes(size) for size in message_sizes]
     ax.set_xticklabels(labels, fontsize=TICKS_FONTSIZE)
-
-    ax.set_xlabel('Message size', fontsize=TICKS_FONTSIZE)
-    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
-    plt.yticks(fontsize=TICKS_FONTSIZE)
-    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-
-    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
-    
-    # Enhance legend
-    if motivation:
-        legend = plt.legend(bbox_to_anchor=(0.32, 0.98), loc='upper right',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
-    else:
-        legend = plt.legend(bbox_to_anchor=(0.01, -0.3), loc='upper left',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=3)
-    legend.get_frame().set_edgecolor('black')
-    
-    # Add gridlines
-    ax.grid(True, linestyle='--', alpha=0.7)
     
     # Set y-axis to start at 0 for linear scale
     if y_scale == 'linear':
@@ -149,17 +92,17 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     # Set reasonable x-axis limits
     ax.set_xlim(0.5, len(message_sizes) + 0.5)
     
-    # Adjust layout
-    plt.tight_layout()
+    # Position legend at the top center
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.3),
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=2)
+    legend.get_frame().set_edgecolor('black')
     
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plot_type = 'motivation_' if motivation else ''
-    plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'{plot_type}IPC_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'{plot_type}IPC_{y_scale}.pdf')
+    plt.savefig(output_dir / f'IPC_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'IPC_{y_scale}.png', format='png', dpi=300, bbox_inches=None)
     
     plt.close()
 
@@ -176,10 +119,6 @@ def main():
     # Create plots for all variants
     create_line_plot(data, args.output_dir, 'linear')
     create_line_plot(data, args.output_dir, 'log')
-    
-    # Create plots for VM and CVM only (motivation)
-    create_line_plot(data, args.output_dir, 'linear', motivation=True)
-    create_line_plot(data, args.output_dir, 'log', motivation=True)
     
     print(f"Plots saved in {args.output_dir}")
 

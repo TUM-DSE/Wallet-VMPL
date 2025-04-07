@@ -1,47 +1,15 @@
 #!/usr/bin/env python3
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
-import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
-
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
-palette = sns.color_palette("deep")
-
-LABEL_MAPPINGS = {
-    'vm'               : 'VM (KVM-Linux)',
-    'kata'             : 'Containers (Kata)',
-    'cvm'              : 'CVM (SEV-SNP)',
-    'wallet'           : 'Wallet',
-}
-
-def crop_pdf(input_path):
-    """Use pdfcrop to crop the PDF file."""
-    try:
-        subprocess.run(['pdfcrop', input_path, input_path], check=True)
-        print(f"Successfully cropped {input_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error cropping PDF {input_path}: {e}")
-    except FileNotFoundError:
-        print("pdfcrop command not found. Please install texlive-extra-utils package.")
+# Import centralized plotting configuration
+import sys
+sys.path.append('..')
+from motivation_plotting_config import *
 
 def load_data(file_path):
     """Parse the input CSV file containing function density measurements"""
@@ -67,10 +35,8 @@ def load_data(file_path):
 
 def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     """Create line plot for memory consumption based on number of functions"""
-    figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
-    figheight = 2.2
-    
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    # Create standardized plot
+    fig, ax = create_standardized_plot()
     
     # Filter variants for motivation plot
     variants = list(data.keys())
@@ -85,16 +51,21 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             functions = [item[0] for item in sorted_data]
             memory = [item[1] for item in sorted_data]
             
-            label = LABEL_MAPPINGS.get(variant, variant)
+            label = LABEL_MAPPINGS_VM.get(variant, variant)
             ax.plot(functions, memory, label=label,
-                   color=palette[i], marker='o', markersize=1.5,
-                   linewidth=1)
+                   color=PALETTE_REGULAR[i], marker='o', markersize=MARKER_SIZE,
+                   linewidth=LINE_WIDTH)
 
+    # Apply consistent styling
+    apply_consistent_style(ax, 
+                         title=LOWER_BETTER_TITLE,
+                         xlabel="Number of Functions", 
+                         ylabel="Memory Usage (GB)")
+    
     # Customize the plot
     ax.set_yscale(y_scale)
     
     # Set reasonable x-axis ticks
-    # Try to use the actual function numbers from data if reasonable
     all_functions = []
     for variant in variants:
         if variant in data:
@@ -112,22 +83,6 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
         else:
             step = 5
         ax.set_xticks(range(0, max(all_functions) + step, step))
-
-    ax.set_xlabel('Number of Functions', fontsize=TICKS_FONTSIZE)
-    ax.set_ylabel('Memory Usage (GB)', fontsize=TICKS_FONTSIZE)
-    plt.xticks(fontsize=TICKS_FONTSIZE)
-    plt.yticks(fontsize=TICKS_FONTSIZE)
-    ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-
-    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
-    
-    # Enhance legend
-    legend = plt.legend(bbox_to_anchor=(0.01, -0.3), loc='upper left',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=3)
-    legend.get_frame().set_edgecolor('black')
-    
-    # Add gridlines
-    ax.grid(True, linestyle='--', alpha=0.7)
     
     # Set y-axis to start at 0 for linear scale
     if y_scale == 'linear':
@@ -136,16 +91,17 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     # Set reasonable x-axis limits
     ax.set_xlim(0, max(all_functions) * 1.05)
     
-    # Adjust layout
-    plt.tight_layout()
+    # Position legend at the top center
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.25),
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=2)
+    legend.get_frame().set_edgecolor('black')
     
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / f'function_density_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'function_density_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'function_density_{y_scale}.pdf')
+    plt.savefig(output_dir / f'function_density_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'function_density_{y_scale}.png', format='png', dpi=300, bbox_inches=None)
     
     plt.close()
 

@@ -1,43 +1,15 @@
 #!/usr/bin/env python3
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 import numpy as np
 import argparse
 from pathlib import Path
-import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
-
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
-figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
-figheight = 2.2
-palette = sns.color_palette("pastel")
-hatches = ["", "//", "xx", "\\\\", ".."]
-
-def crop_pdf(input_path):
-    """Use pdfcrop to crop the PDF file."""
-    try:
-        subprocess.run(['pdfcrop', input_path, input_path], check=True)
-        print(f"Successfully cropped {input_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error cropping PDF {input_path}: {e}")
-    except FileNotFoundError:
-        print("pdfcrop command not found. Please install texlive-extra-utils package.")
+# Import centralized plotting configuration
+import sys
+sys.path.append('..')
+from motivation_plotting_config import *
 
 def load_data(csv_path):
     """Load and parse CSV data"""
@@ -57,23 +29,6 @@ def calculate_categories(df):
     function = df[df['Measurement'] == 'measure_function']['Average (ns)'].values[0]
     
     categories = {
-        # CVM
-        # 'CVM': {
-        #     'CVM TCB': monitor_cold,
-        #     'Monitor': 0,
-        #     'Zygote': 0,
-        #     'Trustlet': 0,
-        #     'Function': 0
-        # },
-        # CVM full
-        # 'CVM-fu': {
-        #     'CVM TCB': 3 * monitor_cold + zygote_cold + trustlet_cold + function,
-        #     'Monitor': 0,
-        #     'Zygote': 0,
-        #     'Trustlet': 0,
-        #     'Function': 0
-        # },
-        # CVM short
         'CVM\n(SEV-SNP)': {
             'CVM TCB': monitor_cold + zygote_cold + trustlet_cold + function,
             'Monitor': 0,
@@ -124,17 +79,17 @@ def create_plot(categories, output_dir, y_scale='linear'):
     # Convert nanoseconds to milliseconds
     df = df / 1_000_000
     
-    # Create the plot with increased size
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    # Create standardized plot
+    fig, ax = create_standardized_plot()
     
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax, color=palette, linewidth=0, edgecolor='black', width=0.6)
+    df.plot(kind='bar', stacked=True, ax=ax, color=PALETTE_PASTEL, linewidth=0, edgecolor='black', width=0.6)
     
     # Add hatches for better distinction
     bars = ax.patches
     n_bars = len(df)
     n_categories = len(df.columns)
-    patterns = [h for h in hatches for _ in range(n_bars)]
+    patterns = [h for h in HATCHES for _ in range(n_bars)]
     for bar, pattern in zip(bars, patterns):
         bar.set_hatch(pattern)
     
@@ -143,54 +98,36 @@ def create_plot(categories, output_dir, y_scale='linear'):
         total = 0
         for j, value in enumerate(df.loc[category]):
             if value > 0:  # Only show non-zero values
-                x = i
-                y = total + (value / 2)
                 total += value
-                # if value > df.values.max() * 0.05:  # Only show labels for visible segments
-                    # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
-        # Add total on top of each bar - choose the axis depending where the total is
+        # Add total on top of each bar
         ax.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=ANNOTATION_SIZE)
+    
+    # Apply consistent styling
+    apply_consistent_style(ax, 
+                         title=LOWER_BETTER_TITLE,
+                         xlabel="",
+                         ylabel="Time (ms)")
     
     # Customize the plot
     ax.set_yscale(y_scale)
-    # Tick size
-    ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
-    ax.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
-    # Fix xticks rotation
     plt.xticks(rotation=0)
-    # y-axis label set in the middle of the plt
-    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
-  
-    # x-axis label
-    # ax.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
-    ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
-    # Title in the upper plot
-    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
-
+    
     # Insert legend in the top right position
     legend = ax.legend(bbox_to_anchor=(0.73, 0.97), loc='upper left', 
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
     legend.get_frame().set_edgecolor('black')
     
-    # Add gridlines for better readability
-    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
-
-    # Adjust layout to prevent label cutoff
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / f'attestation_report_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'attestation_report_{y_scale}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'attestation_report_{y_scale}.pdf')
+    plt.savefig(output_dir / f'attestation_report_{y_scale}.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'attestation_report_{y_scale}.png', format='png', dpi=300, bbox_inches=None)
     
     plt.close()
 
 def create_cutoff_plot(categories, output_dir):
-    """Create stacked bar chart"""
+    """Create stacked bar chart with broken y-axis"""
     # Convert to DataFrame
     data = []
     for category, components in categories.items():
@@ -204,35 +141,26 @@ def create_cutoff_plot(categories, output_dir):
     # Convert nanoseconds to milliseconds
     df = df / 1_000_000
     
-    # Create the plot with increased size
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(figwidth, figheight))
+    # Create standardized cutoff plot
+    fig, (ax1, ax2) = create_standardized_cutoff_plot()
 
+    # Set y-axis limits
     ax1.set_ylim(2745, 2749)  # outliers only
-    ax2.set_ylim(0, 7)  # most of the data
+    ax2.set_ylim(0, 7)        # most of the data
     
-    # hide the spines between ax and ax2
-    ax1.spines.bottom.set_visible(False)
-    ax2.spines.top.set_visible(False)
-
-    # hide the xaxis from the upper plot
-    ax1.get_xaxis().set_visible(False)
-
-    d = .5  # proportion of vertical to horizontal extent of the slanted line
-    kwargs = dict(marker=[(-1, -d), (1, d)], markersize=TICKS_FONTSIZE,
-                  linestyle="none", color='k', mec='k', mew=1, clip_on=False)
-    ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
-    ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
+    # Add break marks
+    apply_broken_axis_style(ax1, ax2)
 
     # Plot stacked bars with wider bars
-    df.plot(kind='bar', stacked=True, ax=ax1, color=palette, linewidth=0, edgecolor='black', width=0.8, legend=False)
-    df.plot(kind='bar', stacked=True, ax=ax2, color=palette, linewidth=0, edgecolor='black', width=0.8)
+    df.plot(kind='bar', stacked=True, ax=ax1, color=PALETTE_PASTEL, linewidth=0, edgecolor='black', width=0.8, legend=False)
+    df.plot(kind='bar', stacked=True, ax=ax2, color=PALETTE_PASTEL, linewidth=0, edgecolor='black', width=0.8)
     
     # Add hatches for better distinction
     bars1 = ax1.patches
     bars2 = ax2.patches
     n_bars = len(df)
     n_categories = len(df.columns)
-    patterns = [h for h in hatches for _ in range(n_bars)]
+    patterns = [h for h in HATCHES for _ in range(n_bars)]
     for bar, pattern in zip(bars1, patterns):
         bar.set_hatch(pattern)
     for bar, pattern in zip(bars2, patterns):
@@ -243,63 +171,34 @@ def create_cutoff_plot(categories, output_dir):
         total = 0
         for j, value in enumerate(df.loc[category]):
             if value > 0:  # Only show non-zero values
-                x = i
-                y = total + (value / 2)
                 total += value
-                # if value > df.values.max() * 0.05:  # Only show labels for visible segments
-                    # ax.text(x, y, f'{value:.1f}', ha='center', va='center', fontsize=7)
         # Add total on top of each bar - choose the axis depending where the total is
         if total > 2450:
             ax1.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
         else:
             ax2.text(i, total, f'{total:.3f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
-    # Customize the plot
-    # Tick size
-    ax1.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
-    ax1.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
-    ax2.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
-    ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
+    # Apply consistent styling
+    apply_consistent_style(ax1, title=LOWER_BETTER_TITLE)
+    apply_consistent_style(ax2)
+    
     # Fix xticks rotation
     plt.xticks(rotation=0)
-    # y-axis label set in the middle of the plt
-    # ax2.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
-    ax2.annotate(
-        'Time (ms)',  # Text to annotate
-        xy=(-0.28, 5),  # The point to annotate (data coordinates)
-        xytext=(-50, 15),  # Text location (offset coordinates)
-        textcoords='offset points',  # Interpret xytext as an offset from xy
-        rotation=90,  # Rotate the label vertically
-        va='center',  # Align text vertically to the center
-        fontsize=TICKS_FONTSIZE,  # Font size,
-    )
-  
-    # x-axis label
-    # ax2.set_xlabel('Variant', fontsize=TICKS_FONTSIZE)
-    ax2.set_xlabel('', fontsize=TICKS_FONTSIZE)
-    # Title in the upper plot
-    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
-    # Insert legend in the top right position
-    legend = ax2.legend(bbox_to_anchor=(0.2, -0.47), loc='upper left', 
+    # Add y-axis label in the middle
+    create_annotation_y_label(ax2, 'Time (ms)', position=(0, 6.5))
+    
+    # Position legend at the center top
+    legend = ax2.legend(loc='center', bbox_to_anchor=(0.43, 2.55), 
                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=3)
     legend.get_frame().set_edgecolor('black')
     
-    # Add gridlines for better readability
-    ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
-    ax2.yaxis.grid(True, linestyle='--', alpha=0.7)
-       
-    # Adjust layout to prevent label cutoff
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / 'attestation_report_cutoff.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'attestation_report_cutoff.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / 'attestation_report_cutoff.pdf')
+    plt.savefig(output_dir / 'attestation_report_cutoff.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / 'attestation_report_cutoff.png', format='png', dpi=300, bbox_inches=None)
     
     plt.close()
 
