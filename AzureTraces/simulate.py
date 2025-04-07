@@ -143,7 +143,7 @@ def update_simulation(nodes, next_function_time, simulation_time, caching_time,
 def cache_function(node, f):
     global cur_cache_util
     global max_cache_util
-    f_id = f.application_hash + f.func_hash
+    f_id = f.application_hash + '-' + f.func_hash
 
     # check if function is already cached
     for i in range(node.max_functions):
@@ -183,7 +183,7 @@ def is_any_active(nodes):
                 return True
     return False
 
-def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft_warm_time, soft_warm_std, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file):
+def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft_warm_time, soft_warm_std, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file, enable_dynamic_sw):
 
     # index into the csv
     app_hash = 0
@@ -251,13 +251,13 @@ def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft
 
         # get possible node for next function
         f_delay = 0;
-        assigned_node, _, _ = scheduler.pick_next_node(nodes, f)
+        assigned_node, _, _, _ = scheduler.pick_next_node(nodes, f)
         # if there are no free node, run until a new node can be selected
         f_sched_time = max(sim_time, f.arrival_time)
         while(assigned_node == None):
             log(f'[{sim_time}] No free nodes available')
             _, sim_time, _  = update_simulation(nodes, f_sched_time, sim_time, caching_time, True)
-            assigned_node, _ , _ = scheduler.pick_next_node(nodes, f)
+            assigned_node, _ , _, _ = scheduler.pick_next_node(nodes, f)
 
         # we now have a canditate node, simulate until this function can run
         # take into account any delays
@@ -271,13 +271,16 @@ def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft
         f.start_time = sim_time
 
         #look for nodes again, just in case there is a better one than the previous candidate
-        assigned_node, assigned_slot, cold_boot = scheduler.pick_next_node(nodes, f)
-        soft_warm = False
+        assigned_node, assigned_slot, cold_boot, soft_warm = scheduler.pick_next_node(nodes, f)
+
+        # if we're not computing soft warm rate from the traces, keep the old system with the flat rate
+        if not enable_dynamic_sw:
+            soft_warm = False
 
         f_initial_duration = f.duration
         f_boot_time = 0
         if cold_boot == True:
-            if random.random() < percentage_soft_warm:
+            if (not enable_dynamic_sw and random.random() < percentage_soft_warm) or (enable_dynamic_sw and soft_warm):
                 f_boot_time = np.random.normal(soft_warm_time, soft_warm_std) 
                 f.duration = f.duration + f_boot_time
                 soft_warm = True
@@ -361,7 +364,10 @@ def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft
     print(f'max_functions_cached_per_node: {max_functions_per_node}')
     print(f'caching_time: {caching_time}')
     print(f'max_executions_slots: {max_execution_slots}')
-    print(f'percentage_soft_warm: {percentage_soft_warm}')
+    if enable_dynamic_sw:
+        print(f'percentage_soft_warm: {soft_warm_boots / len(rows)}')
+    else:
+        print(f'percentage_soft_warm: {percentage_soft_warm}')
     print('------------------------------------------------')
 
     return [sim_time, cold_boots/len(rows), soft_warm_boots / len(rows), warm_boots / len(rows), np.average(delays), np.median(delays), np.std(delays)]
@@ -389,7 +395,7 @@ if __name__ == '__main__':
     max_execution_slots = args.execution_slots
     percentage_soft_warm = args.percentage_soft_warm
     input_file = args.input_file
-    out = main_sim(num_nodes, cold_boot_time, 0, warm_boot_time, 0, soft_warm_time, 0, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file)
+    out = main_sim(num_nodes, cold_boot_time, 0, warm_boot_time, 0, soft_warm_time, 0, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file, False)
     print(out)
 
 
