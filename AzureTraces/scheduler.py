@@ -17,11 +17,17 @@ class SimpleScheduler(Scheduler):
         soft_warm = False
         soft_warm_node = None
         soft_warm_slot = 0
+        cold_boot_node = None
+        cold_boot_slot = 0
         func_id = function.application_hash + '-' +  function.func_hash
         for node in nodes:
             has_free, slot = has_free_slot(node)
             if has_free == False:
                 continue
+
+            if cold_boot_node == None:
+                cold_boot_node = node
+                cold_boot_slot = slot
             # find a free node that has the function already registered
             # for a warm boot
             for i in range(node.max_functions):
@@ -44,14 +50,20 @@ class SimpleScheduler(Scheduler):
             cold_boot = True
             return soft_warm_node, soft_warm_slot, cold_boot, soft_warm
 
-        #OPTIMIZE: I can integrate this second for loop in the one above
-        # there is no free node with this function registered, pick the first available node
-        for node in nodes:
-            has_free, slot = has_free_slot(node)
-            if has_free == True:
+        if cold_boot_node != None:
                 cold_boot = True
                 soft_warm = False
-                return node, slot, cold_boot, soft_warm
+                return cold_boot_node, cold_boot_slot, cold_boot, soft_warm
+            
+
+        #OPTIMIZE: I can integrate this second for loop in the one above
+        # there is no free node with this function registered, pick the first available node
+       # for node in nodes:
+       #     has_free, slot = has_free_slot(node)
+       #     if has_free == True:
+       #         cold_boot = True
+       #         soft_warm = False
+       #         return node, slot, cold_boot, soft_warm
 
         # there are no free nodes in the system!
         return None, 0, False, False
