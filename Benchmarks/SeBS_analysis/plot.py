@@ -479,6 +479,48 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
                 verticalalignment='bottom', horizontalalignment='right', 
                 fontsize=ANNOTATION_SIZE)
     
+    # Add per-function invocation latency statistics
+    stats_results.append("\nPer-Function Invocation Latency Statistics:")
+    
+    # Process each benchmark/function
+    for bench in benchmarks:
+        stats_results.append(f"\nBenchmark: {bench}")
+        stats_results.append(f"{'Variant':<20} {'P50 (s)':<10} {'P99 (s)':<10} {'StdDev (s)':<10}")
+        stats_results.append("-" * 50)
+        
+        # Process each variant for this benchmark
+        for variant in variants:
+            variant_bench_data = df[(df['type'] == 'cold') & 
+                                    (df['variant'] == variant) & 
+                                    (df['benchmark'] == bench)]
+            
+            if len(variant_bench_data) == 0:
+                stats_results.append(f"{LABEL_MAPPINGS[variant]:<20} {'N/A':<10} {'N/A':<10} {'N/A':<10}")
+                continue
+                
+            latencies = variant_bench_data['invocation_latency'].values
+            
+            if len(latencies) > 0:
+                p50 = np.percentile(latencies, 50)
+                p99 = np.percentile(latencies, 99)
+                stddev = np.std(latencies)
+                stats_results.append(f"{LABEL_MAPPINGS[variant]:<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
+        
+        # Add lukewarm data for this benchmark if available
+        if lukewarm_data:
+            lukewarm_bench_data = [item for item in lukewarm_data if item['benchmark'] == bench]
+            
+            if lukewarm_bench_data:
+                lukewarm_latencies = [item['invocation_latency'] for item in lukewarm_bench_data]
+                
+                if len(lukewarm_latencies) > 0:
+                    p50 = np.percentile(lukewarm_latencies, 50)
+                    p99 = np.percentile(lukewarm_latencies, 99)
+                    stddev = np.std(lukewarm_latencies)
+                    stats_results.append(f"{'Wallet (Lukewarm)':<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
+            else:
+                stats_results.append(f"{'Wallet (Lukewarm)':<20} {'N/A':<10} {'N/A':<10} {'N/A':<10}")
+    
     # Customize the plot
     ax.set_title(title, fontsize=TITLE_FONTSIZE)
     ax.set_xlabel('Latency (seconds)', fontsize=TICKS_FONTSIZE)
@@ -496,6 +538,10 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     # Collect the statistics results if a collector is provided
     if collect_results is not None:
         collect_results.extend(stats_results)
+    
+    # Print the per-function statistics immediately to the console
+    for line in stats_results:
+        print(line)
     
     # Adjust layout
     plt.tight_layout()
