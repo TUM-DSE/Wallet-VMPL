@@ -22,7 +22,8 @@ print(rows[0])
 print(rows[0][2])
 
 for row in rows:
-    row.resize(5, refcheck = False)
+    row.resize(6, refcheck = False)
+    row[5] = row[4]
     row[4] = str(float(row[2]) - float(row[3]))
 
 #for i in range(len(rows)):
@@ -88,5 +89,13 @@ with open(output_file, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(header)
     writer.writerows(sorted_rows)
+
+# Count unique values in the first column
+first_column_values = [row[0] for row in rows]
+unique_values = set(first_column_values)
+unique_count = len(unique_values)
+
+# Print count of unique values in first column
+print(f"Count of unique values in column '{header[0]}': {unique_count}")
 
 print(f'Sorted CSV saved as {output_file}')
