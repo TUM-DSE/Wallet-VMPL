@@ -85,7 +85,7 @@ class Runner:
                 results["measure_zygote_hot"].append(self.time_function(zy.measure_zygote_hot))
 
                 # Create trustlet and measure
-                func = b"print(\"Hello World!!\")"
+                func = "func.py"
                 tr = zy.create_trustlet(func)
                 tr.prepare_measure_trustlet_cold()
                 results["measure_trustlet_cold"].append(self.time_function(tr.measure_trustlet_cold))
