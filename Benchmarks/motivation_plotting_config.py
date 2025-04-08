@@ -312,9 +312,9 @@ LABEL_MAPPINGS_VM = {
 }
 
 LABEL_MAPPINGS_SIMULATIONS = {
-    'VM'                : 'Linux VM',
-    'KATA'              : 'Containers',
-    'CVM'               : 'CVM',
+    'VM'                : 'VM (KVM-Linux)',
+    'KATA'              : 'Containers (Kata)',
+    'CVM'               : 'CVM (SEV-SNP)',
     'WALLET'            : 'Wallet',
 }
 
