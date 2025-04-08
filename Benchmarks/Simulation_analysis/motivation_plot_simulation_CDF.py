@@ -161,14 +161,14 @@ def setup_log_formatter(ax):
         # Create a formatter that will use regular decimals instead of scientific notation
         formatter = ScalarFormatter()
         formatter.set_scientific(False)
-        
+
         # Create custom log locator for more control over tick positions
         locator = LogLocator(base=10)
-        
+
         # Apply formatter and locator to the x-axis
         ax.xaxis.set_major_formatter(formatter)
         ax.xaxis.set_major_locator(locator)
-        
+
         # Ensure grid aligns with major ticks
         ax.grid(True, which='major', alpha=0.5)
         ax.grid(False, which='minor')
@@ -181,14 +181,14 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
     # Set x-axis to log scale if requested
     if use_log_scale:
         ax.set_xscale('log')
-    
+
     # Use different line styles and colors for better distinction
     line_styles = ['-', '--', '-.', ':']
     colors = PALETTE_REGULAR
 
     # Keep track of max x value for setting plot limits properly
     max_x_value = 0
-    
+
     for i, config in enumerate(configs):
         variant = config['variant']
         num_nodes = config['num_nodes']
@@ -226,7 +226,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
         # Plot the CDF with different line styles and colors
         style_idx = i % len(line_styles)
         color_idx = i % len(colors)
-        
+
         # Main plot
         ax.plot(sorted_data, y_values, 
                 linestyle=line_styles[style_idx], 
@@ -241,7 +241,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
         x_label = 'Scheduling delay (ms)'
     elif value_type == 'slowdowns':
         x_label = 'Per-function slowdown'
-   
+
     # Apply consistent styling from the configuration
     apply_consistent_style(ax, 
                        title=LOWER_BETTER_TITLE,
@@ -254,7 +254,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
 
     # Set y-axis to range from 0 to 1
     ax.set_ylim(*ylim)
-    
+
     # Add a horizontal line at y=0.5 to visualize median
     ax.axhline(y=0.5, color='gray', linestyle='--', alpha=0.5)
     
@@ -269,7 +269,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
     
     # Create file suffix based on plot options
     suffix = "_log" if use_log_scale else ""
-    
+
     # Save as PDF
     pdf_path = f"{output_dir}/pdf/{output_name}{suffix}.pdf"
     plt.savefig(pdf_path, dpi=300, bbox_inches=None)
@@ -298,10 +298,10 @@ def parallel_plot_node_size(args):
     
     # Generate original plot
     generate_cdf_plot(node_configs, output_dir, base_output_name, title, value_type)
-    
+
     # Generate log scale plot
     generate_cdf_plot(node_configs, output_dir, base_output_name, title, value_type, use_log_scale=True)
-    
+
     return output_dir + "/pdf/" + base_output_name
 
 def process_by_node_size(configs, output_dir, pool, value_type):
@@ -377,7 +377,7 @@ def main():
     
     plotting_start = time.time()
     if configs:
-        with Pool(processes=num_cores) as pool:            
+        with Pool(processes=num_cores) as pool:      
             # Generate plots by node size in parallel
             print("Generating node size plots in parallel...")
             node_delay_plots = process_by_node_size(configs, output_dir, pool, "delays")
