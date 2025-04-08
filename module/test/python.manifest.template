@@ -1,0 +1,60 @@
+[libos]
+entrypoint = "/python/python"
+
+[loader]
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+log_level = "debug"
+in_memory = true
+insecure__disable_aslr = true
+argv = ["python3", "-c", """
+import ctypes
+import pickle
+from ctypes import CDLL
+lib = CDLL("/lib/libcpuid.so")
+print("Test1", flush=True)
+lib.finalize_zygote()
+print("TEST2", flush=True)
+#lib.notify_monitor()                                             # begin time
+
+a = ctypes.string_at(0x140_0000_0000)
+# a = (ctypes.c_char * 1048576).from_address(0x140_0000_0000) # 1 MiB # doesnt work
+print("TEST2",flush=True)
+exec(a)
+print("TEST3",flush=True)
+while True:
+  b = (ctypes.c_char * 104857600).from_address(0x280_0000_0000) # 100 MiB
+  print(len(b), flush=True)
+  print(b.value, flush=True)
+  input = pickle.loads(b)
+  print("Pickle loaded", flush=True)
+  #input = {}
+  out = handler(input)
+  print("OUT",flush=True)
+  print(len(out),flush=True)
+  lib.notify_monitor()                                           # end time
+  out = pickle.dumps(out)
+  print(len(out),flush=True)
+  # out = f'Länge: {len(out)}\\n'.encode('utf-8') + b'\\x00' # out ist möglicherweise zu lang für mmemmove
+  ptr = ctypes.POINTER(ctypes.c_char*len(out))
+  dst = ctypes.cast(0x300_0000_0000, ptr)
+  ctypes.memmove(dst, out, len(out))
+  print("Memcopy Done",flush=True)
+  lib.notify_monitor()
+  lib.notify_monitor()                                           # begin time
+"""]
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib"
+MINIO_ADDRESS = { value = "{{ minio_address }}" }
+MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
+MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
+PYTHONPATH = "/python/stdlib.zip:/dependencies"
+OMP_NUM_THREADS = "1"
+
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+  { type = "pseudo", path = "/python", uri = "python" },
+  { type = "pseudo", path = "/dependencies", uri = "dependencies" },
+]
