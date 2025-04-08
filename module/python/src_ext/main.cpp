@@ -21,7 +21,30 @@ extern "C" {
 #include <monitor.h>
 #include <zygote.h>
 #include <attest.h>
+#include <lib.h>
 #include <attest_microbenchmark.h>
+#include <sys/io.h>
+}
+
+bool permission = false;
+#define BENCHMARK_PORT 0xF4
+void get_permission(){
+    if (permission) {
+        return;
+    }
+    if (ioperm(BENCHMARK_PORT, 1, 1)) {
+        fprintf(stderr,"Unable to access benchmark port");
+    } else {
+        permission = true;
+    }
+}
+int count = 0;
+void start_measure() {
+    outb(75, BENCHMARK_PORT);
+}
+
+void end_measure(){
+    outb(76, BENCHMARK_PORT);
 }
 
 PYBIND11_MODULE(_wallet, m) {
@@ -65,7 +88,17 @@ PYBIND11_MODULE(_wallet, m) {
           py::arg("trusted_process_id"), py::arg("input"), py::arg("input_len"),
           py::arg("output"), py::arg("output_len"));
     /* end of helper functions for attestation microbenchmark */
-
+    /*Getting status of Wallet #pf, pvalidate, cow*/
+    m.def("stat_get", []() {
+        get_permission();
+        end_measure();
+        fprintf(stderr, "End measure %d\n", count);
+        stat_get();});
+    m.def("stat_reset", []() {
+        get_permission();
+        start_measure();
+        fprintf(stderr, "Start measure %d\n",count++);
+        stat_reset();});
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else
