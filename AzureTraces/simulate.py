@@ -280,7 +280,7 @@ def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft
         f_initial_duration = f.duration
         f_boot_time = 0
         if cold_boot == True:
-            if (not enable_dynamic_sw and random.random() < percentage_soft_warm) or (enable_dynamic_sw and soft_warm):
+            if ((not enable_dynamic_sw) and random.random() < percentage_soft_warm) or (enable_dynamic_sw and soft_warm):
                 f_boot_time = np.random.normal(soft_warm_time, soft_warm_std) 
                 f.duration = f.duration + f_boot_time
                 soft_warm = True
