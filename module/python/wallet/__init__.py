@@ -17,6 +17,12 @@ class Wallet:
         self.fd = None
         pass
 
+    def stat_get(self):
+        _w.stat_get()
+
+    def stat_reset(self):
+        _w.stat_reset()
+
     def open_device(self, path: FileName = "/dev/vmpl_device") -> int:
         self.fd = _w.monitor_connect()
         if self.fd < 0:

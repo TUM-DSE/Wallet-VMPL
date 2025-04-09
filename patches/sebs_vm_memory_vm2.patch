@@ -1,0 +1,61 @@
+diff --git a/sebs/cvm/function.py b/sebs/cvm/function.py
+index 21b89da..3f2589d 100644
+--- a/sebs/cvm/function.py
++++ b/sebs/cvm/function.py
+@@ -2,6 +2,9 @@ import concurrent.futures
+ import datetime
+ import sys
+ import time
++from subprocess import Popen
++import subprocess
++import os
+ 
+ import requests
+ from sebs.faas.function import ExecutionResult, Function, FunctionConfig, Trigger
+@@ -42,22 +45,28 @@ class HTTPTrigger(Trigger):
+             from tasks.config import SSH_PORT
+ 
+             vm: QemuVM
+-            resource: VMResource = get_vm_resource("snp", "small") # 1 cpu, 8 GB memory
+-            # resource: VMResource = get_vm_resource("amd", "small") # 1 cpu, 8 GB memory
++            #resource: VMResource = get_vm_resource("snp", "small") # 1 cpu, 8 GB memory
++            resource: VMResource = get_vm_resource("amd", "small") # 1 cpu, 8 GB memory
+             config = {
+                 "image": "../../../build/image/guest-fs-sebs.qcow2",
+                 "ssh_port": SSH_PORT,
+                 "boot_prealloc": False
+             }
+-            qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
+-            # qemu_cmd = get_amd_vm_direct_qemu_cmd(resource, config)
++            #qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
++            qemu_cmd = get_amd_vm_direct_qemu_cmd(resource, config)
+ 
+-            context = spawn_qemu(qemu_cmd, numa_node=resource.numa_node, config=config)
++            p = subprocess.run(["sudo", "rmdir", "/sys/fs/cgroup/vm_bench/"])
++            p = subprocess.run(["sudo", "mkdir", "/sys/fs/cgroup/vm_bench/"])
++            #p = subprocess.run(["sudo", "sh", "-c", f"echo {os.getpid()} > /sys/fs/cgroup/vm_bench/cgroup.procs"])
++
++            extra_args = [ "sudo", "cgexec", "--sticky", "-g", "memory:vm_bench"]
++            context = spawn_qemu(qemu_cmd, numa_node=resource.numa_node, config=config,
++                                 extra_args_pre=extra_args)
+             self.function._context = context
+             vm = context.__enter__()
+             self.function._running = True
+ 
+-            vm.pin_vcpu(resource.pin_base)
++            #vm.pin_vcpu(resource.pin_base)
+ 
+             environment = {
+                 "CODE_LOCATION": self.function._code_location,
+@@ -76,6 +85,11 @@ class HTTPTrigger(Trigger):
+ 
+         output = requests.post("http://localhost:9002", json=payload).json()
+         end = datetime.datetime.now()
++        with open("/sys/fs/cgroup/vm_bench/memory.peak", "r") as f:
++            mem = int(f.read())
++
++        #p = subprocess.run(["sudo", "sh", "-c", f"echo {os.getpid()} > /sys/fs/cgroup/cgroup.procs"])
++        self.logging.info(f"Memory utilization: {mem}")
+ 
+         result = ExecutionResult.from_times(begin, end)
+         result.request_id = output["request_id"]
