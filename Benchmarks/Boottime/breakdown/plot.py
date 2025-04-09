@@ -412,7 +412,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Set y-axis limits with two breaks
     max_zygote = df[df['Component'] == "Zygote creation"]['Time (ms)'].max()
-    ax1.set_ylim(250, max_zygote-150)  # Upper section for high values (Zygote)
+    ax1.set_ylim(250, max_zygote + 50)  # Upper section for high values (Zygote)
     ax2.set_ylim(0.6, 250)                 # Middle section for medium values
     ax3.set_ylim(0, 0.6)                  # Lower section for small values
     
@@ -472,15 +472,17 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
             top_value = max(0, value - top_min)
             middle_value = min(middle_max - middle_min, max(0, min(value, middle_max) - middle_min))
             bottom_value = min(bottom_max, max(0, min(value, bottom_max)))
+
+            print(f"{benchmark}: {component} - Top: {top_value}, Middle: {middle_value}, Bottom: {bottom_value}")
             
             # Plot each portion in its respective subplot
             if top_value > 0:
-                ax1.bar(x[j] + (i - 1.5) * width, top_value, width, 
+                ax1.bar(x[j] + (i - 1.5) * width, top_value + 250, width, 
                         label=component if j == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
             
             if middle_value > 0:
-                ax2.bar(x[j] + (i - 1.5) * width, middle_value, width, 
+                ax2.bar(x[j] + (i - 1.5) * width, middle_value + 0.5, width, 
                         label=component if j == 0 and top_value == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
             
@@ -516,7 +518,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Create the legend with the ordered items
     legend = ax1.legend(ordered_handles, ordered_labels, 
-                      bbox_to_anchor=(0.01, 0.65), loc='upper left',
+                      bbox_to_anchor=(0.01, 0.60), loc='upper left',
                       #bbox_to_anchor=(0.01, 0.90), loc='upper left',
                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
     legend.get_frame().set_edgecolor('black')
