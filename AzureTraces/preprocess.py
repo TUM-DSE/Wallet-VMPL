@@ -15,7 +15,8 @@ with open(input_file, 'r') as csvfile:
 
 orig_rows = rows.copy()
 
-header.resize(5)
+header.resize(6)
+header[5] = header[4]
 header[4] = "start_timestamp"
 print(header)
 print(rows[0])
@@ -25,6 +26,8 @@ for row in rows:
     row.resize(6, refcheck = False)
     row[5] = row[4]
     row[4] = str(float(row[2]) - float(row[3]))
+    row[0] = row[0].replace('-','_')
+    row[1] = row[1].replace('-','_')
 
 #for i in range(len(rows)):
 #    row = rows[i]
