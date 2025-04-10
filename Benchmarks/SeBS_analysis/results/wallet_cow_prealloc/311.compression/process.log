@@ -1,4 +1,4 @@
-13:51:13,461 INFO SeBS-8fd9: Created experiment output at /root/Benchmarks/SeBS/311.compression
-13:51:13,476 INFO Wallet-b9f9: Using existing deployment wallet-67e6f780 that matches prefix wallet!
-13:51:13,480 INFO Experiment.PerfCost-d4f0: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/cold_results.json
-13:51:13,485 INFO Experiment.PerfCost-d4f0: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/sequential_results.json
+12:44:16,411 INFO SeBS-ceba: Created experiment output at /root/Benchmarks/SeBS/311.compression
+12:44:16,425 INFO Wallet-6657: Using existing deployment wallet-33434736 that matches prefix wallet!
+12:44:16,430 INFO Experiment.PerfCost-1d53: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/sequential_results.json
+12:44:16,434 INFO Experiment.PerfCost-1d53: Processing data in /root/Benchmarks/SeBS/311.compression/perf-cost/cold_results.json
