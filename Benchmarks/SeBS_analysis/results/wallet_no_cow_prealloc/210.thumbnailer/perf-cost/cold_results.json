@@ -1,0 +1,266 @@
+{
+  "_invocations": {
+    "210.thumbnailer-python-3.11": {
+      "254f3d0c-67f7-4396-995d-e4eae6203b93": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744291788.506536",
+          "end": "1744291789.117176",
+          "is_cold": false,
+          "request_id": "254f3d0c-67f7-4396-995d-e4eae6203b93",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 361298500.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-da7e4932",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.79e82109.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "254f3d0c-67f7-4396-995d-e4eae6203b93",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 610640,
+          "client": 2917461,
+          "client_begin": "2025-04-10 13:29:46.193212",
+          "client_end": "2025-04-10 13:29:49.110673",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "3203348a-0e1b-4754-9fb3-4c8f61c4c717": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744291801.423350",
+          "end": "1744291802.020251",
+          "is_cold": false,
+          "request_id": "3203348a-0e1b-4754-9fb3-4c8f61c4c717",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 352326120.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-da7e4932",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.4891c71c.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "3203348a-0e1b-4754-9fb3-4c8f61c4c717",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 596901,
+          "client": 2890884,
+          "client_begin": "2025-04-10 13:29:59.123489",
+          "client_end": "2025-04-10 13:30:02.014373",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "8c6b340a-5a23-497c-9172-9ed02330cf20": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744291840.077524",
+          "end": "1744291840.688561",
+          "is_cold": false,
+          "request_id": "8c6b340a-5a23-497c-9172-9ed02330cf20",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 355979760.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-da7e4932",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.0a99a10d.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "8c6b340a-5a23-497c-9172-9ed02330cf20",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 611037,
+          "client": 2876138,
+          "client_begin": "2025-04-10 13:30:37.806197",
+          "client_end": "2025-04-10 13:30:40.682335",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "91bb9dd5-b8c3-457e-a592-6b2751c96c5d": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744291814.303529",
+          "end": "1744291814.908673",
+          "is_cold": false,
+          "request_id": "91bb9dd5-b8c3-457e-a592-6b2751c96c5d",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 357782460.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-da7e4932",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.e9dadc34.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "91bb9dd5-b8c3-457e-a592-6b2751c96c5d",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 605144,
+          "client": 2875958,
+          "client_begin": "2025-04-10 13:30:12.026932",
+          "client_end": "2025-04-10 13:30:14.902890",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "95140bec-7c47-447a-badc-b8e16af4d895": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744291827.203690",
+          "end": "1744291827.801823",
+          "is_cold": false,
+          "request_id": "95140bec-7c47-447a-badc-b8e16af4d895",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 353753880.0,
+                "download_size": 1640578,
+                "upload_size": 3872
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-wallet-da7e4932",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.b6bbaaaf.jpg"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "95140bec-7c47-447a-badc-b8e16af4d895",
+        "stats": {
+          "cold_start": true,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 598133,
+          "client": 2880399,
+          "client_begin": "2025-04-10 13:30:24.915546",
+          "client_end": "2025-04-10 13:30:27.795945",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      }
+    }
+  },
+  "_metrics": {},
+  "begin_time": 1744291781.187392,
+  "config": {
+    "deployment": {
+      "name": "wallet"
+    },
+    "experiments": {
+      "download_results": false,
+      "experiments": {
+        "perf-cost": {
+          "benchmark": "210.thumbnailer",
+          "concurrent-invocations": 1,
+          "experiments": [
+            "cold",
+            "sequential"
+          ],
+          "input-size": "small",
+          "memory-sizes": [],
+          "repetitions": 5
+        }
+      },
+      "flags": {},
+      "runtime": {
+        "language": "python",
+        "version": "3.11"
+      },
+      "update_code": false,
+      "update_storage": false
+    }
+  },
+  "end_time": 1744291845.687624,
+  "result_bucket": null,
+  "statistics": {
+    "cold_count": 5,
+    "failures": [],
+    "failures_count": 0,
+    "incorrect": [],
+    "incorrect_count": 0,
+    "samples_generated": 5
+  }
+}
