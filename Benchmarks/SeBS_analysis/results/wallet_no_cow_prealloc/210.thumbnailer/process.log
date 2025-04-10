@@ -1,0 +1,4 @@
+13:31:45,646 INFO SeBS-6f9c: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+13:31:45,659 INFO Wallet-b5ad: Using existing deployment wallet-da7e4932 that matches prefix wallet!
+13:31:45,664 INFO Experiment.PerfCost-39ff: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+13:31:45,669 INFO Experiment.PerfCost-39ff: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json

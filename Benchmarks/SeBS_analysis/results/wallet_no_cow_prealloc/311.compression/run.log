@@ -1,0 +1,39 @@
+13:38:32,697 INFO SeBS-adca: Created experiment output at /root/Benchmarks/SeBS/311.compression
+13:38:32,770 INFO Wallet-c4bf: Generating unique resource name wallet-1860300c
+13:38:32,772 INFO minio.Minio-88a3: Initialize a new bucket for benchmarks
+13:38:32,777 INFO minio.Minio-88a3: Created bucket sebs-benchmarks-wallet-1860300c
+13:38:32,934 INFO Benchmark-54b3: Building benchmark 311.compression. Reason: no cached code package.
+13:38:33,13 INFO Benchmark-54b3: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+13:38:33,44 INFO Wallet-c4bf: Function size 0.000004 MB
+13:38:33,66 INFO Benchmark-54b3: Created code package (source hash: 215abcf11a5b09fade69cad30b314ca7), for run on wallet with python:3.11
+13:38:33,225 INFO Wallet-c4bf: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+13:38:34,271 INFO Experiment.PerfCost-5eaf: Begin experiment
+13:38:34,272 INFO Experiment.PerfCost-5eaf: Begin cold experiments
+13:38:34,275 INFO Wallet.WalletFunction-e3a4: Not stopping function as it was not running
+13:38:42,914 INFO Experiment.PerfCost-5eaf: Processed 1 samples out of 5, 0 errors
+13:38:47,917 INFO Wallet.WalletFunction-e3a4: Stopping function
+13:38:47,918 INFO Wallet.WalletFunction-e3a4: Function stopped succesfully
+13:38:56,474 INFO Experiment.PerfCost-5eaf: Processed 2 samples out of 5, 0 errors
+13:39:01,480 INFO Wallet.WalletFunction-e3a4: Stopping function
+13:39:01,480 INFO Wallet.WalletFunction-e3a4: Function stopped succesfully
+13:39:10,6 INFO Experiment.PerfCost-5eaf: Processed 3 samples out of 5, 0 errors
+13:39:15,12 INFO Wallet.WalletFunction-e3a4: Stopping function
+13:39:15,13 INFO Wallet.WalletFunction-e3a4: Function stopped succesfully
+13:39:23,606 INFO Experiment.PerfCost-5eaf: Processed 4 samples out of 5, 0 errors
+13:39:28,612 INFO Wallet.WalletFunction-e3a4: Stopping function
+13:39:28,613 INFO Wallet.WalletFunction-e3a4: Function stopped succesfully
+13:39:37,158 INFO Experiment.PerfCost-5eaf: Processed 5 samples out of 5, 0 errors
+13:39:42,167 INFO Experiment.PerfCost-5eaf: Mean 3566.5672 [ms], median 3549.896 [ms], std 41.623825885663166, CV 1.167055702347713
+13:39:42,174 INFO Experiment.PerfCost-5eaf: Parametric CI (Student's t-distribution) 0.95 from 3508.7840661800724 to 3624.3503338199275, within 1.6201330461382466% of mean
+13:39:42,176 INFO Experiment.PerfCost-5eaf: Parametric CI (Student's t-distribution) 0.99 from 3470.7471783555548 to 3662.387221644445, within 2.686617586917897% of mean
+13:39:42,180 INFO Experiment.PerfCost-5eaf: Begin sequential experiments
+13:39:49,150 INFO Experiment.PerfCost-5eaf: Processed 1 samples out of 5, 0 errors
+13:40:00,104 INFO Experiment.PerfCost-5eaf: Processed 2 samples out of 5, 0 errors
+13:40:11,48 INFO Experiment.PerfCost-5eaf: Processed 3 samples out of 5, 0 errors
+13:40:21,985 INFO Experiment.PerfCost-5eaf: Processed 4 samples out of 5, 0 errors
+13:40:32,908 INFO Experiment.PerfCost-5eaf: Processed 5 samples out of 5, 0 errors
+13:40:37,914 INFO Experiment.PerfCost-5eaf: Mean 931.2356 [ms], median 932.933 [ms], std 9.989892503926146, CV 1.0727567227805883
+13:40:37,917 INFO Experiment.PerfCost-5eaf: Parametric CI (Student's t-distribution) 0.95 from 917.3674059280111 to 945.1037940719889, within 1.4892250760160919% of mean
+13:40:37,919 INFO Experiment.PerfCost-5eaf: Parametric CI (Student's t-distribution) 0.99 from 908.2383935783388 to 954.2328064216612, within 2.46953686281551% of mean
+13:40:37,923 INFO Wallet.WalletFunction-e3a4: Stopping function
+13:40:37,928 INFO Wallet.WalletFunction-e3a4: Function stopped succesfully
