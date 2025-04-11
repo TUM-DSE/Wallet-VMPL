@@ -311,10 +311,17 @@ LABEL_MAPPINGS_VM = {
     'wallet'            : 'Wallet',
 }
 
-LABEL_MAPPINGS_SIMULATIONS = {
+LABEL_MAPPINGS_SIMULATIONS_MOTIVATION = {
     'VM'                : 'VM (KVM-Linux)',
     'KATA'              : 'Containers (Kata)',
     'CVM'               : 'CVM (SEV-SNP)',
+    'WALLET'            : 'Wallet',
+}
+
+LABEL_MAPPINGS_SIMULATIONS_EVALUATION = {
+    'VM'                : 'VM',
+    'KATA'              : 'Containers',
+    'CVM'               : 'CVM',
     'WALLET'            : 'Wallet',
 }
 

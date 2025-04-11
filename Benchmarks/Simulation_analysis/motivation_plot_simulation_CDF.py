@@ -189,9 +189,9 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
     # Keep track of max x value for setting plot limits properly
     max_x_value = 0
 
-    # Sort configs according to the order in LABEL_MAPPINGS_SIMULATIONS
+    # Sort configs according to the order in LABEL_MAPPINGS_SIMULATIONS_MOTIVATION
     # We can create a sorting key based on the position of each variant in the dictionary
-    variant_order = {variant: i for i, variant in enumerate(LABEL_MAPPINGS_SIMULATIONS.keys())}
+    variant_order = {variant: i for i, variant in enumerate(LABEL_MAPPINGS_SIMULATIONS_MOTIVATION.keys())}
     sorted_configs = sorted(configs, key=lambda x: variant_order.get(x['variant'], float('inf')))
     
     for i, config in enumerate(sorted_configs):
@@ -215,7 +215,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
         y_values = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         
         # Map the variant name if it exists in mapping dict
-        display_variant = LABEL_MAPPINGS_SIMULATIONS[variant]
+        display_variant = LABEL_MAPPINGS_SIMULATIONS_MOTIVATION[variant]
         
         # Create label with configuration details
         label = ""
