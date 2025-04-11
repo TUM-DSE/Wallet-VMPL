@@ -161,7 +161,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     df.set_index('Category', inplace=True)
     
     # Create standardized cutoff plot
-    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.75, bottom_margin= 0.45, top_margin=0.65)
+    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.95, bottom_margin= 0.45, top_margin=0.46)
 
     # Set y-axis limits with a break
     ax1.set_ylim(400, 14600)  # upper section for high values
@@ -206,13 +206,13 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     plt.xticks(rotation=90)
     
     # Add y-axis label in the middle
-    create_annotation_y_label(ax2, 'Time (ms)', position=(0.52, 220))
+    create_annotation_y_label(ax2, 'Time (ms)', position=(0.65, 220))
     
     # Add legend at the center top
     handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.55, 0.85), 
+    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.5, 0.91), 
                edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
-               frameon=True, ncols=2)
+               frameon=True, ncols=3, columnspacing=0.3, labelspacing=0.2, borderpad=0.3, handletextpad=0.3)
     
     # Save plots
     output_dir = Path(output_dir)

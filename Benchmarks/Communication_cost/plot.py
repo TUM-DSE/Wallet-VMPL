@@ -38,7 +38,7 @@ def create_line_plot(data, output_dir, y_scale='linear'):
     message_sizes = [64.0, 256.0, 1024.0, 8192.0, 16384.0, 65536.0, 262144.0, 1048576.0]
     
     # Create standardized plot
-    fig, ax = create_standardized_plot(ax_height = 0.75, bottom_margin= 0.45, top_margin=0.65)
+    fig, ax = create_standardized_plot(ax_height = 0.95, bottom_margin= 0.45, top_margin=0.46)
     
     # Filter variants
     variants = ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
@@ -93,8 +93,8 @@ def create_line_plot(data, output_dir, y_scale='linear'):
     ax.set_xlim(0.5, len(message_sizes) + 0.5)
     
     # Position legend at the top center
-    legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.5),
-                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=2)
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.5, 1.3),
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=2, columnspacing=0.3, labelspacing=0.2, borderpad=0.3, handletextpad=0.3)
     legend.get_frame().set_edgecolor('black')
     
     # Save plots
