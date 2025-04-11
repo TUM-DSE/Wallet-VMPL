@@ -6,7 +6,7 @@ import io
 import sys
 import os
 import seaborn as sns
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Lock
 from functools import partial
 import itertools
 from pathlib import Path
@@ -20,6 +20,9 @@ from matplotlib.ticker import ScalarFormatter, LogFormatter, LogLocator
 import sys
 sys.path.append('..')
 from motivation_plotting_config import *
+
+# Create a global lock for synchronized printing
+print_lock = Lock()
 
 TRACE_NAME = "default"
 
@@ -408,6 +411,56 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
 
     plt.close()
 
+
+  # Add summary table at the end
+    print("\nLatency Summary Table (milliseconds):")
+    print("=" * 120)
+    
+    # Create header with node sizes
+    header = f"{'Variant':<15}"
+    for node_size in unique_node_sizes:
+        header += f" | {node_size:^9} nodes"
+    print(header)
+    print("-" * 120)
+
+    # Print P50 values first
+    for variant in sorted_variants:
+        if variant in plot_data['P50']:
+            variant_display = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
+            line = f"{variant_display} P50"
+            line = f"{line:<15}"
+            for node_size in unique_node_sizes:
+                # Find this node size in the variant's data
+                if node_size in plot_data['P50'][variant]['node_sizes']:
+                    idx = plot_data['P50'][variant]['node_sizes'].index(node_size)
+                    value = plot_data['P50'][variant]['delays'][idx]
+                    # Format value to be right-aligned with 2 decimal places
+                    formatted_value = f"{value:.2f}".rjust(15)
+                    line += f" | {formatted_value}"
+                else:
+                    line += f" | {'N/A':>15}"
+            print(line)
+
+    # Print P99 values
+    for variant in sorted_variants:
+        if variant in plot_data['P99']:
+            variant_display = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
+            line = f"{variant_display} P99"
+            line = f"{line:<15}"
+            for node_size in unique_node_sizes:
+                # Find this node size in the variant's data
+                if node_size in plot_data['P99'][variant]['node_sizes']:
+                    idx = plot_data['P99'][variant]['node_sizes'].index(node_size)
+                    value = plot_data['P99'][variant]['delays'][idx]
+                    # Format value to be right-aligned with 2 decimal places
+                    formatted_value = f"{value:.2f}".rjust(15)
+                    line += f" | {formatted_value}"
+                else:
+                    line += f" | {'N/A':>15}"
+            print(line)
+    
+    print("=" * 120)
+
     return pdf_path
 
 def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim=(0, 1.05), use_log_scale=False):
@@ -526,6 +579,34 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
     plt.savefig(png_path, dpi=300, bbox_inches=None)
     
     plt.close()
+    
+    # Print summary of P50, P90, P99 with lock to prevent mixed output
+    with print_lock:
+        print(f"\nLatency Summary for {title}: {x_label}:")
+        print("=" * 120)
+
+        unit = "(ms)" if value_type == "delays" else "    "
+        
+        # Create header
+        header = f"{'Variant':<15} | {'P50 '+unit:>15} | {'P90 '+unit:>15} | {'P99 '+unit:>15}"
+        print(header)
+        print("-" * 120)
+        
+        # Print percentiles for each variant
+        for config in sorted_configs:
+            variant = config['variant']
+            display_variant = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
+            
+            if value_type in config and config[value_type]:
+                values = np.array(config[value_type])
+                p50 = np.percentile(values, 50)
+                p90 = np.percentile(values, 90)
+                p99 = np.percentile(values, 99)
+                
+                line = f"{display_variant:<15} | {p50:15.2f} | {p90:15.2f} | {p99:15.2f}"
+                print(line)
+        
+        print("=" * 120)
     
     return f'{output_dir}/pdf/{output_name}'
 
