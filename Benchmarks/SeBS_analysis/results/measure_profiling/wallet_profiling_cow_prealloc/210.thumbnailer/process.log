@@ -1,0 +1,3 @@
+13:29:46,704 INFO SeBS-3b6b: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+13:29:46,718 INFO WalletProfiling-1565: Using existing deployment walletprofiling-d86b15ac that matches prefix walletprofiling!
+13:29:46,723 INFO Experiment.PerfCost-edba: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json

@@ -1,0 +1,30 @@
+13:36:38,500 INFO SeBS-3789: Created experiment output at /root/Benchmarks/SeBS/311.compression
+13:36:38,571 INFO WalletProfiling-baad: Generating unique resource name walletprofiling-feb8a9f8
+13:36:38,574 INFO minio.Minio-b04a: Initialize a new bucket for benchmarks
+13:36:38,579 INFO minio.Minio-b04a: Created bucket sebs-benchmarks-walletprofiling-feb8a9f8
+13:36:38,737 INFO Benchmark-2132: Building benchmark 311.compression. Reason: no cached code package.
+13:36:38,818 INFO Benchmark-2132: There is no Docker build image for wallet_profiling run in python, thus skipping the Docker-based installation of dependencies.
+13:36:38,850 INFO WalletProfiling-baad: Function size 0.000004 MB
+13:36:38,872 INFO Benchmark-2132: Created code package (source hash: 215abcf11a5b09fade69cad30b314ca7), for run on wallet_profiling with python:3.11
+13:36:39,33 INFO WalletProfiling-baad: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+13:36:40,106 INFO Experiment.PerfCost-63ac: Begin experiment
+13:36:40,106 INFO Experiment.PerfCost-63ac: Begin cold experiments
+13:36:40,110 INFO WalletProfiling.WalletFunction-19ab: Not stopping function as it was not running
+13:36:50,280 INFO Experiment.PerfCost-63ac: Processed 1 samples out of 5, 0 errors
+13:36:55,285 INFO WalletProfiling.WalletFunction-19ab: Stopping function
+13:36:55,286 INFO WalletProfiling.WalletFunction-19ab: Function stopped succesfully
+13:37:05,435 INFO Experiment.PerfCost-63ac: Processed 2 samples out of 5, 0 errors
+13:37:10,441 INFO WalletProfiling.WalletFunction-19ab: Stopping function
+13:37:10,441 INFO WalletProfiling.WalletFunction-19ab: Function stopped succesfully
+13:37:20,646 INFO Experiment.PerfCost-63ac: Processed 3 samples out of 5, 0 errors
+13:37:25,652 INFO WalletProfiling.WalletFunction-19ab: Stopping function
+13:37:25,653 INFO WalletProfiling.WalletFunction-19ab: Function stopped succesfully
+13:37:35,797 INFO Experiment.PerfCost-63ac: Processed 4 samples out of 5, 0 errors
+13:37:40,802 INFO WalletProfiling.WalletFunction-19ab: Stopping function
+13:37:40,803 INFO WalletProfiling.WalletFunction-19ab: Function stopped succesfully
+13:37:50,912 INFO Experiment.PerfCost-63ac: Processed 5 samples out of 5, 0 errors
+13:37:55,920 INFO Experiment.PerfCost-63ac: Mean 5141.4502 [ms], median 5135.776 [ms], std 30.921956874686956, CV 0.601424805683948
+13:37:55,926 INFO Experiment.PerfCost-63ac: Parametric CI (Student's t-distribution) 0.95 from 5098.523642096069 to 5184.376757903931, within 0.834911478942869% of mean
+13:37:55,928 INFO Experiment.PerfCost-63ac: Parametric CI (Student's t-distribution) 0.99 from 5070.266388469556 to 5212.634011530445, within 1.3845084316958758% of mean
+13:37:55,932 INFO WalletProfiling.WalletFunction-19ab: Stopping function
+13:37:55,936 INFO WalletProfiling.WalletFunction-19ab: Function stopped succesfully

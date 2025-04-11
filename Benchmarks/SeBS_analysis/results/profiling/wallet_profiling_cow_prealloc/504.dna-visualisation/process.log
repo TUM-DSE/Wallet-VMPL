@@ -1,0 +1,3 @@
+15:41:25,883 INFO SeBS-f447: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+15:41:25,897 INFO WalletProfiling-7bf8: Using existing deployment walletprofiling-13777566 that matches prefix walletprofiling!
+15:41:25,902 INFO Experiment.PerfCost-cda9: Processing data in /root/Benchmarks/SeBS/504.dna-visualisation/perf-cost/cold_results.json

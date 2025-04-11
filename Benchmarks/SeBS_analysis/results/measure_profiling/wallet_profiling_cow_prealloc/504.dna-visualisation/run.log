@@ -1,0 +1,30 @@
+14:23:57,370 INFO SeBS-20dd: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+14:23:57,448 INFO WalletProfiling-7a20: Generating unique resource name walletprofiling-9ad2eadc
+14:23:57,451 INFO minio.Minio-c4f0: Initialize a new bucket for benchmarks
+14:23:57,456 INFO minio.Minio-c4f0: Created bucket sebs-benchmarks-walletprofiling-9ad2eadc
+14:23:57,628 INFO Benchmark-d71c: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+14:23:57,727 INFO Benchmark-d71c: There is no Docker build image for wallet_profiling run in python, thus skipping the Docker-based installation of dependencies.
+14:23:57,758 INFO WalletProfiling-7a20: Function size 0.000005 MB
+14:23:57,783 INFO Benchmark-d71c: Created code package (source hash: 23d725ddb360885101d4ef8bc9ec9dc1), for run on wallet_profiling with python:3.11
+14:23:57,969 INFO WalletProfiling-7a20: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+14:23:58,711 INFO Experiment.PerfCost-1b97: Begin experiment
+14:23:58,712 INFO Experiment.PerfCost-1b97: Begin cold experiments
+14:23:58,715 INFO WalletProfiling.WalletFunction-d9fa: Not stopping function as it was not running
+14:24:22,132 INFO Experiment.PerfCost-1b97: Processed 1 samples out of 5, 0 errors
+14:24:27,137 INFO WalletProfiling.WalletFunction-d9fa: Stopping function
+14:24:27,138 INFO WalletProfiling.WalletFunction-d9fa: Function stopped succesfully
+14:24:50,5 INFO Experiment.PerfCost-1b97: Processed 2 samples out of 5, 0 errors
+14:24:55,11 INFO WalletProfiling.WalletFunction-d9fa: Stopping function
+14:24:55,12 INFO WalletProfiling.WalletFunction-d9fa: Function stopped succesfully
+14:25:18,51 INFO Experiment.PerfCost-1b97: Processed 3 samples out of 5, 0 errors
+14:25:23,57 INFO WalletProfiling.WalletFunction-d9fa: Stopping function
+14:25:23,57 INFO WalletProfiling.WalletFunction-d9fa: Function stopped succesfully
+14:25:46,56 INFO Experiment.PerfCost-1b97: Processed 4 samples out of 5, 0 errors
+14:25:51,61 INFO WalletProfiling.WalletFunction-d9fa: Stopping function
+14:25:51,62 INFO WalletProfiling.WalletFunction-d9fa: Function stopped succesfully
+14:26:14,102 INFO Experiment.PerfCost-1b97: Processed 5 samples out of 5, 0 errors
+14:26:19,110 INFO Experiment.PerfCost-1b97: Mean 18058.7314 [ms], median 18025.523 [ms], std 183.94850495135864, CV 1.0186125529911731
+14:26:19,116 INFO Experiment.PerfCost-1b97: Parametric CI (Student's t-distribution) 0.95 from 17803.369936909676 to 18314.092863090325, within 1.4140609184226796% of mean
+14:26:19,118 INFO Experiment.PerfCost-1b97: Parametric CI (Student's t-distribution) 0.99 from 17635.273215874415 to 18482.189584125586, within 2.344894415593256% of mean
+14:26:19,122 INFO WalletProfiling.WalletFunction-d9fa: Stopping function
+14:26:19,128 INFO WalletProfiling.WalletFunction-d9fa: Function stopped succesfully
