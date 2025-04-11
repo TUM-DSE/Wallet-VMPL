@@ -1,0 +1,21 @@
+16:02:09,62 INFO SeBS-800e: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+16:02:09,135 INFO WalletWarm-2fa9: Generating unique resource name walletwarm-528afc2a
+16:02:09,138 INFO minio.Minio-3399: Initialize a new bucket for benchmarks
+16:02:09,143 INFO minio.Minio-3399: Created bucket sebs-benchmarks-walletwarm-528afc2a
+16:02:09,387 INFO Benchmark-3b6c: Building benchmark 110.dynamic-html. Reason: no cached code package.
+16:02:09,511 INFO Benchmark-3b6c: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:02:09,549 INFO WalletWarm-2fa9: Function size 0.000005 MB
+16:02:09,577 INFO Benchmark-3b6c: Created code package (source hash: df7bdfe626d61a7c1f521476c26ace06), for run on wallet_warm with python:3.11
+16:02:09,808 INFO WalletWarm-2fa9: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+16:02:10,475 INFO Experiment.PerfCost-da60: Begin experiment
+16:02:10,475 INFO Experiment.PerfCost-da60: Begin sequential experiments
+16:02:19,223 INFO Experiment.PerfCost-da60: Processed 1 samples out of 5, 0 errors
+16:02:30,717 INFO Experiment.PerfCost-da60: Processed 2 samples out of 5, 0 errors
+16:02:42,183 INFO Experiment.PerfCost-da60: Processed 3 samples out of 5, 0 errors
+16:02:53,688 INFO Experiment.PerfCost-da60: Processed 4 samples out of 5, 0 errors
+16:03:05,174 INFO Experiment.PerfCost-da60: Processed 5 samples out of 5, 0 errors
+16:03:10,183 INFO Experiment.PerfCost-da60: Mean 1475.9604000000004 [ms], median 1479.208 [ms], std 12.476050169825347, CV 0.8452835299527917
+16:03:10,188 INFO Experiment.PerfCost-da60: Parametric CI (Student's t-distribution) 0.95 from 1458.6408657868935 to 1493.2799342131073, within 1.1734416596208719% of mean
+16:03:10,190 INFO Experiment.PerfCost-da60: Parametric CI (Student's t-distribution) 0.99 from 1447.2399406987902 to 1504.6808593012106, within 1.9458827825739908% of mean
+16:03:10,197 INFO WalletWarm.WalletFunction-6892: Stopping function
+16:03:10,199 INFO WalletWarm.WalletFunction-6892: Function stopped succesfully

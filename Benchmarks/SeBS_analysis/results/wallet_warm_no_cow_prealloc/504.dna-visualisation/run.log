@@ -1,0 +1,14 @@
+16:58:36,494 INFO SeBS-18be: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+16:58:36,574 INFO WalletWarm-7866: Generating unique resource name walletwarm-359d14f6
+16:58:36,576 INFO minio.Minio-14f3: Initialize a new bucket for benchmarks
+16:58:36,581 INFO minio.Minio-14f3: Created bucket sebs-benchmarks-walletwarm-359d14f6
+16:58:36,748 INFO Benchmark-d5b1: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+16:58:36,842 INFO Benchmark-d5b1: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:58:36,873 INFO WalletWarm-7866: Function size 0.000005 MB
+16:58:36,897 INFO Benchmark-d5b1: Created code package (source hash: 23d725ddb360885101d4ef8bc9ec9dc1), for run on wallet_warm with python:3.11
+16:58:37,72 INFO WalletWarm-7866: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+16:58:37,764 INFO Experiment.PerfCost-5f3c: Begin experiment
+16:58:37,764 INFO Experiment.PerfCost-5f3c: Begin sequential experiments
+16:58:43,82 INFO WalletWarm.WalletFunction-207a: Stopping function
+16:58:43,83 INFO WalletWarm.WalletFunction-207a: Function stopped succesfully
+16:58:43,96 INFO WalletWarm.WalletFunction-207a: Not stopping function as it was not running
