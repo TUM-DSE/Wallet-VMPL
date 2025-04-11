@@ -1,0 +1,21 @@
+16:33:16,20 INFO SeBS-a760: Created experiment output at /root/Benchmarks/SeBS/501.graph-pagerank
+16:33:16,99 INFO WalletWarm-526a: Generating unique resource name walletwarm-ab570836
+16:33:16,101 INFO minio.Minio-1f6c: Initialize a new bucket for benchmarks
+16:33:16,106 INFO minio.Minio-1f6c: Created bucket sebs-benchmarks-walletwarm-ab570836
+16:33:16,271 INFO Benchmark-b034: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+16:33:16,461 INFO Benchmark-b034: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:33:16,531 INFO WalletWarm-526a: Function size 0.000005 MB
+16:33:16,569 INFO Benchmark-b034: Created code package (source hash: e3fc2034ea713c3a08295e68f4ad0ef8), for run on wallet_warm with python:3.11
+16:33:16,891 INFO WalletWarm-526a: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+16:33:17,550 INFO Experiment.PerfCost-59f0: Begin experiment
+16:33:17,550 INFO Experiment.PerfCost-59f0: Begin sequential experiments
+16:33:26,857 INFO Experiment.PerfCost-59f0: Processed 1 samples out of 5, 0 errors
+16:33:38,562 INFO Experiment.PerfCost-59f0: Processed 2 samples out of 5, 0 errors
+16:33:50,282 INFO Experiment.PerfCost-59f0: Processed 3 samples out of 5, 0 errors
+16:34:01,992 INFO Experiment.PerfCost-59f0: Processed 4 samples out of 5, 0 errors
+16:34:13,687 INFO Experiment.PerfCost-59f0: Processed 5 samples out of 5, 0 errors
+16:34:18,695 INFO Experiment.PerfCost-59f0: Mean 1694.9634 [ms], median 1693.422 [ms], std 8.342065082460078, CV 0.49216785934493196
+16:34:18,703 INFO Experiment.PerfCost-59f0: Parametric CI (Student's t-distribution) 0.95 from 1683.3827571172812 to 1706.544042882719, within 0.6832385220069559% of mean
+16:34:18,705 INFO Experiment.PerfCost-59f0: Parametric CI (Student's t-distribution) 0.99 from 1675.759570468414 to 1714.1672295315861, within 1.1329937585428718% of mean
+16:34:18,709 INFO WalletWarm.WalletFunction-2e31: Stopping function
+16:34:18,711 INFO WalletWarm.WalletFunction-2e31: Function stopped succesfully

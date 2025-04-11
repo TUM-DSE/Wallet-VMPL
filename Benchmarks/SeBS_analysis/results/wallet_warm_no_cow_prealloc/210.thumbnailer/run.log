@@ -1,0 +1,14 @@
+16:10:08,597 INFO SeBS-0560: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+16:10:08,667 INFO WalletWarm-658f: Generating unique resource name walletwarm-705dc9de
+16:10:08,670 INFO minio.Minio-d5a7: Initialize a new bucket for benchmarks
+16:10:08,675 INFO minio.Minio-d5a7: Created bucket sebs-benchmarks-walletwarm-705dc9de
+16:10:08,684 INFO Benchmark-b0ea: Building benchmark 210.thumbnailer. Reason: no cached code package.
+16:10:08,902 INFO Benchmark-b0ea: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:10:08,983 INFO WalletWarm-658f: Function size 0.000005 MB
+16:10:09,27 INFO Benchmark-b0ea: Created code package (source hash: de4ea5bd9ade694cacda06f879b30898), for run on wallet_warm with python:3.11
+16:10:09,407 INFO WalletWarm-658f: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+16:10:10,437 INFO Experiment.PerfCost-8ac4: Begin experiment
+16:10:10,438 INFO Experiment.PerfCost-8ac4: Begin sequential experiments
+16:10:12,798 INFO WalletWarm.WalletFunction-cd44: Stopping function
+16:10:12,798 INFO WalletWarm.WalletFunction-cd44: Function stopped succesfully
+16:10:12,814 INFO WalletWarm.WalletFunction-cd44: Not stopping function as it was not running

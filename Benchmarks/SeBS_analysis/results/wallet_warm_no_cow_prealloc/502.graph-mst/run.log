@@ -1,0 +1,21 @@
+16:41:18,675 INFO SeBS-bb66: Created experiment output at /root/Benchmarks/SeBS/502.graph-mst
+16:41:18,752 INFO WalletWarm-417b: Generating unique resource name walletwarm-cb061e50
+16:41:18,755 INFO minio.Minio-09af: Initialize a new bucket for benchmarks
+16:41:18,760 INFO minio.Minio-09af: Created bucket sebs-benchmarks-walletwarm-cb061e50
+16:41:18,930 INFO Benchmark-c12e: Building benchmark 502.graph-mst. Reason: no cached code package.
+16:41:19,128 INFO Benchmark-c12e: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:41:19,200 INFO WalletWarm-417b: Function size 0.000005 MB
+16:41:19,241 INFO Benchmark-c12e: Created code package (source hash: 8b44dcd3ba68d29baf7e1b5250afe603), for run on wallet_warm with python:3.11
+16:41:19,575 INFO WalletWarm-417b: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+16:41:20,273 INFO Experiment.PerfCost-c4df: Begin experiment
+16:41:20,274 INFO Experiment.PerfCost-c4df: Begin sequential experiments
+16:41:29,492 INFO Experiment.PerfCost-c4df: Processed 1 samples out of 5, 0 errors
+16:41:41,142 INFO Experiment.PerfCost-c4df: Processed 2 samples out of 5, 0 errors
+16:41:52,811 INFO Experiment.PerfCost-c4df: Processed 3 samples out of 5, 0 errors
+16:42:04,458 INFO Experiment.PerfCost-c4df: Processed 4 samples out of 5, 0 errors
+16:42:16,110 INFO Experiment.PerfCost-c4df: Processed 5 samples out of 5, 0 errors
+16:42:21,119 INFO Experiment.PerfCost-c4df: Mean 1643.4508 [ms], median 1640.446 [ms], std 7.078764423259184, CV 0.4307256671912042
+16:42:21,124 INFO Experiment.PerfCost-c4df: Parametric CI (Student's t-distribution) 0.95 from 1633.623899583097 to 1653.2777004169031, within 0.5979430851780334% of mean
+16:42:21,126 INFO Experiment.PerfCost-c4df: Parametric CI (Student's t-distribution) 0.99 from 1627.1551485114555 to 1659.7464514885446, within 0.9915509176511116% of mean
+16:42:21,130 INFO WalletWarm.WalletFunction-ce16: Stopping function
+16:42:21,132 INFO WalletWarm.WalletFunction-ce16: Function stopped succesfully
