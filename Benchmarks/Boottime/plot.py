@@ -161,10 +161,10 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     df.set_index('Category', inplace=True)
     
     # Create standardized cutoff plot
-    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.7, bottom_margin= 0.45, top_margin=0.65)
+    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.75, bottom_margin= 0.45, top_margin=0.65)
 
     # Set y-axis limits with a break
-    ax1.set_ylim(400, 14200)  # upper section for high values
+    ax1.set_ylim(400, 14600)  # upper section for high values
     ax2.set_ylim(0, 240)      # lower section for most data
     
     # Add break marks

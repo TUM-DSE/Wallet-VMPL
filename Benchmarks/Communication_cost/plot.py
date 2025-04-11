@@ -38,7 +38,7 @@ def create_line_plot(data, output_dir, y_scale='linear'):
     message_sizes = [64.0, 256.0, 1024.0, 8192.0, 16384.0, 65536.0, 262144.0, 1048576.0]
     
     # Create standardized plot
-    fig, ax = create_standardized_plot(ax_height = 0.7, bottom_margin= 0.45, top_margin=0.65)
+    fig, ax = create_standardized_plot(ax_height = 0.75, bottom_margin= 0.45, top_margin=0.65)
     
     # Filter variants
     variants = ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
