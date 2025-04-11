@@ -161,10 +161,10 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     df.set_index('Category', inplace=True)
     
     # Create standardized cutoff plot
-    fig, (ax1, ax2) = create_standardized_cutoff_plot()
+    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.7, bottom_margin= 0.45, top_margin=0.65)
 
     # Set y-axis limits with a break
-    ax1.set_ylim(400, 13800)  # upper section for high values
+    ax1.set_ylim(400, 14200)  # upper section for high values
     ax2.set_ylim(0, 240)      # lower section for most data
     
     # Add break marks
@@ -210,7 +210,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     
     # Add legend at the center top
     handles, labels = ax1.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.55, 0.885), 
+    fig.legend(handles, labels, loc='center', bbox_to_anchor=(0.55, 0.85), 
                edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
                frameon=True, ncols=2)
     
