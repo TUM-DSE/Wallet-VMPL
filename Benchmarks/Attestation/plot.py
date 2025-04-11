@@ -142,10 +142,10 @@ def create_cutoff_plot(categories, output_dir):
     df = df / 1_000_000
     
     # Create standardized cutoff plot
-    fig, (ax1, ax2) = create_standardized_cutoff_plot()
+    fig, (ax1, ax2) = create_standardized_cutoff_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
 
     # Set y-axis limits
-    ax1.set_ylim(2745, 2749)  # outliers only
+    ax1.set_ylim(2745, 2749.5)  # outliers only
     ax2.set_ylim(0, 7)        # most of the data
     
     # Add break marks
@@ -189,8 +189,8 @@ def create_cutoff_plot(categories, output_dir):
     create_annotation_y_label(ax2, 'Time (ms)', position=(0, 6.5))
     
     # Position legend at the center top
-    legend = ax2.legend(loc='center', bbox_to_anchor=(0.43, 2.55), 
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=3)
+    legend = ax2.legend(loc='center', bbox_to_anchor=(0.73, 1.3), 
+                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=1)
     legend.get_frame().set_edgecolor('black')
     
     # Save plots

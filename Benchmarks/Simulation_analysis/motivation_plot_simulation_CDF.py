@@ -176,7 +176,7 @@ def setup_log_formatter(ax):
 def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=(0, 1.05), use_log_scale=False):
     """Generate CDF plot for the given configurations and save to output_path."""
     # Create standardized plot using config
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
     
     # Set x-axis to log scale if requested
     if use_log_scale:
@@ -189,7 +189,12 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
     # Keep track of max x value for setting plot limits properly
     max_x_value = 0
 
-    for i, config in enumerate(configs):
+    # Sort configs according to the order in LABEL_MAPPINGS_SIMULATIONS
+    # We can create a sorting key based on the position of each variant in the dictionary
+    variant_order = {variant: i for i, variant in enumerate(LABEL_MAPPINGS_SIMULATIONS.keys())}
+    sorted_configs = sorted(configs, key=lambda x: variant_order.get(x['variant'], float('inf')))
+    
+    for i, config in enumerate(sorted_configs):
         variant = config['variant']
         num_nodes = config['num_nodes']
         max_cache = config['max_cache']
@@ -244,7 +249,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
 
     # Apply consistent styling from the configuration
     apply_consistent_style(ax, 
-                       title=LOWER_BETTER_TITLE,
+                       title=title,
                        xlabel=x_label,
                        ylabel=y_label)
     
@@ -259,8 +264,8 @@ def generate_cdf_plot(configs, output_dir, output_name, title, value_type, ylim=
     ax.axhline(y=0.5, color='gray', linestyle='--', alpha=0.5)
     
     # Add legend with standardized position and style
-    legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.3), edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
-                        frameon=True, ncols=2)
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.7, 0.35), edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
+                        frameon=True, ncols=1)
     legend.get_frame().set_edgecolor('black')
     
     # Ensure the output directory exists
@@ -293,7 +298,7 @@ def parallel_plot_node_size(args):
         return None
     
     # Generate different plot versions with the same data
-    title = f"Invocation Latency CDF - {node_size} Nodes"
+    title = f"Invocation Latency CDF ({node_size} Nodes)"
     base_output_name = f"{TRACE_NAME}_node_size_{node_size}_{value_type}"
     
     # Generate original plot

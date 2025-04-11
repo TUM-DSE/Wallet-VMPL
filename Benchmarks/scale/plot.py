@@ -36,7 +36,7 @@ def load_data(file_path):
 def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     """Create line plot for memory consumption based on number of functions"""
     # Create standardized plot
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
     
     # Filter variants for motivation plot
     variants = list(data.keys())
@@ -103,8 +103,8 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     ax.set_xlim(-50, max(all_functions) * 1.05)
     
     # Position legend at the top center
-    legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.25),
-                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=2)
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.3, 0.7), framealpha=0.3,
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncols=1)
     legend.get_frame().set_edgecolor('black')
     
     # Save plots
