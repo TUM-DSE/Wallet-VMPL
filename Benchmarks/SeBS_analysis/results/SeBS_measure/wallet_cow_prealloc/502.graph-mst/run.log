@@ -1,0 +1,39 @@
+21:40:58,6 INFO SeBS-cd80: Created experiment output at /root/Benchmarks/SeBS/502.graph-mst
+21:40:58,78 INFO Wallet-6bd4: Generating unique resource name wallet-7d1fc852
+21:40:58,81 INFO minio.Minio-52af: Initialize a new bucket for benchmarks
+21:40:58,85 INFO minio.Minio-52af: Created bucket sebs-benchmarks-wallet-7d1fc852
+21:40:58,264 INFO Benchmark-0ef3: Building benchmark 502.graph-mst. Reason: no cached code package.
+21:40:58,462 INFO Benchmark-0ef3: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+21:40:58,535 INFO Wallet-6bd4: Function size 0.000005 MB
+21:40:58,575 INFO Benchmark-0ef3: Created code package (source hash: 8b44dcd3ba68d29baf7e1b5250afe603), for run on wallet with python:3.11
+21:40:58,913 INFO Wallet-6bd4: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+21:40:59,601 INFO Experiment.PerfCost-1f35: Begin experiment
+21:40:59,602 INFO Experiment.PerfCost-1f35: Begin cold experiments
+21:40:59,605 INFO Wallet.WalletFunction-ce28: Not stopping function as it was not running
+21:41:08,408 INFO Experiment.PerfCost-1f35: Processed 1 samples out of 5, 0 errors
+21:41:13,414 INFO Wallet.WalletFunction-ce28: Stopping function
+21:41:13,415 INFO Wallet.WalletFunction-ce28: Function stopped succesfully
+21:41:22,204 INFO Experiment.PerfCost-1f35: Processed 2 samples out of 5, 0 errors
+21:41:27,210 INFO Wallet.WalletFunction-ce28: Stopping function
+21:41:27,211 INFO Wallet.WalletFunction-ce28: Function stopped succesfully
+21:41:36,5 INFO Experiment.PerfCost-1f35: Processed 3 samples out of 5, 0 errors
+21:41:41,10 INFO Wallet.WalletFunction-ce28: Stopping function
+21:41:41,11 INFO Wallet.WalletFunction-ce28: Function stopped succesfully
+21:41:49,806 INFO Experiment.PerfCost-1f35: Processed 4 samples out of 5, 0 errors
+21:41:54,813 INFO Wallet.WalletFunction-ce28: Stopping function
+21:41:54,814 INFO Wallet.WalletFunction-ce28: Function stopped succesfully
+21:42:03,616 INFO Experiment.PerfCost-1f35: Processed 5 samples out of 5, 0 errors
+21:42:08,624 INFO Experiment.PerfCost-1f35: Mean 3790.3053999999997 [ms], median 3788.847 [ms], std 5.4049895689075855, CV 0.14260037117081872
+21:42:08,630 INFO Experiment.PerfCost-1f35: Parametric CI (Student's t-distribution) 0.95 from 3782.80207158388 to 3797.8087284161193, within 0.1979610512683102% of mean
+21:42:08,632 INFO Experiment.PerfCost-1f35: Parametric CI (Student's t-distribution) 0.99 from 3777.862857622868 to 3802.7479423771315, within 0.32827281878478076% of mean
+21:42:08,636 INFO Experiment.PerfCost-1f35: Begin sequential experiments
+21:42:13,746 INFO Experiment.PerfCost-1f35: Processed 1 samples out of 5, 0 errors
+21:42:23,807 INFO Experiment.PerfCost-1f35: Processed 2 samples out of 5, 0 errors
+21:42:33,869 INFO Experiment.PerfCost-1f35: Processed 3 samples out of 5, 0 errors
+21:42:43,926 INFO Experiment.PerfCost-1f35: Processed 4 samples out of 5, 0 errors
+21:42:53,984 INFO Experiment.PerfCost-1f35: Processed 5 samples out of 5, 0 errors
+21:42:58,990 INFO Experiment.PerfCost-1f35: Mean 50.5162 [ms], median 50.46 [ms], std 0.40799137245780026, CV 0.8076446218397272
+21:42:58,993 INFO Experiment.PerfCost-1f35: Parametric CI (Student's t-distribution) 0.95 from 49.9498171754883 to 51.0825828245117, within 1.121190478523125% of mean
+21:42:58,995 INFO Experiment.PerfCost-1f35: Parametric CI (Student's t-distribution) 0.99 from 49.57698450724255 to 51.455415492757446, within 1.8592362306694648% of mean
+21:42:58,999 INFO Wallet.WalletFunction-ce28: Stopping function
+21:42:59,1 INFO Wallet.WalletFunction-ce28: Function stopped succesfully
