@@ -100,7 +100,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
         ax.set_ylim(bottom=-49)
     
     # Set reasonable x-axis limits
-    ax.set_xlim(0, max(all_functions) * 1.05)
+    ax.set_xlim(-50, max(all_functions) * 1.05)
     
     # Position legend at the top center
     legend = ax.legend(loc='center', bbox_to_anchor=(0.45, 1.25),
