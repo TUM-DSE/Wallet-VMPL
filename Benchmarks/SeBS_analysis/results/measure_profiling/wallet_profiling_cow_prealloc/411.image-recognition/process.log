@@ -1,0 +1,3 @@
+13:49:35,162 INFO SeBS-afbf: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
+13:49:35,175 INFO WalletProfiling-308b: Using existing deployment walletprofiling-29a9ee0a that matches prefix walletprofiling!
+13:49:35,180 INFO Experiment.PerfCost-a261: Processing data in /root/Benchmarks/SeBS/411.image-recognition/perf-cost/cold_results.json
