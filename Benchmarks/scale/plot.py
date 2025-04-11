@@ -52,10 +52,21 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             memory = [item[1] for item in sorted_data]
             
             label = LABEL_MAPPINGS_VM.get(variant, variant)
+
             ax.plot(functions, memory, label=label,
                    color=PALETTE_REGULAR[i], marker='o', markersize=MARKER_SIZE,
                    linewidth=LINE_WIDTH)
-
+            # Add annotation to the wallet variant
+            if variant == 'wallet':
+                # Annotate each data point for the wallet variant
+                for j, (func, mem) in enumerate(zip(functions, memory)):
+                    ax.annotate(f'{mem:.2f}',
+                              xy=(func, mem),
+                              xytext=(-4, -6),
+                              textcoords='offset points',
+                              fontsize=ANNOTATION_SIZE)
+                              # arrowprops=dict(arrowstyle='->', color='black', connectionstyle='arc3'))
+                    
     # Apply consistent styling
     apply_consistent_style(ax, 
                          title=LOWER_BETTER_TITLE,
@@ -86,7 +97,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     
     # Set y-axis to start at 0 for linear scale
     if y_scale == 'linear':
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(bottom=-49)
     
     # Set reasonable x-axis limits
     ax.set_xlim(0, max(all_functions) * 1.05)
