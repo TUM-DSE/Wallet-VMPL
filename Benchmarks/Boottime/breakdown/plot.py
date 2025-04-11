@@ -180,7 +180,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear', suffix=''):
     df.set_index('Category', inplace=True)
     
     figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
-    figheight = 2.2
+    figheight = 1.8
     # Create the plot with increased size
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(figwidth, figheight))
 
@@ -242,7 +242,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear', suffix=''):
     ax2.tick_params(axis='both', which='minor', labelsize=TICKS_FONTSIZE)
     
     # Fix xticks rotation
-    plt.xticks(rotation=25)
+    plt.xticks(rotation=15)
     
     # Add y-axis label in the middle
     ax2.annotate(
@@ -295,7 +295,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     else:
         figwidth = 3.3 # 3.3 inch for single column, 7 inch for double column
         #figheight = 2.2
-        figheight = 2.0
+        #figheight = 2.0
+        figheight = 1.8
 
     # Convert to DataFrame
     data = []
@@ -342,7 +343,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     plt.yticks(fontsize=TICKS_FONTSIZE)
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
-    plt.xticks(fontsize=TICKS_FONTSIZE, rotation=25)
+    plt.xticks(fontsize=TICKS_FONTSIZE, rotation=15)
     # ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
     ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
     
@@ -407,7 +408,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Create the plot with increased size
     figwidth = 3.3  # 3.3 inch for single column
-    figheight = 2.0  # Increased height to accommodate three subplots
+    figheight = 1.8  # Increased height to accommodate three subplots
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
     
     # Set y-axis limits with two breaks
@@ -494,7 +495,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     # Customize the plot
     ax3.set_xlabel('', fontsize=TICKS_FONTSIZE)
     ax3.set_xticks(x)
-    ax3.set_xticklabels(ordered_benchmarks, rotation=25, fontsize=TICKS_FONTSIZE)
+    ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
     
     # Add y-axis label in the middle
     fig.text(-0.01, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)

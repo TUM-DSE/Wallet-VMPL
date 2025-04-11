@@ -25,6 +25,7 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
+figheight2 = 1.8
 
 BENCHMARKS = [
     '110.dynamic-html', #'120.uploader',
@@ -81,7 +82,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     avg_memory = avg_memory.sort_values('order')
     
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    fig, ax = plt.subplots(figsize=(figwidth, figheight2))
     
     # Define positions for the bars
     benchmarks = avg_memory['bench']
@@ -130,7 +131,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Clean up benchmark names for display
     clean_benchmark_names = [b.split('.', 1)[1] for b in benchmarks]
-    ax.set_xticklabels(clean_benchmark_names, fontsize=TICKS_FONTSIZE, rotation=45, ha='right')
+    ax.set_xticklabels(clean_benchmark_names, fontsize=TICKS_FONTSIZE, rotation=15, ha='right')
     
     # Add grid with custom linestyle
     ax.grid(axis='y', linestyle=linestyles[0], alpha=0.7)

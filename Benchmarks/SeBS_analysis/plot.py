@@ -473,7 +473,8 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
         stats_results.append("No lukewarm invocation data available")
     
     # Add horizontal lines at specific percentiles
-    percentiles = [0.5, 0.95, 0.99]
+    #percentiles = [0.5, 0.95, 0.99]
+    percentiles = [0.5, 0.99]
     for p in percentiles:
         ax.axhline(y=p, color='gray', linestyle='--', alpha=0.5, linewidth=0.8)
         ax.text(ax.get_xlim()[1]*0.98, p, f"{int(p*100)}%", 

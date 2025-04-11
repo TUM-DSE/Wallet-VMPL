@@ -399,7 +399,7 @@ def main():
     create_plot(categories, args.output_dir)
     create_plot(categories, args.output_dir, 'log')
 
-    figsize = (3.3/2, 2.0)
+    figsize = (3.3/2, 1.8)
     create_configurable_triple_cutoff_plot(categories, args.output_dir, figsize=figsize)
     print(f"Plots saved in {args.output_dir}")
     

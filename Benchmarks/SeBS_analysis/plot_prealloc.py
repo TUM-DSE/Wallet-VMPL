@@ -25,7 +25,8 @@ TICKS_FONTSIZE = 5
 LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
-figheight = 2.0
+#figheight = 2.0
+figheight = 1.8
 VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
