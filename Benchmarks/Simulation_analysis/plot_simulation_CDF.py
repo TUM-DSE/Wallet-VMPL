@@ -14,25 +14,12 @@ from matplotlib.backends.backend_pdf import PdfPages
 import subprocess
 import tempfile
 import time
+from matplotlib.ticker import ScalarFormatter, LogFormatter, LogLocator
 
-# Apply the requested settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
-
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
-palette = sns.color_palette("deep", n_colors=6)
-figwidth = 3.3
-figheight = 2.2
+# Import centralized plotting configuration
+import sys
+sys.path.append('..')
+from motivation_plotting_config import *
 
 TRACE_NAME = "default"
 
@@ -86,7 +73,6 @@ def get_indented_section(text, section_name):
     """
     sections = split_text_by_indentation(text)
     return sections.get(section_name, '')
-
 
 def find_section_boundaries(text):
     """Find the start indices of all variant sections in the text."""
@@ -142,6 +128,8 @@ def parse_section(section_text):
 
     # Extract delays
     delays =  extract_indented_section_values(section_text, "Delays")
+    delays = [delay * 1000 for delay in delays]  # Convert to milliseconds
+    
     # Extract slowdowns
     slowdowns = extract_indented_section_values(section_text, "Slowdowns")
 
@@ -165,17 +153,92 @@ def parallel_parse_section(args):
         return result
     return None
 
-def crop_pdf(input_path):
-    """Use pdfcrop to crop the PDF file."""
-    try:
-        subprocess.run(['pdfcrop', input_path, input_path], check=True)
-        print(f"Successfully cropped {input_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error cropping PDF {input_path}: {e}")
-    except FileNotFoundError:
-        print("pdfcrop command not found. Please install texlive-extra-utils package.")
+def setup_log_formatter(ax):
+    """Set up the log axis with decimal formatting."""
+    if ax.get_xscale() == 'log':
+        # Create a formatter that will use regular decimals instead of scientific notation
+        formatter = ScalarFormatter()
+        formatter.set_scientific(False)
 
-def plot_percentile_delay_latency(configs, output_dir):
+        # Create custom log locator for more control over tick positions
+        locator = LogLocator(base=10)
+
+        # Apply formatter and locator to the x-axis
+        ax.xaxis.set_major_formatter(formatter)
+        ax.xaxis.set_major_locator(locator)
+
+        # Ensure grid aligns with major ticks
+        ax.grid(True, which='major', alpha=0.5)
+        ax.grid(False, which='minor')
+
+def setup_axis_formatters(ax):
+    """Set up the log axis with powers of 10 formatting for both x and y axes."""
+    # Create a custom formatter for powers of 10
+    class PowersOf10Formatter(ScalarFormatter):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.set_scientific(False)
+            
+        def __call__(self, x, pos=None):
+          # For zero, just return 0
+          if x == 0:
+              return '0'
+              
+          # For large numbers, use scientific notation
+          if abs(x) >= 1000:
+              power = int(np.log10(abs(x)))
+              base = x / (10**power)
+              
+              # If it's an exact power of 10
+              if abs(base - 1.0) < 1e-10:
+                  return f'$10^{power}$'
+              # If it's a simple coefficient times a power of 10 (like 2×10^3, 5×10^4, etc.)
+              elif abs(base) == int(abs(base)) or abs(abs(base) - round(abs(base), 1)) < 1e-10:
+                  if abs(base) == int(abs(base)):
+                      coefficient = int(abs(base))
+                  else:
+                      coefficient = round(abs(base), 1)
+                      
+                  # Handle negative numbers
+                  sign = '-' if x < 0 else ''
+                  
+                  return f'${sign}{coefficient}\\times10^{{{power}}}$'
+              else:
+                  # For other values, use regular formatting
+                  return f'{x:.0f}'
+          else:
+              # For smaller numbers, use regular formatting
+              # If it's a whole number, show no decimal places
+              if x == int(x):
+                  return f'{int(x)}'
+              # Otherwise show one decimal place
+              else:
+                  return f'{x:.1f}'
+
+    # Apply the formatter for both axes
+    x_formatter = PowersOf10Formatter()
+    y_formatter = PowersOf10Formatter()
+    
+    if ax.get_xscale() == 'log':
+        # For log scale, use LogLocator
+        x_locator = LogLocator(base=10)
+        ax.xaxis.set_major_locator(x_locator)
+        ax.xaxis.set_major_formatter(x_formatter)
+        
+        # Add minor grid lines for log scale
+        ax.grid(True, which='major', alpha=0.5)
+        ax.grid(False, which='minor')
+    else:
+        ax.xaxis.set_major_formatter(x_formatter)
+    
+    # Apply formatter to y-axis as well
+    if ax.get_yscale() == 'log':
+        y_locator = LogLocator(base=10)
+        ax.yaxis.set_major_locator(y_locator)
+    
+    ax.yaxis.set_major_formatter(y_formatter)
+
+def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
     """
     Create a plot of P99 and P50 delay latency across different node sizes for multiple variants.
 
@@ -186,12 +249,17 @@ def plot_percentile_delay_latency(configs, output_dir):
     Returns:
         str: Path to the generated plot
     """
-    plt.figure(figsize=(figwidth, figheight))
+    # Create standardized plot using config
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
 
+    # Set x-axis to log scale if requested
+    if use_log_scale:
+        ax.set_xscale('log')
+        
     # Use different line styles and markers for better distinction
     line_styles = ['-', '--', '-.', ':']
     markers = ['o', 's', '^', 'D', 'v']
-    colors = palette
+    colors = PALETTE_REGULAR
 
     # Get unique node sizes
     unique_node_sizes = sorted(set(config['num_nodes'] for config in configs))
@@ -202,8 +270,16 @@ def plot_percentile_delay_latency(configs, output_dir):
         'P50': {}
     }
 
+    # Sort configs according to the order in LABEL_MAPPINGS_SIMULATIONS_EVALUATION
+    # We can create a sorting key based on the position of each variant in the dictionary
+    variant_order = {variant: i for i, variant in enumerate(LABEL_MAPPINGS_SIMULATIONS_EVALUATION.keys())}
+    sorted_variants = sorted(
+        set(config['variant'] for config in configs),
+        key=lambda x: variant_order.get(x, float('inf'))
+    )
+    
     # Iterate through each variant
-    for variant in set(config['variant'] for config in configs):
+    for variant in sorted_variants:
         # Filter configs for this variant
         variant_configs = [config for config in configs if config['variant'] == variant]
 
@@ -243,11 +319,19 @@ def plot_percentile_delay_latency(configs, output_dir):
     # Plot P99 and P50 for each variant
     percentiles = ['P99', 'P50']
     for percentile_idx, percentile in enumerate(percentiles):
-        for variant_idx, variant in enumerate(plot_data[percentile]):
+        for variant_idx, variant in enumerate(sorted_variants):
+            # Skip if this variant doesn't have data for this percentile
+            if variant not in plot_data[percentile]:
+                continue
+              
             # Get data for this variant and percentile
             node_sizes = plot_data[percentile][variant]['node_sizes']
             delays = plot_data[percentile][variant]['delays']
 
+            # Skip if no data
+            if not node_sizes or not delays:
+                continue
+              
             # Select style and color
             style_idx = variant_idx % len(line_styles)
             color_idx = variant_idx % len(colors)
@@ -263,55 +347,91 @@ def plot_percentile_delay_latency(configs, output_dir):
                 linestyle = ':' if linestyle == '-' else '-.'
                 marker = 'x'
 
+            # Map the variant name if it exists in mapping dict
+            display_variant = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
+            
             # Plot with a label that includes the percentile
             plt.plot(node_sizes, delays,
                      marker=marker,
+                     markersize=MARKER_SIZE,
                      linestyle=linestyle,
                      color=color,
-                     label=f'{variant} - {percentile}',
+                     label=f'{display_variant}-{percentile.lower()}',
                      linewidth=1)
 
-    plt.title('Delay Latency Percentiles by Number of Nodes', fontsize=TITLE_FONTSIZE)
-    plt.xlabel('Number of Nodes', fontsize=TITLE_FONTSIZE)
-    plt.ylabel('Delay Latency (seconds)', fontsize=TITLE_FONTSIZE)
+    # You can explicitly set the tick positions and labels
+    tick_positions = np.linspace(min(unique_node_sizes), max(unique_node_sizes), len(unique_node_sizes))
+    ax.set_xticks(tick_positions)
+    ax.set_xticklabels([str(size) for size in unique_node_sizes])
+        
+    title = "Invocation Latency Percentiles"
+    x_label = "Number of nodes"
+    y_label = "Invocation latency (ms)"
+    # Apply consistent styling from the configuration
+    apply_consistent_style(ax, 
+                       title=title,
+                       xlabel=x_label,
+                       ylabel=y_label)
 
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.xticks(unique_node_sizes, fontsize=TICKS_FONTSIZE)
-    plt.yticks(fontsize=TICKS_FONTSIZE)
-
-    plt.legend(loc='best', fontsize=LEGEND_FONTSIZE)
-
-    plt.tight_layout()
-
+    # # Set up decimal formatting for log scale
+    # if use_log_scale:
+    #     setup_log_formatter(ax)
+    # Apply the improved axis formatter
+    setup_axis_formatters(ax)
+    
+    # bring y-label a bit closer to fit
+    ax.yaxis.labelpad = 1.5
+    
+    # Add a horizontal line at y=0.5 to visualize median
+    ax.axhline(y=0.5, color='gray', linestyle='--', alpha=0.5)
+    
+    # Add legend with standardized position and style
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.52, 0.75), framealpha=0.3, edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
+                        frameon=True, ncols=2, columnspacing=0.3, labelspacing=0.2, borderpad=0.1, handletextpad=0.3)
+    legend.get_frame().set_edgecolor('black')
+    
     # Ensure the output directory exists
     os.makedirs(os.path.dirname(f'{output_dir}/pdf'), exist_ok=True)
     os.makedirs(os.path.dirname(f'{output_dir}/png'), exist_ok=True)
-
+    
+    # Create file suffix based on plot options
+    suffix = "_log" if use_log_scale else ""
+    output_name = f"{TRACE_NAME}_percentile_delay_nodes"
+    
     # Save as PDF
-    pdf_path = f"{output_dir}/pdf/{TRACE_NAME}_percentile_delay_nodes.pdf"
-    plt.savefig(pdf_path)
-
+    pdf_path = f"{output_dir}/pdf/{output_name}{suffix}.pdf"
+    plt.savefig(pdf_path, dpi=300, bbox_inches=None)
+    
     # Save as PNG with high DPI for quality
-    png_path = f"{output_dir}/png/{TRACE_NAME}_percentile_delay_nodes.png"
-    plt.savefig(png_path, dpi=300)
+    png_path = f"{output_dir}/png/{output_name}{suffix}.png"
+    plt.savefig(png_path, dpi=300, bbox_inches=None)
 
     plt.close()
 
-    # Crop the PDF if possible
-    if pdf_path.endswith('.pdf'):
-        crop_pdf(pdf_path)
-
     return pdf_path
 
-def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim=(0, 1.05)):
+def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim=(0, 1.05), use_log_scale=False):
     """Generate CDF plot for the given configurations and save to output_path."""
-    plt.figure(figsize=(figwidth, figheight))
+    # Create standardized plot using config
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
     
+    # Set x-axis to log scale if requested
+    if use_log_scale:
+        ax.set_xscale('log')
+        
     # Use different line styles and colors for better distinction
     line_styles = ['-', '--', '-.', ':']
-    colors = palette
+    colors = PALETTE_REGULAR
 
-    for i, config in enumerate(configs):
+    # Keep track of max x value for setting plot limits properly
+    max_x_value = 0
+
+    # Sort configs according to the order in LABEL_MAPPINGS_SIMULATIONS_EVALUATION
+    # We can create a sorting key based on the position of each variant in the dictionary
+    variant_order = {variant: i for i, variant in enumerate(LABEL_MAPPINGS_SIMULATIONS_EVALUATION.keys())}
+    sorted_configs = sorted(configs, key=lambda x: variant_order.get(x['variant'], float('inf')))
+
+    for i, config in enumerate(sorted_configs):
         variant = config['variant']
         num_nodes = config['num_nodes']
         max_cache = config['max_cache']
@@ -328,39 +448,56 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
 
         # Sort the data for CDF
         sorted_data = np.sort(values)
+        max_x_value = max(max_x_value, sorted_data[-1])
         
         # Calculate the CDF values (y-axis)
         y_values = np.arange(1, len(sorted_data) + 1) / len(sorted_data)
         
+        # Map the variant name if it exists in mapping dict
+        display_variant = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
+        
         # Create label with configuration details
         label = ""
         if variant == 'WALLET':
-            label = f"{variant} - c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100}, cr:{cold_rate * 100}%"
+            # label = f"{display_variant}: c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100:.1f}%, cr:{cold_rate * 100:.1f}%"
+            print(f"{display_variant}: c:{max_cache}, w:{soft_warm_pct * 100}%, e:{exec_slots}, cu:{cache_util * 100:.1f}%, cr:{cold_rate * 100:.1f}%")
+            label = f"{display_variant}"
         else: 
-            label = f"{variant} - c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100}%, cr:{cold_rate * 100}%"
+            # label = f"{display_variant}: c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100:.1f}%, cr:{cold_rate * 100:.1f}%"
+            print(f"{display_variant}: c:{max_cache}, e:{exec_slots}, cu:{cache_util * 100:.1f}%, cr:{cold_rate * 100:.1f}%")
+            label = f"{display_variant}"
             
         
         # Plot the CDF with different line styles and colors
         style_idx = i % len(line_styles)
         color_idx = i % len(colors)
-        plt.plot(sorted_data, y_values, linestyle=line_styles[style_idx], 
-                 color=colors[color_idx], label=label, linewidth=1)
+        # Main plot
+        ax.plot(sorted_data, y_values, 
+                linestyle=line_styles[style_idx], 
+                color=colors[color_idx], 
+                label=label, 
+                linewidth=LINE_WIDTH)
+
     
-    x_label = "Unknown value type"
+    # Determine appropriate x-label based on value_type
+    x_label = "Value"
+    y_label = "Cumulative distribution"
     if value_type == 'delays':
-        x_label = 'Scheduling Delay (seconds)'
+        x_label = 'Invocation delay (ms)'
     elif value_type == 'slowdowns':
         x_label = 'Per-function slowdown'
 
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.xlabel(x_label, fontsize=TITLE_FONTSIZE)
-    plt.ylabel('Cumulative Distribution', fontsize=TITLE_FONTSIZE)
-    plt.title(title, fontsize=TITLE_FONTSIZE)
-    plt.legend(loc='lower right', fontsize=LEGEND_FONTSIZE)
+    # Apply consistent styling from the configuration
+    apply_consistent_style(ax, 
+                       title=title,
+                       xlabel=x_label,
+                       ylabel=y_label)
     
-    # Set axes font sizes
-    plt.xticks(fontsize=TICKS_FONTSIZE)
-    plt.yticks(fontsize=TICKS_FONTSIZE)
+    # # Set up decimal formatting for log scale
+    # if use_log_scale:
+    #     setup_log_formatter(ax)
+    # Apply the improved axis formatter
+    setup_axis_formatters(ax)
     
     # Set y-axis to range from 0 to 1
     plt.ylim(*ylim)
@@ -368,25 +505,27 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
     # Add a horizontal line at y=0.5 to visualize median
     plt.axhline(y=0.5, color='gray', linestyle='--', alpha=0.5)
     
-    plt.tight_layout()
+    # Add legend with standardized position and style
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.65, 0.18), framealpha=0.3, edgecolor='black', borderaxespad=0., fontsize=LEGEND_FONTSIZE, 
+                        frameon=True, ncols=2, columnspacing=0.3, labelspacing=0.2, borderpad=0.1, handletextpad=0.3)
+    legend.get_frame().set_edgecolor('black')
     
     # Ensure the output directory exists
     os.makedirs(os.path.dirname(f'{output_dir}/pdf'), exist_ok=True)
     os.makedirs(os.path.dirname(f'{output_dir}/png'), exist_ok=True)
     
+    # Create file suffix based on plot options
+    suffix = "_log" if use_log_scale else ""
+    
     # Save as PDF
-    pdf_path = f"{output_dir}/pdf/{output_name}.pdf"
-    plt.savefig(pdf_path)
+    pdf_path = f"{output_dir}/pdf/{output_name}{suffix}.pdf"
+    plt.savefig(pdf_path, dpi=300, bbox_inches=None)
     
     # Save as PNG with high DPI for quality
-    png_path = f"{output_dir}/png/{output_name}.png"
-    plt.savefig(png_path, dpi=300)
+    png_path = f"{output_dir}/png/{output_name}{suffix}.png"
+    plt.savefig(png_path, dpi=300, bbox_inches=None)
     
     plt.close()
-    
-    # Crop the PDF
-    if pdf_path.endswith('.pdf'):
-        crop_pdf(pdf_path)
     
     return f'{output_dir}/pdf/{output_name}'
 
@@ -397,35 +536,13 @@ def parallel_plot_node_size(args):
     node_configs = [config for config in configs if config['num_nodes'] == node_size]
     
     # Generate plot
-    title = f"Invocation Latency CDF - {node_size} Nodes"
-    return generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type)
-
-def parallel_plot_filtered(args):
-    """Process a single node size plot for parallel execution."""
-    configs, node_size, exec_slots, output_dir, value_type = args
-    # Filter configs for this node size
-    node_configs = [config for config in configs 
-                    if config['num_nodes'] == node_size and
-                    config['exec_slots'] == exec_slots
-                    ]
-    
-    # Generate plot
-    title = f"Invocation Latency CDF - {node_size} Nodes"
-    return generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_filtered_n_{node_size}_e_{exec_slots}_{value_type}", title, value_type)
-
-def parallel_plot_node_cache(args):
-    """Process a single node+cache size plot for parallel execution."""
-    configs, node_size, cache_size, output_dir, value_type = args
-    # Filter configs for this combination
-    filtered_configs = [config for config in configs 
-                       if config['num_nodes'] == node_size and config['max_cache'] == cache_size]
-    
-    if not filtered_configs:
-        return None
-        
-    # Generate plot
-    title = f"Invocation Latency CDF - {node_size} Nodes, {cache_size} Cache"
-    return generate_cdf_plot(filtered_configs, output_dir, f"{TRACE_NAME}_node_{node_size}_cache_{cache_size}_{value_type}", title, value_type)
+    if (value_type == "delays"): 
+      title = f"Invocation Latency CDF ({node_size} Nodes)"
+    elif (value_type == "slowdowns"):
+      title = f"Per function slowdown CDF ({node_size} Nodes)"
+    linear_plot = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type)
+    log_plot    = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type, use_log_scale=True)
+    return [linear_plot, log_plot]
 
 def process_by_node_size(configs, output_dir, pool, value_type):
     """Create plots grouped by node size in parallel."""
@@ -438,21 +555,6 @@ def process_by_node_size(configs, output_dir, pool, value_type):
     # Process plots in parallel
     results = pool.map(parallel_plot_node_size, plot_args)
     return results
-
-def process_by_node_and_cache(configs, output_dir, pool, value_type):
-    """Create plots grouped by node size and cache size combination in parallel."""
-    # Get all unique node sizes and cache sizes
-    node_sizes = set(config['num_nodes'] for config in configs)
-    cache_sizes = set(config['max_cache'] for config in configs)
-    
-    # Prepare arguments for parallel processing
-    plot_args = [(configs, node_size, cache_size, output_dir, value_type) 
-                for node_size, cache_size in itertools.product(node_sizes, cache_sizes)]
-    
-    # Process plots in parallel
-    results = pool.map(parallel_plot_node_cache, plot_args)
-    # Filter out None results (combinations that didn't have data)
-    return [r for r in results if r is not None]
 
 def main():
     global TRACE_NAME
@@ -514,11 +616,6 @@ def main():
     plotting_start = time.time()
     if configs:
         with Pool(processes=num_cores) as pool:
-            # Generate overall CDF plot (not parallelized as it's just one plot)
-            overall_output_path = os.path.join(output_dir, )
-            generate_cdf_plot(configs, output_dir, f"{TRACE_NAME}_overall_cdf_delays", "Overall Invocation Latency CDF", "delays")
-            generate_cdf_plot(configs, output_dir, f"{TRACE_NAME}_overall_cdf_slowdowns", "Overall Invocation Latency CDF", "slowdowns")
-
             # Generate P99
             plot_percentile_delay_latency(configs, output_dir)
             
@@ -527,21 +624,6 @@ def main():
             node_plots = process_by_node_size(configs, output_dir, pool, "delays")
             node_plots = process_by_node_size(configs, output_dir, pool, "slowdowns")
             print(f"Generated {len(node_plots)} node size plots")
-            
-            # Generate plots by node size + cache combination in parallel
-            print("Generating node+cache combination plots in parallel...")
-            combo_plots = process_by_node_and_cache(configs, output_dir, pool, "delays")
-            combo_plots = process_by_node_and_cache(configs, output_dir, pool, "slowdowns")
-            print(f"Generated {len(combo_plots)} node+cache combination plots")
-
-            # Generate plots by node size + cache combination in parallel
-      #      print("Generating filtered plots in parallel...")
-      #      parallel_plot_filtered((configs, 100, 1, output_dir))
-      #      parallel_plot_filtered((configs, 100, 2, output_dir))
-      #      parallel_plot_filtered((configs, 100, 4, output_dir))
-      #      parallel_plot_filtered((configs, 100, 32, output_dir))
-
-
         
         print(f"Plotting completed in {time.time() - plotting_start:.2f} seconds")
     else:
