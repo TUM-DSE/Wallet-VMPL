@@ -1,0 +1,39 @@
+21:00:39,813 INFO SeBS-02ee: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+21:00:39,884 INFO Wallet-412f: Generating unique resource name wallet-dbc4a95a
+21:00:39,887 INFO minio.Minio-c2d9: Initialize a new bucket for benchmarks
+21:00:39,891 INFO minio.Minio-c2d9: Created bucket sebs-benchmarks-wallet-dbc4a95a
+21:00:39,901 INFO Benchmark-d200: Building benchmark 210.thumbnailer. Reason: no cached code package.
+21:00:40,115 INFO Benchmark-d200: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+21:00:40,195 INFO Wallet-412f: Function size 0.000005 MB
+21:00:40,238 INFO Benchmark-d200: Created code package (source hash: de4ea5bd9ade694cacda06f879b30898), for run on wallet with python:3.11
+21:00:40,598 INFO Wallet-412f: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+21:00:41,657 INFO Experiment.PerfCost-acc7: Begin experiment
+21:00:41,657 INFO Experiment.PerfCost-acc7: Begin cold experiments
+21:00:41,661 INFO Wallet.WalletFunction-383d: Not stopping function as it was not running
+21:00:50,807 INFO Experiment.PerfCost-acc7: Processed 1 samples out of 5, 0 errors
+21:00:55,813 INFO Wallet.WalletFunction-383d: Stopping function
+21:00:55,814 INFO Wallet.WalletFunction-383d: Function stopped succesfully
+21:01:04,923 INFO Experiment.PerfCost-acc7: Processed 2 samples out of 5, 0 errors
+21:01:09,929 INFO Wallet.WalletFunction-383d: Stopping function
+21:01:09,929 INFO Wallet.WalletFunction-383d: Function stopped succesfully
+21:01:19,59 INFO Experiment.PerfCost-acc7: Processed 3 samples out of 5, 0 errors
+21:01:24,65 INFO Wallet.WalletFunction-383d: Stopping function
+21:01:24,66 INFO Wallet.WalletFunction-383d: Function stopped succesfully
+21:01:33,242 INFO Experiment.PerfCost-acc7: Processed 4 samples out of 5, 0 errors
+21:01:38,248 INFO Wallet.WalletFunction-383d: Stopping function
+21:01:38,249 INFO Wallet.WalletFunction-383d: Function stopped succesfully
+21:01:47,378 INFO Experiment.PerfCost-acc7: Processed 5 samples out of 5, 0 errors
+21:01:52,386 INFO Experiment.PerfCost-acc7: Mean 4132.174000000001 [ms], median 4124.171 [ms], std 22.600058415853887, CV 0.5469290116014931
+21:01:52,392 INFO Experiment.PerfCost-acc7: Parametric CI (Student's t-distribution) 0.95 from 4100.80008921706 to 4163.5479107829415, within 0.7592591885758097% of mean
+21:01:52,394 INFO Experiment.PerfCost-acc7: Parametric CI (Student's t-distribution) 0.99 from 4080.1475934769346 to 4184.200406523068, within 1.2590565286715052% of mean
+21:01:52,397 INFO Experiment.PerfCost-acc7: Begin sequential experiments
+21:01:57,723 INFO Experiment.PerfCost-acc7: Processed 1 samples out of 5, 0 errors
+21:02:07,894 INFO Experiment.PerfCost-acc7: Processed 2 samples out of 5, 0 errors
+21:02:18,64 INFO Experiment.PerfCost-acc7: Processed 3 samples out of 5, 0 errors
+21:02:28,241 INFO Experiment.PerfCost-acc7: Processed 4 samples out of 5, 0 errors
+21:02:38,409 INFO Experiment.PerfCost-acc7: Processed 5 samples out of 5, 0 errors
+21:02:43,415 INFO Experiment.PerfCost-acc7: Mean 161.00740000000002 [ms], median 160.051 [ms], std 2.6229547155831803, CV 1.6290895422093519
+21:02:43,418 INFO Experiment.PerfCost-acc7: Parametric CI (Student's t-distribution) 0.95 from 157.36615510938182 to 164.64864489061821, within 2.261538842698035% of mean
+21:02:43,420 INFO Experiment.PerfCost-acc7: Parametric CI (Student's t-distribution) 0.99 from 154.9692338230137 to 167.04556617698634, within 3.750241403181669% of mean
+21:02:43,424 INFO Wallet.WalletFunction-383d: Stopping function
+21:02:43,427 INFO Wallet.WalletFunction-383d: Function stopped succesfully

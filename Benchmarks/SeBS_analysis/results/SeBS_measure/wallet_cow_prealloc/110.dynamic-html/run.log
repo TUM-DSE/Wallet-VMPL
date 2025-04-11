@@ -1,0 +1,195 @@
+20:50:46,413 INFO SeBS-2024: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+20:50:46,486 INFO Wallet-e79d: Generating unique resource name wallet-7a1339de
+20:50:46,488 INFO minio.Minio-f195: Initialize a new bucket for benchmarks
+20:50:46,493 INFO minio.Minio-f195: Created bucket sebs-benchmarks-wallet-7a1339de
+20:50:46,742 INFO Benchmark-8e10: Building benchmark 110.dynamic-html. Reason: no cached code package.
+20:50:46,866 INFO Benchmark-8e10: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+20:50:46,905 INFO Wallet-e79d: Function size 0.000005 MB
+20:50:46,933 INFO Benchmark-8e10: Created code package (source hash: df7bdfe626d61a7c1f521476c26ace06), for run on wallet with python:3.11
+20:50:47,162 INFO Wallet-e79d: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+20:50:47,847 INFO Experiment.PerfCost-aac0: Begin experiment
+20:50:47,848 INFO Experiment.PerfCost-aac0: Begin cold experiments
+20:50:47,851 INFO Wallet.WalletFunction-3650: Not stopping function as it was not running
+20:50:56,211 INFO Experiment.PerfCost-aac0: Processed 1 samples out of 5, 0 errors
+20:51:01,217 INFO Wallet.WalletFunction-3650: Stopping function
+20:51:01,217 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:51:08,877 INFO Wallet.WalletFunction-3650: Stopping function
+20:51:08,877 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:51:08,878 ERROR Experiment.PerfCost-aac0: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+20:51:08,878 INFO Experiment.PerfCost-aac0: Processed 1 samples out of 5, 1 errors
+20:51:13,884 INFO Wallet.WalletFunction-3650: Not stopping function as it was not running
+20:51:22,287 INFO Experiment.PerfCost-aac0: Processed 2 samples out of 5, 1 errors
+20:51:27,288 INFO Wallet.WalletFunction-3650: Stopping function
+20:51:27,289 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:51:34,963 INFO Wallet.WalletFunction-3650: Stopping function
+20:51:34,964 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:51:34,964 ERROR Experiment.PerfCost-aac0: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+20:51:34,965 INFO Experiment.PerfCost-aac0: Processed 2 samples out of 5, 2 errors
+20:51:39,970 INFO Wallet.WalletFunction-3650: Not stopping function as it was not running
+20:51:48,383 INFO Experiment.PerfCost-aac0: Processed 3 samples out of 5, 2 errors
+20:51:53,389 INFO Wallet.WalletFunction-3650: Stopping function
+20:51:53,390 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:52:01,138 INFO Wallet.WalletFunction-3650: Stopping function
+20:52:01,138 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:52:01,139 ERROR Experiment.PerfCost-aac0: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+20:52:01,139 INFO Experiment.PerfCost-aac0: Processed 3 samples out of 5, 3 errors
+20:52:06,145 INFO Wallet.WalletFunction-3650: Not stopping function as it was not running
+20:52:14,535 INFO Experiment.PerfCost-aac0: Processed 4 samples out of 5, 3 errors
+20:52:19,541 INFO Wallet.WalletFunction-3650: Stopping function
+20:52:19,542 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:52:27,285 INFO Wallet.WalletFunction-3650: Stopping function
+20:52:27,286 INFO Wallet.WalletFunction-3650: Function stopped succesfully
+20:52:27,286 ERROR Experiment.PerfCost-aac0: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+20:52:27,287 INFO Experiment.PerfCost-aac0: Processed 4 samples out of 5, 4 errors
+20:52:32,288 INFO Wallet.WalletFunction-3650: Not stopping function as it was not running
+20:52:40,746 INFO Experiment.PerfCost-aac0: Processed 5 samples out of 5, 4 errors
+20:52:45,754 INFO Experiment.PerfCost-aac0: Mean 3398.4157999999998 [ms], median 3396.605 [ms], std 31.889825307768646, CV 0.9383732652069429
+20:52:45,760 INFO Experiment.PerfCost-aac0: Parametric CI (Student's t-distribution) 0.95 from 3354.145625309316 to 3442.6859746906835, within 1.3026709295161496% of mean
+20:52:45,762 INFO Experiment.PerfCost-aac0: Parametric CI (Student's t-distribution) 0.99 from 3325.0039094250765 to 3471.827690574923, within 2.1601797689065387% of mean
+20:52:45,769 INFO Experiment.PerfCost-aac0: Begin sequential experiments
+20:52:50,807 INFO Experiment.PerfCost-aac0: Processed 1 samples out of 5, 0 errors
+20:53:00,832 INFO Experiment.PerfCost-aac0: Processed 2 samples out of 5, 0 errors
+20:53:10,855 INFO Experiment.PerfCost-aac0: Processed 3 samples out of 5, 0 errors
+20:53:20,880 INFO Experiment.PerfCost-aac0: Processed 4 samples out of 5, 0 errors
+20:53:30,909 INFO Experiment.PerfCost-aac0: Processed 5 samples out of 5, 0 errors
+20:53:35,915 INFO Experiment.PerfCost-aac0: Mean 14.755199999999999 [ms], median 14.322 [ms], std 1.2653175727855832, CV 8.5754010300476
+20:53:35,918 INFO Experiment.PerfCost-aac0: Parametric CI (Student's t-distribution) 0.95 from 12.998657609259352 to 16.511742390740643, within 11.904565107491907% of mean
+20:53:35,920 INFO Experiment.PerfCost-aac0: Parametric CI (Student's t-distribution) 0.99 from 11.842378926212742 to 17.668021073787255, within 19.74097995138837% of mean
+20:53:35,927 INFO Wallet.WalletFunction-3650: Stopping function
+20:53:35,929 INFO Wallet.WalletFunction-3650: Function stopped succesfully
