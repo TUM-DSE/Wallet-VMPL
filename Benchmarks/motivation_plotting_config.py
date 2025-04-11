@@ -50,7 +50,7 @@ HATCHES = ["", "//", "xx", "\\\\", ".."]
 
 # Line styles
 LINE_WIDTH = 1.0                  # Default line width
-MARKER_SIZE = 1.0                 # Default marker size
+MARKER_SIZE = 2.0                 # Default marker size
 ERROR_BAR_CAP_SIZE = 1.0          # Error bar cap size
 ERROR_BAR_LINE_WIDTH = 0.4        # Error bar line width
 GRID_LINE_WIDTH = 0.5             # Grid line width
@@ -317,6 +317,7 @@ LABEL_MAPPINGS_SIMULATIONS = {
     'CVM'               : 'CVM (SEV-SNP)',
     'WALLET'            : 'Wallet',
 }
+
 
 # Apply settings on import
 apply_mpl_settings()
