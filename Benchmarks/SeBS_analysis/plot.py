@@ -25,6 +25,7 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
+figheight2 = 1.8
 VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc', 'wallet_warm_cow_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
@@ -404,7 +405,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
                 break  # Use first valid result file found
     
     # Setup the plot for cold start invocation latency
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    fig, ax = plt.subplots(figsize=(figwidth, figheight2))
     #title = "Cold Start Invocation Latency with Lukewarm Comparison"
     title = "Cold Start Invocation Latency"
     
@@ -523,7 +524,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     
     # Customize the plot
     ax.set_title(title, fontsize=TITLE_FONTSIZE)
-    ax.set_xlabel('Latency (seconds)', fontsize=TICKS_FONTSIZE)
+    ax.set_xlabel('Latency (s)', fontsize=TICKS_FONTSIZE)
     ax.set_ylabel('Cumulative Probability', fontsize=TICKS_FONTSIZE)
     ax.set_ylim(0, 1.05)
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
@@ -1224,7 +1225,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight), sharey=True)
     
     # Add "Lower is better" at the top of the plot
-    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.98)
+    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.90)
     
     # Left subplot: Lukewarm comparison (cold start + lukewarm Wallet)
     ax_left = axes[0]
@@ -1350,7 +1351,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     
     # Add shared legend at the bottom with all variants
     fig.legend(all_bars, all_labels, 
-              loc='lower center', bbox_to_anchor=(0.5, -0.15),
+              loc='lower center', bbox_to_anchor=(0.5, -0.05),
               ncol=8,  # Adjust number of columns based on how many items
               frameon=True, fontsize=LEGEND_FONTSIZE)
     
@@ -1424,25 +1425,25 @@ def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_result
     
     # Compare cold Wallet with other cold variants
     if wallet_cold_value is not None:
-        result_lines.append(f"\n{metric} - Cold Wallet Comparison:")
+        result_lines.append(f"\n{metric} - Cold Wallet Comparison ({wallet_cold_value:.2f}s):")
         for variant in VARIANTS:
             if variant != wallet_variant:
                 baseline_value = cold_geomeans.get(variant)
                 if baseline_value is not None and not np.isnan(baseline_value):
                     pct_diff = (wallet_cold_value - baseline_value) / baseline_value * 100
                     comparison = "slower" if pct_diff > 0 else "faster"
-                    result_lines.append(f"  Wallet (cold) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]}")
+                    result_lines.append(f"  Wallet (cold) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]} ({baseline_value:.2f}s)")
                 else:
                     result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
     
     # Compare Lukewarm Wallet with cold variants
     if not np.isnan(lukewarm_geomean):
-        result_lines.append(f"\n{metric} - Lukewarm Wallet Comparison:")
+        result_lines.append(f"\n{metric} - Lukewarm Wallet Comparison ({lukewarm_geomean:.2f}s):")
         # First compare with cold Wallet
         if wallet_cold_value is not None and not np.isnan(wallet_cold_value):
             pct_diff = (lukewarm_geomean - wallet_cold_value) / wallet_cold_value * 100
             comparison = "slower" if pct_diff > 0 else "faster"
-            result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than Wallet (cold)")
+            result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than Wallet (cold) ({wallet_cold_value:.2f}s)")
         
         # Then compare with other cold variants
         for variant in VARIANTS:
@@ -1451,7 +1452,7 @@ def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_result
                 if baseline_value is not None and not np.isnan(baseline_value):
                     pct_diff = (lukewarm_geomean - baseline_value) / baseline_value * 100
                     comparison = "slower" if pct_diff > 0 else "faster"
-                    result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]}")
+                    result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]} ({baseline_value:.2f}s)")
                 else:
                     result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
     
