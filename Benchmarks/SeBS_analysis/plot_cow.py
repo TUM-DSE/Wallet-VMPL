@@ -26,17 +26,21 @@ LEGEND_FONTSIZE = 5
 ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
-VARIANTS = ['wallet', 'wallet_cow_prealloc']
+#VARIANTS = ['wallet', 'wallet_cow_prealloc']
+VARIANTS = ['wallet_cow_prealloc', 'wallet_no_cow_prealloc']
 LABEL_MAPPINGS = {
-    'wallet' : 'Wallet - CoW Disabled',
-    'wallet_cow_prealloc'  : 'Wallet - CoW Enabled',
+    #'wallet' : 'Wallet - CoW Disabled',
+    'wallet_cow_prealloc' : 'Wallet - CoW Disabled',
+    'wallet_no_cow_prealloc'  : 'Wallet - CoW Enabled',
 }
 
 BENCHMARKS = [
     '110.dynamic-html', #'120.uploader',
     '210.thumbnailer', 
     '311.compression',
-    '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
+    '501.graph-pagerank',
+    '502.graph-mst',
+    # '503.graph-bfs',
     '504.dna-visualisation'
 ]
 palette = sns.color_palette("pastel", n_colors=len(VARIANTS*2))
@@ -523,7 +527,8 @@ def plot_wallet_comparison_grouped_bars(df, benchmarks, output_dir, geo_only=Fal
 
 def print_performance_summary(df, benchmarks):
     """Print geometric mean values and performance improvements."""
-    wallet_variants = ['wallet', 'wallet_cow_prealloc']
+    #wallet_variants = ['wallet', 'wallet_cow_prealloc']
+    wallet_variants = ['wallet_cow_prealloc', 'wallet_no_cow_prealloc']
     exec_types = ['cold', 'hot']
     
     # Filter data for wallet variants
@@ -553,9 +558,9 @@ def print_performance_summary(df, benchmarks):
                 geomeans[variant] = np.nan
         
         # Calculate improvement
-        if 'wallet' in geomeans and 'wallet_cow_prealloc' in geomeans:
-            if not np.isnan(geomeans['wallet']) and not np.isnan(geomeans['wallet_cow_prealloc']):
-                improvement = ((geomeans['wallet'] - geomeans['wallet_cow_prealloc']) / geomeans['wallet']) * 100
+        if 'wallet_no_cow_prealloc' in geomeans and 'wallet_cow_prealloc' in geomeans:
+            if not np.isnan(geomeans['wallet_no_cow_prealloc']) and not np.isnan(geomeans['wallet_cow_prealloc']):
+                improvement = ((geomeans['wallet_no_cow_prealloc'] - geomeans['wallet_cow_prealloc']) / geomeans['wallet_no_cow_prealloc']) * 100
                 improvements[exec_type] = improvement
                 print(f"  Improvement with CoW: {improvement:.2f}%")
             else:
@@ -570,7 +575,7 @@ def print_performance_summary(df, benchmarks):
         print(f"\n{exec_type.capitalize()} Start:")
         
         for bench in benchmarks:
-            without_cow_data = wallet_df[(wallet_df['variant'] == 'wallet') & 
+            without_cow_data = wallet_df[(wallet_df['variant'] == 'wallet_no_cow_prealloc') & 
                                         (wallet_df['type'] == exec_type) & 
                                         (wallet_df['benchmark'] == bench)]
             with_cow_data = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
@@ -605,14 +610,14 @@ def print_performance_summary(df, benchmarks):
     for bench in benchmarks:
         bench_name = bench.split('.')[1]
         
-        cold_without = wallet_df[(wallet_df['variant'] == 'wallet') & 
+        cold_without = wallet_df[(wallet_df['variant'] == 'wallet_no_cow_prealloc') & 
                                 (wallet_df['type'] == 'cold') & 
                                 (wallet_df['benchmark'] == bench)]
         cold_with = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
                             (wallet_df['type'] == 'cold') & 
                             (wallet_df['benchmark'] == bench)]
         
-        hot_without = wallet_df[(wallet_df['variant'] == 'wallet') & 
+        hot_without = wallet_df[(wallet_df['variant'] == 'wallet_no_cow_prealloc') & 
                               (wallet_df['type'] == 'hot') & 
                               (wallet_df['benchmark'] == bench)]
         hot_with = wallet_df[(wallet_df['variant'] == 'wallet_cow_prealloc') & 
@@ -684,11 +689,52 @@ def print_performance_summary(df, benchmarks):
     print("\n================================")
     return improvements
 
+
+def calculate_execution_overhead(df, benchmarks):
+    wallet_variants = ['wallet_cow_prealloc', 'wallet_no_cow_prealloc']
+    exec_types = ['cold', 'hot']
+    
+    # Filter data for wallet variants
+    wallet_df = df[df['variant'].isin(wallet_variants)]
+    
+    overheads = {}
+    
+    for exec_type in exec_types:
+        geomeans = {}
+        for variant in wallet_variants:
+            variant_data = wallet_df[(wallet_df['variant'] == variant) & 
+                                    (wallet_df['type'] == exec_type)]
+            values = variant_data['exec_time'].values
+
+            print(f"  {variant}: {values}")
+            
+            if len(values) > 0 and np.all(values > 0):
+                geomean = np.exp(np.mean(np.log(values)))
+                geomeans[variant] = geomean
+            else:
+                geomeans[variant] = np.nan
+        
+        print(f"\n{exec_type.capitalize()} Start:")
+        print(f"  CoW Disabled: {geomeans['wallet_no_cow_prealloc']:.4f}s")
+        print(f"  CoW Enabled: {geomeans['wallet_cow_prealloc']:.4f}s")
+        
+        # Calculate overhead
+        if 'wallet_no_cow_prealloc' in geomeans and 'wallet_cow_prealloc' in geomeans:
+            if not np.isnan(geomeans['wallet_no_cow_prealloc']) and not np.isnan(geomeans['wallet_cow_prealloc']):
+                overhead = ((geomeans['wallet_cow_prealloc'] - geomeans['wallet_no_cow_prealloc']) / 
+                          geomeans['wallet_no_cow_prealloc']) * 100
+                overheads[exec_type] = overhead
+                print(f"{exec_type.capitalize()} start overhead of CoW: {overhead:.2f}%")
+    
+    return overheads
+
+
 def main():
     global VARIANTS
 
     # Add wallet variants with preallocation for comparison plots
-    VARIANTS = ['wallet', 'wallet_cow_prealloc']
+    #VARIANTS = ['wallet', 'wallet_cow_prealloc']
+    VARIANTS = ['wallet_cow_prealloc', 'wallet_no_cow_prealloc']
     
     # Get data for invocation latency CDF
     invocation_df, common_benchmarks = derive_incovation_data()
@@ -712,6 +758,9 @@ def main():
     
     # Print performance summary
     print_performance_summary(client_df, common_benchmarks)
+
+    print("\nCalculating execution overhead...")
+    overheads = calculate_execution_overhead(client_df, common_benchmarks)
 
 if __name__ == "__main__":
     main()
