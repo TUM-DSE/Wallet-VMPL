@@ -55,6 +55,11 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Read the CSV file
     df = pd.read_csv(csv_path)
+
+    # keep rows with 'type' == 'wallet'
+    df = df[df['type'] == 'wallet']
+    # drop unnecessary columns: 'type', 'total'
+    df = df.drop(columns=['type', 'total'])
     
     # Group by benchmark and calculate the average
     avg_memory = df.groupby('bench').mean().reset_index()
@@ -126,7 +131,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Set labels and title with MB units
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
-    ax.set_ylim([0,560])
+    ax.set_ylim([0,1500])
     ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE)
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)
@@ -176,8 +181,10 @@ def main():
         # Overall average summary (in MB)
         print("\nOverall Memory Usage:")
         avg_cow = total_cow / len(avg_memory)
+        min_cow = avg_memory['cow_mb'].min()
+        max_cow = avg_memory['cow_mb'].max()
         avg_no_cow = total_no_cow / len(avg_memory)
-        print(f"Average CoW Memory Usage: {avg_cow:.2f} MB")
+        print(f"Average CoW Memory Usage: {avg_cow:.2f} MB (Min: {min_cow:.2f} MB, Max: {max_cow:.2f} MB)")
         print(f"Average No-CoW Memory Usage: {avg_no_cow:.2f} MB")
         
         diff = avg_cow - avg_no_cow
