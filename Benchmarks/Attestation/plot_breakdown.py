@@ -154,8 +154,15 @@ def create_cutoff_plot(averages, output_dir):
     apply_consistent_style(ax1, title=LOWER_BETTER_TITLE)
     apply_consistent_style(ax2)
     
-    # Fix xticks rotation
+    # Fix xticks rotation and add size annotations
     plt.xticks(rotation=0)
+    
+    # Add size annotations below labels
+    size_annotations = ['', '(60MB)', '(4KB)', '(4KB)', '(4KB)']
+    for i, category in enumerate(categories):
+        # Add the size annotation below each category label
+        if i > 0:  # Skip Monitor (no size annotation needed)
+            ax2.text(i, -2.0, size_annotations[i], ha='center', va='top', fontsize=LEGEND_FONTSIZE-2)
     
     # Add y-axis label in the middle
     create_annotation_y_label(ax2, 'Time (ms)', position=(0.2, 6.5))
