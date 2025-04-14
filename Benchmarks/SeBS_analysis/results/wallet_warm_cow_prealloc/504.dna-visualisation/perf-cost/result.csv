@@ -1,11 +1,1 @@
 memory,type,is_cold,exec_time,connection_time,client_time,provider_time,mem_used
-0,cold,True,10207194,0,14098578,0,
-0,cold,True,10197891,0,14122398,0,
-0,cold,True,10178037,0,14174968,0,
-0,cold,True,10171827,0,14613824,0,
-0,cold,True,10134310,0,14076765,0,
-0,sequential,False,9875910,0,11462303,0,
-0,sequential,False,9921008,0,11541583,0,
-0,sequential,False,9884323,0,11462733,0,
-0,sequential,False,9808407,0,11383390,0,
-0,sequential,False,9949459,0,11554945,0,

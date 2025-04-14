@@ -1,36 +1,17 @@
-20:20:16,541 INFO SeBS-d27a: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
-20:20:16,618 INFO WalletWarm-435b: Generating unique resource name wallet-665dc5c0
-20:20:16,620 INFO minio.Minio-70af: Initialize a new bucket for benchmarks
-20:20:16,625 INFO minio.Minio-70af: Created bucket sebs-benchmarks-wallet-665dc5c0
-20:20:16,813 INFO Benchmark-9913: Building benchmark 503.graph-bfs. Reason: no cached code package.
-20:20:17,26 INFO Benchmark-9913: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-20:20:17,104 INFO WalletWarm-435b: Function size 0.000005 MB
-20:20:17,145 INFO Benchmark-9913: Created code package (source hash: 693b2b32a88d140fc886ab0d72ec2ba1), for run on wallet_warm with python:3.11
-20:20:17,506 INFO WalletWarm-435b: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
-20:20:18,225 INFO Experiment.PerfCost-3f53: Begin experiment
-20:20:18,226 INFO Experiment.PerfCost-3f53: Begin cold experiments
-20:20:18,230 INFO WalletWarm.WalletFunction-c1f4: Not stopping function as it was not running
-20:20:25,796 INFO Experiment.PerfCost-3f53: Processed 1 samples out of 5, 0 errors
-20:20:30,798 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:20:30,799 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
-20:20:38,332 INFO Experiment.PerfCost-3f53: Processed 2 samples out of 5, 0 errors
-20:20:43,336 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:20:43,337 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
-20:20:50,894 INFO Experiment.PerfCost-3f53: Processed 3 samples out of 5, 0 errors
-20:20:55,900 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:20:55,901 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
-20:21:03,466 INFO Experiment.PerfCost-3f53: Processed 4 samples out of 5, 0 errors
-20:21:08,472 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:21:08,473 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
-20:21:16,33 INFO Experiment.PerfCost-3f53: Processed 5 samples out of 5, 0 errors
-20:21:21,42 INFO Experiment.PerfCost-3f53: Mean 2550.1295999999998 [ms], median 2553.936 [ms], std 11.987288560804819, CV 0.47006585707662935
-20:21:21,48 INFO Experiment.PerfCost-3f53: Parametric CI (Student's t-distribution) 0.95 from 2533.4885756753797 to 2566.77062432462, within 0.6525560240005076% of mean
-20:21:21,50 INFO Experiment.PerfCost-3f53: Parametric CI (Student's t-distribution) 0.99 from 2522.534293107508 to 2577.7249068924916, within 1.08211390089711% of mean
-20:21:21,247 INFO Experiment.PerfCost-3f53: Begin sequential experiments
-20:21:27,882 INFO Experiment.PerfCost-3f53: Processed 1 samples out of 5, 0 errors
-20:21:38,697 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:21:38,698 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
-20:21:38,698 ERROR Experiment.PerfCost-3f53: Couldn't invoke function; output:
+17:52:36,289 INFO SeBS-36cc: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
+17:52:36,365 INFO WalletWarm-ce4d: Generating unique resource name walletwarm-c0adede8
+17:52:36,367 INFO minio.Minio-9e10: Initialize a new bucket for benchmarks
+17:52:36,372 INFO minio.Minio-9e10: Created bucket sebs-benchmarks-walletwarm-c0adede8
+17:52:36,539 INFO Benchmark-f99b: Building benchmark 503.graph-bfs. Reason: no cached code package.
+17:52:36,733 INFO Benchmark-f99b: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+17:52:36,805 INFO WalletWarm-ce4d: Function size 0.000005 MB
+17:52:36,845 INFO Benchmark-f99b: Created code package (source hash: 693b2b32a88d140fc886ab0d72ec2ba1), for run on wallet_warm with python:3.11
+17:52:37,185 INFO WalletWarm-ce4d: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+17:52:37,888 INFO Experiment.PerfCost-16be: Begin experiment
+17:52:37,888 INFO Experiment.PerfCost-16be: Begin sequential experiments
+17:52:45,585 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:52:45,585 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
+17:52:45,586 ERROR Experiment.PerfCost-16be: Couldn't invoke function; output:
 
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>
@@ -49,27 +30,182 @@
                caused an error:</p>
             <pre>Internal Server Error</pre>
               <h2>Exception:</h2>
-              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
               <h2>Traceback:</h2>
               <pre>Traceback (most recent call last):
   File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
     out = route.call(**args)
   File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
     rv = callback(*a, **ka)
-  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 38, in process_request
-    ret = pickle.loads(ret)
-_pickle.UnpicklingError: pickle data was truncated
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 36, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
 </pre>
         </body>
     </html>
 
-20:21:38,699 INFO Experiment.PerfCost-3f53: Processed 1 samples out of 5, 1 errors
-20:21:51,260 INFO Experiment.PerfCost-3f53: Processed 2 samples out of 5, 1 errors
-20:22:02,79 INFO Experiment.PerfCost-3f53: Processed 3 samples out of 5, 1 errors
-20:22:12,898 INFO Experiment.PerfCost-3f53: Processed 4 samples out of 5, 1 errors
-20:22:23,732 INFO Experiment.PerfCost-3f53: Processed 5 samples out of 5, 1 errors
-20:22:28,739 INFO Experiment.PerfCost-3f53: Mean 1162.9652 [ms], median 816.07 [ms], std 693.2137042853093, CV 59.60743316182713
-20:22:28,741 INFO Experiment.PerfCost-3f53: Parametric CI (Student's t-distribution) 0.95 from 200.6303019405094 to 2125.3000980594907, within 82.74838301777993% of mean
-20:22:28,743 INFO Experiment.PerfCost-3f53: Parametric CI (Student's t-distribution) 0.99 from -432.84563034760413 to 2758.7760303476043, within 137.21913865931708% of mean
-20:22:28,935 INFO WalletWarm.WalletFunction-c1f4: Stopping function
-20:22:28,937 INFO WalletWarm.WalletFunction-c1f4: Function stopped succesfully
+17:52:45,586 INFO Experiment.PerfCost-16be: Processed 0 samples out of 5, 1 errors
+17:52:58,133 INFO Experiment.PerfCost-16be: Processed 1 samples out of 5, 1 errors
+17:53:08,239 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:53:08,239 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
+17:53:08,240 ERROR Experiment.PerfCost-16be: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 36, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+17:53:08,240 INFO Experiment.PerfCost-16be: Processed 1 samples out of 5, 2 errors
+17:53:20,769 INFO Experiment.PerfCost-16be: Processed 2 samples out of 5, 2 errors
+17:53:30,876 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:53:30,876 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
+17:53:30,877 ERROR Experiment.PerfCost-16be: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 36, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+17:53:30,877 INFO Experiment.PerfCost-16be: Processed 2 samples out of 5, 3 errors
+17:53:43,411 INFO Experiment.PerfCost-16be: Processed 3 samples out of 5, 3 errors
+17:53:53,509 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:53:53,510 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
+17:53:53,510 ERROR Experiment.PerfCost-16be: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 36, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+17:53:53,510 INFO Experiment.PerfCost-16be: Processed 3 samples out of 5, 4 errors
+17:54:06,16 INFO Experiment.PerfCost-16be: Processed 4 samples out of 5, 4 errors
+17:54:16,124 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:54:16,125 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
+17:54:16,125 ERROR Experiment.PerfCost-16be: Couldn't invoke function; output:
+
+    <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+    <html>
+        <head>
+            <title>Error: 500 Internal Server Error</title>
+            <style type="text/css">
+              html {background-color: #eee; font-family: sans-serif;}
+              body {background-color: #fff; border: 1px solid #ddd;
+                    padding: 15px; margin: 15px;}
+              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}
+            </style>
+        </head>
+        <body>
+            <h1>Error: 500 Internal Server Error</h1>
+            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+               caused an error:</p>
+            <pre>Internal Server Error</pre>
+              <h2>Exception:</h2>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
+              <h2>Traceback:</h2>
+              <pre>Traceback (most recent call last):
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+    out = route.call(**args)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+    rv = callback(*a, **ka)
+  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 36, in process_request
+    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)
+  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
+</pre>
+        </body>
+    </html>
+
+17:54:16,125 INFO Experiment.PerfCost-16be: Processed 4 samples out of 5, 5 errors
+17:54:28,683 INFO Experiment.PerfCost-16be: Processed 5 samples out of 5, 5 errors
+17:54:33,691 INFO Experiment.PerfCost-16be: Mean 2523.3527999999997 [ms], median 2522.742 [ms], std 17.687071407104167, CV 0.7009353352057694
+17:54:33,697 INFO Experiment.PerfCost-16be: Parametric CI (Student's t-distribution) 0.95 from 2498.7992085832307 to 2547.9063914167687, within 0.9730542402461122% of mean
+17:54:33,699 INFO Experiment.PerfCost-16be: Parametric CI (Student's t-distribution) 0.99 from 2482.636322622092 to 2564.0692773779074, within 1.6135863910075408% of mean
+17:54:33,888 INFO WalletWarm.WalletFunction-9700: Stopping function
+17:54:33,889 INFO WalletWarm.WalletFunction-9700: Function stopped succesfully
