@@ -419,12 +419,22 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 1.8  # Increased height to accommodate three subplots
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+
+    # Define y-axis section boundaries
+    #top_min = 250
+    #middle_min = 0.6
+    #middle_max = 250
+    #bottom_max = 0.6
+    top_min = 1300
+    middle_min = 0.6
+    middle_max = 1300
+    bottom_max = 0.6
     
     # Set y-axis limits with two breaks
     max_zygote = df[df['Component'] == "Zygote creation"]['Time (ms)'].max()
-    ax1.set_ylim(250, max_zygote + 50)  # Upper section for high values (Zygote)
-    ax2.set_ylim(0.6, 250)                 # Middle section for medium values
-    ax3.set_ylim(0, 0.6)                  # Lower section for small values
+    ax1.set_ylim(top_min, max_zygote*1.2)  # Upper section for high values (Zygote)
+    ax2.set_ylim(middle_min, middle_max)                 # Middle section for medium values
+    ax3.set_ylim(0, bottom_max)                  # Lower section for small values
     
     # Hide the spines between axes
     ax1.spines.bottom.set_visible(False)
@@ -467,12 +477,6 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     x = np.arange(len(ordered_benchmarks))
     width = 0.2  # width of the bars
     
-    # Define y-axis section boundaries
-    top_min = 250
-    middle_min = 0.6
-    middle_max = 250
-    bottom_max = 0.6
-    
     for i, component in enumerate(components_to_show):
         component_data = df[df['Component'] == component]
         
@@ -488,12 +492,12 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
             
             # Plot each portion in its respective subplot
             if top_value > 0:
-                ax1.bar(x[j] + (i - 1.5) * width, top_value + 250, width, 
+                ax1.bar(x[j] + (i - 1.5) * width, top_value + top_min, width, 
                         label=component if j == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
             
             if middle_value > 0:
-                ax2.bar(x[j] + (i - 1.5) * width, middle_value + 0.5, width, 
+                ax2.bar(x[j] + (i - 1.5) * width, middle_value + middle_min, width, 
                         label=component if j == 0 and top_value == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
             
@@ -529,7 +533,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Create the legend with the ordered items
     legend = ax1.legend(ordered_handles, ordered_labels, 
-                      bbox_to_anchor=(0.01, 0.60), loc='upper left',
+                      bbox_to_anchor=(0.03, 0.80), loc='upper left',
                       #bbox_to_anchor=(0.01, 0.90), loc='upper left',
                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
     legend.get_frame().set_edgecolor('black')
