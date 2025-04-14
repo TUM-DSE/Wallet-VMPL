@@ -56,6 +56,8 @@ def process_request():
     key_name = client.upload_stream(bucket, os.path.join(output_prefix, key), io.BytesIO(ret.get('result').encode()))
     upload_end = datetime.datetime.now()
 
+    print(f"Input Size: {len(data)} \nOutput Size: {output_len}", file=sys.stderr)
+
     ret['result'] = {
         'bucket': bucket,
         'key': key_name

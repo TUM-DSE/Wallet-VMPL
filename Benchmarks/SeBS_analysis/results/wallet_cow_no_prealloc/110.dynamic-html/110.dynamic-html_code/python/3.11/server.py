@@ -35,6 +35,7 @@ def process_request():
         # print(f"ret: {ret}")
         ret = pickle.loads(ret)
 
+    print(f"Input Size: {len(data)} \nOutput Size: {output_len}", file=sys.stderr)
     return {
         "begin": begin.strftime("%s.%f"),
         "end": end.strftime("%s.%f"),
