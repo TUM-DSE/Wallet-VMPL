@@ -1,4 +1,4 @@
-12:20:06,449 INFO SeBS-187e: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
-12:20:06,464 INFO Wallet-4bc2: Using existing deployment wallet-a90d1e2c that matches prefix wallet!
-12:20:06,468 INFO Experiment.PerfCost-33ca: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
-12:20:06,473 INFO Experiment.PerfCost-33ca: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
+12:23:48,125 INFO SeBS-ec0a: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+12:23:48,139 INFO Wallet-acee: Using existing deployment wallet-d6b3f554 that matches prefix wallet!
+12:23:48,143 INFO Experiment.PerfCost-952a: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+12:23:48,148 INFO Experiment.PerfCost-952a: Processing data in /root/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json

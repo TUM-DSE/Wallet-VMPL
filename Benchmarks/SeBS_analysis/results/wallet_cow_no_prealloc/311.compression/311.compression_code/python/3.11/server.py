@@ -69,6 +69,8 @@ def process_request():
     key_name = client.upload_stream(bucket, os.path.join(output_prefix, archive_name), io.BytesIO(ret.get('result')))
     s3_upload_stop = datetime.datetime.now()
 
+    print(f"Input Size: {len(data)} \nOutput Size: {output_len}", file=sys.stderr)
+
     ret['result'] = {
         'bucket': bucket,
         'key': key_name

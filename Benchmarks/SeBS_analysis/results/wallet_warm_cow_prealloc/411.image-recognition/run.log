@@ -1,0 +1,14 @@
+17:29:27,445 INFO SeBS-c463: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
+17:29:27,519 INFO WalletWarm-994d: Generating unique resource name walletwarm-84dceba0
+17:29:27,521 INFO minio.Minio-d953: Initialize a new bucket for benchmarks
+17:29:27,526 INFO minio.Minio-d953: Created bucket sebs-benchmarks-walletwarm-84dceba0
+17:29:27,564 INFO Benchmark-e726: Building benchmark 411.image-recognition. Reason: no cached code package.
+17:29:27,782 INFO Benchmark-e726: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+17:29:27,862 INFO WalletWarm-994d: Function size 0.000005 MB
+17:29:27,910 INFO Benchmark-e726: Created code package (source hash: eb995b4d9b9439453af57b2c3d1d1baa), for run on wallet_warm with python:3.11
+17:29:28,283 INFO WalletWarm-994d: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+17:29:29,983 INFO Experiment.PerfCost-53fd: Begin experiment
+17:29:29,984 INFO Experiment.PerfCost-53fd: Begin sequential experiments
+17:29:42,866 INFO WalletWarm.WalletFunction-2b0b: Stopping function
+17:29:42,866 INFO WalletWarm.WalletFunction-2b0b: Function stopped succesfully
+17:29:42,879 INFO WalletWarm.WalletFunction-2b0b: Not stopping function as it was not running
