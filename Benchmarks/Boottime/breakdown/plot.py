@@ -88,6 +88,7 @@ def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
     '504.dna-visualisation',
     '503.graph-bfs',
     '311.compression',
+    '411.image-recognition'
     ]
     
     # Filter by alloc and cow if specified
@@ -101,6 +102,7 @@ def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
     for b in BENCHMARKS:
         df = filtered_data[filtered_data["benchmark"].str.contains(b)]
         if df.empty:  # Skip benchmarks with no data matching the filters
+            print(f"[WARN] No data for benchmark (type={type_}): {b}")
             continue
             
         name = b.split('.')[1] # remove the number
@@ -446,7 +448,8 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
         "graph-pagerank", 
         "dna-visualisation", 
         "graph-bfs", 
-        "compression"
+        "compression",
+        'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -597,7 +600,7 @@ def main():
     args = parser.parse_args()
     
     # Load and process data
-    raw_data = pd.read_csv("results.csv")
+    raw_data = pd.read_csv(args.input_file)
     
     # Define combinations of alloc and cow to process
     combinations = [
@@ -673,7 +676,8 @@ def main():
                 "graph-pagerank", 
                 "dna-visualisation", 
                 "graph-bfs", 
-                "compression"
+                "compression",
+                'image-recognition'
             ]
             
             # Filter and order benchmarks
