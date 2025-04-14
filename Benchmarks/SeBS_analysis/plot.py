@@ -1231,6 +1231,29 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     # Add "Lower is better" at the top of the plot
     fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.90)
     
+    # Custom benchmark ordering
+    benchmark_order = [
+        "thumbnailer", 
+        "graph-mst", 
+        "dynamic-html", 
+        "graph-pagerank", 
+        "dna-visualisation", 
+        "graph-bfs", 
+        "compression",
+        'image-recognition'
+    ]
+    
+    # Create mapping from benchmark name to its index in the original list
+    benchmark_mapping = {b.split('.')[1]: b for b in benchmarks}
+    
+    # Create ordered list of benchmarks using the mapping
+    plot_benchmarks = []
+    for b in benchmark_order:
+        for full_bench in benchmarks:
+            if full_bench.split('.')[1] == b:
+                plot_benchmarks.append(full_bench)
+                break
+    
     # Left subplot: Lukewarm comparison (cold start + lukewarm Wallet)
     ax_left = axes[0]
     # Filter data for cold execution type
@@ -1241,9 +1264,9 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     lukewarm_df = df[df['variant'] == lukewarm_variant]
     lukewarm_df = lukewarm_df[lukewarm_df['type'] == 'hot']
     
-    # Use benchmarks directly without adding geomean
-    plot_benchmarks = benchmarks  # No geomean
-    
+    # Use the ordered benchmark list instead of original benchmarks
+    # plot_benchmarks = benchmarks  # No geomean
+
     # Calculate bar positions for left subplot
     n_variants = len(VARIANTS)
     width = 0.10  # Width of each bar
