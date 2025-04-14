@@ -124,6 +124,17 @@ def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
                 "Input copy": df["invoke_data_copy"].mean() / 1e6,
                 "Output copy": df["invoke_result_copy"].mean()/ 1e6,
             }
+        elif type_ == "all_simple_measure":
+            categories[name] = {
+                "Zygote": (df["zygote_init"].mean() + df["zygote_data_copy"].mean()) / 1e6,
+                "Zygote #": df["zygote_measure"].mean() / 1e6,
+                "Trustlet": (df["trustlet_function"].mean() + df["trustlet_creation"].mean()) / 1e6,
+                "Trustlet #": df["trustlet_measure"].mean() / 1e6,
+                "Input": df["invoke_data_copy"].mean() / 1e6,
+                "Input #": df["input_measure"].mean() / 1e6,
+                "Output": df["invoke_result_copy"].mean()/ 1e6,
+                "Output #": df["output_measure"].mean()/ 1e6,
+            }
         elif type_ == "measurement":
             categories[name] = {
                 "Zygote": df["zygote_measure"].mean() / 1e6,
@@ -358,7 +369,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     
     # Enhance legend
     if not motivation:
-      if type_ == "invoke" or type_ == "datacopy":
+      if type_ == "invoke" or type_ == "datacopy" or type_ == "all_simple_measure":
         bbox_to_anchor = (0.01, 0.98)
         loc = 'upper left'
       else:
@@ -802,6 +813,546 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
     print(f"{'Average Total':<20}: {total_avg:.3f}")
     print("=" * 40)
 
+def create_side_by_side_plot_with_measurement(categories, measurement_categories, output_dir, suffix=''):
+    """Create side-by-side bar chart with measurement times stacked on top of each bar"""
+    # Convert to DataFrame in the right format for grouped bar chart
+    data = []
+    measure_data = []
+    components_to_show = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
+    measure_components = ["Zygote", "Trustlet", "Input", "Output"]
+    
+    # Map between display names and internal names
+    display_names = ["Zygote", "Trustlet", "Input", "Output"]
+    component_map = dict(zip(components_to_show, display_names))
+    
+    # Ensure each benchmark has all components
+    for benchmark, components in categories.items():
+        for component_name in components_to_show:
+            value = components.get(component_name, 0)
+            data.append({
+                'Benchmark': benchmark,
+                'Component': component_name,
+                'Time (ms)': value,
+                'Display': component_map[component_name]
+            })
+    
+    # Add measurement data
+    for benchmark, components in measurement_categories.items():
+        for i, component_name in enumerate(measure_components):
+            # Map measurement component to its corresponding regular component
+            corresponding_component = components_to_show[i]
+            value = components.get(component_name, 0)
+            measure_data.append({
+                'Benchmark': benchmark,
+                'Component': corresponding_component,  # Use the same component name for alignment
+                'Measurement (ms)': value
+            })
+    
+    df = pd.DataFrame(data)
+    df_measure = pd.DataFrame(measure_data)
+    
+    # Create the plot with increased size
+    figwidth = 3.3  # 3.3 inch for single column
+    figheight = 1.8  # Increased height to accommodate three subplots
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+
+    # Define y-axis section boundaries
+    top_min = 3000
+    middle_min = 1.0
+    middle_max = 3000
+    bottom_max = 1.0
+    
+    # Set y-axis limits with two breaks
+    max_zygote = df[df['Component'] == "Zygote creation"]['Time (ms)'].max()
+    ax1.set_ylim(top_min, 30000)  # Upper section for high values (Zygote)
+    ax2.set_ylim(middle_min, middle_max)              # Middle section for medium values
+    ax3.set_ylim(0, bottom_max)                # Lower section for small values
+    
+    # Hide the spines between axes
+    ax1.spines.bottom.set_visible(False)
+    ax2.spines.top.set_visible(False)
+    ax2.spines.bottom.set_visible(False)
+    ax3.spines.top.set_visible(False)
+    
+    # Hide the xaxis from the upper plots
+    ax1.get_xaxis().set_visible(False)
+    ax2.get_xaxis().set_visible(False)
+    ax1.tick_params(bottom=False)
+    ax2.tick_params(bottom=False)
+    
+    # Add break marks
+    d = .5  # proportion of vertical to horizontal extent of the slanted line
+    kwargs = dict(marker=[(-1, -d), (1, d)], markersize=TICKS_FONTSIZE,
+                  linestyle="none", color='k', mec='k', mew=1, clip_on=False)
+    ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
+    ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
+    ax2.plot([0, 1], [0, 0], transform=ax2.transAxes, **kwargs)
+    ax3.plot([0, 1], [1, 1], transform=ax3.transAxes, **kwargs)
+    
+    # Define the benchmark order as requested
+    benchmark_order = [
+        "thumbnailer", 
+        "graph-mst", 
+        "dynamic-html", 
+        "graph-pagerank", 
+        "dna-visualisation", 
+        "graph-bfs", 
+        "compression",
+        'image-recognition'
+    ]
+    
+    # Filter and order the benchmarks according to the specified sequence
+    available_benchmarks = df['Benchmark'].unique()
+    ordered_benchmarks = [b for b in benchmark_order if b in available_benchmarks]
+    
+    # Plot grouped bars
+    x = np.arange(len(ordered_benchmarks))
+    width = 0.2  # width of the bars
+    
+    # Create measurement hatches that are different from main hatches
+    #measurement_hatches = ["xxx", "+++", "///", "ooo"]
+    measurement_hatches = ["xxx", "xxx", "xxx", "xxx"]
+    hatches = ["", "", "", "", ""]
+    
+    # First plot the main performance bars
+    for i, component in enumerate(components_to_show):
+        component_data = df[df['Component'] == component]
+        display_name = component_data['Display'].iloc[0] if not component_data.empty else component
+        
+        for j, benchmark in enumerate(ordered_benchmarks):
+            value = component_data[component_data['Benchmark'] == benchmark]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            meas_value = 0
+            if benchmark in df_measure['Benchmark'].values:
+                meas_values = df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                         (df_measure['Component'] == component)]['Measurement (ms)'].values
+                if len(meas_values) > 0:
+                    meas_value = meas_values[0]
+            
+            # Calculate what portion of the performance value goes in each section
+            top_value = max(0, value - top_min)
+            middle_value = min(middle_max - middle_min, max(0, min(value, middle_max) - middle_min))
+            bottom_value = min(bottom_max, max(0, min(value, bottom_max)))
+            
+            # Calculate what portion of the measurement value goes in each section
+            m_top_value = max(0, meas_value - top_min)
+            m_middle_value = min(middle_max - middle_min, max(0, min(meas_value, middle_max) - middle_min))
+            m_bottom_value = min(bottom_max, max(0, min(meas_value, bottom_max)))
+            
+            # Plot each portion in its respective subplot - performance first
+            if top_value > 0:
+                ax1.bar(x[j] + (i - 1.5) * width, top_value + top_min, width, 
+                        label=display_name if j == 0 else "", 
+                        color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
+                        
+                # Now add measurement on top if it exists in the top section
+                if m_top_value > 0:
+                    ax1.bar(x[j] + (i - 1.5) * width, m_top_value, width,
+                            bottom=top_value + top_min,
+                            color=palette[i], linewidth=0, edgecolor='black', 
+                            hatch=measurement_hatches[i], alpha=0.7)
+            
+            if middle_value > 0:
+                ax2.bar(x[j] + (i - 1.5) * width, middle_value + middle_min, width, 
+                        label=display_name if j == 0 and top_value == 0 else "", 
+                        color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
+                        
+                # Add measurement on top if it exists in the middle section
+                if m_middle_value > 0:
+                    ax2.bar(x[j] + (i - 1.5) * width, m_middle_value, width,
+                            bottom=middle_value + middle_min,
+                            color=palette[i], linewidth=0, edgecolor='black', 
+                            hatch=measurement_hatches[i], alpha=0.7)
+            
+            if bottom_value > 0:
+                ax3.bar(x[j] + (i - 1.5) * width, bottom_value, width, 
+                        label=display_name if j == 0 and top_value == 0 and middle_value == 0 else "", 
+                        color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
+                        
+                # Add measurement on top if it exists in the bottom section
+                if m_bottom_value > 0:
+                    ax3.bar(x[j] + (i - 1.5) * width, m_bottom_value, width,
+                            bottom=bottom_value,
+                            color=palette[i], linewidth=0, edgecolor='black', 
+                            hatch=measurement_hatches[i], alpha=0.7)
+    
+    # Customize the plot
+    ax3.set_xlabel('', fontsize=TICKS_FONTSIZE)
+    ax3.set_xticks(x)
+    ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
+    
+    # Add y-axis label in the middle
+    fig.text(-0.01, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
+    
+    # Title
+    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Create a single legend for all three subplots
+    handles, labels = [], []
+    for ax in [ax1, ax2, ax3]:
+        h, l = ax.get_legend_handles_labels()
+        handles.extend(h)
+        labels.extend(l)
+    
+    # Create a dictionary mapping labels to handles to eliminate duplicates
+    by_label = dict(zip(labels, handles))
+    ordered_labels = display_names
+    ordered_handles = [by_label[label] for label in ordered_labels]
+    
+    # Create the legend with the simplified component names
+    legend = ax1.legend(ordered_handles, ordered_labels,
+                        loc='upper left', bbox_to_anchor=(0.01, 0.95),
+                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+    legend.get_frame().set_edgecolor('black')
+    
+    # Add gridlines for better readability
+    ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
+    ax2.yaxis.grid(True, linestyle='--', alpha=0.7)
+    ax3.yaxis.grid(True, linestyle='--', alpha=0.7)
+    
+    # Tick sizes
+    for ax in [ax1, ax2, ax3]:
+        ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    
+    # Adjust layout
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0, hspace=0.05)
+    
+    # Add annotation to explain the hatching
+    fig.text(-0.01, -0.00, "Solid: performance time\nHatched: measurement time", 
+             fontsize=ANNOTATION_SIZE, ha="left", va="bottom")
+    
+    # Save plots with suffix
+    output_path = Path(output_dir) / f'runtime_init_with_measurement{suffix}.pdf'
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_path)
+    
+    plt.close()
+    
+    # Print summary table showing both performance and measurement values
+    print(f"\n=== Summary: Performance vs Measurement Times (ms) {suffix} ===")
+    print(f"{'Benchmark':<15}", end="")
+    for comp in components_to_show:
+        print(f"{component_map[comp]:<25}", end="")
+    print()
+    
+    print(f"{'':<15}", end="")
+    for _ in components_to_show:
+        print(f"{'Perf':<12}{'Measure':<13}", end="")
+    print()
+    
+    # Print dashes for formatting
+    print("-" * (15 + 25 * len(components_to_show)))
+    
+    # Initialize sum for calculating averages
+    perf_component_sums = {comp: 0.0 for comp in components_to_show}
+    meas_component_sums = {comp: 0.0 for comp in components_to_show}
+    
+    # Print values for each benchmark
+    for benchmark in ordered_benchmarks:
+        print(f"{benchmark:<15}", end="")
+        for comp in components_to_show:
+            perf_value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            if benchmark in df_measure['Benchmark'].values:
+                meas_value = df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                        (df_measure['Component'] == comp)]['Measurement (ms)'].values[0]
+            else:
+                meas_value = 0.0
+                
+            print(f"{perf_value:<12.3f}{meas_value:<13.3f}", end="")
+            perf_component_sums[comp] += perf_value
+            meas_component_sums[comp] += meas_value
+        print()
+        
+    # Print averages
+    print("-" * (15 + 25 * len(components_to_show)))
+    print(f"{'Average':<15}", end="")
+    for comp in components_to_show:
+        avg_perf = perf_component_sums[comp] / len(ordered_benchmarks)
+        avg_meas = meas_component_sums[comp] / len(ordered_benchmarks)
+        print(f"{avg_perf:<12.3f}{avg_meas:<13.3f}", end="")
+    print()
+    
+    # Print ratio of measurement time to performance time
+    print("-" * (15 + 25 * len(components_to_show)))
+    print(f"{'Ratio (M/P %)':<15}", end="")
+    for comp in components_to_show:
+        avg_perf = perf_component_sums[comp] / len(ordered_benchmarks)
+        avg_meas = meas_component_sums[comp] / len(ordered_benchmarks)
+        if avg_perf > 0:  # Avoid division by zero
+            ratio = (avg_meas / avg_perf) * 100
+        else:
+            ratio = 0
+        print(f"{ratio:<12.1f}{'':<13}", end="")
+    print()
+    print("=" * (15 + 25 * len(components_to_show)))
+    
+    # Print total time for each benchmark
+    print(f"\n=== Total Performance vs Measurement Time per Benchmark (ms) {suffix} ===")
+    print(f"{'Benchmark':<15}{'Performance':<15}{'Measurement':<15}{'Ratio (M/P %)':<15}")
+    print("-" * 60)
+    
+    perf_total_sum = 0
+    meas_total_sum = 0
+    
+    for benchmark in ordered_benchmarks:
+        perf_total = 0
+        meas_total = 0
+        for comp in components_to_show:
+            perf_total += df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            if benchmark in df_measure['Benchmark'].values:
+                meas_total += df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                         (df_measure['Component'] == comp)]['Measurement (ms)'].values[0]
+        
+        perf_total_sum += perf_total
+        meas_total_sum += meas_total
+        
+        # Calculate ratio
+        ratio = (meas_total / perf_total) * 100 if perf_total > 0 else 0
+        
+        print(f"{benchmark:<15}{perf_total:<15.3f}{meas_total:<15.3f}{ratio:<15.1f}")
+    
+    # Print averages
+    perf_avg = perf_total_sum / len(ordered_benchmarks)
+    meas_avg = meas_total_sum / len(ordered_benchmarks)
+    avg_ratio = (meas_avg / perf_avg) * 100 if perf_avg > 0 else 0
+    
+    print("-" * 60)
+    print(f"{'Average':<15}{perf_avg:<15.3f}{meas_avg:<15.3f}{avg_ratio:<15.1f}")
+    print("=" * 60)
+
+def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_categories, output_dir, suffix=''):
+    """Create side-by-side bar chart with measurement times stacked on top of each bar (without y-axis break)"""
+    # Convert to DataFrame in the right format for grouped bar chart
+    data = []
+    measure_data = []
+    components_to_show = ["Zygote creation", "Trustlet creation", "Input copy", "Output copy"]
+    measure_components = ["Zygote", "Trustlet", "Input", "Output"]
+    
+    # Map between display names and internal names
+    display_names = ["Zygote", "Trustlet", "Input", "Output"]
+    component_map = dict(zip(components_to_show, display_names))
+    
+    # Ensure each benchmark has all components
+    for benchmark, components in categories.items():
+        for component_name in components_to_show:
+            value = components.get(component_name, 0)
+            data.append({
+                'Benchmark': benchmark,
+                'Component': component_name,
+                'Time (ms)': value,
+                'Display': component_map[component_name]
+            })
+    
+    # Add measurement data
+    for benchmark, components in measurement_categories.items():
+        for i, component_name in enumerate(measure_components):
+            # Map measurement component to its corresponding regular component
+            corresponding_component = components_to_show[i]
+            value = components.get(component_name, 0)
+            measure_data.append({
+                'Benchmark': benchmark,
+                'Component': corresponding_component,
+                'Measurement (ms)': value
+            })
+    
+    df = pd.DataFrame(data)
+    df_measure = pd.DataFrame(measure_data)
+    
+    # Create the plot
+    figwidth = 3.3  # 3.3 inch for single column
+    figheight = 2.2  # Slightly taller to accommodate the full range
+    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    
+    # Define the benchmark order as requested
+    benchmark_order = [
+        "thumbnailer", 
+        "graph-mst", 
+        "dynamic-html", 
+        "graph-pagerank", 
+        "dna-visualisation", 
+        "graph-bfs", 
+        "compression",
+        'image-recognition'
+    ]
+    
+    # Filter and order the benchmarks according to the specified sequence
+    available_benchmarks = df['Benchmark'].unique()
+    ordered_benchmarks = [b for b in benchmark_order if b in available_benchmarks]
+    
+    # Plot grouped bars
+    x = np.arange(len(ordered_benchmarks))
+    width = 0.2  # width of the bars
+    
+    # Create measurement hatches that are different from main hatches
+    #measurement_hatches = ["xxx", "+++", "///", "ooo"]
+    measurement_hatches = ["xxx", "xxx", "xxx", "xxx"]
+    
+    # First plot the main performance bars
+    for i, component in enumerate(components_to_show):
+        component_data = df[df['Component'] == component]
+        display_name = component_data['Display'].iloc[0] if not component_data.empty else component
+        
+        for j, benchmark in enumerate(ordered_benchmarks):
+            value = component_data[component_data['Benchmark'] == benchmark]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            meas_value = 0
+            if benchmark in df_measure['Benchmark'].values:
+                meas_values = df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                         (df_measure['Component'] == component)]['Measurement (ms)'].values
+                if len(meas_values) > 0:
+                    meas_value = meas_values[0]
+            
+            # Plot the performance bar
+            ax.bar(x[j] + (i - 1.5) * width, value, width,
+                   label=display_name if j == 0 else "",
+                   color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
+            
+            # Add measurement on top if it exists
+            if meas_value > 0:
+                ax.bar(x[j] + (i - 1.5) * width, meas_value, width,
+                       bottom=value,
+                       color=palette[i], linewidth=0, edgecolor='black',
+                       hatch=measurement_hatches[i], alpha=0.7)
+    
+    # Customize the plot
+    ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
+    ax.set_ylabel('Time (ms)', fontsize=TICKS_FONTSIZE)
+    ax.set_xticks(x)
+    ax.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
+    
+    # Title
+    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    
+    # Legend
+    legend = ax.legend(loc='upper left', bbox_to_anchor=(0.01, 0.95),
+                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+    legend.get_frame().set_edgecolor('black')
+    
+    # Add gridlines for better readability
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+    
+    # Tick sizes
+    ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    # Add annotation to explain the hatching
+    fig.text(0.02, 0.02, "Solid: performance time\nHatched: measurement time", 
+             fontsize=ANNOTATION_SIZE, ha="left", va="bottom")
+    
+    # Save plots with suffix
+    output_path = Path(output_dir) / f'runtime_init_with_measurement_no_cutoff{suffix}.pdf'
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
+    crop_pdf(output_path)
+    
+    plt.close()
+    
+    # Print summary table showing both performance and measurement values
+    print(f"\n=== Summary: Performance vs Measurement Times (ms) - No Cutoff {suffix} ===")
+    print(f"{'Benchmark':<15}", end="")
+    for comp in components_to_show:
+        print(f"{component_map[comp]:<25}", end="")
+    print()
+    
+    print(f"{'':<15}", end="")
+    for _ in components_to_show:
+        print(f"{'Perf':<12}{'Measure':<13}", end="")
+    print()
+    
+    # Print dashes for formatting
+    print("-" * (15 + 25 * len(components_to_show)))
+    
+    # Initialize sum for calculating averages
+    perf_component_sums = {comp: 0.0 for comp in components_to_show}
+    meas_component_sums = {comp: 0.0 for comp in components_to_show}
+    
+    # Print values for each benchmark
+    for benchmark in ordered_benchmarks:
+        print(f"{benchmark:<15}", end="")
+        for comp in components_to_show:
+            perf_value = df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            if benchmark in df_measure['Benchmark'].values:
+                meas_value = df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                        (df_measure['Component'] == comp)]['Measurement (ms)'].values[0]
+            else:
+                meas_value = 0.0
+                
+            print(f"{perf_value:<12.3f}{meas_value:<13.3f}", end="")
+            perf_component_sums[comp] += perf_value
+            meas_component_sums[comp] += meas_value
+        print()
+        
+    # Print averages
+    print("-" * (15 + 25 * len(components_to_show)))
+    print(f"{'Average':<15}", end="")
+    for comp in components_to_show:
+        avg_perf = perf_component_sums[comp] / len(ordered_benchmarks)
+        avg_meas = meas_component_sums[comp] / len(ordered_benchmarks)
+        print(f"{avg_perf:<12.3f}{avg_meas:<13.3f}", end="")
+    print()
+    
+    # Print ratio of measurement time to performance time
+    print("-" * (15 + 25 * len(components_to_show)))
+    print(f"{'Ratio (M/P %)':<15}", end="")
+    for comp in components_to_show:
+        avg_perf = perf_component_sums[comp] / len(ordered_benchmarks)
+        avg_meas = meas_component_sums[comp] / len(ordered_benchmarks)
+        if avg_perf > 0:  # Avoid division by zero
+            ratio = (avg_meas / avg_perf) * 100
+        else:
+            ratio = 0
+        print(f"{ratio:<12.1f}{'':<13}", end="")
+    print()
+    print("=" * (15 + 25 * len(components_to_show)))
+    
+    # Print total time for each benchmark
+    print(f"\n=== Total Performance vs Measurement Time per Benchmark (ms) - No Cutoff {suffix} ===")
+    print(f"{'Benchmark':<15}{'Performance':<15}{'Measurement':<15}{'Ratio (M/P %)':<15}")
+    print("-" * 60)
+    
+    perf_total_sum = 0
+    meas_total_sum = 0
+    
+    for benchmark in ordered_benchmarks:
+        perf_total = 0
+        meas_total = 0
+        for comp in components_to_show:
+            perf_total += df[(df['Benchmark'] == benchmark) & (df['Component'] == comp)]['Time (ms)'].values[0]
+            
+            # Get measurement value if available
+            if benchmark in df_measure['Benchmark'].values:
+                meas_total += df_measure[(df_measure['Benchmark'] == benchmark) & 
+                                         (df_measure['Component'] == comp)]['Measurement (ms)'].values[0]
+        
+        perf_total_sum += perf_total
+        meas_total_sum += meas_total
+        
+        # Calculate ratio
+        ratio = (meas_total / perf_total) * 100 if perf_total > 0 else 0
+        
+        print(f"{benchmark:<15}{perf_total:<15.3f}{meas_total:<15.3f}{ratio:<15.1f}")
+    
+    # Print averages
+    perf_avg = perf_total_sum / len(ordered_benchmarks)
+    meas_avg = meas_total_sum / len(ordered_benchmarks)
+    avg_ratio = (meas_avg / perf_avg) * 100 if perf_avg > 0 else 0
+    
+    print("-" * 60)
+    print(f"{'Average':<15}{perf_avg:<15.3f}{meas_avg:<15.3f}{avg_ratio:<15.1f}")
+    print("=" * 60)
+
 def main():
     parser = argparse.ArgumentParser(description='Generate stacked bar charts from boot time data')
     parser.add_argument('input_file', type=str, help='Path to the input file')
@@ -834,8 +1385,9 @@ def main():
         
         # Store the all_simple categories for final summary
         all_simple_categories = None
+        measurement_categories = None
 
-        for type_ in ["all", "all_simple", "zygote", "trustlet", "invoke", "zygote_full",
+        for type_ in ["all", "all_simple", "all_simple_measure", "zygote", "trustlet", "invoke", "zygote_full",
                       "invoke_full", "datacopy", "measurement"]:
             categories = calculate_categories(raw_data, type_=type_, alloc=alloc, cow=cow)
             
@@ -848,9 +1400,8 @@ def main():
                 all_simple_categories = categories
             
             # Create plots for all categories
-            #create_cutoff_plot(categories, args.output_dir, suffix=suffix)
-            create_plot(categories, args.output_dir, type_=type_, suffix=suffix)
-            create_plot(categories, args.output_dir, 'log', type_=type_, suffix=suffix)
+            #create_plot(categories, args.output_dir, type_=type_, suffix=suffix)
+            #create_plot(categories, args.output_dir, 'log', type_=type_, suffix=suffix)
             
             # Create the side-by-side plot for all_simple
             if type_ == "all_simple":
@@ -859,6 +1410,12 @@ def main():
             # Create the side-by-side plot for measurement
             if type_ == "measurement":
                 create_measurement_side_by_side_plot(categories, args.output_dir, suffix=suffix)
+                measurement_categories = categories
+
+        # Only call this function if both category dictionaries are available
+        if all_simple_categories is not None and measurement_categories is not None:
+            create_side_by_side_plot_with_measurement(all_simple_categories, measurement_categories, args.output_dir, suffix=suffix)
+            create_side_by_side_plot_with_measurement_no_cutoff(all_simple_categories, measurement_categories, args.output_dir, suffix=suffix)
 
         # Print plots saved message
         print(f"Plots for {alloc or 'all'} + {cow or 'all'} saved in {args.output_dir}")
