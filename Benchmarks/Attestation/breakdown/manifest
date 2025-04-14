@@ -1,0 +1,34 @@
+[libos]
+entrypoint = "/python/python"
+
+[loader]
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+log_level = "debug"
+in_memory = true
+insecure__disable_aslr = true
+argv = ["python3", "-c", """
+import ctypes
+import pickle
+from ctypes import CDLL
+lib = CDLL("/lib/libcpuid.so")
+lib.finalize_zygote()
+
+while True:
+  lib.notify_monitor()
+"""]
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib"
+MINIO_ADDRESS = { value = "{{ minio_address }}" }
+MINIO_ACCESS_KEY = { value = "{{ minio_access_key }}" }
+MINIO_SECRET_KEY = { value = "{{ minio_secret_key }}" }
+PYTHONPATH = "/python/stdlib.zip:/dependencies"
+OMP_NUM_THREADS = "1"
+
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+  { type = "pseudo", path = "/python", uri = "python" },
+  { type = "pseudo", path = "/dependencies", uri = "dependencies" },
+]
