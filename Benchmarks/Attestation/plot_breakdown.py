@@ -22,6 +22,11 @@ def get_monitor_measurement_time(csv_path):
 
     raise ValueError(f"measure_monitor_cold not found in {csv_path}")
 
+def get_kernel_measurement_time(csv_path):
+    df = pd.read_csv(csv_path)
+    kernel_measure_time = df[df['file'] == 'kernel']['time'].mean()
+    return kernel_measure_time
+
 
 def read_breakdown_csv(csv_path):
     """
@@ -116,7 +121,7 @@ def create_cutoff_plot(averages, output_dir):
     #categories = ['Monitor', 'Zygote', 'Trustlet', 'Input', 'Output']
     #size_annotations = ['', '(60MB)', '(4KB)', '(4KB)', '(4KB)']
     categories = ['Kernel', 'Monitor', 'Zygote', 'Trustlet', 'Input']
-    size_annotations = ['', '', '(60MB)', '(4KB)', '(4KB)']
+    size_annotations = ['(60MB)', '(SNP report)', '(60MB)', '(4KB)', '(4KB)']
     df = pd.DataFrame({'Value': [averages[cat] for cat in categories]}, index=categories)
     
     # Convert nanoseconds to milliseconds
@@ -163,11 +168,10 @@ def create_cutoff_plot(averages, output_dir):
     # Add size annotations below labels
     for i, category in enumerate(categories):
         # Add the size annotation below each category label
-        if i > 0:  # Skip Monitor (no size annotation needed)
-            ax2.text(i, -2.0, size_annotations[i], ha='center', va='top', fontsize=LEGEND_FONTSIZE-2)
+        ax2.text(i, -2.0, size_annotations[i], ha='center', va='top', fontsize=LEGEND_FONTSIZE-2)
     
     # Add y-axis label in the middle
-    create_annotation_y_label(ax2, 'Time (ms)', position=(0.2, 6.5))
+    create_annotation_y_label(ax2, 'Time (ms)', position=(0.3, 6.5))
     
     # Save plots
     output_dir = Path(output_dir)
@@ -181,6 +185,7 @@ def create_cutoff_plot(averages, output_dir):
 def main():
     parser = argparse.ArgumentParser(description='Generate breakdown bar charts from CSV data')
     parser.add_argument('--csv_file', type=str, help='Path to the CSV file of the attestation microbenchmark', default="./results.csv")
+    parser.add_argument('--kernel_csv_file', type=str, help='Path to the CSV file of the attestation microbenchmark', default="./breakdown/cvm/result.csv")
     parser.add_argument('--breakdown_csv_file', type=str, help='Path to the CSV file of the breakdown attestation microbenchmark', default="./breakdown/result.csv")
     parser.add_argument('--output-dir', type=str, default='output', help='Output directory')
     
@@ -193,11 +198,13 @@ def main():
     # Get the monitor measurement time
     monitor_measure_time = get_monitor_measurement_time(args.csv_file)
     print(f"Monitor measurement time: {monitor_measure_time} ns ({monitor_measure_time/1_000_000:.2f} ms)")
+    kernel_measure_time = get_kernel_measurement_time(args.kernel_csv_file)
+    print(f"Kernel measurement time: {kernel_measure_time} ns ({kernel_measure_time/1_000_000:.2f} ms)")
     
     # Read breakdown data
     averages = read_breakdown_csv(args.breakdown_csv_file)
     averages["Monitor"] = monitor_measure_time
-    averages["Kernel"] = 1000*1000*1000
+    averages["Kernel"] = kernel_measure_time
     print("Average measurements:")
     for name, value in averages.items():
         print(f"  {name}: {value} ns ({value/1_000_000:.2f} ms)")
