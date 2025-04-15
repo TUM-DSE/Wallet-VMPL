@@ -33,7 +33,7 @@ BENCHMARKS = [
     '311.compression',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
     '504.dna-visualisation',
-    '411.image-recognition'
+    #'411.image-recognition'
 ]
 
 def crop_pdf(input_path):
@@ -81,7 +81,7 @@ def plot_memory_usage(csv_path="memory.csv"):
         '504.dna-visualisation': 4,
         '503.graph-bfs': 5,
         '311.compression': 6,
-        '411.image-recognition': 7,
+        #'411.image-recognition': 7,
     }
     
     # Create an order column and sort by it

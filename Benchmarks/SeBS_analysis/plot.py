@@ -44,7 +44,7 @@ BENCHMARKS = [
     '311.compression',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
     '504.dna-visualisation',
-    '411.image-recognition'
+    #'411.image-recognition'
 ]
 palette = sns.color_palette("pastel", n_colors=len(VARIANTS))
 hatches = ["", "//", "xx", "\\\\", ".."]
@@ -1240,7 +1240,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        'image-recognition'
+        #'image-recognition'
     ]
     
     # Create mapping from benchmark name to its index in the original list
@@ -1362,7 +1362,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
             ax.set_ylim(bottom=0)
     
     # Set titles for each subplot
-    ax_left.set_title('(a) Cold and Lukewarm Start', fontsize=TITLE_FONTSIZE)
+    ax_left.set_title('(a) Cold and Lukewarm Starts', fontsize=TITLE_FONTSIZE)
     ax_right.set_title('(b) Warm Start', fontsize=TITLE_FONTSIZE)
     
     # Add caption names below each subplot

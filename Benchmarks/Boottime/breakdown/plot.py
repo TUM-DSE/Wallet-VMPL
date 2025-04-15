@@ -88,7 +88,7 @@ def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
     '504.dna-visualisation',
     '503.graph-bfs',
     '311.compression',
-    '411.image-recognition'
+    #'411.image-recognition'
     ]
     
     # Filter by alloc and cow if specified
@@ -477,7 +477,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        'image-recognition'
+        #'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -673,7 +673,7 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        'image-recognition'
+        #'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -898,7 +898,7 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        'image-recognition'
+        #'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -1179,7 +1179,7 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        'image-recognition'
+        #'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -1448,7 +1448,7 @@ def main():
                 "dna-visualisation", 
                 "graph-bfs", 
                 "compression",
-                'image-recognition'
+                #'image-recognition'
             ]
             
             # Filter and order benchmarks
