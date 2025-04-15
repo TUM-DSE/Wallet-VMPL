@@ -66,7 +66,35 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
                               textcoords='offset points',
                               fontsize=ANNOTATION_SIZE)
                               # arrowprops=dict(arrowstyle='->', color='black', connectionstyle='arc3'))
-                    
+    
+    # --- Add annotation for the last point of the CVM variant ---
+    if 'cvm' in data:
+        cvm_functions = data['cvm']['functions']
+        cvm_memory = data['cvm']['memory']
+        # Ensure data is sorted by number of functions
+        sorted_cvm = sorted(zip(cvm_functions, cvm_memory))
+        last_func, last_mem = sorted_cvm[-1]
+
+        # Annotate below the data point with an arrow
+        ax.annotate(
+            "HW-imposed\nCVM limit",
+            xy=(last_func, last_mem),
+            xytext=(10, -10),  # 40 points below the data point
+            textcoords='offset points',
+            ha='center',
+            va='top',
+            fontsize=ANNOTATION_SIZE,
+            # bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="black", lw=0.5, alpha=0.7),
+            arrowprops=dict(
+                arrowstyle="->",
+                color="black",
+                lw=1,
+                shrinkA=0,
+                shrinkB=2,
+                connectionstyle="arc3,rad=0.2"
+            )
+        )
+                  
     # Apply consistent styling
     apply_consistent_style(ax, 
                          title=LOWER_BETTER_TITLE,
