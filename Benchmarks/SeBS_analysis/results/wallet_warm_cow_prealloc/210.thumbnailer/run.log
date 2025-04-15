@@ -1,14 +1,21 @@
-17:13:44,809 INFO SeBS-6217: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
-17:13:44,886 INFO WalletWarm-94c8: Generating unique resource name walletwarm-53027d54
-17:13:44,889 INFO minio.Minio-866a: Initialize a new bucket for benchmarks
-17:13:44,895 INFO minio.Minio-866a: Created bucket sebs-benchmarks-walletwarm-53027d54
-17:13:44,905 INFO Benchmark-57d9: Building benchmark 210.thumbnailer. Reason: no cached code package.
-17:13:45,124 INFO Benchmark-57d9: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:13:45,199 INFO WalletWarm-94c8: Function size 0.000005 MB
-17:13:45,240 INFO Benchmark-57d9: Created code package (source hash: de4ea5bd9ade694cacda06f879b30898), for run on wallet_warm with python:3.11
-17:13:45,576 INFO WalletWarm-94c8: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
-17:13:46,539 INFO Experiment.PerfCost-5944: Begin experiment
-17:13:46,539 INFO Experiment.PerfCost-5944: Begin sequential experiments
-17:13:48,878 INFO WalletWarm.WalletFunction-4630: Stopping function
-17:13:48,879 INFO WalletWarm.WalletFunction-4630: Function stopped succesfully
-17:13:48,893 INFO WalletWarm.WalletFunction-4630: Not stopping function as it was not running
+16:22:44,825 INFO SeBS-88fd: Created experiment output at /root/Benchmarks/SeBS/210.thumbnailer
+16:22:44,897 INFO WalletWarm-ab83: Generating unique resource name walletwarm-dcc4536c
+16:22:44,900 INFO minio.Minio-00c7: Initialize a new bucket for benchmarks
+16:22:44,905 INFO minio.Minio-00c7: Created bucket sebs-benchmarks-walletwarm-dcc4536c
+16:22:44,914 INFO Benchmark-caf5: Building benchmark 210.thumbnailer. Reason: no cached code package.
+16:22:45,130 INFO Benchmark-caf5: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:22:45,209 INFO WalletWarm-ab83: Function size 0.000005 MB
+16:22:45,253 INFO Benchmark-caf5: Created code package (source hash: de4ea5bd9ade694cacda06f879b30898), for run on wallet_warm with python:3.11
+16:22:45,634 INFO WalletWarm-ab83: Creating new function! Reason: function 210.thumbnailer-python-3.11 not found in cache.
+16:22:46,653 INFO Experiment.PerfCost-8c06: Begin experiment
+16:22:46,654 INFO Experiment.PerfCost-8c06: Begin sequential experiments
+16:22:55,337 INFO Experiment.PerfCost-8c06: Processed 1 samples out of 5, 0 errors
+16:23:06,99 INFO Experiment.PerfCost-8c06: Processed 2 samples out of 5, 0 errors
+16:23:16,850 INFO Experiment.PerfCost-8c06: Processed 3 samples out of 5, 0 errors
+16:23:27,598 INFO Experiment.PerfCost-8c06: Processed 4 samples out of 5, 0 errors
+16:23:38,348 INFO Experiment.PerfCost-8c06: Processed 5 samples out of 5, 0 errors
+16:23:43,357 INFO Experiment.PerfCost-8c06: Mean 741.833 [ms], median 739.507 [ms], std 4.601965015077823, CV 0.6203505391480055
+16:23:43,363 INFO Experiment.PerfCost-8c06: Parametric CI (Student's t-distribution) 0.95 from 735.4444483797978 to 748.2215516202021, within 0.8611846089621491% of mean
+16:23:43,365 INFO Experiment.PerfCost-8c06: Parametric CI (Student's t-distribution) 0.99 from 731.2390582378224 to 752.4269417621775, within 1.4280763678857054% of mean
+16:23:43,368 INFO WalletWarm.WalletFunction-9551: Stopping function
+16:23:43,371 INFO WalletWarm.WalletFunction-9551: Function stopped succesfully

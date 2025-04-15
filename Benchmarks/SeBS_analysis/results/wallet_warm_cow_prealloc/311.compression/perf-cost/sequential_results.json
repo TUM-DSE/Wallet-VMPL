@@ -1,27 +1,27 @@
 {
   "_invocations": {
     "311.compression-python-3.11": {
-      "1d620bf9-e58a-4002-a650-243b4b4341dd": {
+      "acbf04df-48c6-465b-bb66-46f636ca949f": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744392117.091572",
-          "end": "1744392118.423306",
+          "begin": "1744737222.374725",
+          "end": "1744737223.675879",
           "is_cold": false,
-          "request_id": "1d620bf9-e58a-4002-a650-243b4b4341dd",
+          "request_id": "acbf04df-48c6-465b-bb66-46f636ca949f",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 1349698180.0,
+                "compute_time": 1275775960.0,
                 "download_size": 10063841,
-                "upload_size": 9326900
+                "upload_size": 9326899
               },
               "result": {
-                "bucket": "sebs-benchmarks-walletwarm-4eca3c3a",
-                "key": "311.compression-0-output/acmart-master.7c523a9c.zip"
+                "bucket": "sebs-benchmarks-walletwarm-e0816eb6",
+                "key": "311.compression-0-output/acmart-master.d6966d18.zip"
               }
             }
           }
@@ -30,42 +30,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "1d620bf9-e58a-4002-a650-243b4b4341dd",
+        "request_id": "acbf04df-48c6-465b-bb66-46f636ca949f",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 1331734,
-          "client": 1487437,
-          "client_begin": "2025-04-11 17:21:56.874302",
-          "client_end": "2025-04-11 17:21:58.361739",
+          "benchmark": 1301154,
+          "client": 1414669,
+          "client_begin": "2025-04-15 17:13:42.137219",
+          "client_end": "2025-04-15 17:13:43.551888",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "5a4e7552-42a4-4f40-bb14-653360e7624d": {
+      "af6a2a40-9b0a-4896-9b20-4dd2ec03a5d8": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744392141.032036",
-          "end": "1744392142.328044",
+          "begin": "1744737233.804693",
+          "end": "1744737235.181636",
           "is_cold": false,
-          "request_id": "5a4e7552-42a4-4f40-bb14-653360e7624d",
+          "request_id": "af6a2a40-9b0a-4896-9b20-4dd2ec03a5d8",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 1253251860.0,
+                "compute_time": 1292072640.0,
                 "download_size": 10063841,
                 "upload_size": 9326900
               },
               "result": {
-                "bucket": "sebs-benchmarks-walletwarm-4eca3c3a",
-                "key": "311.compression-0-output/acmart-master.410dd103.zip"
+                "bucket": "sebs-benchmarks-walletwarm-e0816eb6",
+                "key": "311.compression-0-output/acmart-master.f89117a5.zip"
               }
             }
           }
@@ -74,86 +74,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "5a4e7552-42a4-4f40-bb14-653360e7624d",
-        "stats": {
-          "cold_start": true,
-          "failure": false,
-          "memory_used": null
-        },
-        "times": {
-          "benchmark": 1296008,
-          "client": 3498608,
-          "client_begin": "2025-04-11 17:22:18.766935",
-          "client_end": "2025-04-11 17:22:22.265543",
-          "http_startup": 0,
-          "initialization": 0
-        }
-      },
-      "94865005-a208-47fa-a8aa-62fb25e3a365": {
-        "billing": {
-          "_billed_time": null,
-          "_gb_seconds": 0,
-          "_memory": null
-        },
-        "output": {
-          "begin": "1744392081.565027",
-          "end": "1744392082.865120",
-          "is_cold": false,
-          "request_id": "94865005-a208-47fa-a8aa-62fb25e3a365",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 1264641300.0,
-                "download_size": 10063841,
-                "upload_size": 9326900
-              },
-              "result": {
-                "bucket": "sebs-benchmarks-walletwarm-4eca3c3a",
-                "key": "311.compression-0-output/acmart-master.7e59c4b1.zip"
-              }
-            }
-          }
-        },
-        "provider_times": {
-          "execution": 0,
-          "initialization": 0
-        },
-        "request_id": "94865005-a208-47fa-a8aa-62fb25e3a365",
+        "request_id": "af6a2a40-9b0a-4896-9b20-4dd2ec03a5d8",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 1300093,
-          "client": 1458887,
-          "client_begin": "2025-04-11 17:21:21.338850",
-          "client_end": "2025-04-11 17:21:22.797737",
+          "benchmark": 1376943,
+          "client": 1494661,
+          "client_begin": "2025-04-15 17:13:53.563369",
+          "client_end": "2025-04-15 17:13:55.058030",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "a368e7e0-5ab3-460b-8187-ee002277bf18": {
+      "dce7361e-6898-4285-80b4-9b330e7db7d0": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744392105.548407",
-          "end": "1744392106.970566",
+          "begin": "1744737199.428684",
+          "end": "1744737200.771766",
           "is_cold": false,
-          "request_id": "a368e7e0-5ab3-460b-8187-ee002277bf18",
+          "request_id": "dce7361e-6898-4285-80b4-9b330e7db7d0",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 1357166220.0,
+                "compute_time": 1364162040.0,
                 "download_size": 10063841,
                 "upload_size": 9326900
               },
               "result": {
-                "bucket": "sebs-benchmarks-walletwarm-4eca3c3a",
-                "key": "311.compression-0-output/acmart-master.cdf42d80.zip"
+                "bucket": "sebs-benchmarks-walletwarm-e0816eb6",
+                "key": "311.compression-0-output/acmart-master.736fe476.zip"
               }
             }
           }
@@ -162,42 +118,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "a368e7e0-5ab3-460b-8187-ee002277bf18",
+        "request_id": "dce7361e-6898-4285-80b4-9b330e7db7d0",
         "stats": {
-          "cold_start": true,
+          "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 1422159,
-          "client": 3649938,
-          "client_begin": "2025-04-11 17:21:43.212958",
-          "client_end": "2025-04-11 17:21:46.862896",
+          "benchmark": 1343082,
+          "client": 1459640,
+          "client_begin": "2025-04-15 17:13:19.198359",
+          "client_end": "2025-04-15 17:13:20.657999",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "fff19516-df41-4d08-b238-69aea9d8f80d": {
+      "e4d6c63e-4632-40a0-bff5-bc3dc873c6dc": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744392070.011602",
-          "end": "1744392071.400382",
+          "begin": "1744737210.894474",
+          "end": "1744737212.247200",
           "is_cold": false,
-          "request_id": "fff19516-df41-4d08-b238-69aea9d8f80d",
+          "request_id": "e4d6c63e-4632-40a0-bff5-bc3dc873c6dc",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 1389652320.0,
+                "compute_time": 1360922240.0,
                 "download_size": 10063841,
                 "upload_size": 9326900
               },
               "result": {
-                "bucket": "sebs-benchmarks-walletwarm-4eca3c3a",
-                "key": "311.compression-0-output/acmart-master.23948330.zip"
+                "bucket": "sebs-benchmarks-walletwarm-e0816eb6",
+                "key": "311.compression-0-output/acmart-master.25f8ea53.zip"
               }
             }
           }
@@ -206,17 +162,61 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "fff19516-df41-4d08-b238-69aea9d8f80d",
+        "request_id": "e4d6c63e-4632-40a0-bff5-bc3dc873c6dc",
         "stats": {
-          "cold_start": true,
+          "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 1388780,
-          "client": 3574872,
-          "client_begin": "2025-04-11 17:21:07.752611",
-          "client_end": "2025-04-11 17:21:11.327483",
+          "benchmark": 1352726,
+          "client": 1458763,
+          "client_begin": "2025-04-15 17:13:30.667155",
+          "client_end": "2025-04-15 17:13:32.125918",
+          "http_startup": 0,
+          "initialization": 0
+        }
+      },
+      "f3e88eec-5b31-4b0f-b0ab-af1b196b5e27": {
+        "billing": {
+          "_billed_time": null,
+          "_gb_seconds": 0,
+          "_memory": null
+        },
+        "output": {
+          "begin": "1744737187.990865",
+          "end": "1744737189.307136",
+          "is_cold": false,
+          "request_id": "f3e88eec-5b31-4b0f-b0ab-af1b196b5e27",
+          "result": {
+            "output": {
+              "measurement": {
+                "compute_time": 1278821200.0,
+                "download_size": 10063841,
+                "upload_size": 9326900
+              },
+              "result": {
+                "bucket": "sebs-benchmarks-walletwarm-e0816eb6",
+                "key": "311.compression-0-output/acmart-master.c50df717.zip"
+              }
+            }
+          }
+        },
+        "provider_times": {
+          "execution": 0,
+          "initialization": 0
+        },
+        "request_id": "f3e88eec-5b31-4b0f-b0ab-af1b196b5e27",
+        "stats": {
+          "cold_start": false,
+          "failure": false,
+          "memory_used": null
+        },
+        "times": {
+          "benchmark": 1316271,
+          "client": 1425422,
+          "client_begin": "2025-04-15 17:13:07.761559",
+          "client_end": "2025-04-15 17:13:09.186981",
           "http_startup": 0,
           "initialization": 0
         }
@@ -224,7 +224,7 @@
     }
   },
   "_metrics": {},
-  "begin_time": 1744392048.788357,
+  "begin_time": 1744737179.208102,
   "config": {
     "deployment": {
       "name": "wallet_warm"
@@ -252,16 +252,12 @@
       "update_storage": false
     }
   },
-  "end_time": 1744392147.271526,
+  "end_time": 1744737240.063949,
   "result_bucket": null,
   "statistics": {
-    "cold_count": 3,
-    "failures": [
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/311.compression/wallet_warm/python/3.11/code/server_warm.py&quot;, line 66, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/311.compression/wallet_warm/python/3.11/code/server_warm.py&quot;, line 66, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/311.compression/wallet_warm/python/3.11/code/server_warm.py&quot;, line 66, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n"
-    ],
-    "failures_count": 3,
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
     "incorrect": [],
     "incorrect_count": 0,
     "samples_generated": 5

@@ -1,3 +1,3 @@
-18:01:47,685 INFO SeBS-dcff: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
-18:01:47,699 INFO WalletWarm-cf4b: Using existing deployment walletwarm-fff95360 that matches prefix walletwarm!
-18:01:47,704 INFO Experiment.PerfCost-6808: Processing data in /root/Benchmarks/SeBS/504.dna-visualisation/perf-cost/sequential_results.json
+16:32:54,705 INFO SeBS-14c0: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+16:32:54,718 INFO WalletWarm-3de0: Using existing deployment walletwarm-fb722658 that matches prefix walletwarm!
+16:32:54,722 INFO Experiment.PerfCost-8dc7: Processing data in /root/Benchmarks/SeBS/504.dna-visualisation/perf-cost/sequential_results.json

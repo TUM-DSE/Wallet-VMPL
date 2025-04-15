@@ -1,14 +1,21 @@
-18:01:31,976 INFO SeBS-5b58: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
-18:01:32,52 INFO WalletWarm-3b92: Generating unique resource name walletwarm-fff95360
-18:01:32,54 INFO minio.Minio-e6bb: Initialize a new bucket for benchmarks
-18:01:32,58 INFO minio.Minio-e6bb: Created bucket sebs-benchmarks-walletwarm-fff95360
-18:01:32,219 INFO Benchmark-9064: Building benchmark 504.dna-visualisation. Reason: no cached code package.
-18:01:32,310 INFO Benchmark-9064: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-18:01:32,339 INFO WalletWarm-3b92: Function size 0.000005 MB
-18:01:32,363 INFO Benchmark-9064: Created code package (source hash: 23d725ddb360885101d4ef8bc9ec9dc1), for run on wallet_warm with python:3.11
-18:01:32,549 INFO WalletWarm-3b92: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
-18:01:33,259 INFO Experiment.PerfCost-41e0: Begin experiment
-18:01:33,259 INFO Experiment.PerfCost-41e0: Begin sequential experiments
-18:01:38,232 INFO WalletWarm.WalletFunction-e568: Stopping function
-18:01:38,233 INFO WalletWarm.WalletFunction-e568: Function stopped succesfully
-18:01:38,246 INFO WalletWarm.WalletFunction-e568: Not stopping function as it was not running
+16:30:45,787 INFO SeBS-3205: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+16:30:45,865 INFO WalletWarm-eaf0: Generating unique resource name walletwarm-fb722658
+16:30:45,867 INFO minio.Minio-c71e: Initialize a new bucket for benchmarks
+16:30:45,872 INFO minio.Minio-c71e: Created bucket sebs-benchmarks-walletwarm-fb722658
+16:30:46,42 INFO Benchmark-cd49: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+16:30:46,141 INFO Benchmark-cd49: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+16:30:46,172 INFO WalletWarm-eaf0: Function size 0.000005 MB
+16:30:46,197 INFO Benchmark-cd49: Created code package (source hash: 23d725ddb360885101d4ef8bc9ec9dc1), for run on wallet_warm with python:3.11
+16:30:46,382 INFO WalletWarm-eaf0: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+16:30:47,90 INFO Experiment.PerfCost-f95e: Begin experiment
+16:30:47,90 INFO Experiment.PerfCost-f95e: Begin sequential experiments
+16:31:16,768 INFO Experiment.PerfCost-f95e: Processed 1 samples out of 5, 0 errors
+16:31:37,539 INFO Experiment.PerfCost-f95e: Processed 2 samples out of 5, 0 errors
+16:31:58,361 INFO Experiment.PerfCost-f95e: Processed 3 samples out of 5, 0 errors
+16:32:19,160 INFO Experiment.PerfCost-f95e: Processed 4 samples out of 5, 0 errors
+16:32:39,999 INFO Experiment.PerfCost-f95e: Processed 5 samples out of 5, 0 errors
+16:32:45,6 INFO Experiment.PerfCost-f95e: Mean 10792.270200000003 [ms], median 10788.018 [ms], std 23.90763812173863, CV 0.22152557041926751
+16:32:45,12 INFO Experiment.PerfCost-f95e: Parametric CI (Student's t-distribution) 0.95 from 10759.081077580033 to 10825.459322419973, within 0.3075267928333545% of mean
+16:32:45,14 INFO Experiment.PerfCost-f95e: Parametric CI (Student's t-distribution) 0.99 from 10737.23368296802 to 10847.306717031985, within 0.5099623713274146% of mean
+16:32:45,18 INFO WalletWarm.WalletFunction-466c: Stopping function
+16:32:45,24 INFO WalletWarm.WalletFunction-466c: Function stopped succesfully
