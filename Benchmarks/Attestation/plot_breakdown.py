@@ -25,7 +25,8 @@ def get_monitor_measurement_time(csv_path):
 def get_kernel_measurement_time(csv_path):
     df = pd.read_csv(csv_path)
     kernel_measure_time = df[df['file'] == 'kernel']['time'].mean()
-    return kernel_measure_time
+    kernel_size = df[df['file'] == 'kernel']['size'].mean()
+    return kernel_measure_time, kernel_size
 
 
 def read_breakdown_csv(csv_path):
@@ -114,14 +115,14 @@ def create_breakdown_plot(averages, monitor_measure_time, output_path_base):
     
     return fig
 
-def create_cutoff_plot(averages, output_dir):
+def create_cutoff_plot(averages, output_dir, kernel_size):
     """Create bar chart with broken y-axis showing individual measurement components"""
 
     # Convert dictionary to DataFrame format with the right structure
     #categories = ['Monitor', 'Zygote', 'Trustlet', 'Input', 'Output']
     #size_annotations = ['', '(60MB)', '(4KB)', '(4KB)', '(4KB)']
     categories = ['Kernel', 'Monitor', 'Zygote', 'Trustlet', 'Input']
-    size_annotations = ['(60MB)', '(SNP report)', '(60MB)', '(4KB)', '(4KB)']
+    size_annotations = [f'({kernel_size/1_000_000:.0f}MB)', '(SNP report)', '(60MB)', '(4KB)', '(4KB)']
     df = pd.DataFrame({'Value': [averages[cat] for cat in categories]}, index=categories)
     
     # Convert nanoseconds to milliseconds
@@ -198,7 +199,7 @@ def main():
     # Get the monitor measurement time
     monitor_measure_time = get_monitor_measurement_time(args.csv_file)
     print(f"Monitor measurement time: {monitor_measure_time} ns ({monitor_measure_time/1_000_000:.2f} ms)")
-    kernel_measure_time = get_kernel_measurement_time(args.kernel_csv_file)
+    kernel_measure_time, kernel_size = get_kernel_measurement_time(args.kernel_csv_file)
     print(f"Kernel measurement time: {kernel_measure_time} ns ({kernel_measure_time/1_000_000:.2f} ms)")
     
     # Read breakdown data
@@ -214,7 +215,7 @@ def main():
     create_breakdown_plot(averages, monitor_measure_time, regular_output_path_base)
     
     # Create and save the cut-off plot (both PNG and PDF)
-    create_cutoff_plot(averages, output_dir)
+    create_cutoff_plot(averages, output_dir, kernel_size)
 
 if __name__ == "__main__":
     main()
