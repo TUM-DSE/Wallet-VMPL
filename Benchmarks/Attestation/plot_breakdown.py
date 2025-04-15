@@ -113,7 +113,10 @@ def create_cutoff_plot(averages, output_dir):
     """Create bar chart with broken y-axis showing individual measurement components"""
 
     # Convert dictionary to DataFrame format with the right structure
-    categories = ['Monitor', 'Zygote', 'Trustlet', 'Input', 'Output']
+    #categories = ['Monitor', 'Zygote', 'Trustlet', 'Input', 'Output']
+    #size_annotations = ['', '(60MB)', '(4KB)', '(4KB)', '(4KB)']
+    categories = ['Kernel', 'Monitor', 'Zygote', 'Trustlet', 'Input']
+    size_annotations = ['', '', '(60MB)', '(4KB)', '(4KB)']
     df = pd.DataFrame({'Value': [averages[cat] for cat in categories]}, index=categories)
     
     # Convert nanoseconds to milliseconds
@@ -158,7 +161,6 @@ def create_cutoff_plot(averages, output_dir):
     plt.xticks(rotation=0)
     
     # Add size annotations below labels
-    size_annotations = ['', '(60MB)', '(4KB)', '(4KB)', '(4KB)']
     for i, category in enumerate(categories):
         # Add the size annotation below each category label
         if i > 0:  # Skip Monitor (no size annotation needed)
@@ -195,6 +197,7 @@ def main():
     # Read breakdown data
     averages = read_breakdown_csv(args.breakdown_csv_file)
     averages["Monitor"] = monitor_measure_time
+    averages["Kernel"] = 1000*1000*1000
     print("Average measurements:")
     for name, value in averages.items():
         print(f"  {name}: {value} ns ({value/1_000_000:.2f} ms)")
