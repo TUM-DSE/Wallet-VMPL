@@ -6,7 +6,9 @@
 #include <unistd.h>
 #include <time.h>
 #include "../../../../module/include/my_crypto.h"
-//gcc -m=native -O3 measure.c -L./ -l:libmy_crypto.a
+
+size_t file_size;
+
 uint64_t measure(const char* file){
 
     int fd = open(file, O_RDONLY);
@@ -14,6 +16,7 @@ uint64_t measure(const char* file){
 
     fseek(f, 0L, SEEK_END);
     size_t size = ftell(f);
+    file_size = size;
     rewind(f);
     uint8_t* buf = malloc(size);
 
@@ -34,10 +37,10 @@ uint64_t measure(const char* file){
 
 int main() {
     FILE* f = fopen("result.csv","w");
-    const char* csv_header = "file,time\n";
+    const char* csv_header = "file,size,time\n";
     fprintf(f,csv_header);
     for(int i = 0; i < 10; i++) {
         uint64_t time = measure("../../../linux/vmlinux");
-	fprintf(f,"kernel,%ld\n",time);
+	fprintf(f,"kernel,%ld,%ld\n",file_size,time);
     }
 }
