@@ -83,7 +83,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
             textcoords='offset points',
             ha='center',
             va='top',
-            fontsize=ANNOTATION_SIZE,
+            fontsize=LEGEND_FONTSIZE,
             # bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="black", lw=0.5, alpha=0.7),
             arrowprops=dict(
                 arrowstyle="->",
