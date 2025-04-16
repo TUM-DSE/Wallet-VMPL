@@ -127,6 +127,84 @@ def create_standardized_plot(ax_width=AX_WIDTH, ax_height=AX_HEIGHT,
     
     return fig, ax
 
+def create_standardized_subplots(nrows=1, ncols=2, ax_width=AX_WIDTH, ax_height=AX_HEIGHT, 
+                              left_margin=AX_LEFT_MARGIN, right_margin=AX_RIGHT_MARGIN, 
+                              top_margin=AX_TOP_MARGIN, bottom_margin=AX_BOTTOM_MARGIN,
+                              wspace=0.4, hspace=0.3):
+    """
+    Create a figure with standardized subplots.
+    
+    Parameters:
+    -----------
+    nrows : int
+        Number of subplot rows
+    ncols : int
+        Number of subplot columns
+    ax_width : float
+        Width of each subplot axis in inches
+    ax_height : float
+        Height of each subplot axis in inches
+    left_margin : float
+        Left margin in inches (for labels)
+    right_margin : float
+        Right margin in inches
+    top_margin : float
+        Top margin in inches
+    bottom_margin : float
+        Bottom margin in inches (for labels)
+    wspace : float
+        Width spacing between subplots as a fraction of subplot width
+    hspace : float
+        Height spacing between subplots as a fraction of subplot height
+    
+    Returns:
+    --------
+    fig : matplotlib Figure
+    axes : matplotlib Axes array (can be 1D or 2D depending on nrows and ncols)
+    """
+    # Calculate total figure size from axis dimensions, margins, and spacing
+    fig_width = left_margin + (ax_width * ncols) + (wspace * ax_width * (ncols - 1)) + right_margin
+    fig_height = bottom_margin + (ax_height * nrows) + (hspace * ax_height * (nrows - 1)) + top_margin
+    
+    # Create figure
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    
+    # Calculate subplot params as fractions of figure dimensions
+    left = left_margin / fig_width
+    bottom = bottom_margin / fig_height
+    right = 1 - (right_margin / fig_width)
+    top = 1 - (top_margin / fig_height)
+    
+    # Set up the subplot layout parameters
+    plt.subplots_adjust(left=left, bottom=bottom, right=right, top=top, 
+                        wspace=wspace, hspace=hspace)
+    
+    # Create and return the subplot axes
+    axes = []
+    for i in range(1, nrows * ncols + 1):
+        ax = fig.add_subplot(nrows, ncols, i)
+        axes.append(ax)
+    
+    # Reshape the axes array for 2D access if needed
+    if nrows > 1 and ncols > 1:
+        axes = np.array(axes).reshape(nrows, ncols)
+    
+    # Apply consistent styling to each axis
+    for ax in np.array(axes).flatten():
+        # Configure ticks
+        ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE, pad=3, 
+                      length=2.5, width=BORDER_LINE_WIDTH, direction='in')
+        ax.tick_params(axis='both', which='minor', length=1.5, width=0.4, direction='in')
+        
+        # Grid settings
+        ax.grid(True, linestyle='--', alpha=GRID_ALPHA, linewidth=GRID_LINE_WIDTH)
+        
+        # Spine settings
+        for spine in ax.spines.values():
+            spine.set_linewidth(BORDER_LINE_WIDTH)
+    
+    return fig, axes
+
 def create_standardized_cutoff_plot(ax_width=AX_WIDTH, ax_height=AX_HEIGHT, 
                                   top_ratio=BROKEN_AXIS_TOP_RATIO, 
                                   bottom_ratio=BROKEN_AXIS_BOTTOM_RATIO,
@@ -208,6 +286,109 @@ def apply_broken_axis_style(ax1, ax2):
                   linestyle="none", color='k', mec='k', mew=1, clip_on=False)
     ax1.plot([0, 1], [0, 0], transform=ax1.transAxes, **kwargs)
     ax2.plot([0, 1], [1, 1], transform=ax2.transAxes, **kwargs)
+
+def create_standardized_multi_cutoff_plot(n_sections=2, ax_width=AX_WIDTH, ax_height=AX_HEIGHT,
+                                   section_ratios=None, gaps=None,
+                                   left_margin=AX_LEFT_MARGIN, right_margin=AX_RIGHT_MARGIN,
+                                   top_margin=AX_TOP_MARGIN, bottom_margin=AX_BOTTOM_MARGIN,
+                                   sharex=True):
+    """
+    Create a figure with multiple broken/cutoff y-axes with standardized dimensions.
+    
+    Parameters:
+    -----------
+    n_sections : int
+        Number of vertical sections (axes) with cutoffs between them
+    ax_width : float
+        Width of each axis in inches
+    ax_height : float
+        Total height of all plotting areas combined in inches
+    section_ratios : list of float, optional
+        Proportion of ax_height allocated to each section. If None, sections are equal.
+        Must sum to 1.0
+    gaps : list of float, optional
+        Gaps between axes in inches. If None, uses BROKEN_AXIS_GAP for all.
+        Should have (n_sections-1) elements.
+    left_margin : float
+        Left margin in inches (for labels)
+    right_margin : float
+        Right margin in inches
+    top_margin : float
+        Top margin in inches
+    bottom_margin : float
+        Bottom margin in inches (for labels)
+    sharex : bool
+        Whether all axes should share the x-axis
+        
+    Returns:
+    --------
+    fig : matplotlib Figure
+    axes : list of matplotlib Axes (from top to bottom)
+    """
+    # Default section ratios if not provided
+    if section_ratios is None:
+        section_ratios = [1.0/n_sections] * n_sections
+    
+    # Check that section ratios sum to 1
+    if abs(sum(section_ratios) - 1.0) > 1e-6:
+        raise ValueError(f"Section ratios must sum to 1.0, got {sum(section_ratios)}")
+    
+    # Default gaps if not provided
+    if gaps is None:
+        gaps = [BROKEN_AXIS_GAP] * (n_sections - 1)
+    
+    # Check correct number of gaps
+    if len(gaps) != n_sections - 1:
+        raise ValueError(f"Expected {n_sections-1} gaps, got {len(gaps)}")
+    
+    # Calculate individual axis heights based on proportions
+    ax_heights = [ax_height * ratio for ratio in section_ratios]
+    
+    # Calculate total figure dimensions
+    fig_width = ax_width + left_margin + right_margin
+    fig_height = sum(ax_heights) + sum(gaps) + top_margin + bottom_margin
+    
+    # Create main figure
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    
+    # Create the subplots directly for better positioning control
+    fig, axes = plt.subplots(n_sections, 1, figsize=(fig_width, fig_height),
+                           gridspec_kw={'height_ratios': section_ratios},
+                           sharex=sharex)
+    
+    # Ensure axes is a list even with a single section
+    if n_sections == 1:
+        axes = [axes]
+    
+    # Adjust the figure to have proper spacing
+    plt.subplots_adjust(
+        left=left_margin/fig_width,
+        right=1-right_margin/fig_width,
+        top=1-top_margin/fig_height,
+        bottom=bottom_margin/fig_height,
+        hspace=0.1  # Small spacing between subplots
+    )
+    
+    # Set up broken axis appearance
+    for i in range(n_sections - 1):
+        # Top axis has no bottom spines
+        axes[i].spines.bottom.set_visible(False)
+        # Bottom axis has no top spines
+        axes[i+1].spines.top.set_visible(False)
+        
+        # Hide x-axis for all but the bottom subplot if sharex is True
+        if sharex and i < n_sections - 1:
+            axes[i].tick_params(labelbottom=False)
+    
+    # Add break marks
+    for i in range(n_sections - 1):
+        d = .5  # proportion of vertical to horizontal extent of the slanted line
+        kwargs = dict(marker=[(-1, -d), (1, d)], markersize=TICKS_FONTSIZE,
+                    linestyle="none", color='k', mec='k', mew=1, clip_on=False)
+        axes[i].plot([0, 1], [0, 0], transform=axes[i].transAxes, **kwargs)
+        axes[i+1].plot([0, 1], [1, 1], transform=axes[i+1].transAxes, **kwargs)
+    
+    return fig, axes
 
 def apply_consistent_style(ax, title=None, xlabel=None, ylabel=None, grid=True):
     """
