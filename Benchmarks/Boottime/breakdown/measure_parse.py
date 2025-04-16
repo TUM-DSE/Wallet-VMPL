@@ -38,7 +38,6 @@ INVOKE_RESULT_COPY_END=221
 def parse(filename):
     with open(filename, "r") as f:
         text = f.read()
-
     res_list = []
     current = {}
 
@@ -95,7 +94,6 @@ def parse(filename):
     run_sums = []
     c = 0
     for r in runs:
-        print(r)
         def find_missing_time():
             last = 0
             last_timestamp = 0
@@ -132,6 +130,8 @@ def parse(filename):
         invoke_time = sum_key_word("INVOKE_TIME",r_dict)
         invoke_result_copy = sum_key_word("INVOKE_RESULT_COPY",r_dict)
         input_measure = sum_key_word("INPUT_MEASURE",r_dict)
+        if len(r_dict[OUTPUT_MEASURE_START]) < 3:
+           continue
         output_measure = sum_key_word("OUTPUT_MEASURE",r_dict)
         total_time = r_dict[255][-1] - r_dict[254][0]
 
@@ -153,7 +153,7 @@ def parse(filename):
 BENCHMARKS = [
     '110.dynamic-html', #'120.uploader',
     '210.thumbnailer',
-    '311.compression',
+    '311.compression', '411.image-recognition',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
     '504.dna-visualisation'
 ]
