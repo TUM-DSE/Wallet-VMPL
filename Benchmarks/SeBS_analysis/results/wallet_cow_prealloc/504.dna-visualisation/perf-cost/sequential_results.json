@@ -1,25 +1,25 @@
 {
   "_invocations": {
     "504.dna-visualisation-python-3.11": {
-      "173411ba-0578-4fb3-aef1-b3011302d072": {
+      "2e6a4e20-8d3b-4863-bbe3-56cff1dbfd6f": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744290695.715898",
-          "end": "1744290703.607898",
+          "begin": "1744776585.543080",
+          "end": "1744776593.523840",
           "is_cold": false,
-          "request_id": "173411ba-0578-4fb3-aef1-b3011302d072",
+          "request_id": "2e6a4e20-8d3b-4863-bbe3-56cff1dbfd6f",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 4130135920.0
+                "compute_time": 4096987600.0
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-f7ac3f12",
-                "key": "504.dna-visualisation-0-output/bacillus_subtilis.15e4ba93.fasta"
+                "bucket": "sebs-benchmarks-wallet-47107c5c",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.e89a449a.fasta"
               }
             }
           }
@@ -28,40 +28,40 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "173411ba-0578-4fb3-aef1-b3011302d072",
+        "request_id": "2e6a4e20-8d3b-4863-bbe3-56cff1dbfd6f",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 7892000,
-          "client": 9255515,
-          "client_begin": "2025-04-10 13:11:35.695524",
-          "client_end": "2025-04-10 13:11:44.951039",
+          "benchmark": 7980760,
+          "client": 8797138,
+          "client_begin": "2025-04-16 04:09:45.521761",
+          "client_end": "2025-04-16 04:09:54.318899",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "46f9cc7e-f1b6-40fd-8acf-575f1c967ded": {
+      "326dd7a6-ec7e-4ab0-81c4-f15c6d271096": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744290714.983119",
-          "end": "1744290722.894582",
+          "begin": "1744776641.831262",
+          "end": "1744776649.720803",
           "is_cold": false,
-          "request_id": "46f9cc7e-f1b6-40fd-8acf-575f1c967ded",
+          "request_id": "326dd7a6-ec7e-4ab0-81c4-f15c6d271096",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 4137137960.0
+                "compute_time": 4086152260.0
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-f7ac3f12",
-                "key": "504.dna-visualisation-0-output/bacillus_subtilis.bfcc0ffa.fasta"
+                "bucket": "sebs-benchmarks-wallet-47107c5c",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.2f4fb8cc.fasta"
               }
             }
           }
@@ -70,40 +70,40 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "46f9cc7e-f1b6-40fd-8acf-575f1c967ded",
+        "request_id": "326dd7a6-ec7e-4ab0-81c4-f15c6d271096",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 7911463,
-          "client": 9289334,
-          "client_begin": "2025-04-10 13:11:54.962337",
-          "client_end": "2025-04-10 13:12:04.251671",
+          "benchmark": 7889541,
+          "client": 8695013,
+          "client_begin": "2025-04-16 04:10:41.813073",
+          "client_end": "2025-04-16 04:10:50.508086",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "c0deaa78-87d2-4ded-886d-abd7c99ebae3": {
+      "95751ca8-076e-4ca4-9786-e4c59a96ab7b": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744290676.375243",
-          "end": "1744290684.320344",
+          "begin": "1744776623.131932",
+          "end": "1744776630.988957",
           "is_cold": false,
-          "request_id": "c0deaa78-87d2-4ded-886d-abd7c99ebae3",
+          "request_id": "95751ca8-076e-4ca4-9786-e4c59a96ab7b",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 4213099940.0
+                "compute_time": 4097889280.0
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-f7ac3f12",
-                "key": "504.dna-visualisation-0-output/bacillus_subtilis.7a4fe416.fasta"
+                "bucket": "sebs-benchmarks-wallet-47107c5c",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.6735db6c.fasta"
               }
             }
           }
@@ -112,40 +112,40 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "c0deaa78-87d2-4ded-886d-abd7c99ebae3",
+        "request_id": "95751ca8-076e-4ca4-9786-e4c59a96ab7b",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 7945101,
-          "client": 9327518,
-          "client_begin": "2025-04-10 13:11:16.356578",
-          "client_end": "2025-04-10 13:11:25.684096",
+          "benchmark": 7857025,
+          "client": 8690153,
+          "client_begin": "2025-04-16 04:10:23.111605",
+          "client_end": "2025-04-16 04:10:31.801758",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "c2795334-79a8-43b5-aa12-e9fbd0265288": {
+      "b7e6871f-d6f3-4f4c-b975-1b1edbcb91cc": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744290753.591537",
-          "end": "1744290761.495377",
+          "begin": "1744776566.821370",
+          "end": "1744776574.720837",
           "is_cold": false,
-          "request_id": "c2795334-79a8-43b5-aa12-e9fbd0265288",
+          "request_id": "b7e6871f-d6f3-4f4c-b975-1b1edbcb91cc",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 4128532880.0
+                "compute_time": 4094507040.0
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-f7ac3f12",
-                "key": "504.dna-visualisation-0-output/bacillus_subtilis.d268a781.fasta"
+                "bucket": "sebs-benchmarks-wallet-47107c5c",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.44697987.fasta"
               }
             }
           }
@@ -154,40 +154,40 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "c2795334-79a8-43b5-aa12-e9fbd0265288",
+        "request_id": "b7e6871f-d6f3-4f4c-b975-1b1edbcb91cc",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 7903840,
-          "client": 9273091,
-          "client_begin": "2025-04-10 13:12:33.573237",
-          "client_end": "2025-04-10 13:12:42.846328",
+          "benchmark": 7899467,
+          "client": 8705511,
+          "client_begin": "2025-04-16 04:09:26.804915",
+          "client_end": "2025-04-16 04:09:35.510426",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "ef8ae5d3-f7b9-47d0-8ef0-8f90cf6ff8da": {
+      "c9f256c4-14dd-4941-9a96-245678642d33": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744290734.282819",
-          "end": "1744290742.188525",
+          "begin": "1744776604.350630",
+          "end": "1744776612.301915",
           "is_cold": false,
-          "request_id": "ef8ae5d3-f7b9-47d0-8ef0-8f90cf6ff8da",
+          "request_id": "c9f256c4-14dd-4941-9a96-245678642d33",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 4106003780.0
+                "compute_time": 4091030800.0
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-f7ac3f12",
-                "key": "504.dna-visualisation-0-output/bacillus_subtilis.4dacb955.fasta"
+                "bucket": "sebs-benchmarks-wallet-47107c5c",
+                "key": "504.dna-visualisation-0-output/bacillus_subtilis.22c3358b.fasta"
               }
             }
           }
@@ -196,17 +196,17 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "ef8ae5d3-f7b9-47d0-8ef0-8f90cf6ff8da",
+        "request_id": "c9f256c4-14dd-4941-9a96-245678642d33",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 7905706,
-          "client": 9298917,
-          "client_begin": "2025-04-10 13:12:14.262991",
-          "client_end": "2025-04-10 13:12:23.561908",
+          "benchmark": 7951285,
+          "client": 8770060,
+          "client_begin": "2025-04-16 04:10:04.330141",
+          "client_end": "2025-04-16 04:10:13.100201",
           "http_startup": 0,
           "initialization": 0
         }
@@ -214,7 +214,7 @@
     }
   },
   "_metrics": {},
-  "begin_time": 1744290661.638764,
+  "begin_time": 1744776552.641531,
   "config": {
     "deployment": {
       "name": "wallet"
@@ -243,7 +243,7 @@
       "update_storage": false
     }
   },
-  "end_time": 1744290767.851898,
+  "end_time": 1744776655.514077,
   "result_bucket": null,
   "statistics": {
     "cold_count": 0,

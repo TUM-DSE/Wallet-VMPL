@@ -1,162 +1,162 @@
 {
   "_invocations": {
     "503.graph-bfs-python-3.11": {
-      "1db37148-9576-405a-a1c8-acf9a445bcad": {
+      "51d7f283-98b9-4571-b737-d98a0050ba89": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744368248.783560",
-          "end": "1744368249.459516",
+          "begin": "1744779820.073667",
+          "end": "1744779820.744708",
           "is_cold": false,
-          "request_id": "1db37148-9576-405a-a1c8-acf9a445bcad",
+          "request_id": "51d7f283-98b9-4571-b737-d98a0050ba89",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "1db37148-9576-405a-a1c8-acf9a445bcad",
+        "request_id": "51d7f283-98b9-4571-b737-d98a0050ba89",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 675956,
-          "client": 2574428,
-          "client_begin": "2025-04-11 10:44:06.893660",
-          "client_end": "2025-04-11 10:44:09.468088",
+          "benchmark": 671041,
+          "client": 2532264,
+          "client_begin": "2025-04-16 05:03:38.220592",
+          "client_end": "2025-04-16 05:03:40.752856",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "492b1108-f0e9-46c1-b5c9-56a5c91877dc": {
+      "8c4aa92d-6b1b-45ef-a43c-5ec7809f006c": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744368176.004687",
-          "end": "1744368176.678183",
+          "begin": "1744779845.119350",
+          "end": "1744779845.785643",
           "is_cold": false,
-          "request_id": "492b1108-f0e9-46c1-b5c9-56a5c91877dc",
+          "request_id": "8c4aa92d-6b1b-45ef-a43c-5ec7809f006c",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "492b1108-f0e9-46c1-b5c9-56a5c91877dc",
+        "request_id": "8c4aa92d-6b1b-45ef-a43c-5ec7809f006c",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 673496,
-          "client": 2558884,
-          "client_begin": "2025-04-11 10:42:54.127877",
-          "client_end": "2025-04-11 10:42:56.686761",
+          "benchmark": 666293,
+          "client": 2520479,
+          "client_begin": "2025-04-16 05:04:03.280959",
+          "client_end": "2025-04-16 05:04:05.801438",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "6482cc02-a4ca-425f-87e5-50a85bca1f54": {
+      "c5f63b4e-158e-4c89-b1eb-dcb3c81e3f6e": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744368224.306740",
-          "end": "1744368224.971525",
+          "begin": "1744779807.533076",
+          "end": "1744779808.191842",
           "is_cold": false,
-          "request_id": "6482cc02-a4ca-425f-87e5-50a85bca1f54",
+          "request_id": "c5f63b4e-158e-4c89-b1eb-dcb3c81e3f6e",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "6482cc02-a4ca-425f-87e5-50a85bca1f54",
+        "request_id": "c5f63b4e-158e-4c89-b1eb-dcb3c81e3f6e",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 664785,
-          "client": 2556532,
-          "client_begin": "2025-04-11 10:43:42.423489",
-          "client_end": "2025-04-11 10:43:44.980021",
+          "benchmark": 658766,
+          "client": 2521335,
+          "client_begin": "2025-04-16 05:03:25.686153",
+          "client_end": "2025-04-16 05:03:28.207488",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "94e48b03-be00-4cee-8353-3f4437af931b": {
+      "dc2a9042-3569-4caf-b59e-82dfce1304b0": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744368308.969935",
-          "end": "1744368309.634902",
+          "begin": "1744779794.992343",
+          "end": "1744779795.669314",
           "is_cold": false,
-          "request_id": "94e48b03-be00-4cee-8353-3f4437af931b",
+          "request_id": "dc2a9042-3569-4caf-b59e-82dfce1304b0",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "94e48b03-be00-4cee-8353-3f4437af931b",
+        "request_id": "dc2a9042-3569-4caf-b59e-82dfce1304b0",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 664967,
-          "client": 2548461,
-          "client_begin": "2025-04-11 10:45:07.095107",
-          "client_end": "2025-04-11 10:45:09.643568",
+          "benchmark": 676971,
+          "client": 2557033,
+          "client_begin": "2025-04-16 05:03:13.120612",
+          "client_end": "2025-04-16 05:03:15.677645",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "c5c42e8e-ea0d-4b9b-a5a2-47b71f3ede95": {
+      "e5fbda23-1df6-4b89-a995-02ed6cc9cf96": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744368369.124474",
-          "end": "1744368369.788192",
+          "begin": "1744779832.598667",
+          "end": "1744779833.259418",
           "is_cold": false,
-          "request_id": "c5c42e8e-ea0d-4b9b-a5a2-47b71f3ede95",
+          "request_id": "e5fbda23-1df6-4b89-a995-02ed6cc9cf96",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "c5c42e8e-ea0d-4b9b-a5a2-47b71f3ede95",
+        "request_id": "e5fbda23-1df6-4b89-a995-02ed6cc9cf96",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 663718,
-          "client": 2534998,
-          "client_begin": "2025-04-11 10:46:07.261602",
-          "client_end": "2025-04-11 10:46:09.796600",
+          "benchmark": 660751,
+          "client": 2505932,
+          "client_begin": "2025-04-16 05:03:50.761801",
+          "client_end": "2025-04-16 05:03:53.267733",
           "http_startup": 0,
           "initialization": 0
         }
@@ -166,7 +166,7 @@
   "_metrics": {
     "503.graph-bfs-python-3.11": {}
   },
-  "begin_time": 1744368169.121972,
+  "begin_time": 1744779775.553959,
   "config": {
     "deployment": {
       "name": "wallet"
@@ -183,25 +183,14 @@
       "update_storage": false
     }
   },
-  "end_time": 1744368374.800541,
+  "end_time": 1744779850.807426,
   "result_bucket": null,
   "statistics": {
     "cold_count": 5,
     "failures": [
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n"
+      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 36, in process_request\n    ret = pickle.loads(ret)\n_pickle.UnpicklingError: pickle data was truncated\n</pre>\n        </body>\n    </html>\n"
     ],
-    "failures_count": 12,
+    "failures_count": 1,
     "incorrect": [],
     "incorrect_count": 0,
     "samples_generated": 5

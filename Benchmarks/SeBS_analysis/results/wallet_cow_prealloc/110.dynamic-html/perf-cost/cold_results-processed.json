@@ -1,162 +1,162 @@
 {
   "_invocations": {
     "110.dynamic-html-python-3.11": {
-      "10d81b8e-999d-447e-ae22-82d7df0068a6": {
+      "19f949fc-c051-4bcb-9589-edf58e735481": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744287833.603157",
-          "end": "1744287834.311944",
+          "begin": "1744773230.177907",
+          "end": "1744773230.898458",
           "is_cold": false,
-          "request_id": "10d81b8e-999d-447e-ae22-82d7df0068a6",
+          "request_id": "19f949fc-c051-4bcb-9589-edf58e735481",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "10d81b8e-999d-447e-ae22-82d7df0068a6",
+        "request_id": "19f949fc-c051-4bcb-9589-edf58e735481",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 708787,
-          "client": 2239258,
-          "client_begin": "2025-04-10 12:23:52.075284",
-          "client_end": "2025-04-10 12:23:54.314542",
+          "benchmark": 720551,
+          "client": 2266199,
+          "client_begin": "2025-04-16 03:13:48.635829",
+          "client_end": "2025-04-16 03:13:50.902028",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "2a9e5743-e4de-4ac1-8e4a-7d90c6cbdf7c": {
+      "1f6c83b1-6de3-4ab5-9aa5-b03055fea0df": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744287905.374986",
-          "end": "1744287906.095988",
+          "begin": "1744773266.931853",
+          "end": "1744773267.635633",
           "is_cold": false,
-          "request_id": "2a9e5743-e4de-4ac1-8e4a-7d90c6cbdf7c",
+          "request_id": "1f6c83b1-6de3-4ab5-9aa5-b03055fea0df",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "2a9e5743-e4de-4ac1-8e4a-7d90c6cbdf7c",
+        "request_id": "1f6c83b1-6de3-4ab5-9aa5-b03055fea0df",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 721002,
-          "client": 2269599,
-          "client_begin": "2025-04-10 12:25:03.829053",
-          "client_end": "2025-04-10 12:25:06.098652",
+          "benchmark": 703780,
+          "client": 2235129,
+          "client_begin": "2025-04-16 03:14:25.402938",
+          "client_end": "2025-04-16 03:14:27.638067",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "61ac6810-bfb1-4aae-a092-2b5a38f1bb16": {
+      "6d20f17a-290d-47fd-b8ca-819a24160a49": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744287809.801886",
-          "end": "1744287810.511651",
+          "begin": "1744773217.905247",
+          "end": "1744773218.620682",
           "is_cold": false,
-          "request_id": "61ac6810-bfb1-4aae-a092-2b5a38f1bb16",
+          "request_id": "6d20f17a-290d-47fd-b8ca-819a24160a49",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "61ac6810-bfb1-4aae-a092-2b5a38f1bb16",
+        "request_id": "6d20f17a-290d-47fd-b8ca-819a24160a49",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 709765,
-          "client": 2249498,
-          "client_begin": "2025-04-10 12:23:28.264756",
-          "client_end": "2025-04-10 12:23:30.514254",
+          "benchmark": 715435,
+          "client": 2277810,
+          "client_begin": "2025-04-16 03:13:36.345224",
+          "client_end": "2025-04-16 03:13:38.623034",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "72793449-74a3-45de-995d-59f5d00304e0": {
+      "bb067d99-07de-424f-8ab5-335b257878a8": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744287857.523818",
-          "end": "1744287858.241794",
+          "begin": "1744773242.430068",
+          "end": "1744773243.143605",
           "is_cold": false,
-          "request_id": "72793449-74a3-45de-995d-59f5d00304e0",
+          "request_id": "bb067d99-07de-424f-8ab5-335b257878a8",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "72793449-74a3-45de-995d-59f5d00304e0",
+        "request_id": "bb067d99-07de-424f-8ab5-335b257878a8",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 717976,
-          "client": 2271285,
-          "client_begin": "2025-04-10 12:24:15.972861",
-          "client_end": "2025-04-10 12:24:18.244146",
+          "benchmark": 713537,
+          "client": 2231631,
+          "client_begin": "2025-04-16 03:14:00.914654",
+          "client_end": "2025-04-16 03:14:03.146285",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "abb391e2-fe31-4032-a281-2cb40b01609c": {
+      "f39a7284-db15-444e-bb3c-4a9b8e5677cd": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744287881.452164",
-          "end": "1744287882.168434",
+          "begin": "1744773254.682821",
+          "end": "1744773255.387812",
           "is_cold": false,
-          "request_id": "abb391e2-fe31-4032-a281-2cb40b01609c",
+          "request_id": "f39a7284-db15-444e-bb3c-4a9b8e5677cd",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "abb391e2-fe31-4032-a281-2cb40b01609c",
+        "request_id": "f39a7284-db15-444e-bb3c-4a9b8e5677cd",
         "stats": {
           "cold_start": true,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 716270,
-          "client": 2267542,
-          "client_begin": "2025-04-10 12:24:39.903266",
-          "client_end": "2025-04-10 12:24:42.170808",
+          "benchmark": 704991,
+          "client": 2231271,
+          "client_begin": "2025-04-16 03:14:13.159027",
+          "client_end": "2025-04-16 03:14:15.390298",
           "http_startup": 0,
           "initialization": 0
         }
@@ -166,7 +166,7 @@
   "_metrics": {
     "110.dynamic-html-python-3.11": {}
   },
-  "begin_time": 1744287803.260879,
+  "begin_time": 1744773211.33941,
   "config": {
     "deployment": {
       "name": "wallet"
@@ -183,17 +183,12 @@
       "update_storage": false
     }
   },
-  "end_time": 1744287911.104652,
+  "end_time": 1744773272.644038,
   "result_bucket": null,
   "statistics": {
     "cold_count": 5,
-    "failures": [
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/110.dynamic-html/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n"
-    ],
-    "failures_count": 4,
+    "failures": [],
+    "failures_count": 0,
     "incorrect": [],
     "incorrect_count": 0,
     "samples_generated": 5
