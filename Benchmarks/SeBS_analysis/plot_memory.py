@@ -98,7 +98,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Set up the plot
     #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     
     # Define positions for the bars
     benchmarks = avg_memory['bench']
@@ -142,7 +142,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
     ymax = avg_memory[['cow_mb', 'no_cow_mb']].max().max() * 1.1
     ax.set_ylim([0,ymax])
-    ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE)
+    ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE, pad=3, color='navy')
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)
     
@@ -156,10 +156,9 @@ def plot_memory_usage(csv_path="memory.csv"):
     # Legend
     ax.legend(fontsize=LEGEND_FONTSIZE)
     
-    plt.tight_layout()
-    plt.savefig('output/wallet_memory_usage_comparison.pdf', bbox_inches='tight')
-    plt.savefig('output/wallet_memory_usage_comparison.png', dpi=300, bbox_inches='tight')
-    crop_pdf('output/wallet_memory_usage_comparison.pdf')
+    plt.savefig('output/wallet_memory_usage_comparison.pdf', bbox_inches=None)
+    plt.savefig('output/wallet_memory_usage_comparison.png', dpi=300, bbox_inches=None)
+    # crop_pdf('output/wallet_memory_usage_comparison.pdf')
     plt.close()
     
     return avg_memory

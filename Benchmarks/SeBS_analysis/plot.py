@@ -37,13 +37,13 @@ figheight2 = 1.8
 VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc', 'wallet_warm_cow_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
-    'gramine' : 'LibOS (Gramine)',
-    'kata'    : 'Containers (Kata)',
-    'vm'      : 'VM (KVM-Linux)',
-    'cvm'     : 'CVM (SEV-SNP)',
+    'gramine' : 'LibOS(Gramine)',
+    'kata'    : 'Containers(Kata)',
+    'vm'      : 'VM(KVM-Linux)',
+    'cvm'     : 'CVM(SEV-SNP)',
     'wallet_cow_prealloc'  : 'Wallet',
     'wallet_cow_no_prealloc' : 'Wallet',
-    'wallet_warm_cow_prealloc' : 'Wallet (warm)',
+    'wallet_warm_cow_prealloc' : 'Wallet(warm)',
 }
 
 BENCHMARKS = [
@@ -417,7 +417,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     
     # Setup the plot for cold start invocation latency
     #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     #title = "Cold Start Invocation Latency with Lukewarm Comparison"
     title = "Cold and Lukewarm Starts Invocation Latency"
     
@@ -461,7 +461,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
             p50_lukewarm = np.percentile(lukewarm_latencies, 50)
             p99_lukewarm = np.percentile(lukewarm_latencies, 99)
             stddev_lukewarm = np.std(lukewarm_latencies)
-            stats_results.append(f"{'Wallet (Lukewarm)':<20} {p50_lukewarm:<10.6f} {p99_lukewarm:<10.6f} {stddev_lukewarm:<10.6f}")
+            stats_results.append(f"{'Wallet(Lukewarm)':<20} {p50_lukewarm:<10.6f} {p99_lukewarm:<10.6f} {stddev_lukewarm:<10.6f}")
             
             # Create CDF points for lukewarm
             lukewarm_y_values = np.arange(1, len(lukewarm_latencies) + 1) / len(lukewarm_latencies)
@@ -471,7 +471,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
             lukewarm_style = '-.'  # Different line style
             
             ax.plot(lukewarm_latencies, lukewarm_y_values, 
-                   label="Wallet (Lukewarm)", 
+                   label="Wallet(Lukewarm)", 
                    color=lukewarm_color, linewidth=2.0, alpha=1, linestyle=lukewarm_style)
             
             # Compare lukewarm with cold wallet
@@ -531,12 +531,12 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
                     p50 = np.percentile(lukewarm_latencies, 50)
                     p99 = np.percentile(lukewarm_latencies, 99)
                     stddev = np.std(lukewarm_latencies)
-                    stats_results.append(f"{'Wallet (Lukewarm)':<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
+                    stats_results.append(f"{'Wallet(Lukewarm)':<20} {p50:<10.6f} {p99:<10.6f} {stddev:<10.6f}")
             else:
-                stats_results.append(f"{'Wallet (Lukewarm)':<20} {'N/A':<10} {'N/A':<10} {'N/A':<10}")
+                stats_results.append(f"{'Wallet(Lukewarm)':<20} {'N/A':<10} {'N/A':<10} {'N/A':<10}")
     
     # Customize the plot
-    ax.set_title(title, fontsize=TITLE_FONTSIZE)
+    ax.set_title(title, fontsize=TITLE_FONTSIZE, pad=3, color='navy')
     ax.set_xlabel('Latency (s)', fontsize=TICKS_FONTSIZE)
     ax.set_ylabel('Cumulative Probability', fontsize=TICKS_FONTSIZE)
     ax.set_ylim(0, 1.05)
@@ -547,7 +547,8 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     ax.set_xscale('log')
     
     # Add legend
-    ax.legend(fontsize=LEGEND_FONTSIZE, loc='lower right', bbox_to_anchor=(0.80, 0.02))
+    ax.legend(fontsize=LEGEND_FONTSIZE, loc='lower right', bbox_to_anchor=(0.87, 0.12), framealpha=0.3, edgecolor='black', 
+              ncols=1, borderaxespad=0., columnspacing=0.3, labelspacing=0.2, borderpad=0.15, handletextpad=0.3, handlelength=1.2)
     
     # Collect the statistics results if a collector is provided
     if collect_results is not None:
@@ -557,24 +558,20 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     for line in stats_results:
         print(line)
     
-    # Adjust layout
-    plt.tight_layout()
-    
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf')
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm.png', format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm.pdf')
     
     # Also create linear scale version
     ax.set_xscale('linear')
-    plt.tight_layout()
     
-    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.png', format='png', dpi=300, bbox_inches='tight') 
-    crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf')
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.png', format='png', dpi=300, bbox_inches=None) 
+    # crop_pdf(output_dir / 'invocation_latency_cdf_with_lukewarm_linear.pdf')
     
     plt.close()
 
@@ -1197,7 +1194,7 @@ def create_lukewarm_comparison_plot(df, benchmarks, metric, output_dir, y_scale=
     lukewarm_positions = variant_positions + ((wallet_index + 1) - n_variants/2 + 0.5) * width
     
     lukewarm_bars = ax.bar(lukewarm_positions, lukewarm_plot_values, width,
-                        label="Wallet (Lukewarm)",
+                        label="Wallet(Lukewarm)",
                         color=lukewarm_color, edgecolor='black', hatch=lukewarm_hatch)
     
     # Customize the plot
@@ -1236,10 +1233,11 @@ def create_lukewarm_comparison_plot(df, benchmarks, metric, output_dir, y_scale=
 
 def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scale='linear'):
     """Create side-by-side plot with lukewarm comparison and warm start"""
-    fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight), sharey=True)
+    # fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight), sharey=True)
+    fig, axes = create_standardized_subplots(ax_height = 0.9, ax_width = 2.5, top_margin = 0.15, bottom_margin = 0.42, wspace=0.1, left_margin=0.3)
     
     # Add "Lower is better" at the top of the plot
-    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.87, x=0.53)
+    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.98, x=0.53)
     
     # Custom benchmark ordering
     benchmark_order = [
@@ -1325,12 +1323,12 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     lukewarm_positions = variant_positions + ((wallet_index + 1) - n_variants/2 + 0.5) * width
     
     lukewarm_bars = ax_left.bar(lukewarm_positions, lukewarm_plot_values, width,
-                        label="Wallet (Lukewarm)",
+                        label="Wallet(Lukewarm)",
                         color=lukewarm_color, edgecolor='black', hatch=lukewarm_hatch)
     
     # Add lukewarm to legend items
     all_bars.append(lukewarm_bars[0])
-    all_labels.append("Wallet (Lukewarm)")
+    all_labels.append("Wallet(Lukewarm)")
     
     # Right subplot: Warm start (no lukewarm data)
     ax_right = axes[1]
@@ -1364,7 +1362,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
         ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
         ax.set_xticks(variant_positions)
         xlabels = [benchmark.split('.')[1] for benchmark in plot_benchmarks]  # No 'Geo. Mean'
-        ax.set_xticklabels(xlabels, rotation=15, fontsize=TICKS_FONTSIZE)
+        ax.set_xticklabels(xlabels, rotation=18, fontsize=TICKS_FONTSIZE)
         
         # Add gridlines
         ax.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -1372,8 +1370,8 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
             ax.set_ylim(bottom=0)
     
     # Set titles for each subplot
-    ax_left.set_title('(a) Cold and Lukewarm Starts', fontsize=TITLE_FONTSIZE)
-    ax_right.set_title('(b) Warm Start', fontsize=TITLE_FONTSIZE)
+    ax_left.set_title('(a) Cold and Lukewarm Starts', fontsize=TITLE_FONTSIZE, pad=3, color="navy")
+    ax_right.set_title('(b) Warm Start', fontsize=TITLE_FONTSIZE, pad=3, color="navy")
     
     # Add caption names below each subplot
     if metric == 'exec_time':
@@ -1388,28 +1386,25 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     
     # Add shared legend at the bottom with all variants
     fig.legend(all_bars, all_labels, 
-              loc='lower center', bbox_to_anchor=(0.5, -0.05),
+              loc='lower center', bbox_to_anchor=(0.51, 0.00),
               ncol=8,  # Adjust number of columns based on how many items
-              frameon=True, fontsize=LEGEND_FONTSIZE)
-    
-    # Adjust layout
-    plt.tight_layout()
-    plt.subplots_adjust(bottom=0.25)  # Make room for the legend and caption
+              frameon=True, fontsize=LEGEND_FONTSIZE,
+              framealpha=0.3, edgecolor='black', 
+              borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     
     # Save plots
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     filename = f'{metric}_side_by_side_lukewarm'
-    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / (filename + f'_{y_scale}.pdf'))
+    plt.savefig(output_dir / (filename + f'_{y_scale}.pdf'), format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / (filename + f'_{y_scale}.png'), format='png', dpi=300, bbox_inches=None)
 
     plt.close()
 
 def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_results=None):
     """
-    Print geometric means and calculate how much percent Wallet and Wallet (Lukewarm) 
+    Print geometric means and calculate how much percent Wallet and Wallet(Lukewarm) 
     are better or worse than other baselines
     
     If collect_results is provided, results will be stored there for later display.
@@ -1454,7 +1449,7 @@ def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_result
         result_lines.append(f"  {LABEL_MAPPINGS[variant]} (cold): {cold_geomeans[variant]:.6f} s")
     
     # Print lukewarm geometric mean
-    result_lines.append(f"  Wallet (Lukewarm): {lukewarm_geomean:.6f} s")
+    result_lines.append(f"  Wallet(Lukewarm): {lukewarm_geomean:.6f} s")
     
     # Get Wallet cold value for comparison
     wallet_variant = 'wallet_cow_prealloc'
@@ -1480,7 +1475,7 @@ def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_result
         if wallet_cold_value is not None and not np.isnan(wallet_cold_value):
             pct_diff = (lukewarm_geomean - wallet_cold_value) / wallet_cold_value * 100
             comparison = "slower" if pct_diff > 0 else "faster"
-            result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than Wallet (cold) ({wallet_cold_value:.2f}s)")
+            result_lines.append(f"  Wallet(Lukewarm) is {abs(pct_diff):.2f}% {comparison} than Wallet (cold) ({wallet_cold_value:.2f}s)")
         
         # Then compare with other cold variants
         for variant in VARIANTS:
@@ -1489,7 +1484,7 @@ def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_result
                 if baseline_value is not None and not np.isnan(baseline_value):
                     pct_diff = (lukewarm_geomean - baseline_value) / baseline_value * 100
                     comparison = "slower" if pct_diff > 0 else "faster"
-                    result_lines.append(f"  Wallet (Lukewarm) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]} ({baseline_value:.2f}s)")
+                    result_lines.append(f"  Wallet(Lukewarm) is {abs(pct_diff):.2f}% {comparison} than {LABEL_MAPPINGS[variant]} ({baseline_value:.2f}s)")
                 else:
                     result_lines.append(f"  No data for {LABEL_MAPPINGS[variant]}")
     
@@ -1517,44 +1512,44 @@ def main():
     df = df[~filter]
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
 
-    for metric in metrics:
-        for exec_type in exec_types:
-            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
-            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
-            # Collect performance comparison results instead of printing immediately
-            print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
+    # for metric in metrics:
+    #     for exec_type in exec_types:
+    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
+    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
+    #         # Collect performance comparison results instead of printing immediately
+    #         print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
     
-    # Create combined warm/hot plots for each metric
-    for metric in metrics:
-        create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output')
-        create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output', 'log')
+    # # Create combined warm/hot plots for each metric
+    # for metric in metrics:
+    #     create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output')
+    #     create_complete_plot_warm_hot(df, common_benchmarks, metric, 'output', 'log')
         
-    # Create wallet variant comparison plots
-    for metric in metrics:
-        create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output')
-        create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output', 'log')
+    # # Create wallet variant comparison plots
+    # for metric in metrics:
+    #     create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output')
+    #     create_complete_plot_wallet_variants(df, common_benchmarks, metric, 'output', 'log')
     
-    # Add the lukewarm comparison plots and performance analysis
+    # # Add the lukewarm comparison plots and performance analysis
     for metric in metrics:
-        create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output')
-        create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output', 'log')
-        # Add the new side-by-side lukewarm plots
-        create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output')
+    #     create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output')
+    #     create_lukewarm_comparison_plot(df, common_benchmarks, metric, 'output', 'log')
+    #     # Add the new side-by-side lukewarm plots
+        # create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output')
         create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output', 'log')
-        # Add performance comparison for lukewarm plots
-        print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
+    #     # Add performance comparison for lukewarm plots
+    #     print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
     
-    # Create side-by-side plot for client_time (cold and hot)
-    create_side_by_side_plot(df, common_benchmarks, 'output')
+    # # Create side-by-side plot for client_time (cold and hot)
+    # create_side_by_side_plot(df, common_benchmarks, 'output')
 
-    # Load and process data and derive the invocation latency values
-    VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
-    df, common_benchmarks = derive_incovation_data()
-    print(df, common_benchmarks)
-    # Create invocation latency CDF plots
-    plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
-    # Create invocation latency CDF with lukewarm comparison
-    plot_invocation_latency_cdf_with_lukewarm(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
+    # # Load and process data and derive the invocation latency values
+    # VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
+    # df, common_benchmarks = derive_incovation_data()
+    # print(df, common_benchmarks)
+    # # Create invocation latency CDF plots
+    # plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
+    # # Create invocation latency CDF with lukewarm comparison
+    # plot_invocation_latency_cdf_with_lukewarm(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
     
     print("Plots saved in output directory")
     
