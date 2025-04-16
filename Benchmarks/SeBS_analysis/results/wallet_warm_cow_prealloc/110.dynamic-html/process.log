@@ -1,3 +1,3 @@
-17:06:55,926 INFO SeBS-2154: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
-17:06:55,940 INFO WalletWarm-46f5: Using existing deployment walletwarm-37930742 that matches prefix walletwarm!
-17:06:55,944 INFO Experiment.PerfCost-5b29: Processing data in /root/Benchmarks/SeBS/110.dynamic-html/perf-cost/sequential_results.json
+17:06:07,111 INFO SeBS-dcdd: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+17:06:07,125 INFO WalletWarm-d8bd: Using existing deployment walletwarm-c41855ec that matches prefix walletwarm!
+17:06:07,129 INFO Experiment.PerfCost-e063: Processing data in /root/Benchmarks/SeBS/110.dynamic-html/perf-cost/sequential_results.json

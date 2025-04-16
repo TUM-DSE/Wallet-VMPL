@@ -1,21 +1,21 @@
-17:05:49,281 INFO SeBS-9037: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
-17:05:49,360 INFO WalletWarm-cc40: Generating unique resource name walletwarm-37930742
-17:05:49,363 INFO minio.Minio-68e9: Initialize a new bucket for benchmarks
-17:05:49,368 INFO minio.Minio-68e9: Created bucket sebs-benchmarks-walletwarm-37930742
-17:05:49,611 INFO Benchmark-fc6c: Building benchmark 110.dynamic-html. Reason: no cached code package.
-17:05:49,734 INFO Benchmark-fc6c: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:05:49,772 INFO WalletWarm-cc40: Function size 0.000005 MB
-17:05:49,800 INFO Benchmark-fc6c: Created code package (source hash: df7bdfe626d61a7c1f521476c26ace06), for run on wallet_warm with python:3.11
-17:05:50,25 INFO WalletWarm-cc40: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
-17:05:50,673 INFO Experiment.PerfCost-9ee2: Begin experiment
-17:05:50,673 INFO Experiment.PerfCost-9ee2: Begin sequential experiments
-17:05:58,682 INFO Experiment.PerfCost-9ee2: Processed 1 samples out of 5, 0 errors
-17:06:09,430 INFO Experiment.PerfCost-9ee2: Processed 2 samples out of 5, 0 errors
-17:06:20,173 INFO Experiment.PerfCost-9ee2: Processed 3 samples out of 5, 0 errors
-17:06:30,974 INFO Experiment.PerfCost-9ee2: Processed 4 samples out of 5, 0 errors
-17:06:41,711 INFO Experiment.PerfCost-9ee2: Processed 5 samples out of 5, 0 errors
-17:06:46,720 INFO Experiment.PerfCost-9ee2: Mean 742.9691999999999 [ms], median 732.105 [ms], std 23.11552309077171, CV 3.111235713508947
-17:06:46,725 INFO Experiment.PerfCost-9ee2: Parametric CI (Student's t-distribution) 0.95 from 710.87970953027 to 775.0586904697298, within 4.319087583944243% of mean
-17:06:46,727 INFO Experiment.PerfCost-9ee2: Parametric CI (Student's t-distribution) 0.99 from 689.756169343841 to 796.1822306561588, within 7.162212196166267% of mean
-17:06:46,734 INFO WalletWarm.WalletFunction-29b8: Stopping function
-17:06:46,736 INFO WalletWarm.WalletFunction-29b8: Function stopped succesfully
+17:05:00,413 INFO SeBS-b289: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
+17:05:00,485 INFO WalletWarm-a139: Generating unique resource name walletwarm-c41855ec
+17:05:00,488 INFO minio.Minio-bbb5: Initialize a new bucket for benchmarks
+17:05:00,493 INFO minio.Minio-bbb5: Created bucket sebs-benchmarks-walletwarm-c41855ec
+17:05:00,737 INFO Benchmark-10a3: Building benchmark 110.dynamic-html. Reason: no cached code package.
+17:05:00,860 INFO Benchmark-10a3: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+17:05:00,898 INFO WalletWarm-a139: Function size 0.000005 MB
+17:05:00,925 INFO Benchmark-10a3: Created code package (source hash: df7bdfe626d61a7c1f521476c26ace06), for run on wallet_warm with python:3.11
+17:05:01,152 INFO WalletWarm-a139: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+17:05:01,813 INFO Experiment.PerfCost-5055: Begin experiment
+17:05:01,814 INFO Experiment.PerfCost-5055: Begin sequential experiments
+17:05:09,800 INFO Experiment.PerfCost-5055: Processed 1 samples out of 5, 0 errors
+17:05:20,549 INFO Experiment.PerfCost-5055: Processed 2 samples out of 5, 0 errors
+17:05:31,298 INFO Experiment.PerfCost-5055: Processed 3 samples out of 5, 0 errors
+17:05:42,46 INFO Experiment.PerfCost-5055: Processed 4 samples out of 5, 0 errors
+17:05:52,791 INFO Experiment.PerfCost-5055: Processed 5 samples out of 5, 0 errors
+17:05:57,799 INFO Experiment.PerfCost-5055: Mean 738.3004 [ms], median 737.889 [ms], std 1.8540481762888161, CV 0.2511238211829245
+17:05:57,805 INFO Experiment.PerfCost-5055: Parametric CI (Student's t-distribution) 0.95 from 735.726568508071 to 740.874231491929, within 0.3486157520609515% of mean
+17:05:57,807 INFO Experiment.PerfCost-5055: Parametric CI (Student's t-distribution) 0.99 from 734.0322931500953 to 742.5685068499047, within 0.5780989485993386% of mean
+17:05:57,813 INFO WalletWarm.WalletFunction-5346: Stopping function
+17:05:57,815 INFO WalletWarm.WalletFunction-5346: Function stopped succesfully

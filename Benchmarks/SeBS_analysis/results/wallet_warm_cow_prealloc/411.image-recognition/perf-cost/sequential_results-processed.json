@@ -12,18 +12,7 @@
           "end": "1744797860.518562",
           "is_cold": false,
           "request_id": "18d5ae56-d861-482c-88d7-cdb8d1d5b4f2",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 3562541460.0,
-                "model_time": 2204303420.0
-              },
-              "result": {
-                "class": "sports_car",
-                "idx": 817
-              }
-            }
-          }
+          "result": {}
         },
         "provider_times": {
           "execution": 0,
@@ -55,18 +44,7 @@
           "end": "1744798033.604946",
           "is_cold": false,
           "request_id": "5795a667-71fb-468c-b640-6aa2c1533e1d",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 3569073900.0,
-                "model_time": 2210966260.0
-              },
-              "result": {
-                "class": "sports_car",
-                "idx": 817
-              }
-            }
-          }
+          "result": {}
         },
         "provider_times": {
           "execution": 0,
@@ -98,18 +76,7 @@
           "end": "1744797975.846502",
           "is_cold": false,
           "request_id": "876637d7-4945-4a42-bf24-b3049731c756",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 3562682280.0,
-                "model_time": 2208941640.0
-              },
-              "result": {
-                "class": "sports_car",
-                "idx": 817
-              }
-            }
-          }
+          "result": {}
         },
         "provider_times": {
           "execution": 0,
@@ -141,18 +108,7 @@
           "end": "1744797918.157127",
           "is_cold": false,
           "request_id": "c15529e8-fc1b-4083-8641-2966f6ce196b",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 3559436240.0,
-                "model_time": 2203982760.0
-              },
-              "result": {
-                "class": "sports_car",
-                "idx": 817
-              }
-            }
-          }
+          "result": {}
         },
         "provider_times": {
           "execution": 0,
@@ -184,18 +140,7 @@
           "end": "1744798112.043283",
           "is_cold": false,
           "request_id": "e174b272-27df-4b2d-bf67-7e2b8b01bfe2",
-          "result": {
-            "output": {
-              "measurement": {
-                "compute_time": 10728539900.0,
-                "model_time": 8683053100.0
-              },
-              "result": {
-                "class": "sports_car",
-                "idx": 817
-              }
-            }
-          }
+          "result": {}
         },
         "provider_times": {
           "execution": 0,
@@ -218,7 +163,9 @@
       }
     }
   },
-  "_metrics": {},
+  "_metrics": {
+    "411.image-recognition-python-3.11": {}
+  },
   "begin_time": 1744797781.441644,
   "config": {
     "deployment": {
@@ -226,18 +173,7 @@
     },
     "experiments": {
       "download_results": false,
-      "experiments": {
-        "perf-cost": {
-          "benchmark": "411.image-recognition",
-          "concurrent-invocations": 1,
-          "experiments": [
-            "sequential"
-          ],
-          "input-size": "small",
-          "memory-sizes": [],
-          "repetitions": 5
-        }
-      },
+      "experiments": {},
       "flags": {},
       "runtime": {
         "language": "python",
