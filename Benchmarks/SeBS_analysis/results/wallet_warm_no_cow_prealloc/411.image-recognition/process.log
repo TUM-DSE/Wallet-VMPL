@@ -1,3 +1,3 @@
-16:26:24,407 INFO SeBS-c261: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
-16:26:24,421 INFO WalletWarm-dad0: Using existing deployment walletwarm-a5e63238 that matches prefix walletwarm!
-16:26:24,426 INFO Experiment.PerfCost-c2a4: Processing data in /root/Benchmarks/SeBS/411.image-recognition/perf-cost/sequential_results.json
+15:54:10,525 INFO SeBS-93da: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
+15:54:10,539 INFO WalletWarm-94f9: Using existing deployment walletwarm-9ac1a2a6 that matches prefix walletwarm!
+15:54:10,543 INFO Experiment.PerfCost-4b4c: Processing data in /root/Benchmarks/SeBS/411.image-recognition/perf-cost/sequential_results.json

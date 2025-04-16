@@ -1,14 +1,21 @@
-16:25:57,400 INFO SeBS-e6ae: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
-16:25:57,474 INFO WalletWarm-deef: Generating unique resource name walletwarm-a5e63238
-16:25:57,476 INFO minio.Minio-f431: Initialize a new bucket for benchmarks
-16:25:57,481 INFO minio.Minio-f431: Created bucket sebs-benchmarks-walletwarm-a5e63238
-16:25:57,520 INFO Benchmark-7ff3: Building benchmark 411.image-recognition. Reason: no cached code package.
-16:25:57,742 INFO Benchmark-7ff3: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-16:25:57,828 INFO WalletWarm-deef: Function size 0.000005 MB
-16:25:57,879 INFO Benchmark-7ff3: Created code package (source hash: eb995b4d9b9439453af57b2c3d1d1baa), for run on wallet_warm with python:3.11
-16:25:58,266 INFO WalletWarm-deef: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
-16:26:00,45 INFO Experiment.PerfCost-9460: Begin experiment
-16:26:00,46 INFO Experiment.PerfCost-9460: Begin sequential experiments
-16:26:15,370 INFO WalletWarm.WalletFunction-1624: Stopping function
-16:26:15,371 INFO WalletWarm.WalletFunction-1624: Function stopped succesfully
-16:26:15,384 INFO WalletWarm.WalletFunction-1624: Not stopping function as it was not running
+15:51:04,930 INFO SeBS-5316: Created experiment output at /root/Benchmarks/SeBS/411.image-recognition
+15:51:05,6 INFO WalletWarm-497f: Generating unique resource name walletwarm-9ac1a2a6
+15:51:05,8 INFO minio.Minio-671e: Initialize a new bucket for benchmarks
+15:51:05,13 INFO minio.Minio-671e: Created bucket sebs-benchmarks-walletwarm-9ac1a2a6
+15:51:05,52 INFO Benchmark-5070: Building benchmark 411.image-recognition. Reason: no cached code package.
+15:51:05,270 INFO Benchmark-5070: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
+15:51:05,352 INFO WalletWarm-497f: Function size 0.000005 MB
+15:51:05,403 INFO Benchmark-5070: Created code package (source hash: d177d99361b9fb5bdf976fb4be43044c), for run on wallet_warm with python:3.11
+15:51:05,789 INFO WalletWarm-497f: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+15:51:07,547 INFO Experiment.PerfCost-783c: Begin experiment
+15:51:07,548 INFO Experiment.PerfCost-783c: Begin sequential experiments
+15:51:59,228 INFO Experiment.PerfCost-783c: Processed 1 samples out of 5, 0 errors
+15:52:28,378 INFO Experiment.PerfCost-783c: Processed 2 samples out of 5, 0 errors
+15:52:57,633 INFO Experiment.PerfCost-783c: Processed 3 samples out of 5, 0 errors
+15:53:26,796 INFO Experiment.PerfCost-783c: Processed 4 samples out of 5, 0 errors
+15:53:56,50 INFO Experiment.PerfCost-783c: Processed 5 samples out of 5, 0 errors
+15:54:01,58 INFO Experiment.PerfCost-783c: Mean 19202.0762 [ms], median 19227.425 [ms], std 46.604955309065886, CV 0.24270789691515693
+15:54:01,64 INFO Experiment.PerfCost-783c: Parametric CI (Student's t-distribution) 0.95 from 19137.378149977092 to 19266.774250022907, within 0.33693257619146105% of mean
+15:54:01,66 INFO Experiment.PerfCost-783c: Parametric CI (Student's t-distribution) 0.99 from 19094.78938213948 to 19309.36301786052, within 0.5587250917196152% of mean
+15:54:01,69 INFO WalletWarm.WalletFunction-ace4: Stopping function
+15:54:01,76 INFO WalletWarm.WalletFunction-ace4: Function stopped succesfully
