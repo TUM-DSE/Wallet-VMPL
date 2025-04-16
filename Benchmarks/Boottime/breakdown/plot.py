@@ -96,7 +96,7 @@ def calculate_categories(raw_data, type_="all", alloc=None, cow=None):
     '504.dna-visualisation',
     '503.graph-bfs',
     '311.compression',
-    #'411.image-recognition'
+    '411.image-recognition'
     ]
     
     # Filter by alloc and cow if specified
@@ -288,28 +288,26 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear', suffix=''):
     ax2.set_xlabel('', fontsize=TICKS_FONTSIZE)
     
     # Title in the upper plot
-    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    ax1.set_title('Lower is better ↓', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Insert legend in the top right position
     legend = ax1.legend(bbox_to_anchor=(0.03, 0.97), loc='upper left',
-                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE)
+                       frameon=True, fontsize=LEGEND_FONTSIZE,
+                       framealpha=0.3, edgecolor='black', 
+                       borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
     ax1.yaxis.grid(True, linestyle='--', alpha=0.7)
     ax2.yaxis.grid(True, linestyle='--', alpha=0.7)
-       
-    # Adjust layout to prevent label cutoff
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.03)
 
     # Save plots with suffix
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'boot_time_cutoff{suffix}.pdf')
+    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'boot_time_cutoff{suffix}.png', format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_dir / f'boot_time_cutoff{suffix}.pdf')
     
     plt.close()
 
@@ -338,7 +336,7 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     
     # Create the plot
     #fig, ax = plt.subplots(figsize=(figwidth, figheight))
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     
     # Plot stacked bars with wider bars
     if motivation:
@@ -373,8 +371,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
     ax.set_xlabel('', fontsize=TICKS_FONTSIZE)
     plt.xticks(fontsize=TICKS_FONTSIZE, rotation=15)
-    # ax.set_title('Boot Time', pad=5, fontsize=TITLE_FONTSIZE)
-    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    # ax.set_title('Boot Time', pad = 3, fontsize=TITLE_FONTSIZE)
+    ax.set_title('Lower is better ↓', pad=3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Enhance legend
     if not motivation:
@@ -384,8 +382,9 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
       else:
         bbox_to_anchor = (0.01, 0.02)
         loc = 'lower left'
-      legend = plt.legend(bbox_to_anchor=bbox_to_anchor, loc=loc, 
-                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, framealpha=0.5)
+      legend = plt.legend(fontsize=LEGEND_FONTSIZE, loc=loc, bbox_to_anchor=bbox_to_anchor, framealpha=0.3, edgecolor='black', 
+              ncols=1, borderaxespad=0., columnspacing=0.3, labelspacing=0.2, borderpad=0.1, handletextpad=0.3)
+      
       legend.get_frame().set_edgecolor('black')
 
     # Increase the border a bit to fit the annotations
@@ -403,17 +402,14 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     # Set y-axis to start at 0
     ax.set_ylim(bottom=0)
 
-    # Adjust layout to prevent label cutoff
-    plt.tight_layout()
-    
     # Save plots with suffix
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     plot_type = 'motivation_' if motivation else ''
-    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf', format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.png', format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf')
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.png', format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_dir / f'{plot_type}runtime_init_{y_scale}_{type_}{suffix}.pdf')
     
     plt.close()
 
@@ -438,21 +434,23 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     # Create the plot with increased size
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 1.8  # Increased height to accommodate three subplots
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    fig, ax = create_standardized_multi_cutoff_plot(n_sections=3, ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35, section_ratios=[0.12, 0.65, 0.23])
+    
+    ax1 = ax[0]
+    ax2 = ax[1]
+    ax3 = ax[2]
 
     # Define y-axis section boundaries
-    #top_min = 250
-    #middle_min = 0.6
-    #middle_max = 250
-    #bottom_max = 0.6
-    top_min = 1300
-    middle_min = 0.6
-    middle_max = 1300
-    bottom_max = 0.6
-    
+    top_max = 1500
+    top_min = 1000
+    middle_min = 1
+    middle_max = 450
+    bottom_max = 0.3
+   
     # Set y-axis limits with two breaks
     max_zygote = df[df['Component'] == "Zygote creation"]['Time (ms)'].max()
-    ax1.set_ylim(top_min, max_zygote*1.2)  # Upper section for high values (Zygote)
+    ax1.set_ylim(top_min, top_max)  # Upper section for high values (Zygote)
     ax2.set_ylim(middle_min, middle_max)                 # Middle section for medium values
     ax3.set_ylim(0, bottom_max)                  # Lower section for small values
     
@@ -486,7 +484,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        #'image-recognition'
+        'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -496,6 +494,12 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     # Plot grouped bars
     x = np.arange(len(ordered_benchmarks))
     width = 0.2  # width of the bars
+    
+    # Track bar positions and heights for annotations
+    annotation_info = {
+        'image-recognition': {'Zygote creation': {'x': 0, 'y': 0, 'height': 0, 'ax': None, 'section': None}},
+        'thumbnailer': {'Input copy': {'x': 0, 'y': 0, 'height': 0, 'ax': None, 'section': None}}
+    }
     
     for i, component in enumerate(components_to_show):
         component_data = df[df['Component'] == component]
@@ -510,32 +514,71 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
 
             print(f"{benchmark}: {component} - Top: {top_value}, Middle: {middle_value}, Bottom: {bottom_value}")
             
+            # Bar position
+            bar_x = x[j] + (i - 1.5) * width
+            
             # Plot each portion in its respective subplot
             if top_value > 0:
                 ax1.bar(x[j] + (i - 1.5) * width, top_value + top_min, width, 
                         label=component if j == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
-            
+                # Track for annotation if needed
+                if benchmark == 'image-recognition' and component == 'Zygote creation':
+                    annotation_info[benchmark][component]['x'] = bar_x
+                    annotation_info[benchmark][component]['y'] = top_min
+                    annotation_info[benchmark][component]['height'] = top_value
+                    annotation_info[benchmark][component]['ax'] = ax1
+                    annotation_info[benchmark][component]['section'] = 'top'
+                    
             if middle_value > 0:
                 ax2.bar(x[j] + (i - 1.5) * width, middle_value + middle_min, width, 
                         label=component if j == 0 and top_value == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
+                # Track for annotation if needed
+                if benchmark == 'thumbnailer' and component == 'Input copy':
+                    annotation_info[benchmark][component]['x'] = bar_x
+                    annotation_info[benchmark][component]['y'] = middle_min + middle_value
+                    annotation_info[benchmark][component]['height'] = middle_value
+                    annotation_info[benchmark][component]['ax'] = ax2
+                    annotation_info[benchmark][component]['section'] = 'mid'
             
             if bottom_value > 0:
                 ax3.bar(x[j] + (i - 1.5) * width, bottom_value, width, 
                         label=component if j == 0 and top_value == 0 and middle_value == 0 else "", 
                         color=palette[i], linewidth=0, edgecolor='black', hatch=hatches[i])
     
+    # Add annotations to the specified bars
+    # For image-recognition Zygote creation
+    info = annotation_info['image-recognition']['Zygote creation']
+    if info['ax'] is not None:
+        value = df[(df['Benchmark'] == 'image-recognition') & (df['Component'] == 'Zygote creation')]['Time (ms)'].values[0]
+        info['ax'].annotate(f"{value:.1f}",
+                          xy=(info['x'],  info['y']),
+                          xytext=(8, 2),
+                          textcoords="offset points",
+                          ha='right', va='bottom',
+                          fontsize=ANNOTATION_SIZE)
+
+    # For thumbnailer Input copy
+    info = annotation_info['thumbnailer']['Input copy']
+    if info['ax'] is not None:
+        value = df[(df['Benchmark'] == 'thumbnailer') & (df['Component'] == 'Input copy')]['Time (ms)'].values[0]
+        info['ax'].annotate(f"{value:.1f}",
+                          xy=(info['x'], info['y']/2),
+                          xytext=(3, 1),
+                          textcoords="offset points",
+                          ha='right', va='bottom',
+                          fontsize=ANNOTATION_SIZE)
     # Customize the plot
     ax3.set_xlabel('', fontsize=TICKS_FONTSIZE)
     ax3.set_xticks(x)
-    ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
+    ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE, ha='right')
     
     # Add y-axis label in the middle
-    fig.text(-0.01, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
+    fig.text(0.01, 0.6, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
     
     # Title
-    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    ax1.set_title('Lower is better ↓', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Create a single legend for all three subplots
     handles, labels = [], []
@@ -552,10 +595,12 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     ordered_handles = [by_label[label] for label in ordered_labels]
     
     # Create the legend with the ordered items
-    legend = ax1.legend(ordered_handles, ordered_labels, 
-                      bbox_to_anchor=(0.05, 0.83), loc='upper left',
+    legend = ax2.legend(ordered_handles, ordered_labels, 
+                      bbox_to_anchor=(0.07, 0.9), loc='upper left',
                       #bbox_to_anchor=(0.01, 0.90), loc='upper left',
-                      borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+                      frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2,
+                      framealpha=0.3, edgecolor='black', 
+                      borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
@@ -567,15 +612,15 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     
-    # Adjust layout
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.05)
+    # Save plots with suffix
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     # Save plots with suffix
-    output_path = Path(output_dir) / f'runtime_init_linear_time{suffix}.pdf'
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_path)
+    output_path = output_dir / f'runtime_init_linear_time{suffix}.pdf'
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_path)
     
     plt.close()
     
@@ -644,7 +689,12 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
     # Create the plot with increased size
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 1.8  # Increased height to accommodate three subplots
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    fig, ax = create_standardized_multi_cutoff_plot(n_sections=3, ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
+    
+    ax1 = ax[0]
+    ax2 = ax[1]
+    ax3 = ax[2]
     
     # Set y-axis limits with two breaks
     max_value = df['Time (ms)'].max()
@@ -682,7 +732,7 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        #'image-recognition'
+        'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -732,10 +782,10 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
     ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
     
     # Add y-axis label in the middle
-    fig.text(-0.01, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
+    fig.text(0.02, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
     
     # Title
-    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    ax1.set_title('Lower is better ↓', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Create a single legend for all three subplots
     handles, labels = [], []
@@ -754,7 +804,9 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
     # Create the legend with the ordered items
     legend = ax1.legend(ordered_handles, ordered_labels, 
                       bbox_to_anchor=(0.03, 0.70), loc='upper left',
-                      borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+                      frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2,
+                      framealpha=0.3, edgecolor='black', 
+                      borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
@@ -765,16 +817,12 @@ def create_measurement_side_by_side_plot(categories, output_dir, suffix=''):
     # Tick sizes
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
-    
-    # Adjust layout
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-    
+
     # Save plots with suffix
     output_path = Path(output_dir) / f'runtime_init_measurement{suffix}.pdf'
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_path)
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_path)
     
     plt.close()
     
@@ -863,7 +911,12 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
     # Create the plot with increased size
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 1.8  # Increased height to accommodate three subplots
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(figwidth, figheight))
+    fig, ax = create_standardized_multi_cutoff_plot(n_sections=3, ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
+    
+    ax1 = ax[0]
+    ax2 = ax[1]
+    ax3 = ax[2]
 
     # Define y-axis section boundaries
     top_min = 3000
@@ -907,7 +960,7 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        #'image-recognition'
+        'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -992,10 +1045,10 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
     ax3.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
     
     # Add y-axis label in the middle
-    fig.text(-0.01, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
+    fig.text(0.02, 0.5, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
     
     # Title
-    ax1.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    ax1.set_title('Lower is better ↓', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Create a single legend for all three subplots
     handles, labels = [], []
@@ -1012,7 +1065,9 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
     # Create the legend with the simplified component names
     legend = ax1.legend(ordered_handles, ordered_labels,
                         loc='upper left', bbox_to_anchor=(0.01, 0.95),
-                        borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+                        frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2,
+                        framealpha=0.3, edgecolor='black', 
+                        borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
@@ -1024,19 +1079,15 @@ def create_side_by_side_plot_with_measurement(categories, measurement_categories
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     
-    # Adjust layout
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0, hspace=0.05)
-    
     # Add annotation to explain the hatching
-    fig.text(-0.01, -0.00, "Solid: performance time\nHatched: measurement time", 
+    fig.text(0.02, -0.00, "Solid: performance time\nHatched: measurement time", 
              fontsize=ANNOTATION_SIZE, ha="left", va="bottom")
     
     # Save plots with suffix
     output_path = Path(output_dir) / f'runtime_init_with_measurement{suffix}.pdf'
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_path)
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_path)
     
     plt.close()
     
@@ -1178,7 +1229,7 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 2.2  # Slightly taller to accommodate the full range
     #fig, ax = plt.subplots(figsize=(figwidth, figheight))
-    fig, ax = create_standardized_plot()
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     
     # Define the benchmark order as requested
     benchmark_order = [
@@ -1189,7 +1240,7 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        #'image-recognition'
+        'image-recognition'
     ]
     
     # Filter and order the benchmarks according to the specified sequence
@@ -1239,11 +1290,13 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
     ax.set_xticklabels(ordered_benchmarks, rotation=15, fontsize=TICKS_FONTSIZE)
     
     # Title
-    ax.set_title('Lower is better ↓', pad=5, fontsize=TITLE_FONTSIZE, color="navy")
+    ax.set_title('Lower is better ↓', pad=3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Legend
     legend = ax.legend(loc='upper left', bbox_to_anchor=(0.01, 0.95),
-                     borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
+                     frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2,
+                     framealpha=0.3, edgecolor='black', 
+                     borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
     
     # Add gridlines for better readability
@@ -1251,19 +1304,16 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
     
     # Tick sizes
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
-    
-    # Adjust layout
-    plt.tight_layout()
-    
+  
     # Add annotation to explain the hatching
     fig.text(0.02, 0.02, "Solid: performance time\nHatched: measurement time", 
              fontsize=ANNOTATION_SIZE, ha="left", va="bottom")
     
     # Save plots with suffix
     output_path = Path(output_dir) / f'runtime_init_with_measurement_no_cutoff{suffix}.pdf'
-    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches='tight')
-    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches='tight')
-    crop_pdf(output_path)
+    plt.savefig(output_path, format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(str(output_path).replace('.pdf', '.png'), format='png', dpi=300, bbox_inches=None)
+    # crop_pdf(output_path)
     
     plt.close()
     
@@ -1458,7 +1508,7 @@ def main():
                 "dna-visualisation", 
                 "graph-bfs", 
                 "compression",
-                #'image-recognition'
+                'image-recognition'
             ]
             
             # Filter and order benchmarks
