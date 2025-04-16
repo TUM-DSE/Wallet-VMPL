@@ -596,9 +596,9 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Create the legend with the ordered items
     legend = ax2.legend(ordered_handles, ordered_labels, 
-                      bbox_to_anchor=(0.07, 0.9), loc='upper left',
+                      bbox_to_anchor=(0.07, 0.92), loc='upper left',
                       #bbox_to_anchor=(0.01, 0.90), loc='upper left',
-                      frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2,
+                      frameon=True, fontsize=LEGEND_FONTSIZE, ncol=1,
                       framealpha=0.3, edgecolor='black', 
                       borderaxespad=0., columnspacing=0.5, labelspacing=0.4, borderpad=0.2, handletextpad=0.3, handlelength=1.2)
     legend.get_frame().set_edgecolor('black')
