@@ -9,20 +9,28 @@ from pathlib import Path
 import pprint as pprint
 import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+# Import centralized plotting configuration
+import sys
+sys.path.append('../')
+from motivation_plotting_config import *
 
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
+hatches = HATCHES
+palette = PALETTE_PASTEL
+
+# Common graph settings
+#mpl.use("Agg")
+#mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
+#mpl.rcParams["pdf.fonttype"] = 42
+#mpl.rcParams["ps.fonttype"] = 42
+#mpl.rcParams["font.family"] = "libertine"
+#sns.set_style("whitegrid")
+#sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+#sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+#
+#TITLE_FONTSIZE = 7
+#TICKS_FONTSIZE = 5
+#LEGEND_FONTSIZE = 5
+#ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
 figheight2 = 1.8
@@ -408,9 +416,10 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
                 break  # Use first valid result file found
     
     # Setup the plot for cold start invocation latency
-    fig, ax = plt.subplots(figsize=(figwidth, figheight2))
+    #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
+    fig, ax = create_standardized_plot()
     #title = "Cold Start Invocation Latency with Lukewarm Comparison"
-    title = "Cold Start Invocation Latency"
+    title = "Cold and Lukewarm Starts Invocation Latency"
     
     # Store statistical data
     stats_results.append(f"\n{title}:")
@@ -571,7 +580,8 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
 
 def create_complete_plot(df, benchmarks, metric, exec_type, output_dir, y_scale='linear'):
     """Create grouped bar chart for the given metric and execution type"""
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    #fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    fig, ax = create_standardized_plot()
     
     # Filter data for the specific execution type
     filtered_df = df[df['type'] == exec_type]
@@ -1229,7 +1239,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
     fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight), sharey=True)
     
     # Add "Lower is better" at the top of the plot
-    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.90)
+    fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.87, x=0.53)
     
     # Custom benchmark ordering
     benchmark_order = [

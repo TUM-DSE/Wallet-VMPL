@@ -10,23 +10,31 @@ from pathlib import Path
 import re
 import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
+# Import centralized plotting configuration
+import sys
+sys.path.append('../../')
+from motivation_plotting_config import *
 
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+hatches = HATCHES
+palette = PALETTE_PASTEL
 
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
-palette = sns.color_palette("pastel")
-hatches = ["", "//", "xx", "\\\\", ".."]
+## Common graph settings
+#mpl.use("Agg")
+#mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
+#mpl.rcParams["pdf.fonttype"] = 42
+#mpl.rcParams["ps.fonttype"] = 42
+#mpl.rcParams["font.family"] = "libertine"
+#
+#sns.set_style("whitegrid")
+#sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+#sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+#
+#TITLE_FONTSIZE = 7
+#TICKS_FONTSIZE = 5
+#LEGEND_FONTSIZE = 5
+#ANNOTATION_SIZE = 4
+#palette = sns.color_palette("pastel")
+#hatches = ["", "//", "xx", "\\\\", ".."]
 
 def crop_pdf(input_path):
     """Use pdfcrop to crop the PDF file."""
@@ -329,7 +337,8 @@ def create_plot(categories, output_dir, y_scale='linear', motivation=False, type
     df.set_index('Category', inplace=True)
     
     # Create the plot
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    #fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    fig, ax = create_standardized_plot()
     
     # Plot stacked bars with wider bars
     if motivation:
@@ -544,7 +553,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     
     # Create the legend with the ordered items
     legend = ax1.legend(ordered_handles, ordered_labels, 
-                      bbox_to_anchor=(0.03, 0.80), loc='upper left',
+                      bbox_to_anchor=(0.05, 0.83), loc='upper left',
                       #bbox_to_anchor=(0.01, 0.90), loc='upper left',
                       borderaxespad=0., frameon=True, fontsize=LEGEND_FONTSIZE, ncol=2)
     legend.get_frame().set_edgecolor('black')
@@ -1168,7 +1177,8 @@ def create_side_by_side_plot_with_measurement_no_cutoff(categories, measurement_
     # Create the plot
     figwidth = 3.3  # 3.3 inch for single column
     figheight = 2.2  # Slightly taller to accommodate the full range
-    fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    #fig, ax = plt.subplots(figsize=(figwidth, figheight))
+    fig, ax = create_standardized_plot()
     
     # Define the benchmark order as requested
     benchmark_order = [
