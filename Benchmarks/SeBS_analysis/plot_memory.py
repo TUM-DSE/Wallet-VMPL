@@ -9,20 +9,25 @@ from pathlib import Path
 import pprint as pprint
 import subprocess
 
-# Common graph settings
-mpl.use("Agg")
-mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
-mpl.rcParams["pdf.fonttype"] = 42
-mpl.rcParams["ps.fonttype"] = 42
-mpl.rcParams["font.family"] = "libertine"
-sns.set_style("whitegrid")
-sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+# Import centralized plotting configuration
+import sys
+sys.path.append('../')
+from motivation_plotting_config import *
 
-TITLE_FONTSIZE = 7
-TICKS_FONTSIZE = 5
-LEGEND_FONTSIZE = 5
-ANNOTATION_SIZE = 4
+# Common graph settings
+#mpl.use("Agg")
+#mpl.rcParams["text.latex.preamble"] = r"\usepackage{amsmath}"
+#mpl.rcParams["pdf.fonttype"] = 42
+#mpl.rcParams["ps.fonttype"] = 42
+#mpl.rcParams["font.family"] = "libertine"
+#sns.set_style("whitegrid")
+#sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+#sns.set_context("paper", rc={"font.size": 5, "axes.titlesize": 5, "axes.labelsize": 8})
+#
+#TITLE_FONTSIZE = 7
+#TICKS_FONTSIZE = 5
+#LEGEND_FONTSIZE = 5
+#ANNOTATION_SIZE = 4
 figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
 figheight2 = 1.8
@@ -60,6 +65,9 @@ def plot_memory_usage(csv_path="memory.csv"):
     df = df[df['type'] == 'wallet']
     # drop unnecessary columns: 'type', 'total'
     df = df.drop(columns=['type', 'total'])
+
+    # exclude "411.image-recognition" benchmark
+    df = df[~df['bench'].str.contains("411.image-recognition")]
     
     # Group by benchmark and calculate the average
     avg_memory = df.groupby('bench').mean().reset_index()
@@ -89,7 +97,8 @@ def plot_memory_usage(csv_path="memory.csv"):
     avg_memory = avg_memory.sort_values('order')
     
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(figwidth, figheight2))
+    #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
+    fig, ax = create_standardized_plot()
     
     # Define positions for the bars
     benchmarks = avg_memory['bench']
@@ -131,7 +140,8 @@ def plot_memory_usage(csv_path="memory.csv"):
     
     # Set labels and title with MB units
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
-    ax.set_ylim([0,1500])
+    ymax = avg_memory[['cow_mb', 'no_cow_mb']].max().max() * 1.1
+    ax.set_ylim([0,ymax])
     ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE)
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)
