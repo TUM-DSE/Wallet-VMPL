@@ -178,6 +178,45 @@ run_benchmark_sebs:
 	sleep 5
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) ${WARM_COLD} && poweroff"
 
+run_benchmark_sebs_cvm:
+	if [ "$(name)" == "110.dynamic-html" ]; then \
+		cp module/libpal-html.so module/libpal.so; \
+		cp module/libsysdb-html.so module/libsysdb.so; \
+	elif [ "$(name)" == "120.uploader" ]; then \
+	  	cp module/libpal-none.so module/libpal.so; \
+		cp module/libsysdb-none.so module/libsysdb.so; \
+	elif [ "$(name)" == "210.thumbnailer" ]; then \
+	  	cp module/libpal-thumbnailer.so module/libpal.so; \
+		cp module/libsysdb-thumbnailer.so module/libsysdb.so; \
+	elif [ "$(name)" == "220.video-processing" ]; then \
+	  	cp module/libpal-video.so module/libpal.so; \
+		cp module/libsysdb-video.so module/libsysdb.so; \
+	elif [ "$(name)" == "311.compression" ]; then \
+	  	cp module/libpal-none.so module/libpal.so; \
+		cp module/libsysdb-none.so module/libsysdb.so; \
+	elif [ "$(name)" == "411.image-recognition" ]; then \
+	  	cp module/libpal-image-recognition.so module/libpal.so; \
+		cp module/libsysdb-image-recognition.so module/libsysdb.so; \
+	elif [ "$(name)" == "501.graph-pagerank" ] || [ "$(name)" == "502.graph-mst" ] || [ "$(name)" == "503.graph-bfs" ]; then \
+	  	cp module/libpal-igraph.so module/libpal.so; \
+		cp module/libsysdb-igraph.so module/libsysdb.so; \
+	elif [ "$(name)" == "504.dna-visualisation" ]; then \
+	  	cp module/libpal-dna.so module/libpal.so; \
+		cp module/libsysdb-dna.so module/libsysdb.so; \
+	else \
+	  	sleep 20; \
+	  	echo "Wrong benchmark name."; \
+	  	exit 1; \
+	fi
+	sleep 5
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script_cvm.sh $(name) ${WARM_COLD}"
+
+	WALLET_ADDR="192.168.${USERADDR}.10" bash ./Benchmarks/sebs_script_cvm2.sh $(name) ${WARM_COLD}
+
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "poweroff"
+
+
+
 benchmark_sebs: run run_benchmark_sebs
 
 
