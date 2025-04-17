@@ -26,12 +26,12 @@ with wallet.Wallet() as w:
     start = time.time_ns()
     zygote = w.create_zygote("../libpal-image-recognition.so", "python.manifest.template", "../libsysdb-image-recognition.so")
     end = time.time_ns()
-    print("Zygote Creation Time {(end - start) / 1e9}")
+    print(f"Zygote Creation Time {(end - start) / 1e9}")
 
     start = time.time_ns()
     trustlet_1 = zygote.create_trustlet("./function.py")
     end = time.time_ns()
-    print("Trustlet Creation Time {(end - start) / 1e9}")
+    print(f"Trustlet Creation Time {(end - start) / 1e9}")
 
     print("Executing first Trustlet")
 
