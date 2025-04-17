@@ -52,7 +52,7 @@ BENCHMARKS = [
     '311.compression',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
     '504.dna-visualisation',
-    #'411.image-recognition'
+    '411.image-recognition'
 ]
 palette = sns.color_palette("pastel", n_colors=len(VARIANTS))
 hatches = ["", "//", "xx", "\\\\", ".."]
@@ -1248,7 +1248,7 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
         "dna-visualisation", 
         "graph-bfs", 
         "compression",
-        #'image-recognition'
+        'image-recognition'
     ]
     
     # Create mapping from benchmark name to its index in the original list
@@ -1537,7 +1537,7 @@ def main():
         # create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output')
         create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output', 'log')
     #     # Add performance comparison for lukewarm plots
-    #     print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
+        print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
     
     # # Create side-by-side plot for client_time (cold and hot)
     # create_side_by_side_plot(df, common_benchmarks, 'output')
