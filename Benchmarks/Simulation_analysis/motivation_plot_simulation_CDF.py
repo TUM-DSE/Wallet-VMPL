@@ -298,7 +298,7 @@ def parallel_plot_node_size(args):
         return None
     
     # Generate different plot versions with the same data
-    title = f"Invocation Latency CDF ({node_size} Nodes)"
+    title = f"(a) Invocation Latency CDF ({node_size} Nodes)"
     base_output_name = f"{TRACE_NAME}_node_size_{node_size}_{value_type}"
     
     # Generate original plot

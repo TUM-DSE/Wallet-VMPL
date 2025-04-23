@@ -367,7 +367,7 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
     ax.set_xticks(tick_positions)
     ax.set_xticklabels([str(size) for size in unique_node_sizes])
         
-    title = "Invocation Latency Percentiles"
+    title = "(c) Invocation Latency Percentiles"
     x_label = "Number of nodes"
     y_label = "Invocation latency (ms)"
     # Apply consistent styling from the configuration
@@ -618,9 +618,9 @@ def parallel_plot_node_size(args):
     
     # Generate plot
     if (value_type == "delays"): 
-      title = f"Invocation Latency CDF ({node_size} Nodes)"
+      title = f"(a) Invocation Latency CDF ({node_size} Nodes)"
     elif (value_type == "slowdowns"):
-      title = f"Per function slowdown CDF ({node_size} Nodes)"
+      title = f"(b) Per function slowdown CDF ({node_size} Nodes)"
     linear_plot = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type)
     log_plot    = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type, use_log_scale=True)
     return [linear_plot, log_plot]
