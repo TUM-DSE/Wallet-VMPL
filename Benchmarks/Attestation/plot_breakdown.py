@@ -160,7 +160,7 @@ def create_cutoff_plot(averages, output_dir, kernel_size):
             ax2.text(i, value, f'{value:.2f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
     # Apply consistent styling
-    apply_consistent_style(ax1, title=LOWER_BETTER_TITLE)
+    apply_consistent_style(ax1, title=f"(c) Measurements cost ({LOWER_BETTER_TITLE})")
     apply_consistent_style(ax2)
     
     # Fix xticks rotation and add size annotations
