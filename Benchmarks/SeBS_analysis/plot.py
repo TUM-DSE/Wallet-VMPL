@@ -419,7 +419,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
     fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     #title = "Cold Start Invocation Latency with Lukewarm Comparison"
-    title = "Cold and Lukewarm Starts Invocation Latency"
+    title = "(a) Cold and Lukewarm Starts Invocation Latency"
     
     # Store statistical data
     stats_results.append(f"\n{title}:")
@@ -536,7 +536,7 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
                 stats_results.append(f"{'Wallet(Lukewarm)':<20} {'N/A':<10} {'N/A':<10} {'N/A':<10}")
     
     # Customize the plot
-    ax.set_title(title, fontsize=TITLE_FONTSIZE, pad=3, color='navy')
+    ax.set_title(title, fontsize=TITLE_FONTSIZE, pad=3, color='navy', x=0.4)
     ax.set_xlabel('Latency (s)', fontsize=TICKS_FONTSIZE)
     ax.set_ylabel('Cumulative Probability', fontsize=TICKS_FONTSIZE)
     ax.set_ylim(0, 1.05)
@@ -1544,12 +1544,12 @@ def main():
 
     # # Load and process data and derive the invocation latency values
     # VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
-    # df, common_benchmarks = derive_incovation_data()
+    df, common_benchmarks = derive_incovation_data()
     # print(df, common_benchmarks)
     # # Create invocation latency CDF plots
     # plot_invocation_latency_cdf(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
     # # Create invocation latency CDF with lukewarm comparison
-    # plot_invocation_latency_cdf_with_lukewarm(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
+    plot_invocation_latency_cdf_with_lukewarm(df, VARIANTS, common_benchmarks, 'output', all_comparison_results)
     
     print("Plots saved in output directory")
     

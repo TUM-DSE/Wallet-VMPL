@@ -578,7 +578,7 @@ def create_side_by_side_plot(categories, output_dir, suffix=''):
     fig.text(0.01, 0.6, 'Time (ms)', va='center', rotation='vertical', fontsize=TICKS_FONTSIZE)
     
     # Title
-    ax1.set_title('Lower is better ↓', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
+    ax1.set_title('(b) Runtime breakdown (Lower is better ↓)', pad = 3, fontsize=TITLE_FONTSIZE, color="navy")
     
     # Create a single legend for all three subplots
     handles, labels = [], []
