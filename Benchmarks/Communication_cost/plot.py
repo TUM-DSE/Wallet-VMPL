@@ -38,7 +38,7 @@ def create_line_plot(data, output_dir, y_scale='linear'):
     message_sizes = [64.0, 256.0, 1024.0, 8192.0, 16384.0, 65536.0, 262144.0, 1048576.0]
     
     # Create standardized plot
-    fig, ax = create_standardized_plot(ax_height = 0.95, bottom_margin= 0.45, top_margin=0.46)
+    fig, ax = create_standardized_plot(ax_height = 0.95, bottom_margin= 0.45, top_margin=0.46, right_margin=0.1)
     
     # Filter variants
     variants = ['Native', 'Gramine', 'Kata Containers', 'VM', 'CVM', 'Wallet']
@@ -70,7 +70,7 @@ def create_line_plot(data, output_dir, y_scale='linear'):
 
     # Apply consistent styling
     apply_consistent_style(ax, 
-                        title=LOWER_BETTER_TITLE,
+                        title=f"(b) Network communication ({LOWER_BETTER_TITLE})",
                         xlabel="Message size",
                         ylabel="Time (ms)")
     

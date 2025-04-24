@@ -142,7 +142,7 @@ def plot_memory_usage(csv_path="memory.csv"):
     ax.set_ylabel('Memory Usage (MB)', fontsize=TICKS_FONTSIZE)
     ymax = avg_memory[['cow_mb', 'no_cow_mb']].max().max() * 1.1
     ax.set_ylim([0,ymax])
-    ax.set_title('Memory Usage', fontsize=TITLE_FONTSIZE, pad=3, color='navy')
+    ax.set_title('(c) Memory Usage', fontsize=TITLE_FONTSIZE, pad=3, color='navy')
     ax.tick_params(axis='both', which='major', labelsize=TICKS_FONTSIZE)
     ax.set_xticks(x)
     

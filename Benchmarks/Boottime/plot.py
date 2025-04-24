@@ -199,7 +199,7 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
             ax2.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
     
     # Apply consistent styling
-    apply_consistent_style(ax1, title=LOWER_BETTER_TITLE)
+    apply_consistent_style(ax1, title=f"(a) Boot time breakdown ({LOWER_BETTER_TITLE})")
     apply_consistent_style(ax2)
     
     # Fix xticks rotation
@@ -264,7 +264,7 @@ def create_plot(categories, output_dir, y_scale='linear'):
     
     # Apply consistent styling
     apply_consistent_style(ax, 
-                         title=LOWER_BETTER_TITLE,
+                         title=f"(a) Boot time breakdown ({LOWER_BETTER_TITLE})",
                          xlabel="",
                          ylabel="Time (ms)")
     

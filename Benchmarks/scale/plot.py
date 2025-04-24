@@ -97,7 +97,7 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
                   
     # Apply consistent styling
     apply_consistent_style(ax, 
-                         title=LOWER_BETTER_TITLE,
+                         title=f"(b) Function density ({LOWER_BETTER_TITLE})",
                          xlabel="Number of Functions", 
                          ylabel="Memory Usage (GB)")
     
