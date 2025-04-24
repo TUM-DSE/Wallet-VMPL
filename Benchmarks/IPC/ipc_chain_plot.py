@@ -43,6 +43,38 @@ def calculate_statistics(df):
     stats['std'] = stats['std'].fillna(0)
     return stats
 
+def print_statistics(stats):
+    """Print simple statistics to the console"""
+    # Convert seconds to milliseconds for readability
+    print("\n=== FUNCTION CHAINING PERFORMANCE RESULTS ===")
+    
+    # Get unique chain lengths
+    chain_lengths = sorted(stats['chain_length'].unique())
+    variants = sorted(stats['variant'].unique())
+    
+    # Print statistics for each chain length and variant
+    for chain_length in chain_lengths:
+        print(f"\nChain Length: {chain_length}")
+        print("-" * 50)
+        print(f"{'Implementation':<12} {'Mean (ms)':<10} {'Std Dev (ms)':<12}")
+        print("-" * 50)
+        
+        for variant in variants:
+            # Filter data for this chain length and variant
+            row = stats[(stats['chain_length'] == chain_length) & (stats['variant'] == variant)]
+            if not row.empty:
+                # Get the values (converting to milliseconds)
+                mean_ms = row['mean'].values[0] * 1000
+                std_ms = row['std'].values[0] * 1000
+                
+                # Get display name for variant
+                display_name = LABEL_MAPPINGS_IPC_CHAIN.get(variant, variant.capitalize())
+                
+                # Print the statistics
+                print(f"{display_name:<12} {mean_ms:8.2f}    {std_ms:8.2f}")
+    
+    print("\n" + "="*50)
+
 def create_bar_plot(stats, output_dir, y_scale='linear', group_width=0.8, bar_width_ratio=0.9):
     """Create a bar plot with error bars for function chaining performance
     
@@ -150,6 +182,7 @@ def main():
     parser.add_argument('--output-dir', type=str, default='output', help='Output directory (default: output)')
     parser.add_argument('--group-width', type=float, default=0.8, help='Width allocated for each group of bars (0-1, default: 0.8)')
     parser.add_argument('--bar-width-ratio', type=float, default=0.9, help='Ratio of bar width to available space (0-1, default: 0.9)')
+    parser.add_argument('--no-print', action='store_true', help='Disable printing statistics to console')
     
     args = parser.parse_args()
     
@@ -157,11 +190,15 @@ def main():
     df = load_csv_data(args.input_file)
     stats = calculate_statistics(df)
     
+    # Print results to console
+    if not args.no_print:
+        print_statistics(stats)
+    
     # Create plots with linear and log scales
     create_bar_plot(stats, args.output_dir, y_scale='linear', 
-                    group_width=args.group_width, bar_width_ratio=args.bar_width_ratio)
+                   group_width=args.group_width, bar_width_ratio=args.bar_width_ratio)
     create_bar_plot(stats, args.output_dir, y_scale='log',
-                    group_width=args.group_width, bar_width_ratio=args.bar_width_ratio)
+                   group_width=args.group_width, bar_width_ratio=args.bar_width_ratio)
     
     print(f"Plots saved in {args.output_dir}")
 
