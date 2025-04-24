@@ -58,7 +58,7 @@ def create_bar_plot(stats, output_dir, y_scale='linear', group_width=0.8, bar_wi
     chain_lengths = sorted(stats['chain_length'].unique())
     
     # Create standardized plot
-    fig, ax = create_standardized_plot(ax_height = 0.85, top_margin = 0.1, bottom_margin = 0.2)
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
     
     # Set up the bar width and positions
     # Calculate bar width based on group_width and bar_width_ratio
