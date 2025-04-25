@@ -1,3 +1,4 @@
+variant,chain_length,data_size,time_taken
 wallet,2,16384,0.000360025
 wallet,2,16384,0.000290154
 wallet,2,16384,0.000293871
