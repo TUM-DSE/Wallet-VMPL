@@ -45,8 +45,8 @@ def process_request():
         "result": {"output": ret},
     }
 
+if __name__ == "__main__":
+    ZYGOTE_ID = int(sys.argv[2])
+    FUNCTION_CODE = sys.argv[3]
 
-ZYGOTE_ID = int(sys.argv[2])
-FUNCTION_CODE = sys.argv[3]
-
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

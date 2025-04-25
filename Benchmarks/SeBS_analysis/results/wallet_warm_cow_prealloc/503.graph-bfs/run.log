@@ -1,19 +1,20 @@
-17:21:01,177 INFO SeBS-a6c3: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
-17:21:01,254 INFO WalletWarm-41fd: Generating unique resource name walletwarm-00c1f460
-17:21:01,256 INFO minio.Minio-5008: Initialize a new bucket for benchmarks
-17:21:01,261 INFO minio.Minio-5008: Created bucket sebs-benchmarks-walletwarm-00c1f460
-17:21:01,430 INFO Benchmark-1470: Building benchmark 503.graph-bfs. Reason: no cached code package.
-17:21:01,627 INFO Benchmark-1470: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:21:01,699 INFO WalletWarm-41fd: Function size 0.000005 MB
-17:21:01,740 INFO Benchmark-1470: Created code package (source hash: 693b2b32a88d140fc886ab0d72ec2ba1), for run on wallet_warm with python:3.11
-17:21:02,78 INFO WalletWarm-41fd: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
-17:21:02,779 INFO Experiment.PerfCost-c624: Begin experiment
-17:21:02,780 INFO Experiment.PerfCost-c624: Begin sequential experiments
-17:21:11,129 INFO Experiment.PerfCost-c624: Processed 1 samples out of 5, 0 errors
-17:21:21,957 INFO Experiment.PerfCost-c624: Processed 2 samples out of 5, 0 errors
-17:21:32,789 INFO WalletWarm.WalletFunction-f74c: Stopping function
-17:21:32,789 INFO WalletWarm.WalletFunction-f74c: Function stopped succesfully
-17:21:32,790 ERROR Experiment.PerfCost-c624: Couldn't invoke function; output:
+00:05:43,209 INFO SeBS-6ee2: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs
+00:05:43,245 INFO WalletRemote-c39d: Generating unique resource name wallet-remote-07aa62c1
+00:05:43,248 INFO minio.Minio-9808: Initialize a new bucket for benchmarks
+00:05:43,252 INFO minio.Minio-9808: Created bucket sebs-benchmarks-wallet-remote-07aa62c1
+00:05:43,257 INFO Benchmark-d8bd: Building benchmark 503.graph-bfs. Reason: no cached code package.
+00:05:43,262 INFO Benchmark-d8bd: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+00:05:43,263 INFO WalletRemote-c39d: Function size 0.000006 MB
+00:05:43,265 INFO Benchmark-d8bd: Created code package (source hash: 3e910ad3769350e069f784db096ef7c6), for run on wallet_remote with python:3.11
+00:05:43,271 INFO WalletRemote-c39d: Creating new function! Reason: function 503.graph-bfs-python-3.11 not found in cache.
+00:05:43,453 INFO WalletRemote-c39d: starting wallet server
+00:05:44,459 INFO Experiment.PerfCost-9149: Begin experiment
+00:05:44,459 INFO Experiment.PerfCost-9149: Begin sequential experiments
+00:05:52,741 INFO Experiment.PerfCost-9149: Processed 1 samples out of 5, 0 errors
+00:06:03,567 INFO Experiment.PerfCost-9149: Processed 2 samples out of 5, 0 errors
+00:06:14,391 INFO WalletRemote.WalletRemoteFunction-6042: Stopping function
+00:06:14,395 INFO WalletRemote.WalletRemoteFunction-6042: Function stopped succesfully
+00:06:14,395 ERROR Experiment.PerfCost-9149: Couldn't invoke function; output:
 
     <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
     <html>
@@ -28,30 +29,31 @@
         </head>
         <body>
             <h1>Error: 500 Internal Server Error</h1>
-            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>
+            <p>Sorry, the requested URL <tt>&#039;http://192.168.27.10:9002/&#039;</tt>
                caused an error:</p>
             <pre>Internal Server Error</pre>
               <h2>Exception:</h2>
-              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>
+              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>
               <h2>Traceback:</h2>
               <pre>Traceback (most recent call last):
-  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle
+  File &quot;/usr/local/lib/python3.10/dist-packages/bottle.py&quot;, line 995, in _handle
     out = route.call(**args)
-  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper
+  File &quot;/usr/local/lib/python3.10/dist-packages/bottle.py&quot;, line 2025, in wrapper
     rv = callback(*a, **ka)
-  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet_warm/python/3.11/code/server_warm.py&quot;, line 38, in process_request
-    ret = pickle.loads(ret)
-_pickle.UnpicklingError: pickle data was truncated
+  File &quot;&lt;string&gt;&quot;, line 36, in process_request
+  File &quot;/usr/local/lib/python3.10/dist-packages/wallet/__init__.py&quot;, line 88, in invoke_trustlet_bin
+    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)
+RuntimeError: basic_string::_M_construct null not valid
 </pre>
         </body>
     </html>
 
-17:21:32,790 INFO Experiment.PerfCost-c624: Processed 2 samples out of 5, 1 errors
-17:21:45,312 INFO Experiment.PerfCost-c624: Processed 3 samples out of 5, 1 errors
-17:21:56,140 INFO Experiment.PerfCost-c624: Processed 4 samples out of 5, 1 errors
-17:22:06,980 INFO Experiment.PerfCost-c624: Processed 5 samples out of 5, 1 errors
-17:22:11,989 INFO Experiment.PerfCost-c624: Mean 1157.9178 [ms], median 823.143 [ms], std 676.598032105149, CV 58.43230254385492
-17:22:11,995 INFO Experiment.PerfCost-c624: Parametric CI (Student's t-distribution) 0.95 from 218.64915278759815 to 2097.1864472124016, within 81.11704019166143% of mean
-17:22:11,996 INFO Experiment.PerfCost-c624: Parametric CI (Student's t-distribution) 0.99 from -399.6429648127021 to 2715.4785648127017, within 134.51393223359224% of mean
-17:22:12,175 INFO WalletWarm.WalletFunction-f74c: Stopping function
-17:22:12,176 INFO WalletWarm.WalletFunction-f74c: Function stopped succesfully
+00:06:14,396 INFO Experiment.PerfCost-9149: Processed 2 samples out of 5, 1 errors
+00:06:26,811 INFO Experiment.PerfCost-9149: Processed 3 samples out of 5, 1 errors
+00:06:37,628 INFO Experiment.PerfCost-9149: Processed 4 samples out of 5, 1 errors
+00:06:48,444 INFO Experiment.PerfCost-9149: Processed 5 samples out of 5, 1 errors
+00:06:53,445 INFO Experiment.PerfCost-9149: Mean 1138.4002 [ms], median 823.95 [ms], std 637.7266289090961, CV 56.01954645730878
+00:06:53,447 INFO Experiment.PerfCost-9149: Parametric CI (Student's t-distribution) 0.95 from 253.09371135552362 to 2023.7066886444763, within 77.76759777839781% of mean
+00:06:53,449 INFO Experiment.PerfCost-9149: Parametric CI (Student's t-distribution) 0.99 from -329.676750762859 to 2606.4771507628593, within 128.95965327156998% of mean
+00:06:53,656 INFO WalletRemote.WalletRemoteFunction-6042: Stopping function
+00:06:53,660 INFO WalletRemote.WalletRemoteFunction-6042: Function stopped succesfully

@@ -24,7 +24,7 @@ def process_request():
     end = None
     ret = None
     with wallet.Wallet() as w:
-        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} output size.")
+        print(f"trying to execute trustlet {int(os.environ['TRUSTLET'])} with {len(data)} input size.")
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 36000 # 35571 -> 36000 for benchmark 110
         trustlet.invoke_trustlet_bin("", 0)
@@ -43,5 +43,5 @@ def process_request():
         "result": {"output": ret},
     }
 
-
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+if __name__ == "__main__":
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

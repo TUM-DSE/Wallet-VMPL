@@ -1,21 +1,22 @@
-17:44:39,218 INFO SeBS-7b5f: Created experiment output at /root/Benchmarks/SeBS/502.graph-mst
-17:44:39,297 INFO WalletWarm-224f: Generating unique resource name walletwarm-a45346da
-17:44:39,300 INFO minio.Minio-570e: Initialize a new bucket for benchmarks
-17:44:39,305 INFO minio.Minio-570e: Created bucket sebs-benchmarks-walletwarm-a45346da
-17:44:39,474 INFO Benchmark-f87f: Building benchmark 502.graph-mst. Reason: no cached code package.
-17:44:39,672 INFO Benchmark-f87f: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:44:39,751 INFO WalletWarm-224f: Function size 0.000005 MB
-17:44:39,794 INFO Benchmark-f87f: Created code package (source hash: 8b44dcd3ba68d29baf7e1b5250afe603), for run on wallet_warm with python:3.11
-17:44:40,152 INFO WalletWarm-224f: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
-17:44:40,863 INFO Experiment.PerfCost-a11f: Begin experiment
-17:44:40,864 INFO Experiment.PerfCost-a11f: Begin sequential experiments
-17:44:49,219 INFO Experiment.PerfCost-a11f: Processed 1 samples out of 5, 0 errors
-17:45:00,27 INFO Experiment.PerfCost-a11f: Processed 2 samples out of 5, 0 errors
-17:45:10,850 INFO Experiment.PerfCost-a11f: Processed 3 samples out of 5, 0 errors
-17:45:21,653 INFO Experiment.PerfCost-a11f: Processed 4 samples out of 5, 0 errors
-17:45:32,461 INFO Experiment.PerfCost-a11f: Processed 5 samples out of 5, 0 errors
-17:45:37,470 INFO Experiment.PerfCost-a11f: Mean 800.9015999999999 [ms], median 799.509 [ms], std 5.514403198896532, CV 0.6885244328262713
-17:45:37,475 INFO Experiment.PerfCost-a11f: Parametric CI (Student's t-distribution) 0.95 from 793.2463811151682 to 808.5568188848316, within 0.955825145664798% of mean
-17:45:37,477 INFO Experiment.PerfCost-a11f: Parametric CI (Student's t-distribution) 0.99 from 788.2071822565205 to 813.5960177434794, within 1.585015905009985% of mean
-17:45:37,481 INFO WalletWarm.WalletFunction-5c4c: Stopping function
-17:45:37,482 INFO WalletWarm.WalletFunction-5c4c: Function stopped succesfully
+23:36:00,209 INFO SeBS-d6d7: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/502.graph-mst
+23:36:00,244 INFO WalletRemote-4721: Generating unique resource name wallet-remote-e0ea1c75
+23:36:00,247 INFO minio.Minio-b3f7: Initialize a new bucket for benchmarks
+23:36:00,251 INFO minio.Minio-b3f7: Created bucket sebs-benchmarks-wallet-remote-e0ea1c75
+23:36:00,256 INFO Benchmark-ba9a: Building benchmark 502.graph-mst. Reason: no cached code package.
+23:36:00,261 INFO Benchmark-ba9a: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+23:36:00,262 INFO WalletRemote-4721: Function size 0.000006 MB
+23:36:00,264 INFO Benchmark-ba9a: Created code package (source hash: f33a56d4f95b03d24cbfa24046c2d298), for run on wallet_remote with python:3.11
+23:36:00,270 INFO WalletRemote-4721: Creating new function! Reason: function 502.graph-mst-python-3.11 not found in cache.
+23:36:00,455 INFO WalletRemote-4721: starting wallet server
+23:36:01,459 INFO Experiment.PerfCost-f6ca: Begin experiment
+23:36:01,460 INFO Experiment.PerfCost-f6ca: Begin sequential experiments
+23:36:09,680 INFO Experiment.PerfCost-f6ca: Processed 1 samples out of 5, 0 errors
+23:36:20,495 INFO Experiment.PerfCost-f6ca: Processed 2 samples out of 5, 0 errors
+23:36:31,311 INFO Experiment.PerfCost-f6ca: Processed 3 samples out of 5, 0 errors
+23:36:42,126 INFO Experiment.PerfCost-f6ca: Processed 4 samples out of 5, 0 errors
+23:36:52,940 INFO Experiment.PerfCost-f6ca: Processed 5 samples out of 5, 0 errors
+23:36:57,941 INFO Experiment.PerfCost-f6ca: Mean 813.7279999999998 [ms], median 813.979 [ms], std 0.44802455289864695, CV 0.05505826921264194
+23:36:57,944 INFO Experiment.PerfCost-f6ca: Parametric CI (Student's t-distribution) 0.95 from 813.1060422115479 to 814.3499577884518, within 0.07643313102805076% of mean
+23:36:57,945 INFO Experiment.PerfCost-f6ca: Parametric CI (Student's t-distribution) 0.99 from 812.6966262268653 to 814.7593737731344, within 0.12674674745548056% of mean
+23:36:57,949 INFO WalletRemote.WalletRemoteFunction-0b14: Stopping function
+23:36:57,953 INFO WalletRemote.WalletRemoteFunction-0b14: Function stopped succesfully

@@ -1,22 +1,22 @@
 {
   "_invocations": {
     "411.image-recognition-python-3.11": {
-      "1463256c-5886-4904-b334-7136a0c76a54": {
+      "18130036-7afd-43d0-a16f-bce8301159e2": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744818215.926331",
-          "end": "1744818229.140855",
+          "begin": "1745537034.254807",
+          "end": "1745537047.487407",
           "is_cold": false,
-          "request_id": "1463256c-5886-4904-b334-7136a0c76a54",
+          "request_id": "18130036-7afd-43d0-a16f-bce8301159e2",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 3569407140.0,
-                "model_time": 2214363500.0
+                "compute_time": 3563334320.0,
+                "model_time": 2206497720.0
               },
               "result": {
                 "class": "sports_car",
@@ -29,37 +29,37 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "1463256c-5886-4904-b334-7136a0c76a54",
+        "request_id": "18130036-7afd-43d0-a16f-bce8301159e2",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 13214524,
-          "client": 13307938,
-          "client_begin": "2025-04-16 15:43:35.842455",
-          "client_end": "2025-04-16 15:43:49.150393",
+          "benchmark": 13232600,
+          "client": 13319864,
+          "client_begin": "2025-04-24 23:23:55.907192",
+          "client_end": "2025-04-24 23:24:09.227056",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "331649a5-61ce-4257-8aff-3cbebade9e02": {
+      "418920cc-eacf-4b22-a540-76a4ee81b7b5": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744818192.655231",
-          "end": "1744818205.819383",
+          "begin": "1745536941.042178",
+          "end": "1745536954.250368",
           "is_cold": false,
-          "request_id": "331649a5-61ce-4257-8aff-3cbebade9e02",
+          "request_id": "418920cc-eacf-4b22-a540-76a4ee81b7b5",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 3561481120.0,
-                "model_time": 2211016880.0
+                "compute_time": 3560988360.0,
+                "model_time": 2204459120.0
               },
               "result": {
                 "class": "sports_car",
@@ -72,37 +72,37 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "331649a5-61ce-4257-8aff-3cbebade9e02",
+        "request_id": "418920cc-eacf-4b22-a540-76a4ee81b7b5",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 13164152,
-          "client": 13256797,
-          "client_begin": "2025-04-16 15:43:12.573098",
-          "client_end": "2025-04-16 15:43:25.829895",
+          "benchmark": 13208190,
+          "client": 13296540,
+          "client_begin": "2025-04-24 23:22:22.691023",
+          "client_end": "2025-04-24 23:22:35.987563",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "4e35790d-fc6c-4768-9048-e43d58158558": {
+      "cae2d33b-b59f-4c2f-9f4d-a571f1dcb15d": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744818146.130566",
-          "end": "1744818159.293310",
+          "begin": "1745537010.943887",
+          "end": "1745537024.166480",
           "is_cold": false,
-          "request_id": "4e35790d-fc6c-4768-9048-e43d58158558",
+          "request_id": "cae2d33b-b59f-4c2f-9f4d-a571f1dcb15d",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 3554044520.0,
-                "model_time": 2203688120.0
+                "compute_time": 3566688900.0,
+                "model_time": 2211002200.0
               },
               "result": {
                 "class": "sports_car",
@@ -115,37 +115,37 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "4e35790d-fc6c-4768-9048-e43d58158558",
+        "request_id": "cae2d33b-b59f-4c2f-9f4d-a571f1dcb15d",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 13162744,
-          "client": 13253272,
-          "client_begin": "2025-04-16 15:42:26.047472",
-          "client_end": "2025-04-16 15:42:39.300744",
+          "benchmark": 13222593,
+          "client": 13311368,
+          "client_begin": "2025-04-24 23:23:32.594070",
+          "client_end": "2025-04-24 23:23:45.905438",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "717a16d9-8e39-49e8-a2f6-5f03ab1c7e2e": {
+      "cea2e413-4135-476a-a002-943781f9a3d2": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744818122.813459",
-          "end": "1744818136.033298",
+          "begin": "1745536987.644713",
+          "end": "1745537000.853838",
           "is_cold": false,
-          "request_id": "717a16d9-8e39-49e8-a2f6-5f03ab1c7e2e",
+          "request_id": "cea2e413-4135-476a-a002-943781f9a3d2",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 3571101440.0,
-                "model_time": 2212372120.0
+                "compute_time": 3558255500.0,
+                "model_time": 2204543860.0
               },
               "result": {
                 "class": "sports_car",
@@ -158,37 +158,37 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "717a16d9-8e39-49e8-a2f6-5f03ab1c7e2e",
+        "request_id": "cea2e413-4135-476a-a002-943781f9a3d2",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 13219839,
-          "client": 13302409,
-          "client_begin": "2025-04-16 15:42:02.733667",
-          "client_end": "2025-04-16 15:42:16.036076",
+          "benchmark": 13209125,
+          "client": 13297056,
+          "client_begin": "2025-04-24 23:23:09.295244",
+          "client_end": "2025-04-24 23:23:22.592300",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "b6e81a55-fcec-4313-9b9c-182fa5f37fc9": {
+      "f2faf57d-5f94-4c15-aa01-54efa8f0d711": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1744818169.394360",
-          "end": "1744818182.555578",
+          "begin": "1745536964.339090",
+          "end": "1745536977.552383",
           "is_cold": false,
-          "request_id": "b6e81a55-fcec-4313-9b9c-182fa5f37fc9",
+          "request_id": "f2faf57d-5f94-4c15-aa01-54efa8f0d711",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 3576307340.0,
-                "model_time": 2221288360.0
+                "compute_time": 3558837640.0,
+                "model_time": 2203387540.0
               },
               "result": {
                 "class": "sports_car",
@@ -201,17 +201,17 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "b6e81a55-fcec-4313-9b9c-182fa5f37fc9",
+        "request_id": "f2faf57d-5f94-4c15-aa01-54efa8f0d711",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 13161218,
-          "client": 13249870,
-          "client_begin": "2025-04-16 15:42:49.312011",
-          "client_end": "2025-04-16 15:43:02.561881",
+          "benchmark": 13213293,
+          "client": 13304747,
+          "client_begin": "2025-04-24 23:22:45.989070",
+          "client_end": "2025-04-24 23:22:59.293817",
           "http_startup": 0,
           "initialization": 0
         }
@@ -219,10 +219,10 @@
     }
   },
   "_metrics": {},
-  "begin_time": 1744818091.478639,
+  "begin_time": 1745536911.555991,
   "config": {
     "deployment": {
-      "name": "wallet_warm"
+      "name": "wallet_remote"
     },
     "experiments": {
       "download_results": false,
@@ -247,7 +247,7 @@
       "update_storage": false
     }
   },
-  "end_time": 1744818234.156378,
+  "end_time": 1745537054.228169,
   "result_bucket": null,
   "statistics": {
     "cold_count": 0,

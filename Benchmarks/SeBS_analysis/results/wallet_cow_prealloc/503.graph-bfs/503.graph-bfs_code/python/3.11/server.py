@@ -43,5 +43,5 @@ def process_request():
         "result": {"output": ret},
     }
 
-
-run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)
+if __name__ == "__main__":
+    run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

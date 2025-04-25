@@ -1,21 +1,22 @@
-17:12:57,570 INFO SeBS-7715: Created experiment output at /root/Benchmarks/SeBS/311.compression
-17:12:57,647 INFO WalletWarm-ee57: Generating unique resource name walletwarm-e0816eb6
-17:12:57,649 INFO minio.Minio-cccf: Initialize a new bucket for benchmarks
-17:12:57,654 INFO minio.Minio-cccf: Created bucket sebs-benchmarks-walletwarm-e0816eb6
-17:12:57,822 INFO Benchmark-58b3: Building benchmark 311.compression. Reason: no cached code package.
-17:12:57,907 INFO Benchmark-58b3: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:12:57,940 INFO WalletWarm-ee57: Function size 0.000004 MB
-17:12:57,964 INFO Benchmark-58b3: Created code package (source hash: 215abcf11a5b09fade69cad30b314ca7), for run on wallet_warm with python:3.11
-17:12:58,134 INFO WalletWarm-ee57: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
-17:12:59,204 INFO Experiment.PerfCost-f7b9: Begin experiment
-17:12:59,204 INFO Experiment.PerfCost-f7b9: Begin sequential experiments
-17:13:09,187 INFO Experiment.PerfCost-f7b9: Processed 1 samples out of 5, 0 errors
-17:13:20,658 INFO Experiment.PerfCost-f7b9: Processed 2 samples out of 5, 0 errors
-17:13:32,126 INFO Experiment.PerfCost-f7b9: Processed 3 samples out of 5, 0 errors
-17:13:43,552 INFO Experiment.PerfCost-f7b9: Processed 4 samples out of 5, 0 errors
-17:13:55,58 INFO Experiment.PerfCost-f7b9: Processed 5 samples out of 5, 0 errors
-17:14:00,66 INFO Experiment.PerfCost-f7b9: Mean 1450.6309999999999 [ms], median 1458.763 [ms], std 28.336166042709436, CV 1.9533682957767646
-17:14:00,72 INFO Experiment.PerfCost-f7b9: Parametric CI (Student's t-distribution) 0.95 from 1411.2940952453234 to 1489.9679047546763, within 2.7117099217289877% of mean
-17:14:00,74 INFO Experiment.PerfCost-f7b9: Parametric CI (Student's t-distribution) 0.99 from 1385.399801623586 to 1515.8621983764137, within 4.496746476286106% of mean
-17:14:00,78 INFO WalletWarm.WalletFunction-6fa9: Stopping function
-17:14:00,85 INFO WalletWarm.WalletFunction-6fa9: Function stopped succesfully
+23:15:23,740 INFO SeBS-46b7: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/311.compression
+23:15:23,777 INFO WalletRemote-4d3b: Generating unique resource name wallet-remote-ffec1d4b
+23:15:23,780 INFO minio.Minio-8f87: Initialize a new bucket for benchmarks
+23:15:23,784 INFO minio.Minio-8f87: Created bucket sebs-benchmarks-wallet-remote-ffec1d4b
+23:15:23,789 INFO Benchmark-653f: Building benchmark 311.compression. Reason: no cached code package.
+23:15:23,792 INFO Benchmark-653f: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+23:15:23,792 INFO WalletRemote-4d3b: Function size 0.000005 MB
+23:15:23,793 INFO Benchmark-653f: Created code package (source hash: 7c449d8e722eb9ab77be292ab26f54d9), for run on wallet_remote with python:3.11
+23:15:23,797 INFO WalletRemote-4d3b: Creating new function! Reason: function 311.compression-python-3.11 not found in cache.
+23:15:23,987 INFO WalletRemote-4d3b: starting wallet server
+23:15:25,220 INFO Experiment.PerfCost-c831: Begin experiment
+23:15:25,221 INFO Experiment.PerfCost-c831: Begin sequential experiments
+23:15:34,727 INFO Experiment.PerfCost-c831: Processed 1 samples out of 5, 0 errors
+23:15:46,165 INFO Experiment.PerfCost-c831: Processed 2 samples out of 5, 0 errors
+23:15:57,565 INFO Experiment.PerfCost-c831: Processed 3 samples out of 5, 0 errors
+23:16:08,957 INFO Experiment.PerfCost-c831: Processed 4 samples out of 5, 0 errors
+23:16:20,395 INFO Experiment.PerfCost-c831: Processed 5 samples out of 5, 0 errors
+23:16:25,396 INFO Experiment.PerfCost-c831: Mean 1419.6852000000001 [ms], median 1436.198 [ms], std 20.958676670057248, CV 1.4762904248108837
+23:16:25,398 INFO Experiment.PerfCost-c831: Parametric CI (Student's t-distribution) 0.95 from 1390.5898923739983 to 1448.780507626002, within 2.0494196619082765% of mean
+23:16:25,400 INFO Experiment.PerfCost-c831: Parametric CI (Student's t-distribution) 0.99 from 1371.4373321158628 to 1467.9330678841375, within 3.3984905867960973% of mean
+23:16:25,403 INFO WalletRemote.WalletRemoteFunction-64a5: Stopping function
+23:16:25,408 INFO WalletRemote.WalletRemoteFunction-64a5: Function stopped succesfully

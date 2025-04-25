@@ -1,6 +1,6 @@
 memory,type,is_cold,exec_time,connection_time,client_time,provider_time,mem_used
-0,sequential,False,726965,0,739507,0,
-0,sequential,False,727690,0,741161,0,
-0,sequential,False,726872,0,739110,0,
-0,sequential,False,728322,0,750868,0,
-0,sequential,False,726018,0,738519,0,
+0,sequential,False,729721,0,743230,0,
+0,sequential,False,725016,0,739717,0,
+0,sequential,False,728692,0,742540,0,
+0,sequential,False,721725,0,735295,0,
+0,sequential,False,724174,0,737852,0,

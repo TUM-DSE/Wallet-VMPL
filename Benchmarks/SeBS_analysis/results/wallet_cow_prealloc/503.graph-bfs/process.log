@@ -1,4 +1,4 @@
-04:00:22,216 INFO SeBS-b82d: Created experiment output at /root/Benchmarks/SeBS/503.graph-bfs
-04:00:22,230 INFO Wallet-96a9: Using existing deployment wallet-0782b556 that matches prefix wallet!
-04:00:22,234 INFO Experiment.PerfCost-df73: Processing data in /root/Benchmarks/SeBS/503.graph-bfs/perf-cost/sequential_results.json
-04:00:22,254 INFO Experiment.PerfCost-df73: Processing data in /root/Benchmarks/SeBS/503.graph-bfs/perf-cost/cold_results.json
+22:22:59,520 INFO SeBS-eb5c: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs
+22:22:59,546 INFO WalletRemote-9b3a: Using existing deployment wallet-remote-68cb04a5 that matches prefix wallet-remote!
+22:22:59,548 INFO Experiment.PerfCost-dcd1: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs/perf-cost/cold_results.json
+22:22:59,570 INFO Experiment.PerfCost-dcd1: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs/perf-cost/sequential_results.json

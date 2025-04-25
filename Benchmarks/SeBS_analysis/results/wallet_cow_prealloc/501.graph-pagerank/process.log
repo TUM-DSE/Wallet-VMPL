@@ -1,4 +1,4 @@
-03:42:33,121 INFO SeBS-86d0: Created experiment output at /root/Benchmarks/SeBS/501.graph-pagerank
-03:42:33,136 INFO Wallet-e688: Using existing deployment wallet-8a2da5f4 that matches prefix wallet!
-03:42:33,140 INFO Experiment.PerfCost-e593: Processing data in /root/Benchmarks/SeBS/501.graph-pagerank/perf-cost/sequential_results.json
-03:42:33,145 INFO Experiment.PerfCost-e593: Processing data in /root/Benchmarks/SeBS/501.graph-pagerank/perf-cost/cold_results.json
+21:44:32,672 INFO SeBS-60dc: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank
+21:44:32,697 INFO WalletRemote-c6cb: Using existing deployment wallet-remote-09c21911 that matches prefix wallet-remote!
+21:44:32,699 INFO Experiment.PerfCost-0a59: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank/perf-cost/sequential_results.json
+21:44:32,701 INFO Experiment.PerfCost-0a59: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank/perf-cost/cold_results.json

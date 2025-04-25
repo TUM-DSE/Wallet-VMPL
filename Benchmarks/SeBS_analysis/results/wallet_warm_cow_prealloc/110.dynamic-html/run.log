@@ -1,21 +1,22 @@
-17:05:00,413 INFO SeBS-b289: Created experiment output at /root/Benchmarks/SeBS/110.dynamic-html
-17:05:00,485 INFO WalletWarm-a139: Generating unique resource name walletwarm-c41855ec
-17:05:00,488 INFO minio.Minio-bbb5: Initialize a new bucket for benchmarks
-17:05:00,493 INFO minio.Minio-bbb5: Created bucket sebs-benchmarks-walletwarm-c41855ec
-17:05:00,737 INFO Benchmark-10a3: Building benchmark 110.dynamic-html. Reason: no cached code package.
-17:05:00,860 INFO Benchmark-10a3: There is no Docker build image for wallet_warm run in python, thus skipping the Docker-based installation of dependencies.
-17:05:00,898 INFO WalletWarm-a139: Function size 0.000005 MB
-17:05:00,925 INFO Benchmark-10a3: Created code package (source hash: df7bdfe626d61a7c1f521476c26ace06), for run on wallet_warm with python:3.11
-17:05:01,152 INFO WalletWarm-a139: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
-17:05:01,813 INFO Experiment.PerfCost-5055: Begin experiment
-17:05:01,814 INFO Experiment.PerfCost-5055: Begin sequential experiments
-17:05:09,800 INFO Experiment.PerfCost-5055: Processed 1 samples out of 5, 0 errors
-17:05:20,549 INFO Experiment.PerfCost-5055: Processed 2 samples out of 5, 0 errors
-17:05:31,298 INFO Experiment.PerfCost-5055: Processed 3 samples out of 5, 0 errors
-17:05:42,46 INFO Experiment.PerfCost-5055: Processed 4 samples out of 5, 0 errors
-17:05:52,791 INFO Experiment.PerfCost-5055: Processed 5 samples out of 5, 0 errors
-17:05:57,799 INFO Experiment.PerfCost-5055: Mean 738.3004 [ms], median 737.889 [ms], std 1.8540481762888161, CV 0.2511238211829245
-17:05:57,805 INFO Experiment.PerfCost-5055: Parametric CI (Student's t-distribution) 0.95 from 735.726568508071 to 740.874231491929, within 0.3486157520609515% of mean
-17:05:57,807 INFO Experiment.PerfCost-5055: Parametric CI (Student's t-distribution) 0.99 from 734.0322931500953 to 742.5685068499047, within 0.5780989485993386% of mean
-17:05:57,813 INFO WalletWarm.WalletFunction-5346: Stopping function
-17:05:57,815 INFO WalletWarm.WalletFunction-5346: Function stopped succesfully
+23:02:41,96 INFO SeBS-1d31: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+23:02:41,133 INFO WalletRemote-9c63: Generating unique resource name wallet-remote-3959ebb2
+23:02:41,135 INFO minio.Minio-fd96: Initialize a new bucket for benchmarks
+23:02:41,140 INFO minio.Minio-fd96: Created bucket sebs-benchmarks-wallet-remote-3959ebb2
+23:02:41,147 INFO Benchmark-face: Building benchmark 110.dynamic-html. Reason: no cached code package.
+23:02:41,169 INFO Benchmark-face: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+23:02:41,170 INFO WalletRemote-9c63: Function size 0.000006 MB
+23:02:41,171 INFO Benchmark-face: Created code package (source hash: b4d18045a7201aec9b971c94c809ec11), for run on wallet_remote with python:3.11
+23:02:41,176 INFO WalletRemote-9c63: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+23:02:41,362 INFO WalletRemote-9c63: starting wallet server
+23:02:42,367 INFO Experiment.PerfCost-464b: Begin experiment
+23:02:42,368 INFO Experiment.PerfCost-464b: Begin sequential experiments
+23:02:50,225 INFO Experiment.PerfCost-464b: Processed 1 samples out of 5, 0 errors
+23:03:00,962 INFO Experiment.PerfCost-464b: Processed 2 samples out of 5, 0 errors
+23:03:11,702 INFO Experiment.PerfCost-464b: Processed 3 samples out of 5, 0 errors
+23:03:22,441 INFO Experiment.PerfCost-464b: Processed 4 samples out of 5, 0 errors
+23:03:33,181 INFO Experiment.PerfCost-464b: Processed 5 samples out of 5, 0 errors
+23:03:38,182 INFO Experiment.PerfCost-464b: Mean 737.3979999999999 [ms], median 737.774 [ms], std 0.6646903038257611, CV 0.09013996563941877
+23:03:38,184 INFO Experiment.PerfCost-464b: Parametric CI (Student's t-distribution) 0.95 from 736.4752619297352 to 738.3207380702646, within 0.12513433319112607% of mean
+23:03:38,186 INFO Experiment.PerfCost-464b: Parametric CI (Student's t-distribution) 0.99 from 735.8678513905379 to 738.9281486094619, within 0.20750647675502285% of mean
+23:03:38,191 INFO WalletRemote.WalletRemoteFunction-c446: Stopping function
+23:03:38,196 INFO WalletRemote.WalletRemoteFunction-c446: Function stopped succesfully
