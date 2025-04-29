@@ -1,22 +1,22 @@
-23:21:49,826 INFO SeBS-98c1: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition
-23:21:49,864 INFO WalletRemote-bdcd: Generating unique resource name wallet-remote-e60c5352
-23:21:49,867 INFO minio.Minio-a64c: Initialize a new bucket for benchmarks
-23:21:49,871 INFO minio.Minio-a64c: Created bucket sebs-benchmarks-wallet-remote-e60c5352
-23:21:49,874 INFO Benchmark-57e9: Building benchmark 411.image-recognition. Reason: no cached code package.
-23:21:49,898 INFO Benchmark-57e9: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
-23:21:49,899 INFO WalletRemote-bdcd: Function size 0.000006 MB
-23:21:49,901 INFO Benchmark-57e9: Created code package (source hash: 76c9efa5cbe1b1b4678e5937e35556c9), for run on wallet_remote with python:3.11
-23:21:49,908 INFO WalletRemote-bdcd: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
-23:21:50,101 INFO WalletRemote-bdcd: starting wallet server
-23:21:51,552 INFO Experiment.PerfCost-14cd: Begin experiment
-23:21:51,552 INFO Experiment.PerfCost-14cd: Begin sequential experiments
-23:22:35,988 INFO Experiment.PerfCost-14cd: Processed 1 samples out of 5, 0 errors
-23:22:59,294 INFO Experiment.PerfCost-14cd: Processed 2 samples out of 5, 0 errors
-23:23:22,593 INFO Experiment.PerfCost-14cd: Processed 3 samples out of 5, 0 errors
-23:23:45,906 INFO Experiment.PerfCost-14cd: Processed 4 samples out of 5, 0 errors
-23:24:09,227 INFO Experiment.PerfCost-14cd: Processed 5 samples out of 5, 0 errors
-23:24:14,229 INFO Experiment.PerfCost-14cd: Mean 13305.914999999999 [ms], median 13304.747 [ms], std 8.854903048593686, CV 0.06654862178657903
-23:24:14,231 INFO Experiment.PerfCost-14cd: Parametric CI (Student's t-distribution) 0.95 from 13293.622423886865 to 13318.207576113133, within 0.09238429760849737% of mean
-23:24:14,232 INFO Experiment.PerfCost-14cd: Parametric CI (Student's t-distribution) 0.99 from 13285.530593143541 to 13326.299406856457, within 0.15319808413369276% of mean
-23:24:14,236 INFO WalletRemote.WalletRemoteFunction-ff3d: Stopping function
-23:24:14,240 INFO WalletRemote.WalletRemoteFunction-ff3d: Function stopped succesfully
+17:52:31,987 INFO SeBS-e927: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition
+17:52:32,22 INFO WalletRemote-a3e8: Generating unique resource name wallet-remote-0fdec797
+17:52:32,25 INFO minio.Minio-4eda: Initialize a new bucket for benchmarks
+17:52:32,29 INFO minio.Minio-4eda: Created bucket sebs-benchmarks-wallet-remote-0fdec797
+17:52:32,32 INFO Benchmark-48aa: Building benchmark 411.image-recognition. Reason: no cached code package.
+17:52:32,56 INFO Benchmark-48aa: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+17:52:32,57 INFO WalletRemote-a3e8: Function size 0.000006 MB
+17:52:32,59 INFO Benchmark-48aa: Created code package (source hash: d839ac9c98e93ce0c7b1577d46de47a8), for run on wallet_remote with python:3.11
+17:52:32,65 INFO WalletRemote-a3e8: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+17:52:32,248 INFO WalletRemote-a3e8: starting wallet server
+17:52:33,707 INFO Experiment.PerfCost-7a0b: Begin experiment
+17:52:33,707 INFO Experiment.PerfCost-7a0b: Begin sequential experiments
+17:53:17,407 INFO Experiment.PerfCost-7a0b: Processed 1 samples out of 5, 0 errors
+17:53:40,332 INFO Experiment.PerfCost-7a0b: Processed 2 samples out of 5, 0 errors
+17:54:03,230 INFO Experiment.PerfCost-7a0b: Processed 3 samples out of 5, 0 errors
+17:54:26,158 INFO Experiment.PerfCost-7a0b: Processed 4 samples out of 5, 0 errors
+17:54:49,62 INFO Experiment.PerfCost-7a0b: Processed 5 samples out of 5, 0 errors
+17:54:54,64 INFO Experiment.PerfCost-7a0b: Mean 12912.3002 [ms], median 12912.793 [ms], std 11.962409546575541, CV 0.09264352099384694
+17:54:54,66 INFO Experiment.PerfCost-7a0b: Parametric CI (Student's t-distribution) 0.95 from 12895.69371328402 to 12928.90668671598, within 0.12860982519582592% of mean
+17:54:54,67 INFO Experiment.PerfCost-7a0b: Parametric CI (Student's t-distribution) 0.99 from 12884.762165778417 to 12939.838234221583, within 0.21326977993884524% of mean
+17:54:54,71 INFO WalletRemote.WalletRemoteFunction-efbc: Stopping function
+17:54:54,75 INFO WalletRemote.WalletRemoteFunction-efbc: Function stopped succesfully

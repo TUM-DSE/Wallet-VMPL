@@ -177,6 +177,8 @@ def invocation_latency(variants, benchmarks):
     bench_types = ["cold"] #excluded warm because of non-synced time measurements in/out of the CVM
     for variant in variants:
         print(variant)
+        if variant == "wallet_cow_prealloc":
+            continue
         for bench in benchmarks:
             print(bench)
             for bench_type in bench_types:
@@ -209,6 +211,32 @@ def invocation_latency(variants, benchmarks):
                 else:
                     print(f"Result path {result_path} not found")
                     exit()
+    #Handle wallet differently
+    print("wallet_cow_prealloc")
+    for bench in benchmarks:
+        print(bench)
+        for bench_type in bench_types:
+            result_path = Path(f"./results/{variant}/{bench}/perf-cost/{bench_type}_results-processed.json")
+            end_times = Path(f"./results/{variant}/time-trace-{bench}")
+            with open(end_times, "r") as f:
+                end_data = f.readlines()
+                end_data = [int(x.split(":")[0]) for x in end_data if "255 255" in x]
+            with open(result_path) as f:
+                d = json.load(f)
+            if d.get("_invocations"):
+                d = d["_invocations"]
+                d = d[list(d.keys())[0]]
+                for k in d.keys():
+                    e = d[k]
+                    start = datetime.strptime(e["times"]["client_begin"], "%Y-%m-%d %H:%M:%S.%f").timestamp()
+                    end = 1e100
+                    diff_ = 1e100
+                    for et in end_data:
+                        diff = (et / 1e9) - start
+                        if diff < diff_ and diff > 0:
+                            diff_ = diff
+                            end = et /1e9
+                    output_file.write(f"wallet_cow_prealloc,{bench},{bench_type},{end-start}\n")
     output_file.close()
     # Calculate the mean invocation latency for each variant, benchmark, and type
     # df = pd.read_csv(output_file_path)
@@ -391,30 +419,38 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
     
     for bench in benchmarks:
         # Try to find data in "warm" or "sequential" results
-        result_paths = [
-            Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/warm_results-processed.json"),
-            Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/sequential_results-processed.json")
-        ]
-        
-        for result_path in result_paths:
-            if result_path.exists():
-                with open(result_path) as f:
-                    d = json.load(f)
-                if d.get("_invocations"):
-                    d = d["_invocations"]
-                    d = d[list(d.keys())[0]]
-                    for k in d.keys():
-                        e = d[k]
-                        start = datetime.strptime(e["times"]["client_begin"], "%Y-%m-%d %H:%M:%S.%f").timestamp()
-                        end = float(e["output"]["begin"])
-                        if end > start:  # Skip invalid data points
-                            lukewarm_data.append({
-                                'benchmark': bench,
-                                'type': 'warm',  # Mark as warm for lukewarm
-                                'invocation_latency': end - start
-                            })
-                break  # Use first valid result file found
-    
+        #result_paths = [
+        #    Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/result.csv"),
+        #]
+        print(bench)
+        for bench_type in ["sequential"]:
+            result_path = Path(f"./results/{lukewarm_variant}/{bench}/perf-cost/{bench_type}_results-processed.json")
+            end_times = Path(f"./results/{lukewarm_variant}/time-trace-{bench}")
+            with open(end_times, "r") as f:
+                end_data = f.readlines()
+                end_data = [int(x.split(":")[0]) for x in end_data if "255 255" in x]
+            with open(result_path) as f:
+                d = json.load(f)
+            if d.get("_invocations"):
+                d = d["_invocations"]
+                d = d[list(d.keys())[0]]
+                for k in d.keys():
+                    e = d[k]
+                    start = datetime.strptime(e["times"]["client_begin"], "%Y-%m-%d %H:%M:%S.%f").timestamp()
+                    end = 1e100
+                    diff_ = 1e100
+                    for et in end_data:
+                        diff = (et / 1e9) - start
+                        if diff < diff_ and diff > 0:
+                            diff_ = diff
+                            end = et /1e9
+                    lukewarm_data.append({
+                        "benchmark": bench,
+                        "type": "warm",
+                        "invocation_latency": end - start
+                    })
+    #print(lukewarm_data)
+    #exit()
     # Setup the plot for cold start invocation latency
     #fig, ax = plt.subplots(figsize=(figwidth, figheight2))
     fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.15, bottom_margin = 0.35)
@@ -523,7 +559,6 @@ def plot_invocation_latency_cdf_with_lukewarm(df, variants, benchmarks, output_d
         # Add lukewarm data for this benchmark if available
         if lukewarm_data:
             lukewarm_bench_data = [item for item in lukewarm_data if item['benchmark'] == bench]
-            
             if lukewarm_bench_data:
                 lukewarm_latencies = [item['invocation_latency'] for item in lukewarm_bench_data]
                 
@@ -992,6 +1027,7 @@ def print_performance_comparison(df, benchmarks, metric, exec_type, collect_resu
         variant_data = filtered_df[filtered_df['variant'] == variant]
         # Calculate geometric mean (using log and exp to avoid numerical issues)
         values = variant_data[metric].values
+        print(variant,values)
         # Avoid zeros or negative values for geometric mean
         if np.all(values > 0):
             geomean = np.exp(np.mean(np.log(values)))
@@ -999,7 +1035,7 @@ def print_performance_comparison(df, benchmarks, metric, exec_type, collect_resu
         else:
             # Fallback if there are zeros or negative values
             geomeans[variant] = np.nan
-    
+    print(geomeans)
     # Store or print the results
     result_lines = []
     result_lines.append(f"\n{metric} ({exec_type} start) - Geometric Means:")
@@ -1360,9 +1396,9 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
         plt.sca(ax)
         plt.yticks(fontsize=TICKS_FONTSIZE)
         ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
-        ax.set_xticks(variant_positions)
+        ax.set_xticks(variant_positions-0.2)
         xlabels = [benchmark.split('.')[1] for benchmark in plot_benchmarks]  # No 'Geo. Mean'
-        ax.set_xticklabels(xlabels, rotation=18, fontsize=TICKS_FONTSIZE)
+        ax.set_xticklabels(xlabels,rotation=18, fontsize=TICKS_FONTSIZE)
         
         # Add gridlines
         ax.yaxis.grid(True, linestyle='--', alpha=0.7)
@@ -1512,12 +1548,12 @@ def main():
     df = df[~filter]
     VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc']
 
-    # for metric in metrics:
-    #     for exec_type in exec_types:
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
-    #         create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
-    #         # Collect performance comparison results instead of printing immediately
-    #         print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
+    for metric in metrics:
+        for exec_type in exec_types:
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output')
+            create_complete_plot(df, common_benchmarks, metric, exec_type, 'output', 'log')
+            # Collect performance comparison results instead of printing immediately
+            print_performance_comparison(df, common_benchmarks, metric, exec_type, all_comparison_results)
     
     # # Create combined warm/hot plots for each metric
     # for metric in metrics:

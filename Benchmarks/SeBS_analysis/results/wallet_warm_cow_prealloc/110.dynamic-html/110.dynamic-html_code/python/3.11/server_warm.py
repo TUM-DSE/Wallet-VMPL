@@ -31,6 +31,7 @@ def process_request():
         output_len = 36000 # 35571 -> 36000 for benchmark 110
         trustlet.invoke_trustlet_bin("", 0)
         begin = datetime.datetime.now()
+        outb_lib.outb()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()
         ret = trustlet.invoke_trustlet_bin("", output_len)

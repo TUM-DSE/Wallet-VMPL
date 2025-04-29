@@ -1,39 +1,39 @@
-12:52:29,120 INFO SeBS-3548: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
-12:52:29,194 INFO Wallet-1b35: Generating unique resource name wallet-2b7045f8
-12:52:29,196 INFO minio.Minio-ed4b: Initialize a new bucket for benchmarks
-12:52:29,201 INFO minio.Minio-ed4b: Created bucket sebs-benchmarks-wallet-2b7045f8
-12:52:29,369 INFO Benchmark-f7da: Building benchmark 504.dna-visualisation. Reason: no cached code package.
-12:52:29,467 INFO Benchmark-f7da: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
-12:52:29,499 INFO Wallet-1b35: Function size 0.000005 MB
-12:52:29,524 INFO Benchmark-f7da: Created code package (source hash: 5c901ef5b25a9c44e215daac414b629f), for run on wallet with python:3.11
-12:52:29,709 INFO Wallet-1b35: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
-12:52:30,423 INFO Experiment.PerfCost-5282: Begin experiment
-12:52:30,423 INFO Experiment.PerfCost-5282: Begin cold experiments
-12:52:30,427 INFO Wallet.WalletFunction-4bc1: Not stopping function as it was not running
-12:53:02,551 INFO Experiment.PerfCost-5282: Processed 1 samples out of 5, 0 errors
-12:53:07,556 INFO Wallet.WalletFunction-4bc1: Stopping function
-12:53:07,557 INFO Wallet.WalletFunction-4bc1: Function stopped succesfully
-12:53:37,131 INFO Experiment.PerfCost-5282: Processed 2 samples out of 5, 0 errors
-12:53:42,137 INFO Wallet.WalletFunction-4bc1: Stopping function
-12:53:42,137 INFO Wallet.WalletFunction-4bc1: Function stopped succesfully
-12:54:09,370 INFO Experiment.PerfCost-5282: Processed 3 samples out of 5, 0 errors
-12:54:14,372 INFO Wallet.WalletFunction-4bc1: Stopping function
-12:54:14,373 INFO Wallet.WalletFunction-4bc1: Function stopped succesfully
-12:54:42,631 INFO Experiment.PerfCost-5282: Processed 4 samples out of 5, 0 errors
-12:54:47,637 INFO Wallet.WalletFunction-4bc1: Stopping function
-12:54:47,638 INFO Wallet.WalletFunction-4bc1: Function stopped succesfully
-12:55:16,924 INFO Experiment.PerfCost-5282: Processed 5 samples out of 5, 0 errors
-12:55:21,933 INFO Experiment.PerfCost-5282: Mean 24289.0326 [ms], median 24280.428 [ms], std 1637.418528747932, CV 6.74139046916151
-12:55:21,939 INFO Experiment.PerfCost-5282: Parametric CI (Student's t-distribution) 0.95 from 22015.93127034881 to 26562.133929651187, within 9.358550285165283% of mean
-12:55:21,941 INFO Experiment.PerfCost-5282: Parametric CI (Student's t-distribution) 0.99 from 20519.61747471514 to 28058.447725284856, within 15.51900064263925% of mean
-12:55:21,944 INFO Experiment.PerfCost-5282: Begin sequential experiments
-12:55:49,230 INFO Experiment.PerfCost-5282: Processed 1 samples out of 5, 0 errors
-12:56:08,513 INFO Experiment.PerfCost-5282: Processed 2 samples out of 5, 0 errors
-12:56:27,902 INFO Experiment.PerfCost-5282: Processed 3 samples out of 5, 0 errors
-12:56:47,240 INFO Experiment.PerfCost-5282: Processed 4 samples out of 5, 0 errors
-12:57:06,569 INFO Experiment.PerfCost-5282: Processed 5 samples out of 5, 0 errors
-12:57:11,573 INFO Experiment.PerfCost-5282: Mean 9320.84 [ms], median 9318.736 [ms], std 34.84674844515613, CV 0.37385845530184114
-12:57:11,576 INFO Experiment.PerfCost-5282: Parametric CI (Student's t-distribution) 0.95 from 9272.464957923694 to 9369.215042076306, within 0.5189987391298023% of mean
-12:57:11,578 INFO Experiment.PerfCost-5282: Parametric CI (Student's t-distribution) 0.99 from 9240.621132099068 to 9401.058867900932, within 0.8606398983453456% of mean
-12:57:11,582 INFO Wallet.WalletFunction-4bc1: Stopping function
-12:57:11,588 INFO Wallet.WalletFunction-4bc1: Function stopped succesfully
+02:20:51,6 INFO SeBS-d988: Created experiment output at /root/Benchmarks/SeBS/504.dna-visualisation
+02:20:51,96 INFO Wallet-9306: Generating unique resource name wallet-6a9ba66a
+02:20:51,98 INFO minio.Minio-8aeb: Initialize a new bucket for benchmarks
+02:20:51,102 INFO minio.Minio-8aeb: Created bucket sebs-benchmarks-wallet-6a9ba66a
+02:20:51,275 INFO Benchmark-d2aa: Building benchmark 504.dna-visualisation. Reason: no cached code package.
+02:20:51,378 INFO Benchmark-d2aa: There is no Docker build image for wallet run in python, thus skipping the Docker-based installation of dependencies.
+02:20:51,411 INFO Wallet-9306: Function size 0.000005 MB
+02:20:51,438 INFO Benchmark-d2aa: Created code package (source hash: 23d725ddb360885101d4ef8bc9ec9dc1), for run on wallet with python:3.11
+02:20:51,633 INFO Wallet-9306: Creating new function! Reason: function 504.dna-visualisation-python-3.11 not found in cache.
+02:20:52,360 INFO Experiment.PerfCost-d863: Begin experiment
+02:20:52,361 INFO Experiment.PerfCost-d863: Begin cold experiments
+02:20:52,364 INFO Wallet.WalletFunction-bbb1: Not stopping function as it was not running
+02:21:23,742 INFO Experiment.PerfCost-d863: Processed 1 samples out of 5, 0 errors
+02:21:28,748 INFO Wallet.WalletFunction-bbb1: Stopping function
+02:21:28,749 INFO Wallet.WalletFunction-bbb1: Function stopped succesfully
+02:21:57,612 INFO Experiment.PerfCost-d863: Processed 2 samples out of 5, 0 errors
+02:22:02,618 INFO Wallet.WalletFunction-bbb1: Stopping function
+02:22:02,618 INFO Wallet.WalletFunction-bbb1: Function stopped succesfully
+02:22:29,84 INFO Experiment.PerfCost-d863: Processed 3 samples out of 5, 0 errors
+02:22:34,88 INFO Wallet.WalletFunction-bbb1: Stopping function
+02:22:34,89 INFO Wallet.WalletFunction-bbb1: Function stopped succesfully
+02:23:01,687 INFO Experiment.PerfCost-d863: Processed 4 samples out of 5, 0 errors
+02:23:06,693 INFO Wallet.WalletFunction-bbb1: Stopping function
+02:23:06,693 INFO Wallet.WalletFunction-bbb1: Function stopped succesfully
+02:23:35,389 INFO Experiment.PerfCost-d863: Processed 5 samples out of 5, 0 errors
+02:23:40,398 INFO Experiment.PerfCost-d863: Mean 23593.8972 [ms], median 23689.698 [ms], std 1634.1988215459462, CV 6.926362388092231
+02:23:40,405 INFO Experiment.PerfCost-d863: Parametric CI (Student's t-distribution) 0.95 from 21325.26554049937 to 25862.528859500628, within 9.615332474622413% of mean
+02:23:40,407 INFO Experiment.PerfCost-d863: Parametric CI (Student's t-distribution) 0.99 from 19831.893993423204 to 27355.900406576795, within 15.9448147742917% of mean
+02:23:40,410 INFO Experiment.PerfCost-d863: Begin sequential experiments
+02:24:06,459 INFO Experiment.PerfCost-d863: Processed 1 samples out of 5, 0 errors
+02:24:25,253 INFO Experiment.PerfCost-d863: Processed 2 samples out of 5, 0 errors
+02:24:43,994 INFO Experiment.PerfCost-d863: Processed 3 samples out of 5, 0 errors
+02:25:02,824 INFO Experiment.PerfCost-d863: Processed 4 samples out of 5, 0 errors
+02:25:21,547 INFO Experiment.PerfCost-d863: Processed 5 samples out of 5, 0 errors
+02:25:26,553 INFO Experiment.PerfCost-d863: Mean 8754.9264 [ms], median 8729.683 [ms], std 39.47239673797327, CV 0.4508592640821431
+02:25:26,555 INFO Experiment.PerfCost-d863: Parametric CI (Student's t-distribution) 0.95 from 8700.129928643215 to 8809.722871356786, within 0.6258929984469696% of mean
+02:25:26,557 INFO Experiment.PerfCost-d863: Parametric CI (Student's t-distribution) 0.99 from 8664.059070308102 to 8845.793729691899, within 1.0378994127454766% of mean
+02:25:26,561 INFO Wallet.WalletFunction-bbb1: Stopping function
+02:25:26,568 INFO Wallet.WalletFunction-bbb1: Function stopped succesfully

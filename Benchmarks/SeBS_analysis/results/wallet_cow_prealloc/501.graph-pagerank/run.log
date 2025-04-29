@@ -1,40 +1,40 @@
-21:42:36,787 INFO SeBS-0839: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank
-21:42:36,821 INFO WalletRemote-715c: Generating unique resource name wallet-remote-09c21911
-21:42:36,824 INFO minio.Minio-da2e: Initialize a new bucket for benchmarks
-21:42:36,828 INFO minio.Minio-da2e: Created bucket sebs-benchmarks-wallet-remote-09c21911
-21:42:36,833 INFO Benchmark-0501: Building benchmark 501.graph-pagerank. Reason: no cached code package.
-21:42:36,837 INFO Benchmark-0501: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
-21:42:36,839 INFO WalletRemote-715c: Function size 0.000005 MB
-21:42:36,840 INFO Benchmark-0501: Created code package (source hash: 3029152b4d4410adda3c21bd5ced5212), for run on wallet_remote with python:3.11
-21:42:36,846 INFO WalletRemote-715c: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
-21:42:37,31 INFO WalletRemote-715c: starting wallet server
-21:42:38,36 INFO Experiment.PerfCost-1b3b: Begin experiment
-21:42:38,36 INFO Experiment.PerfCost-1b3b: Begin cold experiments
-21:42:38,39 INFO WalletRemote.WalletRemoteFunction-e3a8: Not stopping function as it was not running
-21:42:45,458 INFO Experiment.PerfCost-1b3b: Processed 1 samples out of 5, 0 errors
-21:42:50,459 INFO WalletRemote.WalletRemoteFunction-e3a8: Stopping function
-21:42:50,464 INFO WalletRemote.WalletRemoteFunction-e3a8: Function stopped succesfully
-21:42:57,883 INFO Experiment.PerfCost-1b3b: Processed 2 samples out of 5, 0 errors
-21:43:02,883 INFO WalletRemote.WalletRemoteFunction-e3a8: Stopping function
-21:43:02,888 INFO WalletRemote.WalletRemoteFunction-e3a8: Function stopped succesfully
-21:43:10,331 INFO Experiment.PerfCost-1b3b: Processed 3 samples out of 5, 0 errors
-21:43:15,331 INFO WalletRemote.WalletRemoteFunction-e3a8: Stopping function
-21:43:15,336 INFO WalletRemote.WalletRemoteFunction-e3a8: Function stopped succesfully
-21:43:22,773 INFO Experiment.PerfCost-1b3b: Processed 4 samples out of 5, 0 errors
-21:43:27,773 INFO WalletRemote.WalletRemoteFunction-e3a8: Stopping function
-21:43:27,778 INFO WalletRemote.WalletRemoteFunction-e3a8: Function stopped succesfully
-21:43:35,230 INFO Experiment.PerfCost-1b3b: Processed 5 samples out of 5, 0 errors
-21:43:40,231 INFO Experiment.PerfCost-1b3b: Mean 2432.1596 [ms], median 2434.919 [ms], std 13.164700096849918, CV 0.5412761603658707
-21:43:40,233 INFO Experiment.PerfCost-1b3b: Parametric CI (Student's t-distribution) 0.95 from 2413.884066427352 to 2450.435133572648, within 0.7514117730040362% of mean
-21:43:40,235 INFO Experiment.PerfCost-1b3b: Parametric CI (Student's t-distribution) 0.99 from 2401.8538359001823 to 2462.4653640998176, within 1.2460433969801028% of mean
-21:43:40,238 INFO Experiment.PerfCost-1b3b: Begin sequential experiments
-21:43:45,439 INFO Experiment.PerfCost-1b3b: Processed 1 samples out of 5, 0 errors
-21:43:55,544 INFO Experiment.PerfCost-1b3b: Processed 2 samples out of 5, 0 errors
-21:44:05,649 INFO Experiment.PerfCost-1b3b: Processed 3 samples out of 5, 0 errors
-21:44:15,753 INFO Experiment.PerfCost-1b3b: Processed 4 samples out of 5, 0 errors
-21:44:25,858 INFO Experiment.PerfCost-1b3b: Processed 5 samples out of 5, 0 errors
-21:44:30,859 INFO Experiment.PerfCost-1b3b: Mean 102.93139999999998 [ms], median 103.0 [ms], std 0.3930829937812097, CV 0.381888319581012
-21:44:30,861 INFO Experiment.PerfCost-1b3b: Parametric CI (Student's t-distribution) 0.95 from 102.38571332298982 to 103.47708667701015, within 0.5301459778164554% of mean
-21:44:30,862 INFO Experiment.PerfCost-1b3b: Parametric CI (Student's t-distribution) 0.99 from 102.02650430214554 to 103.83629569785442, within 0.8791250268182912% of mean
-21:44:30,865 INFO WalletRemote.WalletRemoteFunction-e3a8: Stopping function
-21:44:30,870 INFO WalletRemote.WalletRemoteFunction-e3a8: Function stopped succesfully
+19:03:16,356 INFO SeBS-968c: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank
+19:03:16,389 INFO WalletRemote-9f49: Generating unique resource name wallet-remote-f1b59e6f
+19:03:16,392 INFO minio.Minio-3ccf: Initialize a new bucket for benchmarks
+19:03:16,396 INFO minio.Minio-3ccf: Created bucket sebs-benchmarks-wallet-remote-f1b59e6f
+19:03:16,401 INFO Benchmark-2afa: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+19:03:16,406 INFO Benchmark-2afa: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+19:03:16,407 INFO WalletRemote-9f49: Function size 0.000006 MB
+19:03:16,408 INFO Benchmark-2afa: Created code package (source hash: 8f0e7e9de26c08e8c1dbefc94f823aaa), for run on wallet_remote with python:3.11
+19:03:16,415 INFO WalletRemote-9f49: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+19:03:16,598 INFO WalletRemote-9f49: starting wallet server
+19:03:17,604 INFO Experiment.PerfCost-77a6: Begin experiment
+19:03:17,604 INFO Experiment.PerfCost-77a6: Begin cold experiments
+19:03:17,607 INFO WalletRemote.WalletRemoteFunction-741a: Not stopping function as it was not running
+19:03:25,7 INFO Experiment.PerfCost-77a6: Processed 1 samples out of 5, 0 errors
+19:03:30,7 INFO WalletRemote.WalletRemoteFunction-741a: Stopping function
+19:03:30,12 INFO WalletRemote.WalletRemoteFunction-741a: Function stopped succesfully
+19:03:37,445 INFO Experiment.PerfCost-77a6: Processed 2 samples out of 5, 0 errors
+19:03:42,445 INFO WalletRemote.WalletRemoteFunction-741a: Stopping function
+19:03:42,450 INFO WalletRemote.WalletRemoteFunction-741a: Function stopped succesfully
+19:03:49,882 INFO Experiment.PerfCost-77a6: Processed 3 samples out of 5, 0 errors
+19:03:54,882 INFO WalletRemote.WalletRemoteFunction-741a: Stopping function
+19:03:54,887 INFO WalletRemote.WalletRemoteFunction-741a: Function stopped succesfully
+19:04:02,283 INFO Experiment.PerfCost-77a6: Processed 4 samples out of 5, 0 errors
+19:04:07,284 INFO WalletRemote.WalletRemoteFunction-741a: Stopping function
+19:04:07,288 INFO WalletRemote.WalletRemoteFunction-741a: Function stopped succesfully
+19:04:14,699 INFO Experiment.PerfCost-77a6: Processed 5 samples out of 5, 0 errors
+19:04:19,701 INFO Experiment.PerfCost-77a6: Mean 2412.677 [ms], median 2409.723 [ms], std 15.431238278245871, CV 0.6395898944718199
+19:04:19,703 INFO Experiment.PerfCost-77a6: Parametric CI (Student's t-distribution) 0.95 from 2391.2550070076118 to 2434.0989929923885, within 0.8878931159201322% of mean
+19:04:19,704 INFO Experiment.PerfCost-77a6: Parametric CI (Student's t-distribution) 0.99 from 2377.1535574917657 to 2448.2004425082346, within 1.4723662764735783% of mean
+19:04:19,708 INFO Experiment.PerfCost-77a6: Begin sequential experiments
+19:04:24,919 INFO Experiment.PerfCost-77a6: Processed 1 samples out of 5, 0 errors
+19:04:35,24 INFO Experiment.PerfCost-77a6: Processed 2 samples out of 5, 0 errors
+19:04:45,128 INFO Experiment.PerfCost-77a6: Processed 3 samples out of 5, 0 errors
+19:04:55,233 INFO Experiment.PerfCost-77a6: Processed 4 samples out of 5, 0 errors
+19:05:05,337 INFO Experiment.PerfCost-77a6: Processed 5 samples out of 5, 0 errors
+19:05:10,338 INFO Experiment.PerfCost-77a6: Mean 102.8522 [ms], median 102.868 [ms], std 0.3532706611084474, CV 0.34347409302712767
+19:05:10,340 INFO Experiment.PerfCost-77a6: Parametric CI (Student's t-distribution) 0.95 from 102.36178170107773 to 103.34261829892226, within 0.4768184821737063% of mean
+19:05:10,342 INFO Experiment.PerfCost-77a6: Parametric CI (Student's t-distribution) 0.99 from 102.03895418048444 to 103.66544581951555, within 0.7906936550852173% of mean
+19:05:10,345 INFO WalletRemote.WalletRemoteFunction-741a: Stopping function
+19:05:10,349 INFO WalletRemote.WalletRemoteFunction-741a: Function stopped succesfully

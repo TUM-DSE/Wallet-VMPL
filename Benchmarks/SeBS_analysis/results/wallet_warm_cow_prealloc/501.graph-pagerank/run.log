@@ -1,22 +1,22 @@
-23:29:38,201 INFO SeBS-ec5a: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank
-23:29:38,236 INFO WalletRemote-4bde: Generating unique resource name wallet-remote-fd3860b6
-23:29:38,239 INFO minio.Minio-57f5: Initialize a new bucket for benchmarks
-23:29:38,244 INFO minio.Minio-57f5: Created bucket sebs-benchmarks-wallet-remote-fd3860b6
-23:29:38,249 INFO Benchmark-b0d9: Building benchmark 501.graph-pagerank. Reason: no cached code package.
-23:29:38,254 INFO Benchmark-b0d9: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
-23:29:38,255 INFO WalletRemote-4bde: Function size 0.000006 MB
-23:29:38,256 INFO Benchmark-b0d9: Created code package (source hash: e961e762386d220e0d38bdd5da1f705f), for run on wallet_remote with python:3.11
-23:29:38,262 INFO WalletRemote-4bde: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
-23:29:38,455 INFO WalletRemote-4bde: starting wallet server
-23:29:39,460 INFO Experiment.PerfCost-c993: Begin experiment
-23:29:39,460 INFO Experiment.PerfCost-c993: Begin sequential experiments
-23:29:47,740 INFO Experiment.PerfCost-c993: Processed 1 samples out of 5, 0 errors
-23:29:58,611 INFO Experiment.PerfCost-c993: Processed 2 samples out of 5, 0 errors
-23:30:09,480 INFO Experiment.PerfCost-c993: Processed 3 samples out of 5, 0 errors
-23:30:20,348 INFO Experiment.PerfCost-c993: Processed 4 samples out of 5, 0 errors
-23:30:31,217 INFO Experiment.PerfCost-c993: Processed 5 samples out of 5, 0 errors
-23:30:36,218 INFO Experiment.PerfCost-c993: Mean 868.1582000000001 [ms], median 868.324 [ms], std 1.2644023726646336, CV 0.14564193169685358
-23:30:36,220 INFO Experiment.PerfCost-c993: Parametric CI (Student's t-distribution) 0.95 from 866.4029281107074 to 869.9134718892927, within 0.202183414185647% of mean
-23:30:36,222 INFO Experiment.PerfCost-c993: Parametric CI (Student's t-distribution) 0.99 from 865.2474857603044 to 871.0689142396958, within 0.3352746353943004% of mean
-23:30:36,225 INFO WalletRemote.WalletRemoteFunction-edb9: Stopping function
-23:30:36,229 INFO WalletRemote.WalletRemoteFunction-edb9: Function stopped succesfully
+18:00:18,239 INFO SeBS-d4f9: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/501.graph-pagerank
+18:00:18,273 INFO WalletRemote-3c4e: Generating unique resource name wallet-remote-25c6c675
+18:00:18,275 INFO minio.Minio-efad: Initialize a new bucket for benchmarks
+18:00:18,279 INFO minio.Minio-efad: Created bucket sebs-benchmarks-wallet-remote-25c6c675
+18:00:18,284 INFO Benchmark-76dd: Building benchmark 501.graph-pagerank. Reason: no cached code package.
+18:00:18,288 INFO Benchmark-76dd: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+18:00:18,289 INFO WalletRemote-3c4e: Function size 0.000006 MB
+18:00:18,291 INFO Benchmark-76dd: Created code package (source hash: 8f0e7e9de26c08e8c1dbefc94f823aaa), for run on wallet_remote with python:3.11
+18:00:18,297 INFO WalletRemote-3c4e: Creating new function! Reason: function 501.graph-pagerank-python-3.11 not found in cache.
+18:00:18,479 INFO WalletRemote-3c4e: starting wallet server
+18:00:19,484 INFO Experiment.PerfCost-b132: Begin experiment
+18:00:19,484 INFO Experiment.PerfCost-b132: Begin sequential experiments
+18:00:27,790 INFO Experiment.PerfCost-b132: Processed 1 samples out of 5, 0 errors
+18:00:38,658 INFO Experiment.PerfCost-b132: Processed 2 samples out of 5, 0 errors
+18:00:49,525 INFO Experiment.PerfCost-b132: Processed 3 samples out of 5, 0 errors
+18:01:00,394 INFO Experiment.PerfCost-b132: Processed 4 samples out of 5, 0 errors
+18:01:11,255 INFO Experiment.PerfCost-b132: Processed 5 samples out of 5, 0 errors
+18:01:16,256 INFO Experiment.PerfCost-b132: Mean 864.4154000000001 [ms], median 864.758 [ms], std 2.9534727085246755, CV 0.34167284716638263
+18:01:16,258 INFO Experiment.PerfCost-b132: Parametric CI (Student's t-distribution) 0.95 from 860.3153225775408 to 868.5154774224594, within 0.47431795204705063% of mean
+18:01:16,259 INFO Experiment.PerfCost-b132: Parametric CI (Student's t-distribution) 0.99 from 857.6163657249075 to 871.2144342750927, within 0.7865471016703999% of mean
+18:01:16,262 INFO WalletRemote.WalletRemoteFunction-4312: Stopping function
+18:01:16,267 INFO WalletRemote.WalletRemoteFunction-4312: Function stopped succesfully

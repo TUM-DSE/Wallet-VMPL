@@ -46,6 +46,7 @@ def process_request():
                                # 176404566 nur pickle
                                # 115342263 json dann pickle
         trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()

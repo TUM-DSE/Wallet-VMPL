@@ -1,0 +1,621 @@
++ TARGET=wallet_remote
++ SSH_COMMAND='(cd module; make clean; make -C libwallet/ clean; rm -rf python/build || true)'
++ make ssh_with_command
+make[1]: Entering directory '/scratch/patrick/wallet-current'
+ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.27.10 "(cd module; make clean; make -C libwallet/ clean; rm -rf python/build || true)"
+make -C /lib/modules/6.5.0-svsm/build M=/root/module clean
+make[1]: Entering directory '/usr/src/linux-headers-6.5.0-svsm'
+  CLEAN   /root/module/Module.symvers
+make[1]: Leaving directory '/usr/src/linux-headers-6.5.0-svsm'
+make: Entering directory '/root/module/libwallet'
+rm -f src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o
+rm -f libwallet.*
+make: Leaving directory '/root/module/libwallet'
+make[1]: Leaving directory '/scratch/patrick/wallet-current'
++ SSH_COMMAND='(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko || true)'
++ make ssh_with_command
+make[1]: Entering directory '/scratch/patrick/wallet-current'
+ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.27.10 "(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko || true)"
+make -C libwallet/ libwallet.a
+make[1]: Entering directory '/root/module/libwallet'
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/attest.c -o src/attest.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/attest_microbenchmark.c -o src/attest_microbenchmark.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/lib.c -o src/lib.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/memory.c -o src/memory.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/monitor.c -o src/monitor.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/trustlet.c -o src/trustlet.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/zygote.c -o src/zygote.o
+ar rcs libwallet.a src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o
+make[1]: Leaving directory '/root/module/libwallet'
+make -C libwallet/ libwallet.so
+make[1]: Entering directory '/root/module/libwallet'
+make[1]: Warning: File 'src/zygote.o' has modification time 0.054 s in the future
+cc -shared src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o -o libwallet.so
+make[1]: Leaving directory '/root/module/libwallet'
+make[1]: warning:  Clock skew detected.  Your build may be incomplete.
+make -C /lib/modules/6.5.0-svsm/build M=/root/module modules
+make[1]: Entering directory '/usr/src/linux-headers-6.5.0-svsm'
+  CC [M]  /root/module/src/vmpl.o
+/root/module/src/vmpl.c: In function ‘diff_attestation’:
+/root/module/src/vmpl.c:68:15: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+   68 |       call.r8 = get_pgd_phys();
+      |               ^
+/root/module/src/vmpl.c:77:15: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+   77 |       call.r9 = mcall->monitor_attestation.function_data_ptr;
+      |               ^
+/root/module/src/vmpl.c: In function ‘create_trustlet’:
+/root/module/src/vmpl.c:163:18: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+  163 |         call.rdx = mcall->trustlet.trustlet_data;
+      |                  ^
+In file included from /root/module/src/vmpl.c:18:
+At top level:
+/root/module/include/vmpl.h:127:14: warning: ‘fields’ defined but not used [-Wunused-variable]
+  127 | static Field fields[] = {
+      |              ^~~~~~
+  LD [M]  /root/module/vmpl.o
+make[3]: Warning: File '/root/module/modules.order' has modification time 0.099 s in the future
+  MODPOST /root/module/Module.symvers
+make[3]: warning:  Clock skew detected.  Your build may be incomplete.
+make[3]: Warning: File '/root/module/vmpl.mod.c' has modification time 0.11 s in the future
+  CC [M]  /root/module/vmpl.mod.o
+  LD [M]  /root/module/vmpl.ko
+make[4]: Warning: File '/root/module/vmpl.ko' has modification time 0.11 s in the future
+make[4]: warning:  Clock skew detected.  Your build may be incomplete.
+make[1]: Leaving directory '/usr/src/linux-headers-6.5.0-svsm'
+make[3]: warning:  Clock skew detected.  Your build may be incomplete.
+make[1]: Leaving directory '/scratch/patrick/wallet-current'
++ cd Benchmarks/SeBS/
++ sudo rm -rf cache/
++ ./install.py --no-aws --azure --no-gcp --no-openwhisk --local
+Using existing Python virtualenv at python-venv
+Install Python dependencies with pip
+Install Python dependencies for Azure
+Install Python dependencies for local
+Initialize Docker image for local storage.
+Update typing-extensions (resolving bug with mypy)
+Download benchmarks data
++ source python-venv/bin/activate
+++ deactivate nondestructive
+++ '[' -n '' ']'
+++ '[' -n '' ']'
+++ hash -r
+++ '[' -n '' ']'
+++ unset VIRTUAL_ENV
+++ unset VIRTUAL_ENV_PROMPT
+++ '[' '!' nondestructive = nondestructive ']'
+++ VIRTUAL_ENV=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv
+++ export VIRTUAL_ENV
+++ _OLD_VIRTUAL_PATH=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/nix/store/brxm6ld0k4ipciq4rmh013p48mvqmj8r-clang-tools-17.0.6/bin:/nix/store/glfr70gi7hfaj50mwj2431p8bg60fhqw-python3-3.11.9/bin:/nix/store/ig23ki6sl8dlg3lp0k1l9y9x05wrqs4q-patchelf-0.15.0/bin:/nix/store/4kwk49k8rc8cg8c387kbbjcrl8i0y693-gcc-wrapper-13.2.0/bin:/nix/store/nn152mgpdfcw92b3b03g9kmnlpd9jris-gcc-13.2.0/bin:/nix/store/b93lnii942nnkbpkl6smk8dhv0049di8-glibc-2.39-5-bin/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/zfs2gv7x073znw6b250rgnbij300hva5-binutils-wrapper-2.41/bin:/nix/store/vj57s3h2za2qrfccrvc9b6i7s8mw3ndn-binutils-2.41/bin:/nix/store/68d2plpqcg915a0hxrghpmbf0si8lrln-meson-1.4.0/bin:/nix/store/wvxpsf8xbyz31j0j2azjkndn1wbmh5ia-ninja-1.11.1/bin:/nix/store/0xpv46mb188z226j7cs211zmmi5xw9nj-cmake-3.29.1/bin:/nix/store/39nq7p6jcm9m3xqqm99skwmgsqw4pbbg-pkg-config-wrapper-0.29.2/bin:/nix/store/1kl4qs161vf2yl76a3jf93vij7x37fys-util-linux-minimal-2.39.3-bin/bin:/nix/store/awm61xw8gdyq7abj01vzdw1qhpmzqj27-nasm-2.16.02/bin:/nix/store/xzls0n7708g2ppwz31nzr15x2prh69sn-coreboot-toolchain-x64-24.02/bin:/nix/store/l2647av8j5zbw450vnx3b66df3dwrrwx-guestfs-tools-1.52.0/bin:/nix/store/4a4rirjrxqy7w4gqvkhhw05mp8f9s2pb-libguestfs-1.50.1/bin:/nix/store/lmhw9mikcaxl59abvm3zhj13kkm4swfl-flex-2.6.4/bin:/nix/store/4llr8zwkl30x68ixf8j9w1sjnal9xgw7-gnum4-1.4.19/bin:/nix/store/163r2zlkcqqmpa5px4c9q2qrjw9ffq8j-bison-3.8.2/bin:/nix/store/83jj1xvhy1qljclwn0dvps0lrciz6ymg-perf-tools-unstable-2017-12-19/bin:/nix/store/s85zwyvzmkd19lkvw6zs57vcb4pwkhb0-llvm-binutils-wrapper-17.0.6/bin:/nix/store/xbgkjj06zg6ravbnrkbhkff2k83sznkg-llvm-binutils-17.0.6/bin:/nix/store/ll4fgmcwj311rvin6rnbc0dvkffnsf7y-man-db-2.12.1/bin:/nix/store/535dcbfs7i1da1z9hnfs2m10rbs3frcp-git-lfs-3.5.1/bin:/nix/store/w8v0zazz8rzfr6fl0wawl42l88462wmh-zstd-1.5.6-bin/bin:/nix/store/snycjiabznrrfnij3qkiklbgxkqv0m83-zstd-1.5.6/bin:/nix/store/9ic6r325lik02jadw8qsynqah5h96b9y-python3.11-yq-3.4.1/bin:/nix/store/kqwh8f42rw21f3f9ba3na0dz9xrqg48a-python3.11-argcomplete-3.2.3/bin:/nix/store/k4j8jl7kii9wi8qhbxik7x5sc6xsvi9f-autoconf-2.72/bin:/nix/store/1rxflvd5c8p1zp9v1g4g7lhva55xl56g-automake-1.16.5/bin:/nix/store/wva9jcfp0bq9kfji3rd7vzrhx1793jgx-libtool-2.4.7/bin:/nix/store/jim0yjk96cmp0czrc7faz125w7wxca3m-file-5.45/bin:/nix/store/chsxv0jx2fwhyslf6lm1wfrg42nan4dm-openssl-3.0.13-bin/bin:/nix/store/yh9vxax1chm1jkfmyqapvjxwq7nd138f-rust-bindgen-0.69.4/bin:/nix/store/4w5jkr7ygqpmds9r42a739hrwyspv5xa-rust-cbindgen-0.26.0/bin:/nix/store/lpqh41g09s3civypxmcqy6fdcpkx9kml-gccgo-wrapper-13.2.0/bin:/nix/store/27g8qra2mm386vviqva42j65rwf8nqsn-gccgo-13.2.0/bin:/nix/store/hzxzisypgf5r20x6h9lbykn71l3r3pnx-binutils-wrapper-2.41/bin:/nix/store/6y2k1w5crffd2xw8xyk8zpmc9wh3hkx8-zip-3.0/bin:/nix/store/4jky7rbhqkynz8hxcfyhx5s7bawiangd-inotify-tools-4.23.9.0/bin:/nix/store/4dihdgc6pqc0qniz2z7jicg6q37arpy1-cargo-depgraph-1.5.0/bin:/nix/store/i9hhizqci6igk8a7fjxphg6adzsgm934-cloc-2.00/bin:/nix/store/rlgpybrxcda91ajlkl9g7dqw8v35bf1y-cargo-cache-0.8.3/bin:/nix/store/lml5xjkfhwhcwxa2in7g97b8drwim1qh-libcgroup-3.0/bin:/nix/store/37f8vfj8xvr5byggcl28mhxkhh93pr6k-python3.11-charset-normalizer-3.3.2/bin:/nix/store/qa737iaw7qxnpa8cyir4z1fgyg186mhi-python3.11-numpy-1.26.4/bin:/nix/store/jn4s0anpf0fsqi6kxpx40c48ffqk173p-python3.11-fonttools-4.49.0/bin:/nix/store/y6h88hzxnajxjg7y77djj7hbs296gvn9-python3.11-pybind11-2.12.0/bin:/nix/store/89hrs5x213f2h077mdfcqa2is08wfff6-python3.11-pytest-8.1.1/bin:/nix/store/awd6bmx4i7z2izj8ri5qjddpbw65lnnq-unzip-6.0/bin:/nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/bin:/nix/store/a45895zy04gsf7xc9sbps3zh1z6p8bhr-python3.11-invoke-2.2.0/bin:/nix/store/xzsmb68m1hcjhxwzbwa959766jgmvaw6-python3.11-pip-24.0/bin:/nix/store/8mzvsywg9jhpvf2j4v821ncp5cz1psn2-texlive-2023-env/bin:/nix/store/6nm4wl1709g4yliwfx6f5pmvgbikw1jm-nixos-generate/bin:/nix/store/jx583gh11hfl1nj1a1p0py1skg1s9mvq-ccls-0.20240202/bin:/nix/store/5lqv1pfaacwg2w7nd0qpcx2b5c4cmk1v-gdb-14.2/bin:/nix/store/q1216x47zh0g32swz9k36zhpakzfhvhf-bridge-utils-1.7.1/bin:/nix/store/f8il3wair3rpgma4jim8bx44pqzc6w16-cloud-utils-0.32/bin:/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin:/nix/store/xrx6v6mkn6lzx4sn7a0ilwrpm7jjlf8d-igvm/bin:/nix/store/m92r51bs83kiqkrcg3qgwg7cnc1ksvp9-rust-default-1.77.2/bin:/nix/store/j869vnz3lsxhn71a86j4fkm8r9wajvmp-bpftrace/bin:/nix/store/bwyvbk02y493zmcnrxw6l8797ysv28nx-docker-24.0.5/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/vf8cjkgwmgd4sb3vkxh6x9iar71s1w1c-findutils-4.9.0/bin:/nix/store/ql4y72l42lrlbk8b4nbfvnc5m0nlp2kk-diffutils-3.10/bin:/nix/store/ard747zf4fkkkqa0pwj3fxp9fhnyfm7p-gnused-4.9/bin:/nix/store/gbrv0fn9a07kmdw2rg22iybdymylw4qc-gnugrep-3.11/bin:/nix/store/1vh7kczjs90fzxd786s7yikvqr1g2ndn-gawk-5.2.2/bin:/nix/store/zs4ajc6bp81c92fj2l5r2d68ra0hmfbb-gnutar-1.35/bin:/nix/store/3fzv6f2c0vxv1zfw8v7baxh4s8qq8r2x-gzip-1.13/bin:/nix/store/1mr1p83pzbcmwqlj7v3cwkq5lbxyszq2-bzip2-1.0.8-bin/bin:/nix/store/fx2yaklnv3h6jx0p07h1bh4vy618pn9s-gnumake-4.4.1/bin:/nix/store/dy2z01kpnxn7dn2kgfdxs4fm8xy9mb89-bash-5.2p26/bin:/nix/store/jmxc8fdl9iwdj5qdg5mq15hz2adbq1yn-patch-2.7.6/bin:/nix/store/v6cqgpxhbcd4bhwvzh22hvy7s2i9j90z-xz-5.4.6-bin/bin:/nix/store/f3ylr5a5w2cla15j2w66n435vwx65xmq-file-5.45/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/:/run/wrappers/bin:/home/patrick/.nix-profile/bin:/scratch/patrick/.local/share/nix/profile/bin:/home/patrick/.local/state/nix/profile/bin:/etc/profiles/per-user/patrick/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/
+++ PATH=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/nix/store/brxm6ld0k4ipciq4rmh013p48mvqmj8r-clang-tools-17.0.6/bin:/nix/store/glfr70gi7hfaj50mwj2431p8bg60fhqw-python3-3.11.9/bin:/nix/store/ig23ki6sl8dlg3lp0k1l9y9x05wrqs4q-patchelf-0.15.0/bin:/nix/store/4kwk49k8rc8cg8c387kbbjcrl8i0y693-gcc-wrapper-13.2.0/bin:/nix/store/nn152mgpdfcw92b3b03g9kmnlpd9jris-gcc-13.2.0/bin:/nix/store/b93lnii942nnkbpkl6smk8dhv0049di8-glibc-2.39-5-bin/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/zfs2gv7x073znw6b250rgnbij300hva5-binutils-wrapper-2.41/bin:/nix/store/vj57s3h2za2qrfccrvc9b6i7s8mw3ndn-binutils-2.41/bin:/nix/store/68d2plpqcg915a0hxrghpmbf0si8lrln-meson-1.4.0/bin:/nix/store/wvxpsf8xbyz31j0j2azjkndn1wbmh5ia-ninja-1.11.1/bin:/nix/store/0xpv46mb188z226j7cs211zmmi5xw9nj-cmake-3.29.1/bin:/nix/store/39nq7p6jcm9m3xqqm99skwmgsqw4pbbg-pkg-config-wrapper-0.29.2/bin:/nix/store/1kl4qs161vf2yl76a3jf93vij7x37fys-util-linux-minimal-2.39.3-bin/bin:/nix/store/awm61xw8gdyq7abj01vzdw1qhpmzqj27-nasm-2.16.02/bin:/nix/store/xzls0n7708g2ppwz31nzr15x2prh69sn-coreboot-toolchain-x64-24.02/bin:/nix/store/l2647av8j5zbw450vnx3b66df3dwrrwx-guestfs-tools-1.52.0/bin:/nix/store/4a4rirjrxqy7w4gqvkhhw05mp8f9s2pb-libguestfs-1.50.1/bin:/nix/store/lmhw9mikcaxl59abvm3zhj13kkm4swfl-flex-2.6.4/bin:/nix/store/4llr8zwkl30x68ixf8j9w1sjnal9xgw7-gnum4-1.4.19/bin:/nix/store/163r2zlkcqqmpa5px4c9q2qrjw9ffq8j-bison-3.8.2/bin:/nix/store/83jj1xvhy1qljclwn0dvps0lrciz6ymg-perf-tools-unstable-2017-12-19/bin:/nix/store/s85zwyvzmkd19lkvw6zs57vcb4pwkhb0-llvm-binutils-wrapper-17.0.6/bin:/nix/store/xbgkjj06zg6ravbnrkbhkff2k83sznkg-llvm-binutils-17.0.6/bin:/nix/store/ll4fgmcwj311rvin6rnbc0dvkffnsf7y-man-db-2.12.1/bin:/nix/store/535dcbfs7i1da1z9hnfs2m10rbs3frcp-git-lfs-3.5.1/bin:/nix/store/w8v0zazz8rzfr6fl0wawl42l88462wmh-zstd-1.5.6-bin/bin:/nix/store/snycjiabznrrfnij3qkiklbgxkqv0m83-zstd-1.5.6/bin:/nix/store/9ic6r325lik02jadw8qsynqah5h96b9y-python3.11-yq-3.4.1/bin:/nix/store/kqwh8f42rw21f3f9ba3na0dz9xrqg48a-python3.11-argcomplete-3.2.3/bin:/nix/store/k4j8jl7kii9wi8qhbxik7x5sc6xsvi9f-autoconf-2.72/bin:/nix/store/1rxflvd5c8p1zp9v1g4g7lhva55xl56g-automake-1.16.5/bin:/nix/store/wva9jcfp0bq9kfji3rd7vzrhx1793jgx-libtool-2.4.7/bin:/nix/store/jim0yjk96cmp0czrc7faz125w7wxca3m-file-5.45/bin:/nix/store/chsxv0jx2fwhyslf6lm1wfrg42nan4dm-openssl-3.0.13-bin/bin:/nix/store/yh9vxax1chm1jkfmyqapvjxwq7nd138f-rust-bindgen-0.69.4/bin:/nix/store/4w5jkr7ygqpmds9r42a739hrwyspv5xa-rust-cbindgen-0.26.0/bin:/nix/store/lpqh41g09s3civypxmcqy6fdcpkx9kml-gccgo-wrapper-13.2.0/bin:/nix/store/27g8qra2mm386vviqva42j65rwf8nqsn-gccgo-13.2.0/bin:/nix/store/hzxzisypgf5r20x6h9lbykn71l3r3pnx-binutils-wrapper-2.41/bin:/nix/store/6y2k1w5crffd2xw8xyk8zpmc9wh3hkx8-zip-3.0/bin:/nix/store/4jky7rbhqkynz8hxcfyhx5s7bawiangd-inotify-tools-4.23.9.0/bin:/nix/store/4dihdgc6pqc0qniz2z7jicg6q37arpy1-cargo-depgraph-1.5.0/bin:/nix/store/i9hhizqci6igk8a7fjxphg6adzsgm934-cloc-2.00/bin:/nix/store/rlgpybrxcda91ajlkl9g7dqw8v35bf1y-cargo-cache-0.8.3/bin:/nix/store/lml5xjkfhwhcwxa2in7g97b8drwim1qh-libcgroup-3.0/bin:/nix/store/37f8vfj8xvr5byggcl28mhxkhh93pr6k-python3.11-charset-normalizer-3.3.2/bin:/nix/store/qa737iaw7qxnpa8cyir4z1fgyg186mhi-python3.11-numpy-1.26.4/bin:/nix/store/jn4s0anpf0fsqi6kxpx40c48ffqk173p-python3.11-fonttools-4.49.0/bin:/nix/store/y6h88hzxnajxjg7y77djj7hbs296gvn9-python3.11-pybind11-2.12.0/bin:/nix/store/89hrs5x213f2h077mdfcqa2is08wfff6-python3.11-pytest-8.1.1/bin:/nix/store/awd6bmx4i7z2izj8ri5qjddpbw65lnnq-unzip-6.0/bin:/nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/bin:/nix/store/a45895zy04gsf7xc9sbps3zh1z6p8bhr-python3.11-invoke-2.2.0/bin:/nix/store/xzsmb68m1hcjhxwzbwa959766jgmvaw6-python3.11-pip-24.0/bin:/nix/store/8mzvsywg9jhpvf2j4v821ncp5cz1psn2-texlive-2023-env/bin:/nix/store/6nm4wl1709g4yliwfx6f5pmvgbikw1jm-nixos-generate/bin:/nix/store/jx583gh11hfl1nj1a1p0py1skg1s9mvq-ccls-0.20240202/bin:/nix/store/5lqv1pfaacwg2w7nd0qpcx2b5c4cmk1v-gdb-14.2/bin:/nix/store/q1216x47zh0g32swz9k36zhpakzfhvhf-bridge-utils-1.7.1/bin:/nix/store/f8il3wair3rpgma4jim8bx44pqzc6w16-cloud-utils-0.32/bin:/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin:/nix/store/xrx6v6mkn6lzx4sn7a0ilwrpm7jjlf8d-igvm/bin:/nix/store/m92r51bs83kiqkrcg3qgwg7cnc1ksvp9-rust-default-1.77.2/bin:/nix/store/j869vnz3lsxhn71a86j4fkm8r9wajvmp-bpftrace/bin:/nix/store/bwyvbk02y493zmcnrxw6l8797ysv28nx-docker-24.0.5/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/vf8cjkgwmgd4sb3vkxh6x9iar71s1w1c-findutils-4.9.0/bin:/nix/store/ql4y72l42lrlbk8b4nbfvnc5m0nlp2kk-diffutils-3.10/bin:/nix/store/ard747zf4fkkkqa0pwj3fxp9fhnyfm7p-gnused-4.9/bin:/nix/store/gbrv0fn9a07kmdw2rg22iybdymylw4qc-gnugrep-3.11/bin:/nix/store/1vh7kczjs90fzxd786s7yikvqr1g2ndn-gawk-5.2.2/bin:/nix/store/zs4ajc6bp81c92fj2l5r2d68ra0hmfbb-gnutar-1.35/bin:/nix/store/3fzv6f2c0vxv1zfw8v7baxh4s8qq8r2x-gzip-1.13/bin:/nix/store/1mr1p83pzbcmwqlj7v3cwkq5lbxyszq2-bzip2-1.0.8-bin/bin:/nix/store/fx2yaklnv3h6jx0p07h1bh4vy618pn9s-gnumake-4.4.1/bin:/nix/store/dy2z01kpnxn7dn2kgfdxs4fm8xy9mb89-bash-5.2p26/bin:/nix/store/jmxc8fdl9iwdj5qdg5mq15hz2adbq1yn-patch-2.7.6/bin:/nix/store/v6cqgpxhbcd4bhwvzh22hvy7s2i9j90z-xz-5.4.6-bin/bin:/nix/store/f3ylr5a5w2cla15j2w66n435vwx65xmq-file-5.45/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/:/run/wrappers/bin:/home/patrick/.nix-profile/bin:/scratch/patrick/.local/share/nix/profile/bin:/home/patrick/.local/state/nix/profile/bin:/etc/profiles/per-user/patrick/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/
+++ export PATH
+++ '[' -n '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ PS1='(python-venv) '
+++ export PS1
+++ VIRTUAL_ENV_PROMPT='(python-venv) '
+++ export VIRTUAL_ENV_PROMPT
+++ hash -r
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
++ tools/build_docker_images.py --deployment wallet_remote --language python --language-version 3.11
++ ./sebs.py storage start minio --port 9011 --output-json out_storage.json
+21:33:17,248 INFO root: Starting storage Storage.MINIO on port 9011.
+[21:33:17.248407] minio.Minio-4db3 Minio storage ACCESS_KEY=ujDlVNsp-wEa2on_PeyU2S67x5J9LTGlAs75DF5oDfA
+[21:33:17.248532] minio.Minio-4db3 Minio storage SECRET_KEY=9338f0df68d328f76b129de83c5c94506d1246a268b664925836e6886b67413b
+[21:33:17.955368] minio.Minio-4db3 Starting minio instance at 172.17.0.2:9000
+21:33:17,955 INFO root: Writing storage configuration to out_storage.json.
++ jq '.deployment.name = "wallet_remote"' config/config_template.json
++ jq '.deployment.wallet_remote.storage = input | .experiments."perf-cost".benchmark = "411.image-recognition"' config/config_tmp.json out_storage.json
++ ./sebs.py experiment invoke perf-cost --config config/config.json --output-dir 411.image-recognition --output-file run.log
+[21:33:19.758701] SeBS-fcb5 Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition
+[21:33:19.759385] WalletRemoteResources-de9d Using user-provided configuration of storage for wallet_remote.
+[21:33:19.793770] WalletRemote-6636 Generating unique resource name wallet-remote-bdbe7285
+[21:33:19.797033] minio.Minio-cfb8 Initialize a new bucket for benchmarks
+[21:33:19.801025] minio.Minio-cfb8 Created bucket sebs-benchmarks-wallet-remote-bdbe7285
+[21:33:19.803689] Benchmark-3fa5 Building benchmark 411.image-recognition. Reason: no cached code package.
+[21:33:19.826859] Benchmark-3fa5 There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+[21:33:19.828292] WalletRemote-6636 Function size 0.000005 MB
+[21:33:19.829828] Benchmark-3fa5 Created code package (source hash: b8b431f9b002eb8295ad76f0e82bb43f), for run on wallet_remote with python:3.11
+[21:33:19.836768] WalletRemote-6636 Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+[21:33:20.019636] WalletRemote-6636 starting wallet server
+Bottle v0.13.3 server starting up (using WSGIRefServer())...
+Listening on http://0.0.0.0:9002/
+Hit Ctrl-C to quit.
+
+[21:33:21.477370] Experiment.PerfCost-c974 Begin experiment
+[21:33:21.477677] Experiment.PerfCost-c974 Begin cold experiments
+[21:33:21.480746] WalletRemote.WalletRemoteFunction-8a39 Not stopping function as it was not running
+[21:33:26.481261] WalletRemote.HTTPTrigger-277a Invoke function
+192.168.27.1 - - [24/Apr/2025 21:33:38] "POST /cold HTTP/1.1" 200 16
+[21:33:38.864443] WalletRemote.HTTPTrigger-277a Function Started
+Created zygote <wallet.Zygote object at 0x7f808032ff40> and trustlet <wallet.Trustlet object at 0x7f808032fee0>
+Registered function handler from Benchmarks/SeBS/cache/411.image-recognition/wallet_remote/python/3.11/code
+not model: True
+192.168.27.1 - - [24/Apr/2025 21:33:52] "POST / HTTP/1.1" 200 276
+[21:33:52.459340] Experiment.PerfCost-c974 Processed 1 samples out of 5, 0 errors
+[21:33:57.460139] WalletRemote.WalletRemoteFunction-8a39 Stopping function
+192.168.27.1 - - [24/Apr/2025 21:33:57] "POST /stop HTTP/1.1" 200 16
+[21:33:57.471054] WalletRemote.WalletRemoteFunction-8a39 Function stopped succesfully
+[21:34:02.471581] WalletRemote.HTTPTrigger-277a Invoke function
+192.168.27.1 - - [24/Apr/2025 21:34:14] "POST /cold HTTP/1.1" 200 16
+[21:34:14.441935] WalletRemote.HTTPTrigger-277a Function Started
+trying to execute trustlet 1 with 102591599 output size.
+Created zygote <wallet.Zygote object at 0x7f808032f820> and trustlet <wallet.Trustlet object at 0x7f808032feb0>
+Registered function handler from Benchmarks/SeBS/cache/411.image-recognition/wallet_remote/python/3.11/code
+not model: True
+192.168.27.1 - - [24/Apr/2025 21:34:27] "POST / HTTP/1.1" 200 276
+[21:34:27.995764] Experiment.PerfCost-c974 Processed 2 samples out of 5, 0 errors
+[21:34:32.996557] WalletRemote.WalletRemoteFunction-8a39 Stopping function
+192.168.27.1 - - [24/Apr/2025 21:34:32] "POST /stop HTTP/1.1" 200 16
+[21:34:33.006714] WalletRemote.WalletRemoteFunction-8a39 Function stopped succesfully
+[21:34:38.007216] WalletRemote.HTTPTrigger-277a Invoke function
+192.168.27.1 - - [24/Apr/2025 21:34:49] "POST /cold HTTP/1.1" 200 16
+[21:34:49.963150] WalletRemote.HTTPTrigger-277a Function Started
+trying to execute trustlet 3 with 102591599 output size.
+Created zygote <wallet.Zygote object at 0x7f808032fee0> and trustlet <wallet.Trustlet object at 0x7f808032ff40>
+Registered function handler from Benchmarks/SeBS/cache/411.image-recognition/wallet_remote/python/3.11/code
+not model: True
+192.168.27.1 - - [24/Apr/2025 21:35:03] "POST / HTTP/1.1" 200 276
+[21:35:03.493145] Experiment.PerfCost-c974 Processed 3 samples out of 5, 0 errors
+[21:35:08.493835] WalletRemote.WalletRemoteFunction-8a39 Stopping function
+192.168.27.1 - - [24/Apr/2025 21:35:08] "POST /stop HTTP/1.1" 200 16
+[21:35:08.504450] WalletRemote.WalletRemoteFunction-8a39 Function stopped succesfully
+[21:35:13.504916] WalletRemote.HTTPTrigger-277a Invoke function
+192.168.27.1 - - [24/Apr/2025 21:35:25] "POST /cold HTTP/1.1" 200 16
+[21:35:25.463213] WalletRemote.HTTPTrigger-277a Function Started
+trying to execute trustlet 5 with 102591599 output size.
+Created zygote <wallet.Zygote object at 0x7f808032feb0> and trustlet <wallet.Trustlet object at 0x7f808032f760>
+Registered function handler from Benchmarks/SeBS/cache/411.image-recognition/wallet_remote/python/3.11/code
+not model: True
+192.168.27.1 - - [24/Apr/2025 21:35:38] "POST / HTTP/1.1" 200 276
+[21:35:38.962567] Experiment.PerfCost-c974 Processed 4 samples out of 5, 0 errors
+[21:35:43.963389] WalletRemote.WalletRemoteFunction-8a39 Stopping function
+192.168.27.1 - - [24/Apr/2025 21:35:43] "POST /stop HTTP/1.1" 200 16
+[21:35:43.973670] WalletRemote.WalletRemoteFunction-8a39 Function stopped succesfully
+[21:35:48.974200] WalletRemote.HTTPTrigger-277a Invoke function
+192.168.27.1 - - [24/Apr/2025 21:36:00] "POST /cold HTTP/1.1" 200 16
+[21:36:00.934516] WalletRemote.HTTPTrigger-277a Function Started
+trying to execute trustlet 7 with 102591599 output size.
+Created zygote <wallet.Zygote object at 0x7f808032ff40> and trustlet <wallet.Trustlet object at 0x7f808032ffa0>
+Registered function handler from Benchmarks/SeBS/cache/411.image-recognition/wallet_remote/python/3.11/code
+not model: True
+192.168.27.1 - - [24/Apr/2025 21:36:14] "POST / HTTP/1.1" 200 276
+[21:36:14.450326] Experiment.PerfCost-c974 Processed 5 samples out of 5, 0 errors
+[21:36:19.451568] Experiment.PerfCost-c974 Mean 25583.666999999998 [ms], median 25485.244 [ms], std 198.01712250914125, CV 0.7739982017008792
+[21:36:19.453770] Experiment.PerfCost-c974 Parametric CI (Student's t-distribution) 0.95 from 25308.77516473207 to 25858.558835267926, within 1.0744817592721498% of mean
+[21:36:19.455424] Experiment.PerfCost-c974 Parametric CI (Student's t-distribution) 0.99 from 25127.822190901563 to 26039.511809098432, within 1.7817805754680704% of mean
+[21:36:19.458636] Experiment.PerfCost-c974 Begin sequential experiments
+[21:36:19.460913] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 102591599 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:36:19] "POST / HTTP/1.1" 200 267
+[21:36:25.001246] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 61252 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:36:25] "POST / HTTP/1.1" 200 267
+[21:36:25.536371] Experiment.PerfCost-c974 Processed 1 samples out of 5, 0 errors
+[21:36:35.537214] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 61252 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:36:35] "POST / HTTP/1.1" 200 267
+[21:36:36.073247] Experiment.PerfCost-c974 Processed 2 samples out of 5, 0 errors
+[21:36:46.074084] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 61252 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:36:46] "POST / HTTP/1.1" 200 267
+[21:36:46.609913] Experiment.PerfCost-c974 Processed 3 samples out of 5, 0 errors
+[21:36:56.610680] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 61252 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:36:57] "POST / HTTP/1.1" 200 267
+[21:36:57.145884] Experiment.PerfCost-c974 Processed 4 samples out of 5, 0 errors
+[21:37:07.146707] WalletRemote.HTTPTrigger-277a Invoke function
+trying to execute trustlet 9 with 61252 output size.
+not model: False
+192.168.27.1 - - [24/Apr/2025 21:37:07] "POST / HTTP/1.1" 200 267
+[21:37:07.682631] Experiment.PerfCost-c974 Processed 5 samples out of 5, 0 errors
+[21:37:12.683724] Experiment.PerfCost-c974 Mean 535.0698 [ms], median 535.355 [ms], std 0.4000046999723847, CV 0.07475748023386569
+[21:37:12.685804] Experiment.PerfCost-c974 Parametric CI (Student's t-distribution) 0.95 from 534.5145044543527 to 535.6250955456472, within 0.10378002003612512% of mean
+[21:37:12.687455] Experiment.PerfCost-c974 Parametric CI (Student's t-distribution) 0.99 from 534.1489702061574 to 535.9906297938426, within 0.17209526567236383% of mean
+[21:37:12.690644] WalletRemote.WalletRemoteFunction-8a39 Stopping function
+192.168.27.1 - - [24/Apr/2025 21:37:12] "POST /stop HTTP/1.1" 200 16
+[21:37:12.695319] WalletRemote.WalletRemoteFunction-8a39 Function stopped succesfully
++ ./sebs.py experiment process perf-cost --config config/config.json --output-dir 411.image-recognition --output-file process.log
+[21:37:14.494739] SeBS-eb93 Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition
+[21:37:14.495363] WalletRemoteResources-3d8c Using user-provided configuration of storage for wallet_remote.
+[21:37:14.520255] WalletRemote-38e0 Using existing deployment wallet-remote-bdbe7285 that matches prefix wallet-remote!
+[21:37:14.522403] Experiment.PerfCost-051f Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition/perf-cost/sequential_results.json
+[21:37:14.524390] Experiment.PerfCost-051f Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition/perf-cost/cold_results.json
+++ pgrep minio
++ sudo kill 2080898

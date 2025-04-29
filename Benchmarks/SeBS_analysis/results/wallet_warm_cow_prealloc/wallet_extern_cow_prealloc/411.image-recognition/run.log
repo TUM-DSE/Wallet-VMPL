@@ -1,0 +1,22 @@
+23:21:49,826 INFO SeBS-98c1: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/411.image-recognition
+23:21:49,864 INFO WalletRemote-bdcd: Generating unique resource name wallet-remote-e60c5352
+23:21:49,867 INFO minio.Minio-a64c: Initialize a new bucket for benchmarks
+23:21:49,871 INFO minio.Minio-a64c: Created bucket sebs-benchmarks-wallet-remote-e60c5352
+23:21:49,874 INFO Benchmark-57e9: Building benchmark 411.image-recognition. Reason: no cached code package.
+23:21:49,898 INFO Benchmark-57e9: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+23:21:49,899 INFO WalletRemote-bdcd: Function size 0.000006 MB
+23:21:49,901 INFO Benchmark-57e9: Created code package (source hash: 76c9efa5cbe1b1b4678e5937e35556c9), for run on wallet_remote with python:3.11
+23:21:49,908 INFO WalletRemote-bdcd: Creating new function! Reason: function 411.image-recognition-python-3.11 not found in cache.
+23:21:50,101 INFO WalletRemote-bdcd: starting wallet server
+23:21:51,552 INFO Experiment.PerfCost-14cd: Begin experiment
+23:21:51,552 INFO Experiment.PerfCost-14cd: Begin sequential experiments
+23:22:35,988 INFO Experiment.PerfCost-14cd: Processed 1 samples out of 5, 0 errors
+23:22:59,294 INFO Experiment.PerfCost-14cd: Processed 2 samples out of 5, 0 errors
+23:23:22,593 INFO Experiment.PerfCost-14cd: Processed 3 samples out of 5, 0 errors
+23:23:45,906 INFO Experiment.PerfCost-14cd: Processed 4 samples out of 5, 0 errors
+23:24:09,227 INFO Experiment.PerfCost-14cd: Processed 5 samples out of 5, 0 errors
+23:24:14,229 INFO Experiment.PerfCost-14cd: Mean 13305.914999999999 [ms], median 13304.747 [ms], std 8.854903048593686, CV 0.06654862178657903
+23:24:14,231 INFO Experiment.PerfCost-14cd: Parametric CI (Student's t-distribution) 0.95 from 13293.622423886865 to 13318.207576113133, within 0.09238429760849737% of mean
+23:24:14,232 INFO Experiment.PerfCost-14cd: Parametric CI (Student's t-distribution) 0.99 from 13285.530593143541 to 13326.299406856457, within 0.15319808413369276% of mean
+23:24:14,236 INFO WalletRemote.WalletRemoteFunction-ff3d: Stopping function
+23:24:14,240 INFO WalletRemote.WalletRemoteFunction-ff3d: Function stopped succesfully

@@ -1,162 +1,162 @@
 {
   "_invocations": {
     "503.graph-bfs-python-3.11": {
-      "06381cf3-9100-40b6-8216-5c790a113875": {
+      "6026b0f1-ca99-4e81-8574-34e4e96591df": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1743511721.750614",
-          "end": "1743511721.803611",
+          "begin": "1744769834.580322",
+          "end": "1744769834.624335",
           "is_cold": false,
-          "request_id": "06381cf3-9100-40b6-8216-5c790a113875",
+          "request_id": "6026b0f1-ca99-4e81-8574-34e4e96591df",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "06381cf3-9100-40b6-8216-5c790a113875",
+        "request_id": "6026b0f1-ca99-4e81-8574-34e4e96591df",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 52997,
-          "client": 64021,
-          "client_begin": "2025-04-01 12:48:41.747804",
-          "client_end": "2025-04-01 12:48:41.811825",
+          "benchmark": 44013,
+          "client": 53469,
+          "client_begin": "2025-04-16 02:17:14.577540",
+          "client_end": "2025-04-16 02:17:14.631009",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "1f9411e3-a120-44c5-801e-037fe608216b": {
+      "62f75f53-8cb5-422c-92cc-0c47955b154d": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1743511731.826214",
-          "end": "1743511731.870089",
+          "begin": "1744769824.515046",
+          "end": "1744769824.558928",
           "is_cold": false,
-          "request_id": "1f9411e3-a120-44c5-801e-037fe608216b",
+          "request_id": "62f75f53-8cb5-422c-92cc-0c47955b154d",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "1f9411e3-a120-44c5-801e-037fe608216b",
+        "request_id": "62f75f53-8cb5-422c-92cc-0c47955b154d",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 43875,
-          "client": 54015,
-          "client_begin": "2025-04-01 12:48:51.823471",
-          "client_end": "2025-04-01 12:48:51.877486",
+          "benchmark": 43882,
+          "client": 53473,
+          "client_begin": "2025-04-16 02:17:04.512426",
+          "client_end": "2025-04-16 02:17:04.565899",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "5a97aa9c-335b-45df-825c-7d8d32e5a84f": {
+      "6e100436-838b-4600-a1ba-4f4742b032ac": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1743511751.954151",
-          "end": "1743511751.997742",
+          "begin": "1744769844.645308",
+          "end": "1744769844.689100",
           "is_cold": false,
-          "request_id": "5a97aa9c-335b-45df-825c-7d8d32e5a84f",
+          "request_id": "6e100436-838b-4600-a1ba-4f4742b032ac",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "5a97aa9c-335b-45df-825c-7d8d32e5a84f",
+        "request_id": "6e100436-838b-4600-a1ba-4f4742b032ac",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 43591,
-          "client": 53888,
-          "client_begin": "2025-04-01 12:49:11.951284",
-          "client_end": "2025-04-01 12:49:12.005172",
+          "benchmark": 43792,
+          "client": 53379,
+          "client_begin": "2025-04-16 02:17:24.642649",
+          "client_end": "2025-04-16 02:17:24.696028",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "92b45b93-0758-47c0-bd2d-8de51d39a92d": {
+      "7980d9ff-e8a1-4bab-9bda-6406571c1a4d": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1743511741.891931",
-          "end": "1743511741.935750",
+          "begin": "1744769814.452894",
+          "end": "1744769814.497271",
           "is_cold": false,
-          "request_id": "92b45b93-0758-47c0-bd2d-8de51d39a92d",
+          "request_id": "7980d9ff-e8a1-4bab-9bda-6406571c1a4d",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "92b45b93-0758-47c0-bd2d-8de51d39a92d",
+        "request_id": "7980d9ff-e8a1-4bab-9bda-6406571c1a4d",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 43819,
-          "client": 54257,
-          "client_begin": "2025-04-01 12:49:01.889089",
-          "client_end": "2025-04-01 12:49:01.943346",
+          "benchmark": 44377,
+          "client": 54091,
+          "client_begin": "2025-04-16 02:16:54.449853",
+          "client_end": "2025-04-16 02:16:54.503944",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "f4afd2e6-2cc9-4037-8dce-e66009bd9504": {
+      "fe3c8d82-007f-40bf-9405-91f08d95b6ad": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1743511710.530646",
-          "end": "1743511711.724498",
+          "begin": "1744769854.705825",
+          "end": "1744769854.749767",
           "is_cold": false,
-          "request_id": "f4afd2e6-2cc9-4037-8dce-e66009bd9504",
+          "request_id": "fe3c8d82-007f-40bf-9405-91f08d95b6ad",
           "result": {}
         },
         "provider_times": {
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "f4afd2e6-2cc9-4037-8dce-e66009bd9504",
+        "request_id": "fe3c8d82-007f-40bf-9405-91f08d95b6ad",
         "stats": {
-          "cold_start": true,
+          "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 1193852,
-          "client": 4021596,
-          "client_begin": "2025-04-01 12:48:27.714446",
-          "client_end": "2025-04-01 12:48:31.736042",
+          "benchmark": 43942,
+          "client": 53293,
+          "client_begin": "2025-04-16 02:17:34.703174",
+          "client_end": "2025-04-16 02:17:34.756467",
           "http_startup": 0,
           "initialization": 0
         }
@@ -166,7 +166,7 @@
   "_metrics": {
     "503.graph-bfs-python-3.11": {}
   },
-  "begin_time": 1743511677.470284,
+  "begin_time": 1744769809.387935,
   "config": {
     "deployment": {
       "name": "wallet"
@@ -183,15 +183,12 @@
       "update_storage": false
     }
   },
-  "end_time": 1743511757.011033,
+  "end_time": 1744769859.762316,
   "result_bucket": null,
   "statistics": {
-    "cold_count": 1,
-    "failures": [
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>UnpicklingError(&#039;pickle data was truncated&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 36, in process_request\n    ret = pickle.loads(ret)\n_pickle.UnpicklingError: pickle data was truncated\n</pre>\n        </body>\n    </html>\n",
-      "Couldn't invoke function; output:\n\n    <!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n    <html>\n        <head>\n            <title>Error: 500 Internal Server Error</title>\n            <style type=\"text/css\">\n              html {background-color: #eee; font-family: sans-serif;}\n              body {background-color: #fff; border: 1px solid #ddd;\n                    padding: 15px; margin: 15px;}\n              pre {background-color: #eee; border: 1px solid #ddd; padding: 5px;}\n            </style>\n        </head>\n        <body>\n            <h1>Error: 500 Internal Server Error</h1>\n            <p>Sorry, the requested URL <tt>&#039;http://localhost:9002/&#039;</tt>\n               caused an error:</p>\n            <pre>Internal Server Error</pre>\n              <h2>Exception:</h2>\n              <pre>RuntimeError(&#039;basic_string::_M_construct null not valid&#039;)</pre>\n              <h2>Traceback:</h2>\n              <pre>Traceback (most recent call last):\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 995, in _handle\n    out = route.call(**args)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/bottle.py&quot;, line 2025, in wrapper\n    rv = callback(*a, **ka)\n  File &quot;/root/Benchmarks/SeBS/cache/503.graph-bfs/wallet/python/3.11/code/server.py&quot;, line 34, in process_request\n    ret = trustlet.invoke_trustlet_bin(&quot;&quot;, output_len)\n  File &quot;/root/Benchmarks/SeBS/python-venv/lib/python3.10/site-packages/wallet/__init__.py&quot;, line 86, in invoke_trustlet_bin\n    ret = _w.invoke_trustlet_bin(self.process_id, argument, output_size)\nRuntimeError: basic_string::_M_construct null not valid\n</pre>\n        </body>\n    </html>\n"
-    ],
-    "failures_count": 2,
+    "cold_count": 0,
+    "failures": [],
+    "failures_count": 0,
     "incorrect": [],
     "incorrect_count": 0,
     "samples_generated": 5

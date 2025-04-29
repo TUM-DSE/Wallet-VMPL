@@ -28,6 +28,7 @@ def process_request():
         trustlet = wallet.Trustlet(int(os.environ['TRUSTLET']))
         output_len = 200 # 118 -> 200
         trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()

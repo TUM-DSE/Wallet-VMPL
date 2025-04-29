@@ -1,0 +1,558 @@
++ TARGET=wallet_remote
++ SSH_COMMAND='(cd module; make clean; make -C libwallet/ clean; rm -rf python/build || true)'
++ make ssh_with_command
+make[1]: Entering directory '/scratch/patrick/wallet-current'
+ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.27.10 "(cd module; make clean; make -C libwallet/ clean; rm -rf python/build || true)"
+make -C /lib/modules/6.5.0-svsm/build M=/root/module clean
+make[1]: Entering directory '/usr/src/linux-headers-6.5.0-svsm'
+  CLEAN   /root/module/Module.symvers
+make[1]: Leaving directory '/usr/src/linux-headers-6.5.0-svsm'
+make: Entering directory '/root/module/libwallet'
+rm -f src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o
+rm -f libwallet.*
+make: Leaving directory '/root/module/libwallet'
+make[1]: Leaving directory '/scratch/patrick/wallet-current'
++ SSH_COMMAND='(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko || true)'
++ make ssh_with_command
+make[1]: Entering directory '/scratch/patrick/wallet-current'
+ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.27.10 "(cd module; make libwallet/libwallet.a NODEBUG=1; make vmpl.ko; insmod vmpl.ko || true)"
+make -C libwallet/ libwallet.a
+make[1]: Entering directory '/root/module/libwallet'
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/attest.c -o src/attest.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/attest_microbenchmark.c -o src/attest_microbenchmark.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/lib.c -o src/lib.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/memory.c -o src/memory.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/monitor.c -o src/monitor.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/trustlet.c -o src/trustlet.o
+cc -o3 -fpic -DNODEBUG -Iinclude -c src/zygote.c -o src/zygote.o
+ar rcs libwallet.a src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o
+make[1]: Leaving directory '/root/module/libwallet'
+make -C libwallet/ libwallet.so
+make[1]: Entering directory '/root/module/libwallet'
+cc -shared src/attest.o src/attest_microbenchmark.o src/lib.o src/memory.o src/monitor.o src/trustlet.o src/zygote.o -o libwallet.so
+make[1]: Leaving directory '/root/module/libwallet'
+make -C /lib/modules/6.5.0-svsm/build M=/root/module modules
+make[1]: Entering directory '/usr/src/linux-headers-6.5.0-svsm'
+  CC [M]  /root/module/src/vmpl.o
+/root/module/src/vmpl.c: In function ‘diff_attestation’:
+/root/module/src/vmpl.c:68:15: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+   68 |       call.r8 = get_pgd_phys();
+      |               ^
+/root/module/src/vmpl.c:77:15: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+   77 |       call.r9 = mcall->monitor_attestation.function_data_ptr;
+      |               ^
+/root/module/src/vmpl.c: In function ‘create_trustlet’:
+/root/module/src/vmpl.c:163:18: warning: assignment to ‘u64’ {aka ‘long long unsigned int’} from ‘void *’ makes integer from pointer without a cast [-Wint-conversion]
+  163 |         call.rdx = mcall->trustlet.trustlet_data;
+      |                  ^
+In file included from /root/module/src/vmpl.c:18:
+At top level:
+/root/module/include/vmpl.h:127:14: warning: ‘fields’ defined but not used [-Wunused-variable]
+  127 | static Field fields[] = {
+      |              ^~~~~~
+  LD [M]  /root/module/vmpl.o
+  MODPOST /root/module/Module.symvers
+  CC [M]  /root/module/vmpl.mod.o
+  LD [M]  /root/module/vmpl.ko
+make[1]: Leaving directory '/usr/src/linux-headers-6.5.0-svsm'
+make[1]: Leaving directory '/scratch/patrick/wallet-current'
++ cd Benchmarks/SeBS/
++ sudo rm -rf cache/
++ ./install.py --no-aws --azure --no-gcp --no-openwhisk --local
+Using existing Python virtualenv at python-venv
+Install Python dependencies with pip
+Install Python dependencies for Azure
+Install Python dependencies for local
+Initialize Docker image for local storage.
+Update typing-extensions (resolving bug with mypy)
+Download benchmarks data
++ source python-venv/bin/activate
+++ deactivate nondestructive
+++ '[' -n '' ']'
+++ '[' -n '' ']'
+++ hash -r
+++ '[' -n '' ']'
+++ unset VIRTUAL_ENV
+++ unset VIRTUAL_ENV_PROMPT
+++ '[' '!' nondestructive = nondestructive ']'
+++ VIRTUAL_ENV=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv
+++ export VIRTUAL_ENV
+++ _OLD_VIRTUAL_PATH=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/nix/store/brxm6ld0k4ipciq4rmh013p48mvqmj8r-clang-tools-17.0.6/bin:/nix/store/glfr70gi7hfaj50mwj2431p8bg60fhqw-python3-3.11.9/bin:/nix/store/ig23ki6sl8dlg3lp0k1l9y9x05wrqs4q-patchelf-0.15.0/bin:/nix/store/4kwk49k8rc8cg8c387kbbjcrl8i0y693-gcc-wrapper-13.2.0/bin:/nix/store/nn152mgpdfcw92b3b03g9kmnlpd9jris-gcc-13.2.0/bin:/nix/store/b93lnii942nnkbpkl6smk8dhv0049di8-glibc-2.39-5-bin/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/zfs2gv7x073znw6b250rgnbij300hva5-binutils-wrapper-2.41/bin:/nix/store/vj57s3h2za2qrfccrvc9b6i7s8mw3ndn-binutils-2.41/bin:/nix/store/68d2plpqcg915a0hxrghpmbf0si8lrln-meson-1.4.0/bin:/nix/store/wvxpsf8xbyz31j0j2azjkndn1wbmh5ia-ninja-1.11.1/bin:/nix/store/0xpv46mb188z226j7cs211zmmi5xw9nj-cmake-3.29.1/bin:/nix/store/39nq7p6jcm9m3xqqm99skwmgsqw4pbbg-pkg-config-wrapper-0.29.2/bin:/nix/store/1kl4qs161vf2yl76a3jf93vij7x37fys-util-linux-minimal-2.39.3-bin/bin:/nix/store/awm61xw8gdyq7abj01vzdw1qhpmzqj27-nasm-2.16.02/bin:/nix/store/xzls0n7708g2ppwz31nzr15x2prh69sn-coreboot-toolchain-x64-24.02/bin:/nix/store/l2647av8j5zbw450vnx3b66df3dwrrwx-guestfs-tools-1.52.0/bin:/nix/store/4a4rirjrxqy7w4gqvkhhw05mp8f9s2pb-libguestfs-1.50.1/bin:/nix/store/lmhw9mikcaxl59abvm3zhj13kkm4swfl-flex-2.6.4/bin:/nix/store/4llr8zwkl30x68ixf8j9w1sjnal9xgw7-gnum4-1.4.19/bin:/nix/store/163r2zlkcqqmpa5px4c9q2qrjw9ffq8j-bison-3.8.2/bin:/nix/store/83jj1xvhy1qljclwn0dvps0lrciz6ymg-perf-tools-unstable-2017-12-19/bin:/nix/store/s85zwyvzmkd19lkvw6zs57vcb4pwkhb0-llvm-binutils-wrapper-17.0.6/bin:/nix/store/xbgkjj06zg6ravbnrkbhkff2k83sznkg-llvm-binutils-17.0.6/bin:/nix/store/ll4fgmcwj311rvin6rnbc0dvkffnsf7y-man-db-2.12.1/bin:/nix/store/535dcbfs7i1da1z9hnfs2m10rbs3frcp-git-lfs-3.5.1/bin:/nix/store/w8v0zazz8rzfr6fl0wawl42l88462wmh-zstd-1.5.6-bin/bin:/nix/store/snycjiabznrrfnij3qkiklbgxkqv0m83-zstd-1.5.6/bin:/nix/store/9ic6r325lik02jadw8qsynqah5h96b9y-python3.11-yq-3.4.1/bin:/nix/store/kqwh8f42rw21f3f9ba3na0dz9xrqg48a-python3.11-argcomplete-3.2.3/bin:/nix/store/k4j8jl7kii9wi8qhbxik7x5sc6xsvi9f-autoconf-2.72/bin:/nix/store/1rxflvd5c8p1zp9v1g4g7lhva55xl56g-automake-1.16.5/bin:/nix/store/wva9jcfp0bq9kfji3rd7vzrhx1793jgx-libtool-2.4.7/bin:/nix/store/jim0yjk96cmp0czrc7faz125w7wxca3m-file-5.45/bin:/nix/store/chsxv0jx2fwhyslf6lm1wfrg42nan4dm-openssl-3.0.13-bin/bin:/nix/store/yh9vxax1chm1jkfmyqapvjxwq7nd138f-rust-bindgen-0.69.4/bin:/nix/store/4w5jkr7ygqpmds9r42a739hrwyspv5xa-rust-cbindgen-0.26.0/bin:/nix/store/lpqh41g09s3civypxmcqy6fdcpkx9kml-gccgo-wrapper-13.2.0/bin:/nix/store/27g8qra2mm386vviqva42j65rwf8nqsn-gccgo-13.2.0/bin:/nix/store/hzxzisypgf5r20x6h9lbykn71l3r3pnx-binutils-wrapper-2.41/bin:/nix/store/6y2k1w5crffd2xw8xyk8zpmc9wh3hkx8-zip-3.0/bin:/nix/store/4jky7rbhqkynz8hxcfyhx5s7bawiangd-inotify-tools-4.23.9.0/bin:/nix/store/4dihdgc6pqc0qniz2z7jicg6q37arpy1-cargo-depgraph-1.5.0/bin:/nix/store/i9hhizqci6igk8a7fjxphg6adzsgm934-cloc-2.00/bin:/nix/store/rlgpybrxcda91ajlkl9g7dqw8v35bf1y-cargo-cache-0.8.3/bin:/nix/store/lml5xjkfhwhcwxa2in7g97b8drwim1qh-libcgroup-3.0/bin:/nix/store/37f8vfj8xvr5byggcl28mhxkhh93pr6k-python3.11-charset-normalizer-3.3.2/bin:/nix/store/qa737iaw7qxnpa8cyir4z1fgyg186mhi-python3.11-numpy-1.26.4/bin:/nix/store/jn4s0anpf0fsqi6kxpx40c48ffqk173p-python3.11-fonttools-4.49.0/bin:/nix/store/y6h88hzxnajxjg7y77djj7hbs296gvn9-python3.11-pybind11-2.12.0/bin:/nix/store/89hrs5x213f2h077mdfcqa2is08wfff6-python3.11-pytest-8.1.1/bin:/nix/store/awd6bmx4i7z2izj8ri5qjddpbw65lnnq-unzip-6.0/bin:/nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/bin:/nix/store/a45895zy04gsf7xc9sbps3zh1z6p8bhr-python3.11-invoke-2.2.0/bin:/nix/store/xzsmb68m1hcjhxwzbwa959766jgmvaw6-python3.11-pip-24.0/bin:/nix/store/8mzvsywg9jhpvf2j4v821ncp5cz1psn2-texlive-2023-env/bin:/nix/store/6nm4wl1709g4yliwfx6f5pmvgbikw1jm-nixos-generate/bin:/nix/store/jx583gh11hfl1nj1a1p0py1skg1s9mvq-ccls-0.20240202/bin:/nix/store/5lqv1pfaacwg2w7nd0qpcx2b5c4cmk1v-gdb-14.2/bin:/nix/store/q1216x47zh0g32swz9k36zhpakzfhvhf-bridge-utils-1.7.1/bin:/nix/store/f8il3wair3rpgma4jim8bx44pqzc6w16-cloud-utils-0.32/bin:/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin:/nix/store/xrx6v6mkn6lzx4sn7a0ilwrpm7jjlf8d-igvm/bin:/nix/store/m92r51bs83kiqkrcg3qgwg7cnc1ksvp9-rust-default-1.77.2/bin:/nix/store/j869vnz3lsxhn71a86j4fkm8r9wajvmp-bpftrace/bin:/nix/store/bwyvbk02y493zmcnrxw6l8797ysv28nx-docker-24.0.5/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/vf8cjkgwmgd4sb3vkxh6x9iar71s1w1c-findutils-4.9.0/bin:/nix/store/ql4y72l42lrlbk8b4nbfvnc5m0nlp2kk-diffutils-3.10/bin:/nix/store/ard747zf4fkkkqa0pwj3fxp9fhnyfm7p-gnused-4.9/bin:/nix/store/gbrv0fn9a07kmdw2rg22iybdymylw4qc-gnugrep-3.11/bin:/nix/store/1vh7kczjs90fzxd786s7yikvqr1g2ndn-gawk-5.2.2/bin:/nix/store/zs4ajc6bp81c92fj2l5r2d68ra0hmfbb-gnutar-1.35/bin:/nix/store/3fzv6f2c0vxv1zfw8v7baxh4s8qq8r2x-gzip-1.13/bin:/nix/store/1mr1p83pzbcmwqlj7v3cwkq5lbxyszq2-bzip2-1.0.8-bin/bin:/nix/store/fx2yaklnv3h6jx0p07h1bh4vy618pn9s-gnumake-4.4.1/bin:/nix/store/dy2z01kpnxn7dn2kgfdxs4fm8xy9mb89-bash-5.2p26/bin:/nix/store/jmxc8fdl9iwdj5qdg5mq15hz2adbq1yn-patch-2.7.6/bin:/nix/store/v6cqgpxhbcd4bhwvzh22hvy7s2i9j90z-xz-5.4.6-bin/bin:/nix/store/f3ylr5a5w2cla15j2w66n435vwx65xmq-file-5.45/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/:/run/wrappers/bin:/home/patrick/.nix-profile/bin:/scratch/patrick/.local/share/nix/profile/bin:/home/patrick/.local/state/nix/profile/bin:/etc/profiles/per-user/patrick/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/
+++ PATH=/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/scratch/patrick/wallet-current/Benchmarks/SeBS/python-venv/bin:/nix/store/brxm6ld0k4ipciq4rmh013p48mvqmj8r-clang-tools-17.0.6/bin:/nix/store/glfr70gi7hfaj50mwj2431p8bg60fhqw-python3-3.11.9/bin:/nix/store/ig23ki6sl8dlg3lp0k1l9y9x05wrqs4q-patchelf-0.15.0/bin:/nix/store/4kwk49k8rc8cg8c387kbbjcrl8i0y693-gcc-wrapper-13.2.0/bin:/nix/store/nn152mgpdfcw92b3b03g9kmnlpd9jris-gcc-13.2.0/bin:/nix/store/b93lnii942nnkbpkl6smk8dhv0049di8-glibc-2.39-5-bin/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/zfs2gv7x073znw6b250rgnbij300hva5-binutils-wrapper-2.41/bin:/nix/store/vj57s3h2za2qrfccrvc9b6i7s8mw3ndn-binutils-2.41/bin:/nix/store/68d2plpqcg915a0hxrghpmbf0si8lrln-meson-1.4.0/bin:/nix/store/wvxpsf8xbyz31j0j2azjkndn1wbmh5ia-ninja-1.11.1/bin:/nix/store/0xpv46mb188z226j7cs211zmmi5xw9nj-cmake-3.29.1/bin:/nix/store/39nq7p6jcm9m3xqqm99skwmgsqw4pbbg-pkg-config-wrapper-0.29.2/bin:/nix/store/1kl4qs161vf2yl76a3jf93vij7x37fys-util-linux-minimal-2.39.3-bin/bin:/nix/store/awm61xw8gdyq7abj01vzdw1qhpmzqj27-nasm-2.16.02/bin:/nix/store/xzls0n7708g2ppwz31nzr15x2prh69sn-coreboot-toolchain-x64-24.02/bin:/nix/store/l2647av8j5zbw450vnx3b66df3dwrrwx-guestfs-tools-1.52.0/bin:/nix/store/4a4rirjrxqy7w4gqvkhhw05mp8f9s2pb-libguestfs-1.50.1/bin:/nix/store/lmhw9mikcaxl59abvm3zhj13kkm4swfl-flex-2.6.4/bin:/nix/store/4llr8zwkl30x68ixf8j9w1sjnal9xgw7-gnum4-1.4.19/bin:/nix/store/163r2zlkcqqmpa5px4c9q2qrjw9ffq8j-bison-3.8.2/bin:/nix/store/83jj1xvhy1qljclwn0dvps0lrciz6ymg-perf-tools-unstable-2017-12-19/bin:/nix/store/s85zwyvzmkd19lkvw6zs57vcb4pwkhb0-llvm-binutils-wrapper-17.0.6/bin:/nix/store/xbgkjj06zg6ravbnrkbhkff2k83sznkg-llvm-binutils-17.0.6/bin:/nix/store/ll4fgmcwj311rvin6rnbc0dvkffnsf7y-man-db-2.12.1/bin:/nix/store/535dcbfs7i1da1z9hnfs2m10rbs3frcp-git-lfs-3.5.1/bin:/nix/store/w8v0zazz8rzfr6fl0wawl42l88462wmh-zstd-1.5.6-bin/bin:/nix/store/snycjiabznrrfnij3qkiklbgxkqv0m83-zstd-1.5.6/bin:/nix/store/9ic6r325lik02jadw8qsynqah5h96b9y-python3.11-yq-3.4.1/bin:/nix/store/kqwh8f42rw21f3f9ba3na0dz9xrqg48a-python3.11-argcomplete-3.2.3/bin:/nix/store/k4j8jl7kii9wi8qhbxik7x5sc6xsvi9f-autoconf-2.72/bin:/nix/store/1rxflvd5c8p1zp9v1g4g7lhva55xl56g-automake-1.16.5/bin:/nix/store/wva9jcfp0bq9kfji3rd7vzrhx1793jgx-libtool-2.4.7/bin:/nix/store/jim0yjk96cmp0czrc7faz125w7wxca3m-file-5.45/bin:/nix/store/chsxv0jx2fwhyslf6lm1wfrg42nan4dm-openssl-3.0.13-bin/bin:/nix/store/yh9vxax1chm1jkfmyqapvjxwq7nd138f-rust-bindgen-0.69.4/bin:/nix/store/4w5jkr7ygqpmds9r42a739hrwyspv5xa-rust-cbindgen-0.26.0/bin:/nix/store/lpqh41g09s3civypxmcqy6fdcpkx9kml-gccgo-wrapper-13.2.0/bin:/nix/store/27g8qra2mm386vviqva42j65rwf8nqsn-gccgo-13.2.0/bin:/nix/store/hzxzisypgf5r20x6h9lbykn71l3r3pnx-binutils-wrapper-2.41/bin:/nix/store/6y2k1w5crffd2xw8xyk8zpmc9wh3hkx8-zip-3.0/bin:/nix/store/4jky7rbhqkynz8hxcfyhx5s7bawiangd-inotify-tools-4.23.9.0/bin:/nix/store/4dihdgc6pqc0qniz2z7jicg6q37arpy1-cargo-depgraph-1.5.0/bin:/nix/store/i9hhizqci6igk8a7fjxphg6adzsgm934-cloc-2.00/bin:/nix/store/rlgpybrxcda91ajlkl9g7dqw8v35bf1y-cargo-cache-0.8.3/bin:/nix/store/lml5xjkfhwhcwxa2in7g97b8drwim1qh-libcgroup-3.0/bin:/nix/store/37f8vfj8xvr5byggcl28mhxkhh93pr6k-python3.11-charset-normalizer-3.3.2/bin:/nix/store/qa737iaw7qxnpa8cyir4z1fgyg186mhi-python3.11-numpy-1.26.4/bin:/nix/store/jn4s0anpf0fsqi6kxpx40c48ffqk173p-python3.11-fonttools-4.49.0/bin:/nix/store/y6h88hzxnajxjg7y77djj7hbs296gvn9-python3.11-pybind11-2.12.0/bin:/nix/store/89hrs5x213f2h077mdfcqa2is08wfff6-python3.11-pytest-8.1.1/bin:/nix/store/awd6bmx4i7z2izj8ri5qjddpbw65lnnq-unzip-6.0/bin:/nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/bin:/nix/store/a45895zy04gsf7xc9sbps3zh1z6p8bhr-python3.11-invoke-2.2.0/bin:/nix/store/xzsmb68m1hcjhxwzbwa959766jgmvaw6-python3.11-pip-24.0/bin:/nix/store/8mzvsywg9jhpvf2j4v821ncp5cz1psn2-texlive-2023-env/bin:/nix/store/6nm4wl1709g4yliwfx6f5pmvgbikw1jm-nixos-generate/bin:/nix/store/jx583gh11hfl1nj1a1p0py1skg1s9mvq-ccls-0.20240202/bin:/nix/store/5lqv1pfaacwg2w7nd0qpcx2b5c4cmk1v-gdb-14.2/bin:/nix/store/q1216x47zh0g32swz9k36zhpakzfhvhf-bridge-utils-1.7.1/bin:/nix/store/f8il3wair3rpgma4jim8bx44pqzc6w16-cloud-utils-0.32/bin:/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin:/nix/store/xrx6v6mkn6lzx4sn7a0ilwrpm7jjlf8d-igvm/bin:/nix/store/m92r51bs83kiqkrcg3qgwg7cnc1ksvp9-rust-default-1.77.2/bin:/nix/store/j869vnz3lsxhn71a86j4fkm8r9wajvmp-bpftrace/bin:/nix/store/bwyvbk02y493zmcnrxw6l8797ysv28nx-docker-24.0.5/bin:/nix/store/asqa3kfq3maclk7cqqhrjvp7vriw6ahy-coreutils-9.5/bin:/nix/store/vf8cjkgwmgd4sb3vkxh6x9iar71s1w1c-findutils-4.9.0/bin:/nix/store/ql4y72l42lrlbk8b4nbfvnc5m0nlp2kk-diffutils-3.10/bin:/nix/store/ard747zf4fkkkqa0pwj3fxp9fhnyfm7p-gnused-4.9/bin:/nix/store/gbrv0fn9a07kmdw2rg22iybdymylw4qc-gnugrep-3.11/bin:/nix/store/1vh7kczjs90fzxd786s7yikvqr1g2ndn-gawk-5.2.2/bin:/nix/store/zs4ajc6bp81c92fj2l5r2d68ra0hmfbb-gnutar-1.35/bin:/nix/store/3fzv6f2c0vxv1zfw8v7baxh4s8qq8r2x-gzip-1.13/bin:/nix/store/1mr1p83pzbcmwqlj7v3cwkq5lbxyszq2-bzip2-1.0.8-bin/bin:/nix/store/fx2yaklnv3h6jx0p07h1bh4vy618pn9s-gnumake-4.4.1/bin:/nix/store/dy2z01kpnxn7dn2kgfdxs4fm8xy9mb89-bash-5.2p26/bin:/nix/store/jmxc8fdl9iwdj5qdg5mq15hz2adbq1yn-patch-2.7.6/bin:/nix/store/v6cqgpxhbcd4bhwvzh22hvy7s2i9j90z-xz-5.4.6-bin/bin:/nix/store/f3ylr5a5w2cla15j2w66n435vwx65xmq-file-5.45/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/:/run/wrappers/bin:/home/patrick/.nix-profile/bin:/scratch/patrick/.local/share/nix/profile/bin:/home/patrick/.local/state/nix/profile/bin:/etc/profiles/per-user/patrick/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin:/nix/store/icsy7vasfalxfz75rfi8iawff7cqrv97-rust-default-1.77.2/bin/
+++ export PATH
+++ '[' -n '' ']'
+++ '[' -z '' ']'
+++ _OLD_VIRTUAL_PS1=
+++ PS1='(python-venv) '
+++ export PS1
+++ VIRTUAL_ENV_PROMPT='(python-venv) '
+++ export VIRTUAL_ENV_PROMPT
+++ hash -r
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
+++ export SEBS_WITH_AWS=FALSE
+++ SEBS_WITH_AWS=FALSE
+++ export SEBS_WITH_AZURE=TRUE
+++ SEBS_WITH_AZURE=TRUE
+++ export SEBS_WITH_GCP=FALSE
+++ SEBS_WITH_GCP=FALSE
+++ export SEBS_WITH_OPENWHISK=FALSE
+++ SEBS_WITH_OPENWHISK=FALSE
++ tools/build_docker_images.py --deployment wallet_remote --language python --language-version 3.11
++ ./sebs.py storage start minio --port 9011 --output-json out_storage.json
+21:11:18,600 INFO root: Starting storage Storage.MINIO on port 9011.
+[21:11:18.600678] minio.Minio-5203 Minio storage ACCESS_KEY=BpcVUbaRruQ4bhki67uWXub5KDTDaPK3y4b2htHCvzo
+[21:11:18.600802] minio.Minio-5203 Minio storage SECRET_KEY=aa7af31c7217b848f383a69b96cd4aa39088cb1f5e4cdb6186a15c63eeb6ca40
+[21:11:19.264392] minio.Minio-5203 Starting minio instance at 172.17.0.2:9000
+21:11:19,264 INFO root: Writing storage configuration to out_storage.json.
++ jq '.deployment.name = "wallet_remote"' config/config_template.json
++ jq '.deployment.wallet_remote.storage = input | .experiments."perf-cost".benchmark = "110.dynamic-html"' config/config_tmp.json out_storage.json
++ ./sebs.py experiment invoke perf-cost --config config/config.json --output-dir 110.dynamic-html --output-file run.log
+[21:11:21.080066] SeBS-a6cf Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+[21:11:21.080722] WalletRemoteResources-b910 Using user-provided configuration of storage for wallet_remote.
+[21:11:21.116037] WalletRemote-d930 Generating unique resource name wallet-remote-abc035ef
+[21:11:21.118520] minio.Minio-9239 Initialize a new bucket for benchmarks
+[21:11:21.122380] minio.Minio-9239 Created bucket sebs-benchmarks-wallet-remote-abc035ef
+[21:11:21.128813] Benchmark-4b94 Building benchmark 110.dynamic-html. Reason: no cached code package.
+[21:11:21.150822] Benchmark-4b94 There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+[21:11:21.151738] WalletRemote-d930 Function size 0.000005 MB
+[21:11:21.152850] Benchmark-4b94 Created code package (source hash: 784fc5d58ed939d2d552912079b5a62e), for run on wallet_remote with python:3.11
+[21:11:21.157537] WalletRemote-d930 Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+[21:11:21.339837] WalletRemote-d930 starting wallet server
+Bottle v0.13.3 server starting up (using WSGIRefServer())...
+Listening on http://0.0.0.0:9002/
+Hit Ctrl-C to quit.
+
+[21:11:22.345631] Experiment.PerfCost-afec Begin experiment
+[21:11:22.345881] Experiment.PerfCost-afec Begin cold experiments
+[21:11:22.349165] WalletRemote.WalletRemoteFunction-fffa Not stopping function as it was not running
+[21:11:27.349643] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:11:28] "POST /cold HTTP/1.1" 200 16
+[21:11:28.718860] WalletRemote.HTTPTrigger-973f Function Started
+192.168.27.1 - - [24/Apr/2025 21:11:29] "POST / HTTP/1.1" 200 35727
+[21:11:29.444200] Experiment.PerfCost-afec Processed 1 samples out of 5, 0 errors
+[21:11:34.444910] WalletRemote.WalletRemoteFunction-fffa Stopping function
+192.168.27.1 - - [24/Apr/2025 21:11:34] "POST /stop HTTP/1.1" 200 16
+[21:11:34.450184] WalletRemote.WalletRemoteFunction-fffa Function stopped succesfully
+[21:11:39.450660] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:11:40] "POST /cold HTTP/1.1" 200 16
+[21:11:40.850507] WalletRemote.HTTPTrigger-973f Function Started
+192.168.27.1 - - [24/Apr/2025 21:11:41] "POST / HTTP/1.1" 200 35743
+[21:11:41.580622] Experiment.PerfCost-afec Processed 2 samples out of 5, 0 errors
+[21:11:46.581401] WalletRemote.WalletRemoteFunction-fffa Stopping function
+192.168.27.1 - - [24/Apr/2025 21:11:46] "POST /stop HTTP/1.1" 200 16
+[21:11:46.586426] WalletRemote.WalletRemoteFunction-fffa Function stopped succesfully
+[21:11:51.586895] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:11:53] "POST /cold HTTP/1.1" 200 16
+[21:11:52.991258] WalletRemote.HTTPTrigger-973f Function Started
+192.168.27.1 - - [24/Apr/2025 21:11:53] "POST / HTTP/1.1" 200 35722
+[21:11:53.708543] Experiment.PerfCost-afec Processed 3 samples out of 5, 0 errors
+[21:11:58.709280] WalletRemote.WalletRemoteFunction-fffa Stopping function
+192.168.27.1 - - [24/Apr/2025 21:11:58] "POST /stop HTTP/1.1" 200 16
+[21:11:58.714550] WalletRemote.WalletRemoteFunction-fffa Function stopped succesfully
+[21:12:03.715232] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:05] "POST /cold HTTP/1.1" 200 16
+[21:12:05.116983] WalletRemote.HTTPTrigger-973f Function Started
+192.168.27.1 - - [24/Apr/2025 21:12:05] "POST / HTTP/1.1" 200 35718
+[21:12:05.845717] Experiment.PerfCost-afec Processed 4 samples out of 5, 0 errors
+[21:12:10.846425] WalletRemote.WalletRemoteFunction-fffa Stopping function
+192.168.27.1 - - [24/Apr/2025 21:12:10] "POST /stop HTTP/1.1" 200 16
+[21:12:10.851165] WalletRemote.WalletRemoteFunction-fffa Function stopped succesfully
+[21:12:15.851628] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:17] "POST /cold HTTP/1.1" 200 16
+[21:12:17.246935] WalletRemote.HTTPTrigger-973f Function Started
+192.168.27.1 - - [24/Apr/2025 21:12:18] "POST / HTTP/1.1" 200 35709
+[21:12:17.969292] Experiment.PerfCost-afec Processed 5 samples out of 5, 0 errors
+[21:12:22.970466] Experiment.PerfCost-afec Mean 2118.1828 [ms], median 2120.966 [ms], std 13.12578136950323, CV 0.6196717945921961
+[21:12:22.972674] Experiment.PerfCost-afec Parametric CI (Student's t-distribution) 0.95 from 2099.9612942823733 to 2136.404305717627, within 0.8602423604623156% of mean
+[21:12:22.974331] Experiment.PerfCost-afec Parametric CI (Student's t-distribution) 0.99 from 2087.966628656672 to 2148.398971343328, within 1.4265138657215002% of mean
+[21:12:22.980106] Experiment.PerfCost-afec Begin sequential experiments
+[21:12:22.982379] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:23] "POST / HTTP/1.1" 200 35733
+[21:12:27.993212] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:28] "POST / HTTP/1.1" 200 35714
+[21:12:28.004252] Experiment.PerfCost-afec Processed 1 samples out of 5, 0 errors
+[21:12:38.005231] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:38] "POST / HTTP/1.1" 200 35729
+[21:12:38.016411] Experiment.PerfCost-afec Processed 2 samples out of 5, 0 errors
+[21:12:48.017341] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:48] "POST / HTTP/1.1" 200 35719
+[21:12:48.028612] Experiment.PerfCost-afec Processed 3 samples out of 5, 0 errors
+[21:12:58.029554] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:12:58] "POST / HTTP/1.1" 200 35708
+[21:12:58.040981] Experiment.PerfCost-afec Processed 4 samples out of 5, 0 errors
+[21:13:08.041905] WalletRemote.HTTPTrigger-973f Invoke function
+192.168.27.1 - - [24/Apr/2025 21:13:08] "POST / HTTP/1.1" 200 35708
+[21:13:08.053198] Experiment.PerfCost-afec Processed 5 samples out of 5, 0 errors
+[21:13:13.054396] Experiment.PerfCost-afec Mean 10.610600000000002 [ms], median 10.635 [ms], std 0.16679160650344513, CV 1.5719337879426716
+[21:13:13.056453] Experiment.PerfCost-afec Parametric CI (Student's t-distribution) 0.95 from 10.379056130267719 to 10.842143869732285, within 2.182193935614224% of mean
+[21:13:13.058112] Experiment.PerfCost-afec Parametric CI (Student's t-distribution) 0.99 from 10.226637809951136 to 10.994562190048867, within 3.618666145636117% of mean
+[21:13:13.063764] WalletRemote.WalletRemoteFunction-fffa Stopping function
+192.168.27.1 - - [24/Apr/2025 21:13:13] "POST /stop HTTP/1.1" 200 16
+[21:13:13.068447] WalletRemote.WalletRemoteFunction-fffa Function stopped succesfully
++ ./sebs.py experiment process perf-cost --config config/config.json --output-dir 110.dynamic-html --output-file process.log
+[21:13:14.869566] SeBS-82ec Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+[21:13:14.870235] WalletRemoteResources-d64c Using user-provided configuration of storage for wallet_remote.
+[21:13:14.895979] WalletRemote-667a Using existing deployment wallet-remote-abc035ef that matches prefix wallet-remote!
+[21:13:14.898187] Experiment.PerfCost-15e0 Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html/perf-cost/cold_results.json
+[21:13:14.901136] Experiment.PerfCost-15e0 Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html/perf-cost/sequential_results.json
+++ pgrep minio
++ sudo kill 2074338

@@ -1,0 +1,3 @@
+23:03:40,5 INFO SeBS-c9c1: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+23:03:40,31 INFO WalletRemote-69d4: Using existing deployment wallet-remote-3959ebb2 that matches prefix wallet-remote!
+23:03:40,33 INFO Experiment.PerfCost-ecdc: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html/perf-cost/sequential_results.json

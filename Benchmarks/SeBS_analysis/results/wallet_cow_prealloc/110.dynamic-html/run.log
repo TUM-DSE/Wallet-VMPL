@@ -1,40 +1,40 @@
-21:11:21,80 INFO SeBS-a6cf: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
-21:11:21,116 INFO WalletRemote-d930: Generating unique resource name wallet-remote-abc035ef
-21:11:21,118 INFO minio.Minio-9239: Initialize a new bucket for benchmarks
-21:11:21,122 INFO minio.Minio-9239: Created bucket sebs-benchmarks-wallet-remote-abc035ef
-21:11:21,128 INFO Benchmark-4b94: Building benchmark 110.dynamic-html. Reason: no cached code package.
-21:11:21,150 INFO Benchmark-4b94: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
-21:11:21,151 INFO WalletRemote-d930: Function size 0.000005 MB
-21:11:21,152 INFO Benchmark-4b94: Created code package (source hash: 784fc5d58ed939d2d552912079b5a62e), for run on wallet_remote with python:3.11
-21:11:21,157 INFO WalletRemote-d930: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
-21:11:21,339 INFO WalletRemote-d930: starting wallet server
-21:11:22,345 INFO Experiment.PerfCost-afec: Begin experiment
-21:11:22,345 INFO Experiment.PerfCost-afec: Begin cold experiments
-21:11:22,349 INFO WalletRemote.WalletRemoteFunction-fffa: Not stopping function as it was not running
-21:11:29,444 INFO Experiment.PerfCost-afec: Processed 1 samples out of 5, 0 errors
-21:11:34,445 INFO WalletRemote.WalletRemoteFunction-fffa: Stopping function
-21:11:34,450 INFO WalletRemote.WalletRemoteFunction-fffa: Function stopped succesfully
-21:11:41,581 INFO Experiment.PerfCost-afec: Processed 2 samples out of 5, 0 errors
-21:11:46,581 INFO WalletRemote.WalletRemoteFunction-fffa: Stopping function
-21:11:46,586 INFO WalletRemote.WalletRemoteFunction-fffa: Function stopped succesfully
-21:11:53,709 INFO Experiment.PerfCost-afec: Processed 3 samples out of 5, 0 errors
-21:11:58,709 INFO WalletRemote.WalletRemoteFunction-fffa: Stopping function
-21:11:58,714 INFO WalletRemote.WalletRemoteFunction-fffa: Function stopped succesfully
-21:12:05,846 INFO Experiment.PerfCost-afec: Processed 4 samples out of 5, 0 errors
-21:12:10,846 INFO WalletRemote.WalletRemoteFunction-fffa: Stopping function
-21:12:10,851 INFO WalletRemote.WalletRemoteFunction-fffa: Function stopped succesfully
-21:12:17,969 INFO Experiment.PerfCost-afec: Processed 5 samples out of 5, 0 errors
-21:12:22,970 INFO Experiment.PerfCost-afec: Mean 2118.1828 [ms], median 2120.966 [ms], std 13.12578136950323, CV 0.6196717945921961
-21:12:22,972 INFO Experiment.PerfCost-afec: Parametric CI (Student's t-distribution) 0.95 from 2099.9612942823733 to 2136.404305717627, within 0.8602423604623156% of mean
-21:12:22,974 INFO Experiment.PerfCost-afec: Parametric CI (Student's t-distribution) 0.99 from 2087.966628656672 to 2148.398971343328, within 1.4265138657215002% of mean
-21:12:22,980 INFO Experiment.PerfCost-afec: Begin sequential experiments
-21:12:28,4 INFO Experiment.PerfCost-afec: Processed 1 samples out of 5, 0 errors
-21:12:38,16 INFO Experiment.PerfCost-afec: Processed 2 samples out of 5, 0 errors
-21:12:48,29 INFO Experiment.PerfCost-afec: Processed 3 samples out of 5, 0 errors
-21:12:58,41 INFO Experiment.PerfCost-afec: Processed 4 samples out of 5, 0 errors
-21:13:08,53 INFO Experiment.PerfCost-afec: Processed 5 samples out of 5, 0 errors
-21:13:13,54 INFO Experiment.PerfCost-afec: Mean 10.610600000000002 [ms], median 10.635 [ms], std 0.16679160650344513, CV 1.5719337879426716
-21:13:13,56 INFO Experiment.PerfCost-afec: Parametric CI (Student's t-distribution) 0.95 from 10.379056130267719 to 10.842143869732285, within 2.182193935614224% of mean
-21:13:13,58 INFO Experiment.PerfCost-afec: Parametric CI (Student's t-distribution) 0.99 from 10.226637809951136 to 10.994562190048867, within 3.618666145636117% of mean
-21:13:13,63 INFO WalletRemote.WalletRemoteFunction-fffa: Stopping function
-21:13:13,68 INFO WalletRemote.WalletRemoteFunction-fffa: Function stopped succesfully
+18:32:05,578 INFO SeBS-a7c3: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+18:32:05,611 INFO WalletRemote-885d: Generating unique resource name wallet-remote-96a3bb31
+18:32:05,614 INFO minio.Minio-49bf: Initialize a new bucket for benchmarks
+18:32:05,618 INFO minio.Minio-49bf: Created bucket sebs-benchmarks-wallet-remote-96a3bb31
+18:32:05,624 INFO Benchmark-79d3: Building benchmark 110.dynamic-html. Reason: no cached code package.
+18:32:05,646 INFO Benchmark-79d3: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+18:32:05,647 INFO WalletRemote-885d: Function size 0.000006 MB
+18:32:05,648 INFO Benchmark-79d3: Created code package (source hash: 79f4d163aba14c4d5b1ca4c816848dad), for run on wallet_remote with python:3.11
+18:32:05,653 INFO WalletRemote-885d: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+18:32:05,843 INFO WalletRemote-885d: starting wallet server
+18:32:06,849 INFO Experiment.PerfCost-7a52: Begin experiment
+18:32:06,849 INFO Experiment.PerfCost-7a52: Begin cold experiments
+18:32:06,852 INFO WalletRemote.WalletRemoteFunction-cae9: Not stopping function as it was not running
+18:32:13,959 INFO Experiment.PerfCost-7a52: Processed 1 samples out of 5, 0 errors
+18:32:18,960 INFO WalletRemote.WalletRemoteFunction-cae9: Stopping function
+18:32:18,965 INFO WalletRemote.WalletRemoteFunction-cae9: Function stopped succesfully
+18:32:26,93 INFO Experiment.PerfCost-7a52: Processed 2 samples out of 5, 0 errors
+18:32:31,93 INFO WalletRemote.WalletRemoteFunction-cae9: Stopping function
+18:32:31,97 INFO WalletRemote.WalletRemoteFunction-cae9: Function stopped succesfully
+18:32:38,222 INFO Experiment.PerfCost-7a52: Processed 3 samples out of 5, 0 errors
+18:32:43,222 INFO WalletRemote.WalletRemoteFunction-cae9: Stopping function
+18:32:43,227 INFO WalletRemote.WalletRemoteFunction-cae9: Function stopped succesfully
+18:32:50,346 INFO Experiment.PerfCost-7a52: Processed 4 samples out of 5, 0 errors
+18:32:55,346 INFO WalletRemote.WalletRemoteFunction-cae9: Stopping function
+18:32:55,350 INFO WalletRemote.WalletRemoteFunction-cae9: Function stopped succesfully
+18:33:02,491 INFO Experiment.PerfCost-7a52: Processed 5 samples out of 5, 0 errors
+18:33:07,492 INFO Experiment.PerfCost-7a52: Mean 2122.4856 [ms], median 2123.514 [ms], std 10.867354058831404, CV 0.5120107320790023
+18:33:07,494 INFO Experiment.PerfCost-7a52: Parametric CI (Student's t-distribution) 0.95 from 2107.399294008453 to 2137.571905991547, within 0.7107848454447395% of mean
+18:33:07,496 INFO Experiment.PerfCost-7a52: Parametric CI (Student's t-distribution) 0.99 from 2097.4684354559367 to 2147.502764544063, within 1.1786729928374182% of mean
+18:33:07,501 INFO Experiment.PerfCost-7a52: Begin sequential experiments
+18:33:12,526 INFO Experiment.PerfCost-7a52: Processed 1 samples out of 5, 0 errors
+18:33:22,538 INFO Experiment.PerfCost-7a52: Processed 2 samples out of 5, 0 errors
+18:33:32,550 INFO Experiment.PerfCost-7a52: Processed 3 samples out of 5, 0 errors
+18:33:42,563 INFO Experiment.PerfCost-7a52: Processed 4 samples out of 5, 0 errors
+18:33:52,575 INFO Experiment.PerfCost-7a52: Processed 5 samples out of 5, 0 errors
+18:33:57,576 INFO Experiment.PerfCost-7a52: Mean 10.9032 [ms], median 10.958 [ms], std 0.2132101310913717, CV 1.9554821620384082
+18:33:57,578 INFO Experiment.PerfCost-7a52: Parametric CI (Student's t-distribution) 0.95 from 10.60721688757639 to 11.19918311242361, within 2.71464443854657% of mean
+18:33:57,580 INFO Experiment.PerfCost-7a52: Parametric CI (Student's t-distribution) 0.99 from 10.412380164454152 to 11.394019835545848, within 4.501612696693152% of mean
+18:33:57,586 INFO WalletRemote.WalletRemoteFunction-cae9: Stopping function
+18:33:57,590 INFO WalletRemote.WalletRemoteFunction-cae9: Function stopped succesfully

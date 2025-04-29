@@ -1,27 +1,27 @@
 {
   "_invocations": {
     "210.thumbnailer-python-3.11": {
-      "6290dc18-6390-4b37-be86-ef7424a4dfa3": {
+      "1ac815b1-e338-41b7-87e7-2db3e7d60ae3": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1745536149.783768",
-          "end": "1745536150.513489",
+          "begin": "1745602835.347935",
+          "end": "1745602836.068746",
           "is_cold": false,
-          "request_id": "6290dc18-6390-4b37-be86-ef7424a4dfa3",
+          "request_id": "1ac815b1-e338-41b7-87e7-2db3e7d60ae3",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 360092640.0,
+                "compute_time": 355469960.0,
                 "download_size": 1640578,
                 "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-remote-1c75d704",
-                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.049cc2c7.jpg"
+                "bucket": "sebs-benchmarks-wallet-remote-464d9ba4",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.bfda9c9e.jpg"
               }
             }
           }
@@ -30,42 +30,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "6290dc18-6390-4b37-be86-ef7424a4dfa3",
+        "request_id": "1ac815b1-e338-41b7-87e7-2db3e7d60ae3",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 729721,
-          "client": 743230,
-          "client_begin": "2025-04-24 23:09:11.077947",
-          "client_end": "2025-04-24 23:09:11.821177",
+          "benchmark": 720811,
+          "client": 734552,
+          "client_begin": "2025-04-25 17:40:36.149409",
+          "client_end": "2025-04-25 17:40:36.883961",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "8ae4ebdd-2cec-485b-be8a-9f3ea1393e9d": {
+      "343a311b-3c9c-44d9-ae45-a0d5a17b9444": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1745536171.272323",
-          "end": "1745536171.997339",
+          "begin": "1745602824.614596",
+          "end": "1745602825.332038",
           "is_cold": false,
-          "request_id": "8ae4ebdd-2cec-485b-be8a-9f3ea1393e9d",
+          "request_id": "343a311b-3c9c-44d9-ae45-a0d5a17b9444",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 361036200.0,
+                "compute_time": 354413640.0,
                 "download_size": 1640578,
                 "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-remote-1c75d704",
-                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.9ad540ea.jpg"
+                "bucket": "sebs-benchmarks-wallet-remote-464d9ba4",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.896ee3ef.jpg"
               }
             }
           }
@@ -74,42 +74,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "8ae4ebdd-2cec-485b-be8a-9f3ea1393e9d",
+        "request_id": "343a311b-3c9c-44d9-ae45-a0d5a17b9444",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 725016,
-          "client": 739717,
-          "client_begin": "2025-04-24 23:09:32.566798",
-          "client_end": "2025-04-24 23:09:33.306515",
+          "benchmark": 717442,
+          "client": 731274,
+          "client_begin": "2025-04-25 17:40:25.416553",
+          "client_end": "2025-04-25 17:40:26.147827",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "960dfe80-f18f-4fcb-8a82-c70c0c79ba85": {
+      "362a9f2b-9963-4f06-b85e-18160a1d3b52": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1745536160.528761",
-          "end": "1745536161.257453",
+          "begin": "1745602803.148505",
+          "end": "1745602803.866602",
           "is_cold": false,
-          "request_id": "960dfe80-f18f-4fcb-8a82-c70c0c79ba85",
+          "request_id": "362a9f2b-9963-4f06-b85e-18160a1d3b52",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 360133200.0,
+                "compute_time": 354003520.0,
                 "download_size": 1640578,
                 "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-remote-1c75d704",
-                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.e8de7b0a.jpg"
+                "bucket": "sebs-benchmarks-wallet-remote-464d9ba4",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.288530a5.jpg"
               }
             }
           }
@@ -118,42 +118,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "960dfe80-f18f-4fcb-8a82-c70c0c79ba85",
+        "request_id": "362a9f2b-9963-4f06-b85e-18160a1d3b52",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 728692,
-          "client": 742540,
-          "client_begin": "2025-04-24 23:09:21.822800",
-          "client_end": "2025-04-24 23:09:22.565340",
+          "benchmark": 718097,
+          "client": 732184,
+          "client_begin": "2025-04-25 17:40:03.948981",
+          "client_end": "2025-04-25 17:40:04.681165",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "e8564ef6-bd0b-4b0f-8149-b41d20639523": {
+      "59c972b3-acea-4e94-8375-35b09368a20e": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1745536192.751229",
-          "end": "1745536193.472954",
+          "begin": "1745602792.406396",
+          "end": "1745602793.132928",
           "is_cold": false,
-          "request_id": "e8564ef6-bd0b-4b0f-8149-b41d20639523",
+          "request_id": "59c972b3-acea-4e94-8375-35b09368a20e",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 358988900.0,
+                "compute_time": 355856980.0,
                 "download_size": 1640578,
                 "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-remote-1c75d704",
-                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.5eda3fff.jpg"
+                "bucket": "sebs-benchmarks-wallet-remote-464d9ba4",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.1386d476.jpg"
               }
             }
           }
@@ -162,42 +162,42 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "e8564ef6-bd0b-4b0f-8149-b41d20639523",
+        "request_id": "59c972b3-acea-4e94-8375-35b09368a20e",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 721725,
-          "client": 735295,
-          "client_begin": "2025-04-24 23:09:54.047423",
-          "client_end": "2025-04-24 23:09:54.782718",
+          "benchmark": 726532,
+          "client": 739838,
+          "client_begin": "2025-04-25 17:39:53.207425",
+          "client_end": "2025-04-25 17:39:53.947263",
           "http_startup": 0,
           "initialization": 0
         }
       },
-      "f706af99-719a-4e5f-a6a8-a42358edb4a0": {
+      "727c04d4-6881-40ac-9a91-7b5263772b56": {
         "billing": {
           "_billed_time": null,
           "_gb_seconds": 0,
           "_memory": null
         },
         "output": {
-          "begin": "1745536182.012474",
-          "end": "1745536182.736648",
+          "begin": "1745602813.881760",
+          "end": "1745602814.599730",
           "is_cold": false,
-          "request_id": "f706af99-719a-4e5f-a6a8-a42358edb4a0",
+          "request_id": "727c04d4-6881-40ac-9a91-7b5263772b56",
           "result": {
             "output": {
               "measurement": {
-                "compute_time": 359505600.0,
+                "compute_time": 353797860.0,
                 "download_size": 1640578,
                 "upload_size": 3872
               },
               "result": {
-                "bucket": "sebs-benchmarks-wallet-remote-1c75d704",
-                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.23482111.jpg"
+                "bucket": "sebs-benchmarks-wallet-remote-464d9ba4",
+                "key": "210.thumbnailer-0-output/1_adult-adventure-back-view-2819546.dce8037c.jpg"
               }
             }
           }
@@ -206,17 +206,17 @@
           "execution": 0,
           "initialization": 0
         },
-        "request_id": "f706af99-719a-4e5f-a6a8-a42358edb4a0",
+        "request_id": "727c04d4-6881-40ac-9a91-7b5263772b56",
         "stats": {
           "cold_start": false,
           "failure": false,
           "memory_used": null
         },
         "times": {
-          "benchmark": 724174,
-          "client": 737852,
-          "client_begin": "2025-04-24 23:09:43.308176",
-          "client_end": "2025-04-24 23:09:44.046028",
+          "benchmark": 717970,
+          "client": 732147,
+          "client_begin": "2025-04-25 17:40:14.682789",
+          "client_end": "2025-04-25 17:40:15.414936",
           "http_startup": 0,
           "initialization": 0
         }
@@ -224,7 +224,7 @@
     }
   },
   "_metrics": {},
-  "begin_time": 1745536143.645566,
+  "begin_time": 1745602785.837517,
   "config": {
     "deployment": {
       "name": "wallet_remote"
@@ -252,7 +252,7 @@
       "update_storage": false
     }
   },
-  "end_time": 1745536199.783695,
+  "end_time": 1745602841.884944,
   "result_bucket": null,
   "statistics": {
     "cold_count": 0,

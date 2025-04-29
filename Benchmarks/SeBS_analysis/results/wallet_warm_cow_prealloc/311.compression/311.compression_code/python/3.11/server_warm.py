@@ -60,6 +60,7 @@ def process_request():
         trustlet = zygote.create_trustlet(FUNCTION_CODE)
         output_len = 9328000 # 9327022 -> 9328000 for benchmark 311
         trustlet.invoke_trustlet_bin("", 0)
+        outb_lib.outb()
         begin = datetime.datetime.now()
         trustlet.invoke_trustlet_bin(data, 0)
         end = datetime.datetime.now()

@@ -1,0 +1,22 @@
+23:02:41,96 INFO SeBS-1d31: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/110.dynamic-html
+23:02:41,133 INFO WalletRemote-9c63: Generating unique resource name wallet-remote-3959ebb2
+23:02:41,135 INFO minio.Minio-fd96: Initialize a new bucket for benchmarks
+23:02:41,140 INFO minio.Minio-fd96: Created bucket sebs-benchmarks-wallet-remote-3959ebb2
+23:02:41,147 INFO Benchmark-face: Building benchmark 110.dynamic-html. Reason: no cached code package.
+23:02:41,169 INFO Benchmark-face: There is no Docker build image for wallet_remote run in python, thus skipping the Docker-based installation of dependencies.
+23:02:41,170 INFO WalletRemote-9c63: Function size 0.000006 MB
+23:02:41,171 INFO Benchmark-face: Created code package (source hash: b4d18045a7201aec9b971c94c809ec11), for run on wallet_remote with python:3.11
+23:02:41,176 INFO WalletRemote-9c63: Creating new function! Reason: function 110.dynamic-html-python-3.11 not found in cache.
+23:02:41,362 INFO WalletRemote-9c63: starting wallet server
+23:02:42,367 INFO Experiment.PerfCost-464b: Begin experiment
+23:02:42,368 INFO Experiment.PerfCost-464b: Begin sequential experiments
+23:02:50,225 INFO Experiment.PerfCost-464b: Processed 1 samples out of 5, 0 errors
+23:03:00,962 INFO Experiment.PerfCost-464b: Processed 2 samples out of 5, 0 errors
+23:03:11,702 INFO Experiment.PerfCost-464b: Processed 3 samples out of 5, 0 errors
+23:03:22,441 INFO Experiment.PerfCost-464b: Processed 4 samples out of 5, 0 errors
+23:03:33,181 INFO Experiment.PerfCost-464b: Processed 5 samples out of 5, 0 errors
+23:03:38,182 INFO Experiment.PerfCost-464b: Mean 737.3979999999999 [ms], median 737.774 [ms], std 0.6646903038257611, CV 0.09013996563941877
+23:03:38,184 INFO Experiment.PerfCost-464b: Parametric CI (Student's t-distribution) 0.95 from 736.4752619297352 to 738.3207380702646, within 0.12513433319112607% of mean
+23:03:38,186 INFO Experiment.PerfCost-464b: Parametric CI (Student's t-distribution) 0.99 from 735.8678513905379 to 738.9281486094619, within 0.20750647675502285% of mean
+23:03:38,191 INFO WalletRemote.WalletRemoteFunction-c446: Stopping function
+23:03:38,196 INFO WalletRemote.WalletRemoteFunction-c446: Function stopped succesfully

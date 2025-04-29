@@ -1,4 +1,4 @@
-21:20:32,336 INFO SeBS-c90e: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer
-21:20:32,361 INFO WalletRemote-42b2: Using existing deployment wallet-remote-afaf7713 that matches prefix wallet-remote!
-21:20:32,363 INFO Experiment.PerfCost-f4c4: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
-21:20:32,365 INFO Experiment.PerfCost-f4c4: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json
+18:41:16,751 INFO SeBS-627c: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer
+18:41:16,775 INFO WalletRemote-6496: Using existing deployment wallet-remote-9a8a4d6a that matches prefix wallet-remote!
+18:41:16,777 INFO Experiment.PerfCost-94dd: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer/perf-cost/sequential_results.json
+18:41:16,779 INFO Experiment.PerfCost-94dd: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/210.thumbnailer/perf-cost/cold_results.json

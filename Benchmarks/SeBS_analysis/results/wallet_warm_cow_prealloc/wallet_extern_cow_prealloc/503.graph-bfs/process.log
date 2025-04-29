@@ -1,0 +1,3 @@
+00:06:55,454 INFO SeBS-3952: Created experiment output at /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs
+00:06:55,480 INFO WalletRemote-e4f8: Using existing deployment wallet-remote-07aa62c1 that matches prefix wallet-remote!
+00:06:55,482 INFO Experiment.PerfCost-5ab5: Processing data in /scratch/patrick/wallet-current/Benchmarks/SeBS/503.graph-bfs/perf-cost/sequential_results.json
