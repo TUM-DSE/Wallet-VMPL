@@ -41,4 +41,4 @@ Runtime: 26.9296630859375 ms, std: 0.7202352143073909 ms
 Invoke: 1.662548828125 ms, std: 0.07009079630424025 ms
 
 Native:
-Total: 4.326689 ms
+Total: 4.326689 ms, std: 0 ms
