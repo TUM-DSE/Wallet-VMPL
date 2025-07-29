@@ -44,7 +44,7 @@ BENCHMARKS = [
     '311.compression',
     '501.graph-pagerank', '502.graph-mst', '503.graph-bfs',
     '504.dna-visualisation',
-    #'411.image-recognition',
+    '411.image-recognition',
 ]
 palette = sns.color_palette("pastel", n_colors=len(VARIANTS))
 hatches = ["", "//", "xx", "\\\\", ".."]
