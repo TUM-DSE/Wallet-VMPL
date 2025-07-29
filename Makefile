@@ -24,7 +24,7 @@ USERADDR = $(shell expr $(shell id -u) - 1000)
 
 REQUIREMENTS=requirements.txt
 
-.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark_sebs benchmark_sebs sebs_fs
+.PHONY: build_firmware setup_guest_net del_guest_net kvm unload_kvm load_kvm python run run_benchmark_sebs benchmark_sebs sebs_fs set_experiment_cold set_experiment_both
 
 #Build OVMF Firmware
 build_firmware:
@@ -140,6 +140,10 @@ run:
 
 ssh:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+
+SSH_COMMAND?="shutdown"
+ssh_with_command:
+	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
 
 trustlet_test:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
@@ -302,14 +306,117 @@ boottime:
 	cd Benchmarks/Boottime/wallet/; python parse_boottime.py > "prealloc.res"
 	cp Benchmarks/Boottime/wallet/result.csv Benchmarks/Boottime/wallet/result_prealloc.csv
 
+boottimes:
+	cd Benchmarks/Boottime/; make native
+	cd Benchmarks/Boottime/; make kata
+	cd Benchmarks/Boottime/; make gramine
+
 sebs_images:
 	cd scripts/; ./sebs.sh
 
-RESULT_PATH_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_prealloc
-RESULT_PATH_NO_PREALLOC = Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_no_prealloc
+RESULT_PATH_PREALLOC ?= Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_prealloc
+RESULT_PATH_NO_PREALLOC ?= Benchmarks/SeBS_analysis/results/${WARM_COLD}_cow_no_prealloc
 TRACE_SEBS?=
+STATS_SEBS?=
+DISABLE_COW?=
 run_sebs:
 	mkdir -p ${RESULT_PATH_PREALLOC}
 	mkdir -p ${RESULT_PATH_NO_PREALLOC}
-	cd Benchmarks; ./run_sebs.sh "no_prealloc" "${RESULT_PATH_NO_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"
-	cd Benchmarks; ./run_sebs.sh "prealloc" "${RESULT_PATH_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}"
+	cd Benchmarks; ./run_sebs.sh "no_prealloc" "${RESULT_PATH_NO_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}" "${STATS_SEBS}" "${DISABLE_COW}"
+	cd Benchmarks; ./run_sebs.sh "prealloc" "${RESULT_PATH_PREALLOC}" "${WARM_COLD}" "${TRACE_SEBS}" "${STATS_SEBS}" "${DISABLE_COW}"
+
+#################### SeBS Benchmark Setup ####################
+
+set_experiment_cold:
+	cat Benchmarks/SeBS/config/config_template.json | jq --args ".experiments.\"perf-cost\".experiments = [ \"cold\"]" > config.json
+	mv config.json Benchmarks/SeBS/config/config_template.json
+
+set_experiment_lukewarm:
+	cat Benchmarks/SeBS/config/config_template.json | jq --args ".experiments.\"perf-cost\".experiments = [ \"sequential\"]" > config.json
+	mv config.json Benchmarks/SeBS/config/config_template.json
+
+set_experiment_both:
+	cat Benchmarks/SeBS/config/config_template.json | jq --args ".experiments.\"perf-cost\".experiments = [ \"cold\", \"sequential\"]" > config.json
+	mv config.json Benchmarks/SeBS/config/config_template.json
+
+#################### SeBS Benchmarks ####################
+
+BREAKDOWN_PATH=Benchmarks/SeBS_analysis/results/breakdown
+run_sebs_breakdown:
+	make set_experiment_cold
+	cd Benchmarks; for pre in no_prealloc prealloc; do \
+		for cow in cow no_cow; do \
+			./run_sebs.sh $$pre "${BREAKDOWN_PATH}" "wallet" $$cow "breakdown" ;\
+		done;\
+	done;
+
+BREAKDOWN_MEASURE_PATH=Benchmarks/SeBS_analysis/results/breakdown_measure
+run_sebs_measure_breakdown:
+	make set_experiment_cold
+	cd Benchmarks; for cow in cow no_cow; do \
+		./run_sebs.sh "prealloc" "${BREAKDOWN_MEASURE_PATH}" "wallet" $$cow "breakdown" "measure" ;\
+	done;
+	cp Benchmarks/SeBS_analysis/results/breakdown_measure/*/wallet-*-prealloc-*cow Benchmarks/Boottime/breakdown/results/
+
+SEBS_RESULT_PATH=Benchmarks/SeBS_analysis/results/SeBS
+run_sebs_benchmark:
+	make set_experiment_both
+	cd Benchmarks; for pre in prealloc; do \
+		for cow in cow no_cow; do \
+			./run_sebs.sh $$pre "${SEBS_RESULT_PATH}" "wallet" $$cow "no_feature" "no_measure" ;\
+		done;\
+	done;
+
+run_sebs_benchmark_lukewarm:
+	make set_experiment_lukewarm
+	cd Benchmarks; for pre in prealloc ; do \
+		for cow in cow ; do \
+			./run_sebs.sh $$pre "${SEBS_RESULT_PATH}" "wallet_warm" $$cow "no_feature" "no_measure" ;\
+		done; \
+	done;
+
+SEBS_MEASURE_RESULT_PATH=Benchmarks/SeBS_analysis/results/SeBS_measure
+run_sebs_measure_benchmark:
+	make set_experiment_both
+	cd Benchmarks; for cow in no_cow cow ; do \
+		./run_sebs.sh "prealloc" "${SEBS_MEASURE_RESULT_PATH}" "wallet" $$cow "no_feature" "measure" ;\
+	done;
+
+run_sebs_measure_benchmark_lukewarm:
+	make set_experiment_both
+	cd Benchmarks; for cow in cow ; do \
+		./run_sebs.sh "prealloc" "${SEBS_MEASURE_RESULT_PATH}" "wallet_warm" $$cow "no_feature" "measure" ;\
+	done;
+
+
+SEBS_PROFILING_MEASURE_RESULT_PATH=Benchmarks/SeBS_analysis/results/measure_profiling
+run_sebs_measure_profiling:
+	make set_experiment_cold
+	cd Benchmarks; for cow in no_cow cow; do \
+		./run_sebs.sh "prealloc" "${SEBS_PROFILING_MEASURE_RESULT_PATH}" "wallet_profiling" $$cow "stat" "measure" ;\
+	done;
+
+SEBS_PROFILING_RESULT_PATH=Benchmarks/SeBS_analysis/results/profiling
+run_sebs_profiling:
+	make set_experiment_cold
+	cd Benchmarks; for cow in no_cow cow; do \
+		./run_sebs.sh "prealloc" "${SEBS_PROFILING_RESULT_PATH}" "wallet_profiling" $$cow "stat" "measure" ;\
+	done;
+
+SEBS_EXTERN_RESULT_PATH=Benchmarks/SeBS_analysis/results/SeBS_extern
+run_sebs_external_benchmark:
+	make set_experiment_both
+	cd Benchmarks; for cow in cow; do \
+		for pre in prealloc; do \
+			./run_sebs.sh $$pre ${SEBS_EXTERN_RESULT_PATH} "wallet_extern" $$cow "no_feature" "no_measure" "external" ;\
+		done; \
+	done;
+
+SEBS_EXTERN_LUKEWARM_RESULT_PATH=Benchmarks/SeBS_analysis/results/SeBS_extern_warm
+run_sebs_external_lukewarm_benchmark:
+	make set_experiment_lukewarm
+	cd Benchmarks; for cow in cow; do \
+		for pre in prealloc; do \
+			./run_sebs.sh $$pre ${SEBS_EXTERN_LUKEWARM_RESULT_PATH} "wallet_extern" $$cow "no_feature" "no_measure" "external" ;\
+		done; \
+	done;
