@@ -63,6 +63,7 @@ class Wallet:
         if not self.fd:
             raise Exception("Cannot measure monitor - not initialized!")
         return _w.measure_monitor_hot()
+
     # end of helper functions for attestation microbenchmarks
 
     def __enter__(self):
@@ -78,6 +79,7 @@ class TrustedProcess:
     def __init__(self, process_id):
         self.process_id = process_id
 
+
 class Trustlet(TrustedProcess):
     def __init__(self, process_id):
         TrustedProcess.__init__(self, process_id)
@@ -90,7 +92,13 @@ class Trustlet(TrustedProcess):
         ret = _w.invoke_trustlet(self.process_id, argument, output_size)
         return ret
 
-    def attest_execution(self, input: str, input_len: int, output: str, output_len: int) -> str:
+    def create_channel(self, trustlet):
+        ret = _w.create_channel(self.process_id, trustlet.process_id)
+        return ret
+
+    def attest_execution(
+        self, input: str, input_len: int, output: str, output_len: int
+    ) -> str:
         ret = _w.attest_execution(self.process_id, input, input_len, output, output_len)
         return ret
 
@@ -107,13 +115,17 @@ class Trustlet(TrustedProcess):
         _w.measure_trustlet_hot(self.process_id)
         return
 
-    def measure_function(self, input: str, input_len: int, output: str, output_len: int):
+    def measure_function(
+        self, input: str, input_len: int, output: str, output_len: int
+    ):
         _w.measure_function(self.process_id, input, input_len, output, output_len)
         return
+
     # end of helper functions for attestation microbenchmarks
 
     def delete(self):
         _w.delete_trustlet(self.process_id)
+
 
 class Zygote(TrustedProcess):
     def __init__(self, process_id):
@@ -122,7 +134,7 @@ class Zygote(TrustedProcess):
     def create_trustlet(self, function_code: FileName) -> Trustlet:
         if not Path(function_code).exists():
             raise Exception(f"Function Code {function_code} not found")
-        with open(function_code, mode='r') as file:
+        with open(function_code, mode="r") as file:
             function_code = file.read()
         trustlet_id = _w.create_trustlet(self.process_id, function_code)
         if trustlet_id < 0:
@@ -141,6 +153,7 @@ class Zygote(TrustedProcess):
     def measure_zygote_hot(self):
         _w.measure_zygote_hot(self.process_id)
         return
+
     # end of helper functions for attestation microbenchmarks
 
     def delete(self):
