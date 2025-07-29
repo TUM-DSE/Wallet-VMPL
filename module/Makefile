@@ -13,7 +13,6 @@ all: vmpl.ko
 
 clean:
 	make -C /lib/modules/$(KVERSION)/build M=$(PWD) clean
-	rm test || true
 
 reload:	
 	rmmod vmpl.ko | true
