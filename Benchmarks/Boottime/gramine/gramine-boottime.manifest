@@ -1,0 +1,26 @@
+[loader]
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+log_level = "error"
+argv = [ "date", "+%s%N" ]
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
+
+[libos]
+entrypoint = "/usr/bin/date"
+
+[fs]
+root.type = "tmpfs"
+
+[[fs.mounts]]
+path = "/usr/bin/date"
+uri = "file:/usr/bin/date"
+
+[[fs.mounts]]
+path = "/lib"
+uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/runtime/glibc"
+
+[[fs.mounts]]
+path = "/lib/x86_64-linux-gnu"
+uri = "file:/gramine/python-libs/lib/x86_64-linux-gnu"
+
