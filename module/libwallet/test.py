@@ -13,7 +13,7 @@ tid1 = lib.create_trustlet(zid1, func)
 
 input_data = b"input data"
 output_size = 4096
-#output1 = lib.invoke_trustlet(tid1, input_data, output_size)
+output1 = lib.invoke_trustlet(tid1, input_data, output_size)
 
 #output2 = lib.invoke_trustlet(tid2, input_data, output_size)
 

@@ -28,27 +28,27 @@ void load_file(const char* path, uint8_t** data, uint64_t* buf_size) {
 }
 
 void load_data(char* in, char** out){
-    uint64_t size = strlen(in);
+    uint64_t size = strlen(in) + 1;
     uint64_t actual_size = ROUND_UP_SIZE(size);
     uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);
     for(int i = 0; i < size; i++)
         buf[i] = in[i];
+    buf[size] = 0;
     *out = buf;
 }
 
 void load_data_with_len(char* in, char** out, uint64_t len){
     uint64_t actual_size = ROUND_UP_SIZE(len);
     uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < actual_size; i++){
         buf[i] = in[i];
+    }
     *out = buf;
 }
 
 void* allocate_buffer(uint64_t size) {
     uint64_t actual_size = ROUND_UP_SIZE(size);
     uint8_t* buf = aligned_alloc(PAGE_SIZE, actual_size);
-    for(int i = 0; i < actual_size; i++){
-        buf[i] = 0;
-    }
+    memset(buf, 0, actual_size);
     return buf;
 }
