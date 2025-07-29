@@ -1,0 +1,61 @@
+[hypervisor.qemu]
+
+path = "/nix/store/9ibkl27f7vbnaiwzkk55i6ksgs179k1a-qemu-8.2.0/bin/qemu-system-x86_64"
+#path = "/scratch/patrick/wallet-current/Benchmarks/TCB/tmp/qemu.wrapper"
+kernel = "/nix/store/0j9mwi44nrryw2nhvvzn1s3vdmw1y72g-kata-images-3.6.0/kata/share/kata-containers/vmlinux.container"
+#image = "/nix/store/ffmdanampci32lh103s29g5rlhl5l9qf-kata-3.6.0/share/kata-containers/kata-containers.img"
+image = "/scratch/patrick/wallet-current/Benchmarks/TCB/tmp/kata-containers.img"
+#initrd = "/nix/store/ffmdanampci32lh103s29g5rlhl5l9qf-kata-3.6.0/share/kata-containers/kata-containers-initrd.img"
+machine_type = "q35"
+rootfs_type="ext4"
+enable_annotations = ["enable_iommu", "virtio_fs_extra_args", "kernel_params"]
+valid_hypervisor_paths = ["/scratch/patrick/wallet-current/firmware"]
+kernel_params = "ioport=0xf4"
+firmware = "/scratch/patrick/wallet-current/seabios/out/bios.bin"
+firmware_volume = ""
+machine_accelerators=""
+cpu_features="pmu=off"
+default_vcpus = 1
+default_maxvcpus = 0
+default_bridges = 1
+default_memory = 256
+default_maxmemory = 0
+disable_block_device_use = false
+shared_fs = "virtio-fs"
+virtio_fs_daemon = "/nix/store/0j9mwi44nrryw2nhvvzn1s3vdmw1y72g-kata-images-3.6.0/kata/libexec/virtiofsd"
+valid_virtio_fs_daemon_paths = ["/nix/store/0j9mwi44nrryw2nhvvzn1s3vdmw1y72g-kata-images-3.6.0/kata/libexec/virtiofsd"]
+virtio_fs_cache_size = 0
+virtio_fs_queue_size = 1024
+virtio_fs_extra_args = ["--thread-pool-size=1", "--announce-submounts"]
+virtio_fs_cache = "auto"
+block_device_driver = "virtio-scsi"
+block_device_aio = "io_uring"
+enable_iothreads = false
+enable_vhost_user_store = false
+vhost_user_store_path = "/var/run/kata-containers/vhost-user"
+valid_vhost_user_store_paths = ["/var/run/kata-containers/vhost-user"]
+vhost_user_reconnect_timeout_sec = 0
+valid_file_mem_backends = [""]
+pflashes = []
+valid_entropy_sources = ["/dev/urandom","/dev/random",""]
+disable_selinux=false
+disable_guest_selinux=true
+[factory]
+[agent.kata]
+kernel_modules=[]
+dial_timeout = 45
+[runtime]
+internetworking_model="tcfilter"
+disable_guest_seccomp=true
+sandbox_cgroup_only=false
+static_sandbox_resource_mgmt=false
+sandbox_bind_mounts=[]
+vfio_mode="guest-kernel"
+disable_guest_empty_dir=false
+experimental=[]
+create_container_timeout = 60
+privileged_without_host_devices=true
+
+[[devices]]
+type = "virtio-mmio"
+path = "/dev/ioport"
