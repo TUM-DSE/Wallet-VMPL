@@ -6,6 +6,7 @@ SEBS_TARGET="${3:-wallet}"
 COW_CONFIG="${4:-cow}"
 BENCH_FEATURE="${5:-breakdown}"
 MEASURE="${6:-no_measure}"
+EXTERNAL="${7:-not_external}"
 RESULT_PATH="${SUB_RESULT_PATH}/${SEBS_TARGET}_${COW_CONFIG}_${PREALLOC}"
 
 printf "\nConfiguration:\n"
@@ -42,6 +43,40 @@ delete() {
     sudo rm -rf "Benchmarks/SeBS/$1"
 }
 
+setup_libos() {
+
+    name=$1
+    if [ "${name}" == "110.dynamic-html" ]; then
+        cp module/libpal-html.so module/libpal.so;
+        cp module/libsysdb-html.so module/libsysdb.so;
+    elif [ "${name}" == "120.uploader" ]; then
+        cp module/libpal-none.so module/libpal.so;
+        cp module/libsysdb-none.so module/libsysdb.so;
+    elif [ "${name}" == "210.thumbnailer" ]; then
+        cp module/libpal-thumbnailer.so module/libpal.so;
+        cp module/libsysdb-thumbnailer.so module/libsysdb.so;
+    elif [ "${name}" == "220.video-processing" ]; then
+        cp module/libpal-video.so module/libpal.so;
+        cp module/libsysdb-video.so module/libsysdb.so;
+    elif [ "${name}" == "311.compression" ]; then
+        cp module/libpal-none.so module/libpal.so;
+        cp module/libsysdb-none.so module/libsysdb.so;
+    elif [ "${name}" == "411.image-recognition" ]; then
+        cp module/libpal-image-recognition.so module/libpal.so;
+        cp module/libsysdb-image-recognition.so module/libsysdb.so;
+    elif [ "${name}" == "501.graph-pagerank" ] || [ "${name}" == "502.graph-mst" ] || [ "${name}" == "503.graph-bfs" ]; then
+        cp module/libpal-igraph.so module/libpal.so;
+        cp module/libsysdb-igraph.so module/libsysdb.so;
+    elif [ "${name}" == "504.dna-visualisation" ]; then
+        cp module/libpal-dna.so module/libpal.so;
+        cp module/libsysdb-dna.so module/libsysdb.so;
+    else
+        sleep 1;
+        echo "Benchmark ${name} not found";
+        exit 1;
+    fi
+}
+
 
 run() {
 
@@ -68,6 +103,10 @@ run() {
         sleep 1
     fi
 
+    echo "Collecting time trace"
+    echo "Storing in: ${RESULT_PATH}/time-trace-${BENCH}"
+    sudo bpftrace time.bt &> "${RESULT_PATH}/time-trace-${BENCH}" &
+    PIDT=$!
 
     MEM=128 make run &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}" &
     PID=$!
@@ -80,14 +119,20 @@ run() {
 
     echo "Starting Benchmark ${BENCH} - ${PREALLOC} - ${COW_CONFIG}"
 
-    timeout 1800s make run_benchmark_sebs name="${BENCH}" WARM_COLD="${SEBS_TARGET}" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
-    STATE=$?
+    if [ "${EXTERNAL}" == "external" ]; then
+        setup_libos $BENCH
+        WALLET_ADDR="192.168.27.10" ./Benchmarks/sebs_script_extern.sh ${BENCH} "wallet_remote" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
+        STATE=$?
+    else
+        timeout 1800s make run_benchmark_sebs name="${BENCH}" WARM_COLD="${SEBS_TARGET}" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
+        STATE=$?
+    fi
 
     kill ${PID}
     if [ "${BENCH_FEATURE}" == "breakdown" ] || [ "${BENCH_FEATURE}" == "stat" ]; then
         kill ${PIDT}
     fi
-
+    kill ${PIDT}
     sleep 10
 
     if [ $STATE -eq 124 ]; then
