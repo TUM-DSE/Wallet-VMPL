@@ -78,7 +78,7 @@
           bpftrace = bpftrace.packages.x86_64-linux.default;
           test = pkgs.callPackage ./node/pkg.nix { };
         };
-	pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = nixpkgs.legacyPackages.${system};
         devShells = let
           common_deps = with pkgs; [
             nixos-generators.packages.${system}.nixos-generate
@@ -128,14 +128,23 @@
                 cargo-depgraph
                 cloc
                 cargo-cache
-		libcgroup
+                libcgroup
                 python3
                 python311Packages.requests
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
+                python311Packages.pybind11
+                python311Packages.pytest
+                python311Packages.fire
+                python311Packages.requests
+                python311Packages.setuptools
                 unzip
-		numactl
+                numactl
+                python311Packages.docker
+                python311Packages.invoke
+                python311Packages.lxml
+                python311Packages.psutil
                 python311Packages.pip
                 python311Packages.numpy
                 python311Packages.click
@@ -146,7 +155,7 @@
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
-		texliveMedium
+                texliveMedium
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
