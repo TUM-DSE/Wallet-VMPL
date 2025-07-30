@@ -20,7 +20,7 @@
 	url = git@github.com:TUM-DSE/gramine-svsm.git
 [submodule "Benchmarks/SeBS"]
 	path = Benchmarks/SeBS
-	url = git@github.com:TUM-DSE/SeBS.git
+	url = https://github.com/TUM-DSE/Wallet-SeBS.git
 [submodule "python/portable-python-cmake-buildsystem"]
 	path = runtime/portable-python-cmake-buildsystem
 	url = https://github.com/bjia56/portable-python-cmake-buildsystem.git
