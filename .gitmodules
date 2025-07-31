@@ -27,3 +27,6 @@
 [submodule "Benchmarks/CVM_eval"]
 	path = Benchmarks/CVM_eval
 	url = git@github.com:TUM-DSE/CVM_eval.git
+[submodule "AzureTraces/invitro"]
+	path = AzureTraces/invitro
+	url = https://github.com/dimstav23/invitro.git
