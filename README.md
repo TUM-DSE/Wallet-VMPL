@@ -34,7 +34,8 @@ In the next step we run the VM with Wallet's Monitor.
 make run
 ```
 After the VM has started it can be accessed either via ssh (`make ssh`) or
-by login in with `root:root`.
+by login in with `root:root`. Since the Montior also logs to the same output
+ssh is recommended. 
 
 In the VM the module directory should be available.
 ```bash
