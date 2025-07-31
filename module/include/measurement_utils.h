@@ -1,15 +1,13 @@
 #ifndef MEASUREMENT_UTILS_H
 #define MEASUREMENT_UTILS_H
 
-#include <unistd.h>
-
 static inline uint64_t get_cycles() 
 {
     unsigned int lo,hi;
     __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
     return ((uint64_t)hi << 32) | lo;
 }
-
+ 
 // NOTE: Function sleeps for 100 ms, don't call in performance sensitive code
 static uint64_t get_CPU_freq() 
 {

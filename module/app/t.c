@@ -25,7 +25,6 @@ typedef signed long long int u64;
 #define  PACKED __attribute__((__packed__)) 
 #include "vmpl.h"
 #include "measurement_utils.h"
-#include "my_crypto.h"
 //#define rax 1
 //#define rcx 2
 //#define rdx 3
@@ -107,12 +106,15 @@ int call_attest(uint8_t* pub_key_hash) {
     ret = ioctl(fd, VMPL_WR, &call);
 
     struct attestation_report* report = (struct attestation_report*)att_buffer;
-
-    // Open a file for writing the report
-    FILE *output_file = fopen(MONITOR_ATTESTATION_REPORT_PATH, "w");
-    if (output_file == NULL) {
-        perror("Error opening file");
-        return 1;
+    FILE* report_file = fopen("/root/report.txt","w");
+    printf("FILE: %p\n",report_file);
+    printf("SIZE: %d\n",report->report_size);
+    fwrite(report->report,report->report_size, 1,report_file);
+    
+    for(int i = 0; i<1216;i++){
+        if(i == 64)
+            printf("\n");
+        printf("%" PRIu8 " ", att_buffer[i]);
     }
     print_attestation_report(att_buffer, output_file);
 	  // Extract pub key hash
@@ -581,12 +583,7 @@ int main(int argc, char** argv)
     }
     printf("Test number: %d\n", test_num);
 
-    // Set affinity to CPU 2
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(2, &cpuset);
-    pthread_t thread = pthread_self();
-    int pr = pthread_setaffinity_np(thread, sizeof(cpu_set_t), &cpuset);
+		uint64_t CPU_freq = get_CPU_freq();
 
     fd = open("/dev/vmpl_device", O_RDWR);
     if(fd < 0) {
@@ -603,14 +600,28 @@ int main(int argc, char** argv)
             invoke_trustlet(1);
             break;
         }
-        case 1: {
-            // not work
-            printf("Multiple execution test\n");
-            create_zygote("libpal.so");
-            create_trustlet(0);
-            invoke_trustlet(1);
-            invoke_trustlet(1);
-            break;
+        monitor_init();
+		uint64_t initial_cycles = get_cycles();
+        single_exec();
+		uint64_t final_cycles = get_cycles();
+        int i = 0;
+
+		printf("CPU freq: %ld\n", CPU_freq);
+		printf("Duration: %f ms\n", cycles_to_ms(final_cycles - initial_cycles, CPU_freq));
+
+	//	printf("Number of cycles: %ld\n", final_cycles - initial_cycles);
+        //while(1){
+            //printf("Test: %d\n", i++);
+        //}
+        //call_attest();
+
+        /*
+        if(argc < 2) {
+            setup_schal();
+            printf("Setup done.\nStarting Process");
+            create_vcpu(3,3);
+            printf("Done");
+            goto close_;
         }
         case 2: {
             // not work
