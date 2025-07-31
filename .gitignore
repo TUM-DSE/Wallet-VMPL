@@ -7,9 +7,13 @@ build/*dbg*
 **/*.order
 **/*.out
 **/test
+/AzureTraces/*.txt
+/AzureTraces/*.html
+/AzureTraces/__pycache__/
 /.vscode/**
 /.buildcontainer
 /.toolchain
+/log/
 tmp.qcow2
 guest.qcow2*
 tmp

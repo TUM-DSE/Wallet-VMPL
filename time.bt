@@ -1,0 +1,9 @@
+#!/usr/bin/env bpftrace
+
+#define BENCHMARK_PORT 0xf4
+
+tracepoint:kvm:kvm_pio {
+    if (args->port == BENCHMARK_PORT) {
+        printf("%llu: %d %d\n", nsecs(tai), args->val, args->val);
+    }
+}

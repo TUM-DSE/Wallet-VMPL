@@ -134,6 +134,8 @@
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
+                python311Packages.tqdm
+                python311Packages.scikit-learn
                 python311Packages.pybind11
                 python311Packages.pytest
                 python311Packages.fire
@@ -155,6 +157,7 @@
                 python311Packages.matplotlib
                 python311Packages.seaborn
                 python311Packages.pandas
+                python311Packages.bottle
                 texliveMedium
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm

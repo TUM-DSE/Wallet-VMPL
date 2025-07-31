@@ -16,9 +16,9 @@ def main():
     tmp_file_num = 0
     input_file = sys.argv[1]
 
-    num_nodes = [50, 70, 90, 100, 120]
-    cache_sizes = [64]
-    execution_slots = [4]
+    num_nodes = [100]
+    cache_sizes = [32]
+    execution_slots = [32]
     cache_time = 600
 
     cvm_cold_boot_time = 8.3073
@@ -50,8 +50,8 @@ def main():
 
     k_cold_boot_time = 1.394
     k_cold_std = 0.100466
-    k_warm_boot_time = 0.001
-    k_warm_std = 0.00001
+    k_warm_boot_time = 0.0021
+    k_warm_std = 0.0001
     k_max_execution_slots = 64
     k_header = "************* KATA ****************\n"
 

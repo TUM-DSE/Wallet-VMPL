@@ -80,11 +80,10 @@ setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
 	sudo ip addr add 192.168.${USERADDR}.1/24 dev tap0_${USER}
 	sudo ip link set up dev tap0_${USER}
-	sudo iptables -t nat -A POSTROUTING -o enp2s0f0np0 -j MASQUERADE
+	sudo iptables -t nat -A POSTROUTING -s 192.168.${USERADDR}.0/24 -j MASQUERADE
 
 del_guest_net:
 	sudo ip link delete tap0_${USER}
-	sudo iptables -t nat -D POSTROUTING -o enp2s0f0np0 -j MASQUERADE
 	echo ""
 
 svsm/svsm.bin: build_svsm
@@ -113,6 +112,19 @@ submodules:
 	git submodule update --init --recursive Benchmarks/SeBS;
 
 prepare_all: submodules build_svsm gramine guest.qcow2 setup_guest_net
+
+initialize:
+	git submodule update --init --recursive svsm
+	cd svsm/kernel/src/my_crypto/; ./build.sh
+	git submodule update --init --recursive gramine-svsm
+	cd gramine-svsm; docker build -t gramine-build-container .
+	make gramine
+	cd scripts; ./sebs.sh
+	git submodule update --init --recursive Benchmarks/SeBS
+	make kvm
+	make unload_kvm
+	make load_kvm
+	make setup_guest_net
 
 build_and_run: build_svsm run
 
