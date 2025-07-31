@@ -1,10 +1,20 @@
 # Wallet: Confidential Serverless Computing 
 
+## For evaluation testers
+Due to the special hardware requirments we provide ssh access to our evalution machines.
+Please contact the paper author to obtain ssh access. The machines will have the correct hardware and kernel version to run the experiments. If you run into any problems you can write an email to the authors.
+
 ## Reproduction of paper results
 
 ### Prerequisite
-- A system with AMD SEV-SNP VMPL support
-- Linux kernel 6.8 with Wallet specific (patches)[https://github.com/TUM-DSE/doctor-cluster-config/blob/bf91a4e6a5d07adb7f6bff07ea9d27db6973aa32/pkgs/kernels/linux-svsm-host-wallet.nix#L62]
+
+#### Hardware
+
+- AMD EPYC 7713P with AMD SEV-SNP support enabled
+
+#### Software
+
+- Linux kernel 6.8 with Wallet specific [patches](https://github.com/TUM-DSE/doctor-cluster-config/blob/bf91a4e6a5d07adb7f6bff07ea9d27db6973aa32/pkgs/kernels/linux-svsm-host-wallet.nix#L62)
 - Nix for dependency management 
 
 ### Getting Started
@@ -90,8 +100,8 @@ make plot_comm_latency
 ```
 
 #### 7.6 Scale-out Performance
-For this part public (Azure traces)[https://github.com/Azure/AzurePublicDataset] are used.
-The extend traces should already be part of the data prepared in the (Getting Started)[#getting-started] section.
+For this part public [Azure traces](https://github.com/Azure/AzurePublicDataset) are used.
+The extend traces should already be part of the data prepared in the [Getting Started](#getting-started) section.
 How the traces were extended can be found under [here](https://github.com/dimstav23/invitro/tree/wallet_trace_generation?tab=readme-ov-file#wallet-notes).
 The simulations can be run with the following command.
 ```bash
