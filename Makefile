@@ -126,6 +126,7 @@ initialize:
 	make unload_kvm
 	make load_kvm
 	make setup_guest_net
+	make guest.qcow2
 
 initialize_experiments:
 	cd scripts; ./sebs.sh
