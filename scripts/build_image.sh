@@ -34,6 +34,7 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --install "python3-dev" \
              --install "python3-venv" \
              --install "python3-pip" \
+	     --install "python3-bottle" \
              --install "docker.io" \
              --install "jq" \
              --run-command "grub-mkconfig -o /boot/grub/grub.cfg"

@@ -114,17 +114,21 @@ submodules:
 prepare_all: submodules build_svsm gramine guest.qcow2 setup_guest_net
 
 initialize:
+	git submodule update --init --recursive Benchmarks/SeBS
 	git submodule update --init --recursive svsm
 	cd svsm/kernel/src/my_crypto/; ./build.sh
+	make build_svsm
 	git submodule update --init --recursive gramine-svsm
 	cd gramine-svsm; docker build -t gramine-build-container .
 	make gramine
-	cd scripts; ./sebs.sh
-	git submodule update --init --recursive Benchmarks/SeBS
+	cd scripts; ./sebs.sh one
 	make kvm
 	make unload_kvm
 	make load_kvm
 	make setup_guest_net
+
+initialize_experiments:
+	cd scripts; ./sebs.sh
 
 build_and_run: build_svsm run
 

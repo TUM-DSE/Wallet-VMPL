@@ -17,6 +17,11 @@ build() {
     copy_gramine "$2"
 }
 
+if [ "$#" -ne 2 ]; then
+	build "120.uploader" "none"
+	exit
+fi
+
 build "110.dynamic-html" "html"
 build "120.uploader" "none"
 build "210.thumbnailer" "thumbnailer"
