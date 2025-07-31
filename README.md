@@ -41,7 +41,7 @@ If the guest OS boots to the login prompt everything should work.
 ### Running experiments
 At this point the steps in getting started should have build all required binaries used the experiments. 
 
-#### 7.2 End-to-end Performance
+#### 7.2 End-to-end Performance (Figure 7)
 Use the Makefile to run the experiments.
 ```bash
 make run_sebs_wallet
@@ -57,7 +57,7 @@ Figure 7 can be generated with the following command.
 make plot_end_to_end
 ```
 
-#### 7.3 Performance Analysis
+#### 7.3 Performance Analysis (Figure 8)
 The data produced by the benchmarks of the previous step can also be use 
 to create Figure 8a.
 ```bash
@@ -86,7 +86,7 @@ make run_sebs_wallet_memory
 make plot_memory_usage
 ```
 
-#### 7.5 Communication Analysis
+#### 7.5 Communication Analysis (Figure 9)
 This benchmark does test communication overhead for the different baselines.
 ```bash
 make run_comm_latency_wallet
@@ -99,7 +99,7 @@ With the following Figure 9 can be generated.
 make plot_comm_latency     
 ```
 
-#### 7.6 Scale-out Performance
+#### 7.6 Scale-out Performance (Figure 10)
 For this part public [Azure traces](https://github.com/Azure/AzurePublicDataset) are used.
 The extend traces should already be part of the data prepared in the [Getting Started](#getting-started) section.
 How the traces were extended can be found under [here](https://github.com/dimstav23/invitro/tree/wallet_trace_generation?tab=readme-ov-file#wallet-notes).
@@ -114,7 +114,7 @@ make plot_simulation
 
 ### Additinal experiments
 
-#### 3. Motivation
+#### 3. Motivation (Figure 1)
 
 The data for Figure 1a can be generated via the following commands.
 ```bash
