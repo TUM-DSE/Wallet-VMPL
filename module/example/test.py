@@ -10,11 +10,8 @@ with open("function.py", "rb") as f:
 
 def run_function(trustlet, data, outsize):
     run = trustlet.invoke_trustlet_bin("",0)
-    print("1")
     run = trustlet.invoke_trustlet_bin(data,0)
-    print("2")
     run = trustlet.invoke_trustlet_bin("", outsize)
-    print("3")
     out = pickle.loads(run)
     print("Result: ", out)
 

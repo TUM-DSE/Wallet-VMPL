@@ -127,6 +127,7 @@ initialize:
 	make load_kvm
 	make setup_guest_net
 	make guest.qcow2
+	chmod 0600 ./container/key
 
 initialize_experiments:
 	cd scripts; ./sebs.sh

@@ -43,16 +43,18 @@ insmod vmpl.ko
 ```
 This will load the kernel module used to commuicate with the Monitor.
 
-In the next step the user space libraries can be build.
+In the next step the user space library can be build.
 ```bash
 make libwallet/libwallet.so
 make libwallet/libwallet.a
 ```
+And in `module/python` the python library can be build.
 ```bash
 python3 -m pip install pybind11 pytest fire
 python3 setup.py install
 ```
 
+At this point the preperation are completed and the runtime can be tested.
 With the script at `module/example` a simple Trustlet can be created
 and excecuted.
 ```bash
