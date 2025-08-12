@@ -47,6 +47,9 @@ VMPLkernel6.5.tar.gz:
 	-wget -nc https://github.com/TUM-DSE/svsm/releases/download/VMPL-guest-Image/VMPLkernel6.5.tar.gz
 	tar -xvzf VMPLkernel6.5.tar.gz
 
+images.tar.gz:
+	-wget -nc https://github.com/TUM-DSE/Wallet-VMPL/releases/download/VMPL-Guest-Kernel/images.tar.gz
+	cd module/; tar -xvzf ../images.tar.gz
 #Get guest image
 ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 	-wget -nc ${UBUNTU_IMAGE} -O $@
@@ -131,6 +134,9 @@ initialize:
 
 initialize_experiments:
 	cd scripts; ./sebs.sh
+
+guest_libs:
+	cd scripts; ./setup.sh 192.168.${USERADDR}.10
 
 build_and_run: build_svsm run
 
@@ -438,3 +444,25 @@ run_sebs_external_lukewarm_benchmark:
 			./run_sebs.sh $$pre ${SEBS_EXTERN_LUKEWARM_RESULT_PATH} "wallet_extern" $$cow "no_feature" "no_measure" "external" ;\
 		done; \
 	done;
+
+
+
+
+
+
+#### Simulation
+
+AzureTraces/wallet4000_prepared.csv:
+	cd AzureTraces; python3 preprocess.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv wallet4000_prepared.csv
+
+AzureTraces/simulation_results_parallel.txt: AzureTraces/wallet4000_prepared.csv
+	cd AzureTraces; python sim_node_scalability.py wallet4000_prepared.csv
+
+run_simulation: AzureTraces/simulation_results_parallel.txt
+
+plot_simulation: AzureTraces/simulation_results_parallel.txt
+	cd Benchmarks/Simulation_analysis/; python plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel.txt
+	mkdir -p figures
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_delays_log.pdf figures/figure10a.pdf
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_slowdowns_log.pdf figures/figure10b.pdf
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_percentile_delay_nodes.pdf figures/figure10c.pdf
