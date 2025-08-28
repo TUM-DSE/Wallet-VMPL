@@ -143,6 +143,118 @@ def create_line_plot(data, output_dir, y_scale='linear', motivation=False):
     plt.savefig(output_dir / f'function_density_{y_scale}.png', format='png', dpi=300, bbox_inches=None)
     
     plt.close()
+    
+def create_line_plot_presentation(data, output_dir, y_scale='linear', motivation=False):
+    """Create line plot for memory consumption based on number of functions"""
+    # Create standardized plot
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
+    
+    # Filter variants for motivation plot
+    variants = list(data.keys())
+    
+    for i, variant in enumerate(variants):
+        if variant in data:
+            functions = data[variant]['functions']
+            memory = data[variant]['memory']
+            
+            # Ensure data is sorted by number of functions
+            sorted_data = sorted(zip(functions, memory))
+            functions = [item[0] for item in sorted_data]
+            memory = [item[1] for item in sorted_data]
+            
+            label = LABEL_MAPPINGS_VM.get(variant, variant)
+
+            ax.plot(functions, memory, label=label,
+                   marker='o', markersize=MARKER_SIZE,
+                   linewidth=LINE_WIDTH)
+            # Add annotation to the wallet variant
+            if variant == 'wallet':
+                # Annotate each data point for the wallet variant
+                for j, (func, mem) in enumerate(zip(functions, memory)):
+                    ax.annotate(f'{mem:.2f}',
+                              xy=(func, mem),
+                              xytext=(-4, -6),
+                              textcoords='offset points',
+                              fontsize=ANNOTATION_SIZE)
+                              # arrowprops=dict(arrowstyle='->', color='black', connectionstyle='arc3'))
+    
+    # --- Add annotation for the last point of the CVM variant ---
+    if 'cvm' in data:
+        cvm_functions = data['cvm']['functions']
+        cvm_memory = data['cvm']['memory']
+        # Ensure data is sorted by number of functions
+        sorted_cvm = sorted(zip(cvm_functions, cvm_memory))
+        last_func, last_mem = sorted_cvm[-1]
+
+        # Annotate below the data point with an arrow
+        ax.annotate(
+            "HW-imposed\nCVM limit",
+            xy=(last_func, last_mem),
+            xytext=(10, -10),  # 40 points below the data point
+            textcoords='offset points',
+            ha='center',
+            va='top',
+            fontsize=LEGEND_FONTSIZE,
+            # bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="black", lw=0.5, alpha=0.7),
+            arrowprops=dict(
+                arrowstyle="->",
+                color="black",
+                lw=1,
+                shrinkA=0,
+                shrinkB=2,
+                connectionstyle="arc3,rad=0.2"
+            )
+        )
+                  
+    # Apply consistent styling
+    apply_consistent_style(ax, 
+                         title="",
+                         xlabel="Number of Functions", 
+                         ylabel="Memory Usage (GB)",
+                         grid=False)
+    
+    # Customize the plot
+    ax.set_yscale(y_scale)
+    
+    # Set reasonable x-axis ticks
+    all_functions = []
+    for variant in variants:
+        if variant in data:
+            all_functions.extend(data[variant]['functions'])
+    
+    unique_functions = sorted(set(all_functions))
+    if len(unique_functions) <= 10:  # If we have a reasonable number of x-ticks
+        ax.set_xticks(unique_functions)
+    else:
+        # Otherwise, create reasonable ticks
+        if max(all_functions) > 100:
+            step = 20
+        elif max(all_functions) > 50:
+            step = 10
+        else:
+            step = 5
+        ax.set_xticks(range(0, max(all_functions) + step, step))
+    
+    # Set y-axis to start at 0 for linear scale
+    if y_scale == 'linear':
+        ax.set_ylim(bottom=-49)
+    
+    # Set reasonable x-axis limits
+    ax.set_xlim(-50, max(all_functions) * 1.05)
+    
+    # Position legend at the top center
+    legend = ax.legend(loc='center', bbox_to_anchor=(0.25, 0.75), framealpha=0.3,
+                     borderaxespad=0., frameon=False, fontsize=LEGEND_FONTSIZE-1, ncols=1)
+    legend.get_frame().set_edgecolor('black')
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / f'function_density_{y_scale}_presentation.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / f'function_density_{y_scale}_presentation.png', format='png', dpi=300, bbox_inches=None)
+    
+    plt.close()
 
 def main():
     parser = argparse.ArgumentParser(description='Generate line plots for function density')
@@ -157,6 +269,8 @@ def main():
     # Create plots for all variants
     create_line_plot(data, args.output_dir, 'linear')
     create_line_plot(data, args.output_dir, 'log')
+    
+    create_line_plot_presentation(data, args.output_dir, 'linear')
     
     print(f"Function density plots saved in {args.output_dir}")
 
