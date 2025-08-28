@@ -35,6 +35,7 @@ figwidth = 3.3  # 3.3 inch for single column, 7 inch for double column
 figheight = 2.0
 figheight2 = 1.8
 VARIANTS = ['native', 'gramine', 'kata', 'vm', 'cvm', 'wallet_cow_prealloc', 'wallet_cow_no_prealloc', 'wallet_warm_cow_prealloc']
+VARIANTS_PRESENTATION = ['kata', 'vm', 'cvm', 'wallet_cow_prealloc']
 LABEL_MAPPINGS = {
     'native'  : 'Native',
     'gramine' : 'LibOS(Gramine)',
@@ -1438,6 +1439,180 @@ def create_side_by_side_lukewarm_plot(df, benchmarks, metric, output_dir, y_scal
 
     plt.close()
 
+def create_side_by_side_lukewarm_plot_presentation(df, benchmarks, metric, output_dir, y_scale='linear'):
+    """Create side-by-side plot with lukewarm comparison and warm start"""
+    # fig, axes = plt.subplots(1, 2, figsize=(figwidth*2, figheight), sharey=True)
+    fig, axes = create_standardized_subplots(ax_height = 0.9, ax_width = 2.5, top_margin = 0.15, bottom_margin = 0.5, wspace=0.1, left_margin=0.35, right_margin=0.1)
+    
+    # Add "Lower is better" at the top of the plot
+    # fig.suptitle('Lower is better ↓', fontsize=TITLE_FONTSIZE, color="navy", y=0.98, x=0.53)
+    
+    # Custom benchmark ordering
+    benchmark_order = [
+        "thumbnailer", 
+        "graph-mst", 
+        "dynamic-html", 
+        "graph-pagerank", 
+        "dna-visualisation", 
+        "graph-bfs", 
+        "compression",
+        'image-recognition'
+    ]
+    
+    # Create mapping from benchmark name to its index in the original list
+    benchmark_mapping = {b.split('.')[1]: b for b in benchmarks}
+    
+    # Create ordered list of benchmarks using the mapping
+    plot_benchmarks = []
+    for b in benchmark_order:
+        for full_bench in benchmarks:
+            if full_bench.split('.')[1] == b:
+                plot_benchmarks.append(full_bench)
+                break
+    
+    # Left subplot: Lukewarm comparison (cold start + lukewarm Wallet)
+    ax_left = axes[0]
+    # Filter data for cold execution type
+    cold_df = df[df['type'] == 'cold']
+    
+    # Get warm data for Wallet
+    lukewarm_variant = 'wallet_warm_cow_prealloc'
+    lukewarm_df = df[df['variant'] == lukewarm_variant]
+    lukewarm_df = lukewarm_df[lukewarm_df['type'] == 'hot']
+    
+    # Use the ordered benchmark list instead of original benchmarks
+    # plot_benchmarks = benchmarks  # No geomean
+
+    # Calculate bar positions for left subplot
+    n_variants = len(VARIANTS_PRESENTATION)
+    width = 0.10  # Width of each bar
+    variant_positions = np.arange(len(plot_benchmarks))
+    
+    # Store all bars for the legend
+    all_bars = []
+    all_labels = []
+    
+    # Plot bars for each variant's cold data on left subplot
+    for i, variant in enumerate(VARIANTS_PRESENTATION):
+        variant_data = cold_df[cold_df['variant'] == variant]
+        # Prepare data without geomean
+        values = []
+        for bench in plot_benchmarks:
+            bench_data = variant_data[variant_data['benchmark'] == bench]
+            if len(bench_data) > 0:
+                values.append(bench_data[metric].values[0])
+            else:
+                values.append(np.nan)
+        
+        positions = variant_positions + (i - n_variants/2 + 0.5) * width
+        bars = ax_left.bar(positions, values, width, 
+                    label=LABEL_MAPPINGS[variant],
+                    edgecolor='black', hatch=hatches[i%len(hatches)])
+        
+        # Add all variants to legend
+        all_bars.append(bars[0])
+        all_labels.append(LABEL_MAPPINGS[variant])
+    
+    # Add lukewarm Wallet data to left subplot
+    lukewarm_color = 'tab:orange'  # Different color for lukewarm
+    lukewarm_hatch = '-'  # Different hatch pattern
+    
+    # Prepare lukewarm data without geomean
+    lukewarm_plot_values = []
+    for bench in plot_benchmarks:
+        bench_data = lukewarm_df[lukewarm_df['benchmark'] == bench]
+        if len(bench_data) > 0:
+            lukewarm_plot_values.append(bench_data[metric].values[0])
+        else:
+            lukewarm_plot_values.append(np.nan)
+    
+    # Position lukewarm bars to the right of Wallet cold bars
+    wallet_index = VARIANTS_PRESENTATION.index('wallet_cow_prealloc')
+    lukewarm_positions = variant_positions + ((wallet_index + 1) - n_variants/2 + 0.5) * width
+    
+    lukewarm_bars = ax_left.bar(lukewarm_positions, lukewarm_plot_values, width,
+                        label="Wallet(Lukewarm)",
+                        edgecolor='black', hatch=lukewarm_hatch)
+    
+    # Add lukewarm to legend items
+    all_bars.append(lukewarm_bars[0])
+    all_labels.append("Wallet(Lukewarm)")
+    
+    # Right subplot: Warm start (no lukewarm data)
+    ax_right = axes[1]
+    # Filter data for hot execution type (warm start)
+    hot_df = df[df['type'] == 'hot']
+    
+    # Plot bars for each variant's warm data on right subplot
+    for i, variant in enumerate(VARIANTS_PRESENTATION):
+        variant_data = hot_df[hot_df['variant'] == variant]
+        # Prepare data without geomean
+        values = []
+        for bench in plot_benchmarks:
+            bench_data = variant_data[variant_data['benchmark'] == bench]
+            if len(bench_data) > 0:
+                values.append(bench_data[metric].values[0])
+            else:
+                values.append(np.nan)
+        
+        positions = variant_positions + (i - n_variants/2 + 0.5) * width
+        ax_right.bar(positions, values, width, 
+                    label=LABEL_MAPPINGS[variant],
+                    edgecolor='black', hatch=hatches[i%len(hatches)])
+    
+    # Configure both subplots
+    for idx, ax in enumerate(axes):
+        ax.set_yscale(y_scale)
+        if idx == 0:  # Only add y-label to the first subplot
+            ax.set_ylabel('Time (s)', fontsize=TICKS_FONTSIZE)
+        plt.sca(ax)
+        plt.yticks(fontsize=TICKS_FONTSIZE)
+        ax.yaxis.offsetText.set_fontsize(TICKS_FONTSIZE)
+        ax.set_xticks(variant_positions-0.2)
+        xlabels = [benchmark.split('.')[1] for benchmark in plot_benchmarks]  # No 'Geo. Mean'
+        ax.set_xticklabels(xlabels,rotation=18, fontsize=TICKS_FONTSIZE)
+        
+        # Add gridlines
+        ax.yaxis.grid(True, linestyle='--', alpha=0.7)
+        if(y_scale not in "log"):
+            ax.set_ylim(bottom=0)
+    
+    # Set titles for each subplot
+    ax_left.set_title('Cold and Lukewarm Starts', fontsize=TITLE_FONTSIZE, pad=3, color="navy")
+    ax_right.set_title('Warm Start', fontsize=TITLE_FONTSIZE, pad=3, color="navy")
+    
+    ax_left.grid(False)
+    ax_right.grid(False)
+    
+    # Add caption names below each subplot
+    if metric == 'exec_time':
+        left_caption = 'Execution Time (Cold Start)'
+        right_caption = 'Execution Time (Warm Start)'
+    elif metric == 'client_time':
+        left_caption = 'Client Time (Cold Start)'
+        right_caption = 'Client Time (Warm Start)'
+    else:
+        left_caption = f'{metric} (Cold Start)'
+        right_caption = f'{metric} (Warm Start)'
+    
+    # Add shared legend at the bottom with all variants
+    fig.legend(all_bars, all_labels, 
+              loc='lower center', bbox_to_anchor=(0.51, -0.0),
+              ncol=8,  # Adjust number of columns based on how many items
+              frameon=False, fontsize=LEGEND_FONTSIZE-1,
+              framealpha=0.3, edgecolor='black', 
+              borderaxespad=0.0)
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    filename = f'{metric}_side_by_side_lukewarm'
+    plt.savefig(output_dir / (filename + f'_{y_scale}_presentation.pdf'), format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / (filename + f'_{y_scale}_presentation.png'), format='png', dpi=300, bbox_inches=None)
+
+    plt.close()
+
 def print_lukewarm_performance_comparison(df, benchmarks, metric, collect_results=None):
     """
     Print geometric means and calculate how much percent Wallet and Wallet(Lukewarm) 
@@ -1572,6 +1747,7 @@ def main():
     #     # Add the new side-by-side lukewarm plots
         # create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output')
         create_side_by_side_lukewarm_plot(df, common_benchmarks, metric, 'output', 'log')
+        create_side_by_side_lukewarm_plot_presentation(df, common_benchmarks, metric, 'output', 'log')
     #     # Add performance comparison for lukewarm plots
         print_lukewarm_performance_comparison(df, common_benchmarks, metric, all_comparison_results)
     
