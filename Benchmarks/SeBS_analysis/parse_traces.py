@@ -56,7 +56,7 @@ def parse_benchmark(b,r,me="profiling"):
 
 def parse_memory(b,r):
         try:
-            with open(f"results/wallet_memory/wallet_profiling-{b}") as f:
+            with open(f"results/memory_extern/wallet_extern_cow_prealloc/wallet_extern-{b}") as f:
                 trace = f.read()
         except:
             print(f"Trace missing results/wallet_traces_{alloc}/wallet_profiling-{b}")
@@ -96,9 +96,9 @@ match sys.argv[1]:
             f.write("type,bench,total,cow,no_cow\n")
             for b in BENCHMARKS:
                 parse_memory(b,f)
-                parse_memory_vm(b,f,"vm")
-                parse_memory_vm(b,f,"cvm")
-                parse_memory_vm(b,f,"kata")
+                #parse_memory_vm(b,f,"vm")
+                #parse_memory_vm(b,f,"cvm")
+                #parse_memory_vm(b,f,"kata")
 
     case "trace":
         csv_header = "bench,prealloc,vmexit,vmgexit,pvalidate,page_fault,cow\n"
