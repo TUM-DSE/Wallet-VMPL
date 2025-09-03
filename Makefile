@@ -134,11 +134,10 @@ initialize:
 
 initialize_experiments: images.tar.gz
 	git submodule update --init --recursive Benchmarks/CVM_eval
-	cd Benchmarks/CVM_eval/; \
-		nix develop --command inv build.build-qemu-snp \
-		nix develop --command inv build.build-ovmf-snp \
-		nix develop --command inv build.build-guest-fs-sebs \
-		nix develop --command just setup-linux
+	cd Benchmarks/CVM_eval/; nix develop --command inv build.build-qemu-snp
+	cd Benchmarks/CVM_eval/; nix develop --command inv build.build-ovmf-snp 
+	cd Benchmarks/CVM_eval/; nix develop --command inv build.build-guest-fs-sebs
+	cd Benchmarks/CVM_eval/; nix develop --command just setup-linux
 
 guest_libs:
 	cd scripts; ./setup.sh 192.168.${USERADDR}.10

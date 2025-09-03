@@ -39,7 +39,7 @@ After the VM has started it can be accessed either via ssh (`make ssh`) or
 by login in with `root:root`. Since the Montior also logs to the same output
 ssh is recommended. 
 
-In the VM the module directory should be available.
+In the VM the `module` directory should be available.
 ```bash
 make vmpl.ko
 insmod vmpl.ko
@@ -48,8 +48,8 @@ This will load the kernel module used to commuicate with the Monitor.
 
 In the next step the user space library can be build.
 ```bash
-make libwallet/libwallet.so
-make libwallet/libwallet.a
+make -C libwallet/ libwallet.so
+make -C libwallet/ libwallet.a
 ```
 And in `module/python` the python library can be build.
 ```bash
@@ -76,7 +76,7 @@ Result:  {'Output': 10}
 
 ### Running experiments
 
-#### Preperation (~2h)
+#### Preperation (~10min)
 Run the following to setup all required dependencies and Zygote images.
 
 ```bash
