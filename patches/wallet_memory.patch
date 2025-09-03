@@ -1,0 +1,44 @@
+diff --git a/sebs/wallet_remote/function.py b/sebs/wallet_remote/function.py
+index e1f6d4d..3b370cd 100644
+--- a/sebs/wallet_remote/function.py
++++ b/sebs/wallet_remote/function.py
+@@ -28,6 +28,8 @@ class HTTPTrigger(Trigger):
+ 
+         begin = datetime.datetime.now()
+ 
++        requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/stat_reset", json={})
++
+         if not self.function._running:
+             cold = True
+ 
+@@ -60,6 +62,8 @@ class HTTPTrigger(Trigger):
+         output = output.json()
+         end = datetime.datetime.now()
+ 
++        requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/stat_get", json={})
++
+         result = ExecutionResult.from_times(begin, end)
+         result.request_id = output["request_id"]
+         result.parse_benchmark_output(output)
+diff --git a/sebs/wallet_remote/server.py b/sebs/wallet_remote/server.py
+index 74dbdaa..836e22b 100644
+--- a/sebs/wallet_remote/server.py
++++ b/sebs/wallet_remote/server.py
+@@ -88,6 +88,17 @@ def cold_start():
+ 
+     return {"result": "ok"}
+ 
++@route("/stat_get", method="POST")
++def stat_get():
++    with wallet.Wallet() as w:
++        w.stat_get()
++
++@route("/stat_reset", method="POST")
++def stat_reset():
++    with wallet.Wallet() as w:
++        w.stat_reset()
++
++
+ if __name__ == "__main__":
+     __name__ = "wallet_remote"
+     run(host="0.0.0.0", port=int(sys.argv[1]), debug=True)

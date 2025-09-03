@@ -1,0 +1,24 @@
+diff --git a/sebs/cvm/function.py b/sebs/cvm/function.py
+index 21b89da..7ce9276 100644
+--- a/sebs/cvm/function.py
++++ b/sebs/cvm/function.py
+@@ -42,15 +42,15 @@ class HTTPTrigger(Trigger):
+             from tasks.config import SSH_PORT
+ 
+             vm: QemuVM
+-            resource: VMResource = get_vm_resource("snp", "small") # 1 cpu, 8 GB memory
+-            # resource: VMResource = get_vm_resource("amd", "small") # 1 cpu, 8 GB memory
++            # resource: VMResource = get_vm_resource("snp", "small") # 1 cpu, 8 GB memory
++            resource: VMResource = get_vm_resource("amd", "small") # 1 cpu, 8 GB memory
+             config = {
+                 "image": "../../../build/image/guest-fs-sebs.qcow2",
+                 "ssh_port": SSH_PORT,
+                 "boot_prealloc": False
+             }
+-            qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
+-            # qemu_cmd = get_amd_vm_direct_qemu_cmd(resource, config)
++            # qemu_cmd = get_snp_direct_qemu_cmd(resource, config)
++            qemu_cmd = get_amd_vm_direct_qemu_cmd(resource, config)
+ 
+             context = spawn_qemu(qemu_cmd, numa_node=resource.numa_node, config=config)
+             self.function._context = context

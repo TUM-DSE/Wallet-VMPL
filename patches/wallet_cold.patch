@@ -1,0 +1,19 @@
+diff --git a/sebs/wallet_remote/function.py b/sebs/wallet_remote/function.py
+index 3fde518..e1f6d4d 100644
+--- a/sebs/wallet_remote/function.py
++++ b/sebs/wallet_remote/function.py
+@@ -41,12 +41,12 @@ class HTTPTrigger(Trigger):
+                 "MINIO_ACCESS_KEY": self.function._storage_cfg.access_key,
+                 "MINIO_SECRET_KEY": self.function._storage_cfg.secret_key,
+             }
+-            req = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/warm",json=data)
++            req = requests.post(f"http://{os.environ['WALLET_ADDR']}:9002/cold",json=data)
+ 
+             self.function._running = True
+ 
+             if req.status_code != 200:
+-                self.logging.info(f"http://{os.environ['WALLET_ADDR']}:9002/warm")
++                self.logging.info(f"http://{os.environ['WALLET_ADDR']}:9002/cold")
+                 raise RuntimeError(req.text)
+ 
+             self.logging.info(f"Function Started")
