@@ -163,7 +163,7 @@ print(",invoke_data_copy,invoke_time,invoke_result_copy,total_time,zygote_measur
 for a in ["prealloc"]:
     for cow in ["cow" ]:
         for b in BENCHMARKS:
-            file_name = f"wallet-{b}-{a}-{cow}"
+            file_name = f"wallet_extern-{b}-{a}-{cow}"
             file_path = Path("measure")
             #file_path /= f"wallet_{cow}_{a}"
             file_path /= file_name

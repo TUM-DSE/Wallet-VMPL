@@ -24,6 +24,7 @@ mkdir -p log/run
 
 mkdir -p $RESULT_PATH
 
+WALLET_VM_ADDRESS="192.168.$(expr $(id -u) % 1000).10"
 
 benchmarks=(
     "110.dynamic-html"
@@ -106,7 +107,7 @@ run() {
     echo "Collecting time trace"
     echo "Storing in: ${RESULT_PATH}/time-trace-${BENCH}"
     sudo bpftrace time.bt &> "${RESULT_PATH}/time-trace-${BENCH}" &
-    PIDT=$!
+    PIDT_TIME=$!
 
     MEM=128 make run &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}" &
     PID=$!
@@ -121,18 +122,20 @@ run() {
 
     if [ "${EXTERNAL}" == "external" ]; then
         setup_libos $BENCH
-        WALLET_ADDR="192.168.27.10" ./Benchmarks/sebs_script_extern.sh ${BENCH} "wallet_remote" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
+        WALLET_ADDR="${WALLET_VM_ADDRESS}" ./Benchmarks/sebs_script_extern.sh ${BENCH} "wallet_remote" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
         STATE=$?
     else
         timeout 1800s make run_benchmark_sebs name="${BENCH}" WARM_COLD="${SEBS_TARGET}" &> "${RESULT_PATH}/${SEBS_TARGET}-${BENCH}-bench"
         STATE=$?
     fi
 
-    kill ${PID}
+    sudo kill ${PID}
     if [ "${BENCH_FEATURE}" == "breakdown" ] || [ "${BENCH_FEATURE}" == "stat" ]; then
-        kill ${PIDT}
+        sudo kill ${PIDT}
+	echo "Closed bpftrace ${PIDT}"
     fi
-    kill ${PIDT}
+    sudo kill ${PIDT_TIME}
+    echo "Closed bpftrace ${PIDT_TIME}"
     sleep 10
 
     if [ $STATE -eq 124 ]; then

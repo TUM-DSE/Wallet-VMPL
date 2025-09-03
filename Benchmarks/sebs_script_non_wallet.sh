@@ -46,8 +46,8 @@ do
         'config/config_tmp.json' \
         'out_storage.json' > 'config/config.json'
 
-    ./sebs.py experiment invoke perf-cost --config 'config/config.json' --output-dir "$1-$i" --output-file 'run.log'
-    ./sebs.py experiment process perf-cost --config 'config/config.json' --output-dir "$1-$i" --output-file 'process.log' #
+    ./sebs.py experiment invoke perf-cost --config 'config/config.json' --output-dir "$i" --output-file 'run.log'
+    ./sebs.py experiment process perf-cost --config 'config/config.json' --output-dir "$i" --output-file 'process.log' #
     echo "BENCHMARK DONE: $i"
 done
 

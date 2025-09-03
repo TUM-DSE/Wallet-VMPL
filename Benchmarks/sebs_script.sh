@@ -14,7 +14,7 @@ source python-venv/bin/activate
 pip3 install ../../module/python
 
 tools/build_docker_images.py --deployment "${TARGET}" --language 'python' --language-version '3.11'
-./sebs.py storage start minio --port '9011' --output-json 'out_storage.json'
+./sebs.py storage start MINIO --port '9011' --output-json 'out_storage.json' #minio does not work as argument with newer packages?
 
 jq ".deployment.name = \"${TARGET}\"" 'config/config_template.json' > 'config/config_tmp.json'
 
