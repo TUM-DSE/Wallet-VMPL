@@ -19,9 +19,11 @@ Please contact the paper author to obtain ssh access. The machines will have the
 
 ### Getting Started
 
-The first step is to get the source code for Wallet. 
+The first step is to get the source code for Wallet and enter the nix shell
 ```bash
 git clone https://github.com/TUM-DSE/Wallet-VMPL.git
+cd Wallet-VMPL
+nix develop
 ```
 In order to get everthing ready the next step is to run the 
 initialization.
