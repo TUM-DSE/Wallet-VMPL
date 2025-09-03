@@ -1,0 +1,23 @@
+#define BENCHMARK_PORT 0xf4
+
+rawtracepoint:kvm_exit {
+	@kvmexit = count();
+}
+
+rawtracepoint:kvm_vmgexit_enter {
+	@kvmvmgexit = count();
+}
+
+tracepoint:kvm:kvm_pio {
+	if (args->port == BENCHMARK_PORT) {
+		if (args->val == 75) {
+			clear(@kvmexit);
+			clear(@kvmvmgexit);
+			printf("Clearing\n")
+		} 
+		if (args->val == 76) {
+			print(@kvmexit);
+			print(@kvmvmgexit);
+		}
+	}
+}

@@ -1,0 +1,50 @@
+#!/usr/bin/env bpftrace
+
+#define BENCHMARK_PORT 0xf4
+
+BEGIN {
+    @ = 0;
+    @EVENT[0]   = "Monitor: Start";
+    @EVENT[1]   = "Monitor: Load Guest";
+    @EVENT[100] = "Linux: systemd init end";
+    @EVENT[101] = "Runtime: Monitor connection";
+    @EVENT[102] = "Runtime: Monitor connection End";
+    @EVENT[103] = "Runtime: Zygote Creation";
+    @EVENT[104] = "Runtime: Zygote Creation End";
+    @EVENT[105] = "Runtime: Trustlet Creation";
+    @EVENT[106] = "Runtime: Trustlet Creation End";
+    @EVENT[107] = "Runtime: Trustlet Invocation";
+    @EVENT[108] = "Runtime: Trustlet Invocation End";
+    @EVENT[110] = "Runtime: In Python environment";
+    @EVENT[200] = "Monitor: zygote_data start";
+    @EVENT[201] = "Monitor: zygote_data end";
+    @EVENT[202] = "Monitor: zygote_init end";
+    @EVENT[203] = "Monitor: trustlet_dup start";
+    @EVENT[204] = "Monitor: trustlet_dup end";
+    @EVENT[205] = "Monitor: trustlet_func_copy end";
+    @EVENT[254] = "Monitor: request start";
+    @EVENT[255] = "Monitor: request end";
+    @EVENT[210] = "Monitor: copy_invoke_data start";
+    @EVENT[211] = "Monitor: copy_invoke_data end";
+    @EVENT[212] = "Monitor: invoke_setup end";
+    @EVENT[213] = "Monitor: invoke_data_copy end";
+    @EVENT[214] = "Monitor: invoke end";
+    @EVENT[220] = "Monitor: invoke_result_copy";
+    @EVENT[221] = "Monitor: invoke_result_copy end";
+}
+
+// QEMU entry point
+u:qemu-system-x86_64:main {
+    printf("%llu: QEMU: main\n", nsecs);
+}
+
+tracepoint:kvm:kvm_pio {
+    if (args->port == BENCHMARK_PORT) {
+        printf("%llu: %d %s\n", nsecs(tai), args->val, @EVENT[args->val]);
+    }
+}
+
+END {
+    clear(@);
+    clear(@EVENT);
+}

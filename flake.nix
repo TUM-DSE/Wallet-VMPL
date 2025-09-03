@@ -158,7 +158,9 @@
                 python311Packages.seaborn
                 python311Packages.pandas
                 python311Packages.bottle
+		python311Packages.igraph
                 texliveMedium
+		stdenv.cc.cc.lib
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
@@ -170,6 +172,7 @@
               if [ ! -f "./container/99_config.yaml" ]; then
                 ./container/netconf.sh 2> /dev/null
               fi;
+	      LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib/"
             '';
           };
         };

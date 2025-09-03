@@ -20,7 +20,7 @@ IMAGE_SIZE=10
 UBUNTU_IMAGE=https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 KERNEL_DIRS = kernel/linuxamd/ kernel/linux/ kernel/linux-guest/
 CONFIG_FILES = $(addsuffix .config,$(KERNEL_DIRS))
-USERADDR = $(shell expr $(shell id -u) - 1000)
+USERADDR = $(shell expr $(shell id -u) % 1000)
 
 REQUIREMENTS=requirements.txt
 
@@ -134,6 +134,12 @@ initialize:
 
 initialize_experiments:
 	cd scripts; ./sebs.sh
+	git submodule update --init --recursive Benchmarks/CVM_eval
+	cd Benchmarks/CVM_eval/; \
+		nix develop --command inv build.build-qemu-snp \
+		nix develop --command inv build.build-ovmf-snp \
+		nix develop --command inv build.build-guest-fs-sebs \
+		nix develop --command just setup-linux
 
 guest_libs:
 	cd scripts; ./setup.sh 192.168.${USERADDR}.10
@@ -378,9 +384,9 @@ BREAKDOWN_MEASURE_PATH=Benchmarks/SeBS_analysis/results/breakdown_measure
 run_sebs_measure_breakdown:
 	make set_experiment_cold
 	cd Benchmarks; for cow in cow no_cow; do \
-		./run_sebs.sh "prealloc" "${BREAKDOWN_MEASURE_PATH}" "wallet" $$cow "breakdown" "measure" ;\
+		./run_sebs.sh "prealloc" "${BREAKDOWN_MEASURE_PATH}" "wallet_extern" $$cow "breakdown" "measure" "external" ;\
 	done;
-	cp Benchmarks/SeBS_analysis/results/breakdown_measure/*/wallet-*-prealloc-*cow Benchmarks/Boottime/breakdown/results/
+	cp Benchmarks/SeBS_analysis/results/breakdown_measure/*/wallet*-*-prealloc-*cow Benchmarks/Boottime/breakdown/results/
 
 SEBS_RESULT_PATH=Benchmarks/SeBS_analysis/results/SeBS
 run_sebs_benchmark:
@@ -445,11 +451,140 @@ run_sebs_external_lukewarm_benchmark:
 		done; \
 	done;
 
+SEBS_MEMORY_EXTERN_RESULT_PATH=Benchmarks/SeBS_analysis/results/memory_extern
+run_sebs_measure_profiling_extern:
+	make set_experiment_cold
+	cd Benchmarks/SeBS/; git apply ../../patches/wallet_memory.patch
+	cd Benchmarks; for cow in cow; do \
+                ./run_sebs.sh "prealloc" "${SEBS_MEMORY_EXTERN_RESULT_PATH}" "wallet_extern" $$cow "stat" "measure" "external" ;\
+        done;
+	cd Benchmarks/SeBS/; git apply -R ../../patches/wallet_memory.patch
 
 
+#### End-to-End 
+
+run_sebs_wallet:
+	make run_sebs_external_lukewarm_benchmark
+	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_warm_cow_prealloc/
+	cd Benchmarks/SeBS; git apply ../../patches/wallet_cold.patch
+	make run_sebs_external_benchmark
+	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
+	cd Benchmarks/SeBS; git apply -R ../../patches/wallet_cold.patch
 
 
+RESULT_TARGET?=gramine
 
+move_result:
+	sudo rm -r Benchmarks/SeBS_analysis/results/${RESULT_TARGET}/*
+	cd Benchmarks/CVM_eval/benchmarks/sebs/SeBS/; mv -f \
+		110.dynamic-html \
+		210.thumbnailer \
+		311.compression \
+		411.image-recognition \
+		501.graph-pagerank \
+		502.graph-mst \
+		503.graph-bfs \
+		504.dna-visualisation \
+		../../../../SeBS_analysis/results/${RESULT_TARGET}/
+run_sebs_gramine:
+	make set_experiment_both
+	cd Benchmarks; ./sebs_script_non_wallet.sh gramine
+	make move_result RESULT_TARGET=gramine
+
+run_sebs_native:
+	make set_experiment_both
+	cd Benchmarks; ./sebs_script_non_wallet.sh native
+	make move_result RESULT_TARGET=native
+
+run_sebs_kata:
+	make set_experiment_both
+	cd Benchmarks; ./sebs_script_non_wallet.sh kata_qemu
+	make move_result RESULT_TARGET=kata
+
+run_sebs_vm:
+	make set_experiment_both
+	cd Benchmarks/CVM_eval/benchmarks/sebs/SeBS; git apply ../../../../../patches/sebs_vm.patch 
+	cd Benchmarks/CVM_eval; nix develop --command bash -c "cd ../; ./sebs_script_non_wallet.sh cvm"
+	make move_result RESULT_TARGET=vm
+	cd Benchmarks/CVM_eval/benchmarks/sebs/SeBS; git apply -R ../../../../../patches/sebs_vm.patch
+
+run_sebs_cvm:
+	make set_experiment_both
+	cd Benchmarks/CVM_eval; nix develop --command bash -c "cd ../; ./sebs_script_non_wallet.sh cvm"
+	make move_result RESULT_TARGET=cvm
+
+END_TO_END_PATH=Benchmarks/SeBS_analysis/output
+END_TO_END_FIGURE=${END_TO_END_PATH}/client_time_side_by_side_lukewarm_log.pdf
+
+${END_TO_END_FIGURE}:
+	cd Benchmarks/SeBS_analysis; python plot.py
+
+plot_end_to_end: ${END_TO_END_FIGURE}
+	cp ${END_TO_END_PATH}/client_time_side_by_side_lukewarm_log.pdf figures/figure7.pdf
+
+figures/figure8a.pdf: ${END_TO_END_FIGURE}
+	cp ${END_TO_END_PATH}/invocation_latency_cdf_with_lukewarm_linear.pdf figures/figure8a.pdf
+
+plot_invocation_latency: figures/figure8a.pdf
+
+#### Breakdown
+
+BREAKDOWN_PATH=Benchmarks/Boottime/breakdown
+
+Benchmarks/Boottime/breakdown/breakdown_results.csv:
+	make run_sebs_measure_breakdown
+	cp ${BREAKDOWN_PATH}/results/wallet_extern* ${BREAKDOWN_PATH}/measure
+	cd ${BREAKDOWN_PATH}; python measure_parse.py > breakdown_results.csv
+
+run_sebs_wallet_breakdown: ${BREAKDOWN_PATH}/breakdown_results.csv
+
+${BREAKDOWN_PATH}/output/runtime_init_linear_time_all.pdf:
+	cd ${BREAKDOWN_PATH}; python plot.py breakdown_results.csv
+
+figures/figure8b.pdf: ${BREAKDOWN_PATH}/output/runtime_init_linear_time_all.pdf
+	cp ${BREAKDOWN_PATH}/output/runtime_init_linear_time_all.pdf figures/figure8b.pdf
+
+plot_runtime_breakdown: ${BREAKDOWN_PATH}/breakdown_results.csv figures/figure8b.pdf
+
+#### Memory
+
+run_sebs_wallet_memory: run_sebs_measure_profiling_extern
+
+Benchmarks/SeBS_analysis/output/wallet_memory_usage_comparison.pdf:
+	cd Benchmarks/SeBS_analysis/; python parse_traces.py memory
+	cd Benchmarks/SeBS_analysis/; python plot_memory.py
+
+figure/figure8c.pdf: Benchmarks/SeBS_analysis/output/wallet_memory_usage_comparison.pdf
+	cp Benchmarks/SeBS_analysis/output/wallet_memory_usage_comparison.pdf figures/figure8c.pdf
+
+plot_memory_usage: figure/figure8c.pdf
+
+#### Communication latency
+
+Benchmarks/IPC/extended/results.csv:
+	printf "chain_length,size,time\n" > Benchmarks/IPC/extended/results.csv
+
+run_comm_latency_kata: Benchmarks/IPC/extended/results.csv
+	cd Benchmarks/IPC/extended/; ./run.sh kata &> /dev/null
+
+run_comm_latency_vm: Benchmarks/IPC/extended/results.csv
+	cd Benchmarks/IPC/extended/; ./run.sh VM &> /dev/null
+
+run_comm_latency_cvm: Benchmarks/IPC/extended/results.csv
+	cd Benchmarks/IPC/extended/; ./run.sh CVM &> /dev/null
+
+run_comm_latency_wallet:
+	LOG_LEVEL="no_print" SVSM_DEBUG="" FEATURE="boottime prealloc" make build_svsm &> /dev/null
+	cd Benchmarks/IPC/wallet/extended/; ./run.sh &> /dev/null
+	cat Benchmarks/IPC/wallet/extended/result.csv > Benchmarks/IPC/extended/results.csv
+
+Benchmarks/IPC/output/IPC_chain_linear.pdf:
+	cd Benchmarks/IPC/; python ipc_chain_plot.py extended/results.csv
+
+figures/figure9.pdf: Benchmarks/IPC/output/IPC_chain_linear.pdf
+	cp Benchmarks/IPC/output/IPC_chain_linear.pdf figures/figure9.pdf
+
+plot_comm_latency: figures/figure9.pdf
 #### Simulation
 
 AzureTraces/wallet4000_prepared.csv:
