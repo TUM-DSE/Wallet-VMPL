@@ -462,12 +462,12 @@ run_sebs_measure_profiling_extern:
 #### End-to-End 
 
 run_sebs_wallet:
+	cd Benchmarks/SeBS; git apply -R ../../patches/wallet_cold.patch
 	make run_sebs_external_lukewarm_benchmark
 	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_warm_cow_prealloc/
 	cd Benchmarks/SeBS; git apply ../../patches/wallet_cold.patch
 	make run_sebs_external_benchmark
 	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
-	cd Benchmarks/SeBS; git apply -R ../../patches/wallet_cold.patch
 
 
 RESULT_TARGET?=gramine
