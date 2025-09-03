@@ -132,8 +132,7 @@ initialize:
 	make guest.qcow2
 	chmod 0600 ./container/key
 
-initialize_experiments:
-	cd scripts; ./sebs.sh
+initialize_experiments: images.tar.gz
 	git submodule update --init --recursive Benchmarks/CVM_eval
 	cd Benchmarks/CVM_eval/; \
 		nix develop --command inv build.build-qemu-snp \

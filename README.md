@@ -158,7 +158,7 @@ And Figure 10 can be created via the following.
 make plot_simulation
 ```
 
-### Additinal experiments
+### Additinal experiments (In progress)
 
 #### 3. Motivation (Figure 1 & Figure 2) (~3h)
 
