@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-sub=$(expr $(id -u) - 1000)
+sub=$(expr $(id -u) % 1000)
 YAMLIN=./container/99_config.yaml.in
 YAMLOUT=./container/99_config.yaml
 
