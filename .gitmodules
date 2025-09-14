@@ -29,4 +29,4 @@
 	url = https://github.com/TUM-DSE/CVM_eval.git 
 [submodule "AzureTraces/invitro"]
 	path = AzureTraces/invitro
-	url = https://github.com/dimstav23/invitro.git
+	url = git@github.com:dimstav23/invitro.git

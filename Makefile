@@ -585,7 +585,10 @@ figures/figure9.pdf: Benchmarks/IPC/output/IPC_chain_linear.pdf
 plot_comm_latency: figures/figure9.pdf
 #### Simulation
 
-AzureTraces/wallet4000_prepared.csv:
+AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv:
+	git submodule update --init --recursive AzureTraces/invitro;
+
+AzureTraces/wallet4000_prepared.csv: AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
 	cd AzureTraces; python3 preprocess.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv wallet4000_prepared.csv
 
 AzureTraces/simulation_results_parallel.txt: AzureTraces/wallet4000_prepared.csv

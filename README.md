@@ -16,6 +16,7 @@ Please contact the paper author to obtain ssh access. The machines will have the
 
 - Linux kernel 6.8 with Wallet specific [patches](https://github.com/TUM-DSE/doctor-cluster-config/blob/bf91a4e6a5d07adb7f6bff07ea9d27db6973aa32/pkgs/kernels/linux-svsm-host-wallet.nix#L62)
 - Nix for dependency management 
+- Git LFS
 
 ### Getting Started
 
