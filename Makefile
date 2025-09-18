@@ -591,14 +591,24 @@ AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv:
 AzureTraces/wallet4000_prepared.csv: AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
 	cd AzureTraces; python3 preprocess.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv wallet4000_prepared.csv
 
-AzureTraces/simulation_results_parallel.txt: AzureTraces/wallet4000_prepared.csv
+AzureTraces/simulation_results_parallel_100.txt: AzureTraces/wallet4000_prepared.csv
 	cd AzureTraces; python sim_node_scalability.py wallet4000_prepared.csv
+	cp AzureTraces/simulation_results_parallel.txt AzureTraces/simulation_results_parallel_100.txt
 
-run_simulation: AzureTraces/simulation_results_parallel.txt
+AzureTraces/simulation_results_parallel_5.txt: AzureTraces/wallet4000_prepared.csv
+	git apply patches/motivation_simulation.patch
+	cd AzureTraces; python sim_node_scalability.py wallet4000_prepared.csv
+	cp AzureTraces/simulation_results_parallel.txt AzureTraces/simulation_results_parallel_5.txt
+	git apply -R patches/motivation_simulation.patch
 
-plot_simulation: AzureTraces/simulation_results_parallel.txt
-	cd Benchmarks/Simulation_analysis/; python plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel.txt
+run_simulation: AzureTraces/simulation_results_parallel_100.txt AzureTraces/simulation_results_parallel_5.txt
+
+plot_simulation: AzureTraces/simulation_results_parallel_100.txt AzureTraces/simulation_results_parallel_5.txt 
+	cd Benchmarks/Simulation_analysis/; python plot_simulation_CDF.py ../../AzureTraces/simulation_results_paralle_100.txt
 	mkdir -p figures
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_delays_log.pdf figures/figure10a.pdf
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_slowdowns_log.pdf figures/figure10b.pdf
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_percentile_delay_nodes.pdf figures/figure10c.pdf
+	cd Benchmarks/Simulation_analysis/; python motivation_plot_simulation_CDF.py ../../AzureTraces/simulation_results_paralle_5.txt
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_5_delays_log.pdf figures/figure2a.pdf
+

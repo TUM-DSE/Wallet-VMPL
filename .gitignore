@@ -7,6 +7,7 @@ build/*dbg*
 **/*.order
 **/*.out
 **/test
+/AzureTraces/*.csv
 /AzureTraces/*.txt
 /AzureTraces/*.html
 /AzureTraces/__pycache__/

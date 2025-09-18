@@ -1,0 +1,17 @@
+diff --git a/AzureTraces/sim_node_scalability.py b/AzureTraces/sim_node_scalability.py
+index 1f2461f..04f9ef4 100644
+--- a/AzureTraces/sim_node_scalability.py
++++ b/AzureTraces/sim_node_scalability.py
+@@ -16,9 +16,9 @@ def main():
+     tmp_file_num = 0
+     input_file = sys.argv[1]
+ 
+-    num_nodes = [50, 75, 100, 125, 150]
+-    cache_sizes = [32]
+-    execution_slots = [32]
++    num_nodes = [5]
++    cache_sizes = [500]
++    execution_slots = [500]
+     cache_time = 600
+ 
+     cvm_cold_boot_time = 8.3073
