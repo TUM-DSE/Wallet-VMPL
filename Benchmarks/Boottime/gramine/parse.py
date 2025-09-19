@@ -38,6 +38,6 @@ if __name__ == "__main__":
     print(vm_avg, vm_std)
 
     with open("result.txt", "w") as f:
-        f.write("Gramine stats:\n")
+        f.write("Gramine:\n")
         f.write(f"Runtime: {vm_avg[0]} ms, std: {vm_std[0]} ms\n")
         f.write(f"Invoke: {vm_avg[1]} ms, std: {vm_std[1]} ms\n")

@@ -329,10 +329,6 @@ boottime:
 	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh
 	cd Benchmarks/Boottime/wallet/; python parse_boottime.py > "no_prealloc.res"
 	cp Benchmarks/Boottime/wallet/result.csv Benchmarks/Boottime/wallet/result_without_prealloc.csv
-	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
-	cd Benchmarks/Boottime/wallet/; ITER=${BOOTTIME_ITERATION} ./run.sh "prealloc"
-	cd Benchmarks/Boottime/wallet/; python parse_boottime.py > "prealloc.res"
-	cp Benchmarks/Boottime/wallet/result.csv Benchmarks/Boottime/wallet/result_prealloc.csv
 
 boottimes:
 	cd Benchmarks/Boottime/; make native
@@ -649,3 +645,45 @@ plot_scaling_motivation:
 	mkdir -p figures/
 	cp Benchmarks/scale/output/function_density_linear.pdf figures/figure2b.pdf
 
+#### Boottime
+
+BOOTPATH=Benchmarks/Boottime
+
+run_boottime_native:
+	cd ${BOOTPATH}; make native
+
+run_boottime_kata:
+	cd ${BOOTPATH}; make kata
+
+run_boottime_gramine:
+	cd ${BOOTPATH}; make gramine
+
+run_boottime_vm:
+	cd ${BOOTPATH}; make vm
+
+run_boottime_cvm:
+	cd ${BOOTPATH}; make cvm
+
+run_boottime_wallet:
+	cp guest.qcow2 guest.qcow2_bak
+	make boottime_setup
+	make boottime
+	cp guest.qcow2_bak guest.qcow2
+
+plot_boottime_motivation:
+	cd ${BOOTPATH}; \
+		cat wallet/no_prealloc.res > results.txt; \
+		echo "" >> results.txt; \
+		cat vm_result.txt >> results.txt; \
+		echo "" >> results.txt; \
+		cat cvm_result.txt >> results.txt; \
+		echo "" >> results.txt; \
+		cat kata/result.txt >> results.txt; \
+		echo "" >> results.txt; \
+		cat gramine/result.txt >> results.txt; \
+		echo "" >> results.txt; \
+		cat native/result.txt >> results.txt; 
+	cd ${BOOTPATH}; \
+		python plot.py results.txt
+	mkdir -p figures
+	cp ${BOOTPATH}/output/boot_time_cutoff.pdf figures/figure1a.pdf

@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     MAPPING = ["QEMU", "Monitor", "OVMF", "Linux", "Runtime", "Zygote", "Trustlet", "Invoke"]
 
-    print("Wallet stats:")
+    print("Wallet:")
     for i in range(len(MAPPING)):
         print(f"{MAPPING[i]}: {vm_avg[i]/1000000} ms, std: {vm_std[i]/1000000} ms")
 
