@@ -609,7 +609,7 @@ plot_simulation: AzureTraces/simulation_results_parallel_100.txt AzureTraces/sim
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_delays_log.pdf figures/figure10a.pdf
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_slowdowns_log.pdf figures/figure10b.pdf
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_percentile_delay_nodes.pdf figures/figure10c.pdf
-	cd Benchmarks/Simulation_analysis/; python motivation_plot_simulation_CDF.py ../../AzureTraces/simulation_results_paralle_5.txt
+	cd Benchmarks/Simulation_analysis/; python motivation_plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel_5.txt
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_5_delays_log.pdf figures/figure2a.pdf
 
 ##### Attestation
@@ -618,4 +618,34 @@ plot_attest_motivation:
 	cd Benchmarks/Attestation/; python3 plot_breakdown.py --csv_file results.csv
 	mkdir -p figures/
 	cp Benchmarks/Attestation/output/attestation_breakdown_cutoff.pdf figures/figure2c.pdf
+
+#### Scaling
+
+SCALE=cd Benchmarks/scale; python3 run.py
+LIMIT_INCREASE=sudo prlimit --pid=$$$$ --nofile=1000000
+
+run_scale_kata:
+	@${LIMIT_INCREASE};${SCALE} kata &> /dev/null
+	@reset
+
+run_scale_vm:
+	@${LIMIT_INCREASE};${SCALE} vm &> /dev/null
+	@reset
+
+run_scale_cvm:
+	@${LIMIT_INCREASE};${SCALE} cvm &> /dev/null
+	@reset
+
+run_scale_wallet:
+	@#See Benchmarks/scale/README.md
+	@test -f Benchmarks/scale/result.csv || \
+	        printf "type,instances,assigned_memory,memory_usage,shared_pages\n" > Benchmarks/scale/result.csv
+	@for n in 1 100 200 300 400 500 600 700; do\
+	        printf "wallet,%d,0.5,%d,0\n" $$n $$(expr 37755 \* 4096 +  $$n \* 15 \* 4096) >> Benchmarks/scale/result.csv; \
+	done
+
+plot_scaling_motivation:
+	cd Benchmarks/scale; python3 plot.py result.csv
+	mkdir -p figures/
+	cp Benchmarks/scale/output/function_density_linear.pdf figures/figure2b.pdf
 

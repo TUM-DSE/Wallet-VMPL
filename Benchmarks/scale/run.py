@@ -249,6 +249,8 @@ def run_vm(vm="amd", mem=2, it=[]):
         cmd = get_amd_vm_direct_qemu_cmd(r, c)
     else:
         cmd = get_snp_direct_qemu_cmd(r, c)
+    
+    print("COMMAND: ", " ".join(cmd))
 
     cmd = [x for x in cmd if not "net0" in x]
     cmd.remove("-netdev")
@@ -259,7 +261,9 @@ def run_vm(vm="amd", mem=2, it=[]):
             if len(cc.split("q35")[1]) == 0:
                 cmd[i] = "q35,mem-merge=on"
             else:
-                cmd[i] = "q35,mem-merge=on," + cc.split("q35")[1]
+                cmd[i] = "q35,mem-merge=on" + cc.split("q35")[1]
+
+    print("COMMAND: ", " ".join(cmd))
 
     a = spawn_qemu_parallel(cmd, it)
     if not a:
@@ -274,12 +278,12 @@ runtime = sys.argv[1]
 match runtime:
     case "vm":
         vm_type = "vm"
-        run_vm("amd", 0.5, [100, 200, 300, 400, 500, 600, 700])
+        run_vm("amd", 0.5, [1, 100, 200, 300, 400, 500, 600, 700])
     case "cvm":
         vm_type = "cvm"
-        run_vm("snp", 0.5, [100, 200, 300, 400, 500])
+        run_vm("snp", 0.5, [1, 100, 200, 300, 400, 500])
     case "kata":
-        run_kata([1, 2, 100, 200, 300, 400, 500, 600, 700])
+        run_kata([1, 100, 200, 300, 400, 500, 600, 700])
 # run_kata(n)
 # run_vm("amd", 0.5, [100,200,300,400,500,600,700])
 # run_vm("amd",0.5, [1,2])

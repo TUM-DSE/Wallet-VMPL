@@ -17,6 +17,8 @@ def load_data(file_path):
         # Read the CSV file
         df = pd.read_csv(file_path)
         
+        df = df.rename(columns={"type": "vm"})
+
         # Convert memory_usage from bytes to GB for easier visualization
         df['memory_usage_gb'] = df['memory_usage'] / (1024**3)
         
