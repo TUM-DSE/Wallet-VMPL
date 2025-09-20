@@ -583,7 +583,7 @@ plot_comm_latency: figures/figure9.pdf
 #### Simulation
 
 AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv:
-	git submodule update --init --recursive AzureTraces/invitro; || \
+	git submodule update --init --recursive AzureTraces/invitro || \
 		(mkdir -p AzureTraces/invitro/wallet_traces/; cp -r /scratch/${USER}/wallet_traces/* AzureTraces/invitro/wallet_traces/)
 
 AzureTraces/wallet4000_prepared.csv: AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
