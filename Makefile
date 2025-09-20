@@ -583,7 +583,8 @@ plot_comm_latency: figures/figure9.pdf
 #### Simulation
 
 AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv:
-	git submodule update --init --recursive AzureTraces/invitro;
+	git submodule update --init --recursive AzureTraces/invitro; || \
+		(mkdir -p AzureTraces/invitro/wallet_traces/; cp -r /scratch/${USER}/wallet_traces/* AzureTraces/invitro/wallet_traces/)
 
 AzureTraces/wallet4000_prepared.csv: AzureTraces/invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
 	cd AzureTraces; python3 preprocess.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv wallet4000_prepared.csv
@@ -770,6 +771,11 @@ run_all:
 	make _run_all_ || make unlock
 	@make unlock
 
+run_all_cvm:
+	@make lock
+	make _run_all_cvm_ || make unlock
+	@make unlock
+
 _run_all_:
 	@#Setup
 	@mkdir -p steps/logs
@@ -797,11 +803,13 @@ _run_all_:
 	@if [[ ! -f steps/breakdown ]]; then \
 		make run_sebs_wallet_breakdown > steps/logs/breakdown; \
 		make plot_runtime_breakdown > steps/logs/breakdown_plot; \
+		touch steps/breakdown; \
 	fi
 	@echo "Starting memory Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/memory ]]; then \
 		make run_sebs_wallet_memory > steps/logs/memory; \
 		make plot_memory_usage > steps/logs/memory_plot; \
+		touch steps/memory; \
 	fi
 	@echo "Starting communication latency Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm_latency ]]; then \
@@ -810,12 +818,14 @@ _run_all_:
 		make run_comm_latency_vm > steps/logs/lat_vm; \
 		make run_comm_latency_cvm > steps/logs/lat_cvm; \
 		make plot_comm_latency > steps/logs/lat_plot; \
+		touch steps/comm_latency; \
 	fi
 	@echo "Starting Simulation $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/simulation ]]; then \
 		make run_simulation > steps/logs/sim; \
 		make plot_simulation > steps/logs/sim_plot; \
 		make plot_cdf_motivation > steps/logs/sim_mot_plot; \
+		touch steps/simulation; \
 	fi
 	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/boottime ]]; then \
@@ -825,6 +835,7 @@ _run_all_:
 		make run_boottime_wallet > steps/logs/boot_wallet; \
 		make run_boottime_vm > steps/logs/boot_vm; \
 		make plot_boottime_motivation > steps/logs/boot_plot; \
+		touch steps/boottime; \
 	fi
 	@echo "Starting communicaton Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm ]]; then \
@@ -835,19 +846,47 @@ _run_all_:
 		make run_comm_cvm > steps/logs/comm_cvm; \
 		make run_comm_wallet > steps/logs/comm_wallet; \
 		make plot_comm_motivation > steps/logs/comm_plot; \
+		touch steps/comm; \
 	fi
 	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
-	if [[ ! -f steps/sclae ]]; then \
+	@if [[ ! -f steps/scale ]]; then \
 		make run_scale_vm > steps/logs/scale_vm; \
 		make run_scale_kata > steps/logs/scale_kata; \
 		make run_scale_wallet > steps/logs/scale_wallet; \
+		touch steps/scale; \
 	fi
 	@echo "Finishng plots $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/plot ]]; then \
 		make plot_attest_motivation > steps/logs/att_plot; \
 		make plot_scaling_motivation > steps/logs/scale_plot; \
+		touch steps/plot;
 	fi
+	@echo "Done"
 
+_run_all_cvm_:
+	@#Setup
+	@mkdir -p steps/logs
+	@if [[ ! -f steps/init ]]; then \
+                rm -r guest.qcow2 > steps/logs/init; \
+                make initialize_experiments >> steps/logs/init; \
+                touch steps/init; \
+        fi
+	@echo "Starting end to end Benchmarks $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/end_to_end ]]; then \
+		make run_sebs_cvm > steps/logs/end_cvm; \
+		touch steps/end_to_end; \
+	fi
+	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/boottime ]]; then \
+		make run_boottime_cvm > steps/logs/boot_cvm; \
+		touch steps/boottime; \
+	fi
+	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/scale ]]; then \
+		make run_scale_vm > steps/logs/scale_cvm; \
+		touch steps/scale; \
+	fi
+	@echo "Done"
 
 ifeq ($(wildcard ${LOCK_FILE}),)
 NOLOCK=1
