@@ -790,6 +790,9 @@ _run_all_:
 	else \
 		make del_guest_net &>> steps/logs/init; \
 		make setup_guest_net &>> steps/logs/init; \
+		make kvm &>> steps/logs/init; \
+		make unload_kvm &>> steps/logs/init; \
+		make load_kvm &>> steps/logs/init; \
 	fi
 	@echo "Initialization completed"
 	@echo "Starting Benchmarks $(shell date +"%H:%M:%S")"
