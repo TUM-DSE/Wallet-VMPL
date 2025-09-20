@@ -787,6 +787,9 @@ _run_all_:
 		make prepair_vm &>> steps/logs/init; \
 		make initialize_experiments &>> steps/logs/init; \
 		touch steps/init; \
+	else \
+		make del_guest_net &>> steps/logs/init; \
+		make setup_guest_net &>> steps/logs/init; \
 	fi
 	@echo "Initialization completed"
 	@echo "Starting Benchmarks $(shell date +"%H:%M:%S")"
