@@ -86,8 +86,7 @@ setup_guest_net: #131.159.254.1
 	sudo iptables -t nat -A POSTROUTING -s 192.168.${USERADDR}.0/24 -j MASQUERADE
 
 del_guest_net:
-	sudo ip link delete tap0_${USER}
-	echo ""
+	sudo ip link delete tap0_${USER} || true
 
 svsm/svsm.bin: build_svsm
 
@@ -514,6 +513,7 @@ ${END_TO_END_FIGURE}:
 	cd Benchmarks/SeBS_analysis; python plot.py
 
 plot_end_to_end: ${END_TO_END_FIGURE}
+	mkdir -p figures/
 	cp ${END_TO_END_PATH}/client_time_side_by_side_lukewarm_log.pdf figures/figure7.pdf
 
 figures/figure8a.pdf: ${END_TO_END_FIGURE}
@@ -527,6 +527,7 @@ BREAKDOWN_PATH=Benchmarks/Boottime/breakdown
 
 Benchmarks/Boottime/breakdown/breakdown_results.csv:
 	make run_sebs_measure_breakdown
+	mkdir -p ${BREAKDOWN_PATH}/measure
 	cp ${BREAKDOWN_PATH}/results/wallet_extern* ${BREAKDOWN_PATH}/measure
 	cd ${BREAKDOWN_PATH}; python measure_parse.py > breakdown_results.csv
 
@@ -713,26 +714,26 @@ COMMPLOTPATH=Benchmarks/Communication_cost
 run_comm_wallet:
 	cp guest.qcow2 guest.qcow2_bak
 	make ipc_setup
-	make ipc &> /dev/null
+	make ipc &> /dev/null 
 	cp guest.qcow2_bak guest.qcow2
 
 run_comm_vm:
-	cd ${COMMPATH}; ./run VM
+	cd ${COMMPATH}; ./run.sh VM
 
 run_comm_cvm:
-	cd ${COMMPATH};; ./run CVM
+	cd ${COMMPATH}; ./run.sh CVM
 
 run_comm_kata:
-	cd ${COMMPATH};; ./run kata
+	cd ${COMMPATH}; ./run.sh kata
 
 run_comm_gramine:
 	cd ${COMMPATH}/gramine; make
-	cd ${COMMPATH}/gramine; ./gamine.sh
+	cd ${COMMPATH}/gramine; ./gramine.sh
 	cd ${COMMPATH}/gramine; python parse.py gramine
 
 run_comm_native:
 	cd ${COMMPATH}/native; make
-	cd ${COMMPATH}/native; ./native.sh
+	cd ${COMMPATH}/native; ./native.sh || true
 	cd ${COMMPATH}/native; python parse.py native pipe
 
 plot_comm_motivation:
@@ -752,3 +753,115 @@ plot_comm_motivation:
 	cd ${COMMPLOTPATH}; python plot.py results.txt
 	mkdir -p figures
 	cp ${COMMPLOTPATH}/output/IPC_log.pdf figures/figure1b.pdf
+
+
+#### Execute all benchmarks
+
+LOCK_FILE=/tmp/wallet_benchmark.lock
+
+lock:
+	echo ${USER} > ${LOCK_FILE}
+
+unlock:
+	rm -f ${LOCK_FILE}
+
+run_all:
+	@make lock
+	make _run_all_ || make unlock
+	@make unlock
+
+_run_all_:
+	@#Setup
+	@mkdir -p steps/logs
+	@if [[ ! -f steps/init ]]; then \
+		rm -r guest.qcow2 > steps/logs/init; \
+		make del_guest_net >> steps/logs/init; \
+		make initialize >> steps/logs/init; \
+		make prepair_vm >> steps/logs/init; \
+		make initialize_experiments >> steps/logs/init; \
+		touch steps/init; \
+	fi
+	@echo "Initialization completed"
+	@echo "Starting Benchmarks $(shell date +"%H:%M:%S")"
+	@echo "Starting end to end Benchmarks"
+	@if [[ ! -f steps/end_to_end ]]; then \
+		make run_sebs_wallet > steps/logs/end_wallet;\
+		make run_sebs_vm > steps/logs/end_vm; \
+		make run_sebs_kata > steps/logs/end_kata; \
+		make run_sebs_gramine > steps/logs/end_gramine; \
+		make run_sebs_native > steps/logs/end_native; \
+		make plot_end_to_end > steps/logs/end_plot; \
+		make plot_invocation_latency >> steps/logs/end_plot; \
+	fi
+	@echo "Starting runtime Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/breakdown ]]; then \
+		make run_sebs_wallet_breakdown > steps/logs/breakdown; \
+		make plot_runtime_breakdown > steps/logs/breakdown_plot; \
+	fi
+	@echo "Starting memory Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/memory ]]; then \
+		make run_sebs_wallet_memory > steps/logs/memory; \
+		make plot_memory_usage > steps/logs/memory_plot; \
+	fi
+	@echo "Starting communication latency Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/comm_latency ]]; then \
+		make run_comm_latency_wallet > steps/logs/lat_wallet; \
+		make run_comm_latency_kata > steps/logs/lat_kata; \
+		make run_comm_latency_vm > steps/logs/lat_vm; \
+		make run_comm_latency_cvm > steps/logs/lat_cvm; \
+		make plot_comm_latency > steps/logs/lat_plot; \
+	fi
+	@echo "Starting Simulation $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/simulation ]]; then \
+		make run_simulation > steps/logs/sim; \
+		make plot_simulation > steps/logs/sim_plot; \
+		make plot_cdf_motivation > steps/logs/sim_mot_plot; \
+	fi
+	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/boottime ]]; then \
+		make run_boottime_native > steps/logs/boot_native; \
+		make run_boottime_kata > steps/logs/boot_kata; \
+		make run_boottime_gramine > steps/logs/boot_gramine; \
+		make run_boottime_wallet > steps/logs/boot_wallet; \
+		make run_boottime_vm > steps/logs/boot_vm; \
+		make plot_boottime_motivation > steps/logs/boot_plot; \
+	fi
+	@echo "Starting communicaton Benchmark $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/comm ]]; then \
+		make run_comm_native > steps/logs/comm_native; \
+		make run_comm_gramine > steps/logs/comm_gramine; \
+		make run_comm_kata > > steps/logs/comm_kata; \
+		make run_comm_vm > steps/logs/comm_vm; \
+		make run_comm_cvm > steps/logs/comm_cvm; \
+		make run_comm_wallet > steps/logs/comm_wallet; \
+		make plot_comm_motivation > steps/logs/comm_plot; \
+	fi
+	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
+	if [[ ! -f steps/sclae ]]; then \
+		make run_scale_vm > steps/logs/scale_vm; \
+		make run_scale_kata > steps/logs/scale_kata; \
+		make run_scale_wallet > steps/logs/scale_wallet; \
+	fi
+	@echo "Finishng plots $(shell date +"%H:%M:%S")"
+	@if [[ ! -f steps/plot ]]; then \
+		make plot_attest_motivation > steps/logs/att_plot; \
+		make plot_scaling_motivation > steps/logs/scale_plot; \
+	fi
+
+
+ifeq ($(wildcard ${LOCK_FILE}),)
+NOLOCK=1
+else
+LOCK=1
+endif
+ifeq ($(shell cat ${LOCK_FILE}),${USER})
+USERMATCH=1
+endif
+
+ifdef LOCK
+	ifndef USERMATCH
+     	   $(error Lock file is engage. User $(shell cat ${LOCK_FILE}) is running a benchmark since $(shell date -r ${LOCK_FILE}). 
+	   If this is not the case please delete ${LOCK_FILE}.)
+	endif
+endif
+
