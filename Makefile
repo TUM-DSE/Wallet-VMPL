@@ -780,85 +780,85 @@ _run_all_:
 	@#Setup
 	@mkdir -p steps/logs
 	@if [[ ! -f steps/init ]]; then \
-		rm -r guest.qcow2 > steps/logs/init; \
-		make del_guest_net >> steps/logs/init; \
-		make initialize >> steps/logs/init; \
-		make prepair_vm >> steps/logs/init; \
-		make initialize_experiments >> steps/logs/init; \
+		rm -r guest.qcow2 &> steps/logs/init; \
+		make del_guest_net &>> steps/logs/init; \
+		make initialize &>> steps/logs/init; \
+		make prepair_vm &>> steps/logs/init; \
+		make initialize_experiments &>> steps/logs/init; \
 		touch steps/init; \
 	fi
 	@echo "Initialization completed"
 	@echo "Starting Benchmarks $(shell date +"%H:%M:%S")"
 	@echo "Starting end to end Benchmarks"
 	@if [[ ! -f steps/end_to_end ]]; then \
-		make run_sebs_wallet > steps/logs/end_wallet;\
-		make run_sebs_vm > steps/logs/end_vm; \
-		make run_sebs_kata > steps/logs/end_kata; \
-		make run_sebs_gramine > steps/logs/end_gramine; \
-		make run_sebs_native > steps/logs/end_native; \
-		make plot_end_to_end > steps/logs/end_plot; \
-		make plot_invocation_latency >> steps/logs/end_plot; \
+		make run_sebs_wallet &> steps/logs/end_wallet;\
+		make run_sebs_vm &> steps/logs/end_vm; \
+		make run_sebs_kata &> steps/logs/end_kata; \
+		make run_sebs_gramine &> steps/logs/end_gramine; \
+		make run_sebs_native &> steps/logs/end_native; \
+		make plot_end_to_end &> steps/logs/end_plot; \
+		make plot_invocation_latency &>> steps/logs/end_plot; \
 	fi
 	@echo "Starting runtime Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/breakdown ]]; then \
-		make run_sebs_wallet_breakdown > steps/logs/breakdown; \
-		make plot_runtime_breakdown > steps/logs/breakdown_plot; \
+		make run_sebs_wallet_breakdown &> steps/logs/breakdown; \
+		make plot_runtime_breakdown &> steps/logs/breakdown_plot; \
 		touch steps/breakdown; \
 	fi
 	@echo "Starting memory Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/memory ]]; then \
-		make run_sebs_wallet_memory > steps/logs/memory; \
-		make plot_memory_usage > steps/logs/memory_plot; \
+		make run_sebs_wallet_memory &> steps/logs/memory; \
+		make plot_memory_usage &> steps/logs/memory_plot; \
 		touch steps/memory; \
 	fi
 	@echo "Starting communication latency Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm_latency ]]; then \
-		make run_comm_latency_wallet > steps/logs/lat_wallet; \
-		make run_comm_latency_kata > steps/logs/lat_kata; \
-		make run_comm_latency_vm > steps/logs/lat_vm; \
-		make run_comm_latency_cvm > steps/logs/lat_cvm; \
-		make plot_comm_latency > steps/logs/lat_plot; \
+		make run_comm_latency_wallet &> steps/logs/lat_wallet; \
+		make run_comm_latency_kata &> steps/logs/lat_kata; \
+		make run_comm_latency_vm &> steps/logs/lat_vm; \
+		make run_comm_latency_cvm &> steps/logs/lat_cvm; \
+		make plot_comm_latency &> steps/logs/lat_plot; \
 		touch steps/comm_latency; \
 	fi
 	@echo "Starting Simulation $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/simulation ]]; then \
-		make run_simulation > steps/logs/sim; \
-		make plot_simulation > steps/logs/sim_plot; \
-		make plot_cdf_motivation > steps/logs/sim_mot_plot; \
+		make run_simulation &> steps/logs/sim; \
+		make plot_simulation &> steps/logs/sim_plot; \
+		make plot_cdf_motivation &> steps/logs/sim_mot_plot; \
 		touch steps/simulation; \
 	fi
 	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/boottime ]]; then \
-		make run_boottime_native > steps/logs/boot_native; \
-		make run_boottime_kata > steps/logs/boot_kata; \
-		make run_boottime_gramine > steps/logs/boot_gramine; \
-		make run_boottime_wallet > steps/logs/boot_wallet; \
-		make run_boottime_vm > steps/logs/boot_vm; \
-		make plot_boottime_motivation > steps/logs/boot_plot; \
+		make run_boottime_native &> steps/logs/boot_native; \
+		make run_boottime_kata &> steps/logs/boot_kata; \
+		make run_boottime_gramine &> steps/logs/boot_gramine; \
+		make run_boottime_wallet &> steps/logs/boot_wallet; \
+		make run_boottime_vm &> steps/logs/boot_vm; \
+		make plot_boottime_motivation &> steps/logs/boot_plot; \
 		touch steps/boottime; \
 	fi
 	@echo "Starting communicaton Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm ]]; then \
-		make run_comm_native > steps/logs/comm_native; \
-		make run_comm_gramine > steps/logs/comm_gramine; \
-		make run_comm_kata > > steps/logs/comm_kata; \
-		make run_comm_vm > steps/logs/comm_vm; \
-		make run_comm_cvm > steps/logs/comm_cvm; \
-		make run_comm_wallet > steps/logs/comm_wallet; \
-		make plot_comm_motivation > steps/logs/comm_plot; \
+		make run_comm_native &> steps/logs/comm_native; \
+		make run_comm_gramine &> steps/logs/comm_gramine; \
+		make run_comm_kata &> steps/logs/comm_kata; \
+		make run_comm_vm &> steps/logs/comm_vm; \
+		make run_comm_cvm &> steps/logs/comm_cvm; \
+		make run_comm_wallet &> steps/logs/comm_wallet; \
+		make plot_comm_motivation &> steps/logs/comm_plot; \
 		touch steps/comm; \
 	fi
 	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/scale ]]; then \
-		make run_scale_vm > steps/logs/scale_vm; \
-		make run_scale_kata > steps/logs/scale_kata; \
-		make run_scale_wallet > steps/logs/scale_wallet; \
+		make run_scale_vm &> steps/logs/scale_vm; \
+		make run_scale_kata &> steps/logs/scale_kata; \
+		make run_scale_wallet &> steps/logs/scale_wallet; \
 		touch steps/scale; \
 	fi
 	@echo "Finishng plots $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/plot ]]; then \
-		make plot_attest_motivation > steps/logs/att_plot; \
-		make plot_scaling_motivation > steps/logs/scale_plot; \
+		make plot_attest_motivation &> steps/logs/att_plot; \
+		make plot_scaling_motivation &> steps/logs/scale_plot; \
 		touch steps/plot;
 	fi
 	@echo "Done"
@@ -867,23 +867,23 @@ _run_all_cvm_:
 	@#Setup
 	@mkdir -p steps/logs
 	@if [[ ! -f steps/init ]]; then \
-                rm -r guest.qcow2 > steps/logs/init; \
-                make initialize_experiments >> steps/logs/init; \
+                rm -r guest.qcow2 &> steps/logs/init; \
+                make initialize_experiments &>> steps/logs/init; \
                 touch steps/init; \
         fi
 	@echo "Starting end to end Benchmarks $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/end_to_end ]]; then \
-		make run_sebs_cvm > steps/logs/end_cvm; \
+		make run_sebs_cvm &> steps/logs/end_cvm; \
 		touch steps/end_to_end; \
 	fi
 	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/boottime ]]; then \
-		make run_boottime_cvm > steps/logs/boot_cvm; \
+		make run_boottime_cvm &> steps/logs/boot_cvm; \
 		touch steps/boottime; \
 	fi
 	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/scale ]]; then \
-		make run_scale_vm > steps/logs/scale_cvm; \
+		make run_scale_vm &> steps/logs/scale_cvm; \
 		touch steps/scale; \
 	fi
 	@echo "Done"
@@ -899,8 +899,7 @@ endif
 
 ifdef LOCK
 	ifndef USERMATCH
-     	   $(error Lock file is engage. User $(shell cat ${LOCK_FILE}) is running a benchmark since $(shell date -r ${LOCK_FILE}). 
-	   If this is not the case please delete ${LOCK_FILE}.)
+		$(error Lock file is engage. User $(shell cat ${LOCK_FILE}) is running a benchmark since $(shell date -r ${LOCK_FILE}). If this is not the case please delete ${LOCK_FILE}.)
 	endif
 endif
 
