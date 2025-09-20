@@ -779,6 +779,7 @@ run_all_cvm:
 _run_all_:
 	@#Setup
 	@mkdir -p steps/logs
+	@echo "Starting Initialization $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
 		rm -r guest.qcow2 &> steps/logs/init; \
 		make del_guest_net &>> steps/logs/init; \
@@ -866,6 +867,7 @@ _run_all_:
 _run_all_cvm_:
 	@#Setup
 	@mkdir -p steps/logs
+	@echo "Starting Initialization $(shell date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
                 rm -r guest.qcow2 &> steps/logs/init; \
                 make initialize_experiments &>> steps/logs/init; \
