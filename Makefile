@@ -687,3 +687,63 @@ plot_boottime_motivation:
 		python plot.py results.txt
 	mkdir -p figures
 	cp ${BOOTPATH}/output/boot_time_cutoff.pdf figures/figure1a.pdf
+
+#### Prepair
+
+prepair_vm:
+	make build_svsm
+	make run > /dev/null &
+	sleep 50
+	SSH_COMMAND="cd module; make vmpl.ko; insmod vmpl.ko" make ssh_with_command
+	SSH_COMMAND="cd module; make -B -C libwallet/ libwallet.so libwallet.a" make ssh_with_command
+	SSH_COMMAND="cd module/python; python3 setup.py install" make ssh_with_command
+	SSH_COMMAND="cd module/example; python3 test.py" make ssh_with_command
+	SSH_COMMAND="shutdown now" make ssh_with_command
+
+#### Communication
+
+COMMPATH=Benchmarks/IPC
+COMMPLOTPATH=Benchmarks/Communication_cost
+
+run_comm_wallet:
+	cp guest.qcow2 guest.qcow2_bak
+	make ipc_setup
+	make ipc &> /dev/null
+	cp guest.qcow2_bak guest.qcow2
+
+run_comm_vm:
+	cd ${COMMPATH}; ./run VM
+
+run_comm_cvm:
+	cd ${COMMPATH};; ./run CVM
+
+run_comm_kata:
+	cd ${COMMPATH};; ./run kata
+
+run_comm_gramine:
+	cd ${COMMPATH}/gramine; make
+	cd ${COMMPATH}/gramine; ./gamine.sh
+	cd ${COMMPATH}/gramine; python parse.py gramine
+
+run_comm_native:
+	cd ${COMMPATH}/native; make
+	cd ${COMMPATH}/native; ./native.sh
+	cd ${COMMPATH}/native; python parse.py native pipe
+
+plot_comm_motivation:
+	cd ${COMMPATH}; \
+		echo "Wallet:" > results.txt; \
+		cat wallet/res.csv >> results.txt; \
+		echo "" >> results.txt; \
+		cat vm_result.txt >> results.txt; \
+		cat cvm_result.txt >> results.txt; \
+		cat kata_result.txt >> results.txt; \
+		echo "Gramine:" >> results.txt; \
+		cat gramine/res_gramine.csv >> results.txt; \
+		echo "" >> results.txt; \
+		echo "Native:" >> results.txt; \
+		cat native/res_native_pipe.csv >> results.txt
+	cd ${COMMPATH}; cp results.txt ../Communication_cost/
+	cd ${COMMPLOTPATH}; python plot.py results.txt
+	mkdir -p figures
+	cp ${COMMPLOTPATH}/output/IPC_log.pdf figures/figure1b.pdf

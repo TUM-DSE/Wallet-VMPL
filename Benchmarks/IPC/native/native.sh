@@ -7,7 +7,7 @@ rm result_native/*
 
 make native
 
-for comm in pipe socket shm
+for comm in pipe
 do
     echo $comm
 

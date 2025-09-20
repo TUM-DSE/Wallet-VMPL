@@ -1,6 +1,6 @@
 [loader]
 entrypoint = "file:{{ gramine.libos }}"
-log_level = "debug"
+log_level = "error"
 insecure__use_cmdline_argv = true
 
 [loader.env]
