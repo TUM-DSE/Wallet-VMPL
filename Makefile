@@ -891,7 +891,7 @@ _run_all_cvm_:
 	fi
 	@echo "Starting scale Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/scale ]]; then \
-		make run_scale_vm &> steps/logs/scale_cvm; \
+		make run_scale_cvm &> steps/logs/scale_cvm; \
 		touch steps/scale; \
 	fi
 	@echo "Done"
