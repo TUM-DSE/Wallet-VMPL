@@ -779,7 +779,7 @@ run_all_cvm:
 _run_all_:
 	@#Setup
 	@mkdir -p steps/logs
-	@echo "Starting Initialization $(shell date +"%H:%M:%S")"
+	@echo "Starting Initialization $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
 		rm -r guest.qcow2 &> steps/logs/init; \
 		make del_guest_net &>> steps/logs/init; \
@@ -795,7 +795,7 @@ _run_all_:
 		make load_kvm &>> steps/logs/init; \
 	fi
 	@echo "Initialization completed"
-	@echo "Starting Benchmarks $(shell date +"%H:%M:%S")"
+	@echo "Starting Benchmarks $$(date +"%H:%M:%S")"
 	@echo "Starting end to end Benchmarks"
 	@if [[ ! -f steps/end_to_end ]]; then \
 		make run_sebs_wallet &> steps/logs/end_wallet;\
@@ -806,19 +806,19 @@ _run_all_:
 		make plot_end_to_end &> steps/logs/end_plot; \
 		make plot_invocation_latency &>> steps/logs/end_plot; \
 	fi
-	@echo "Starting runtime Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting runtime Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/breakdown ]]; then \
 		make run_sebs_wallet_breakdown &> steps/logs/breakdown; \
 		make plot_runtime_breakdown &> steps/logs/breakdown_plot; \
 		touch steps/breakdown; \
 	fi
-	@echo "Starting memory Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting memory Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/memory ]]; then \
 		make run_sebs_wallet_memory &> steps/logs/memory; \
 		make plot_memory_usage &> steps/logs/memory_plot; \
 		touch steps/memory; \
 	fi
-	@echo "Starting communication latency Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting communication latency Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm_latency ]]; then \
 		make run_comm_latency_wallet &> steps/logs/lat_wallet; \
 		make run_comm_latency_kata &> steps/logs/lat_kata; \
@@ -827,14 +827,14 @@ _run_all_:
 		make plot_comm_latency &> steps/logs/lat_plot; \
 		touch steps/comm_latency; \
 	fi
-	@echo "Starting Simulation $(shell date +"%H:%M:%S")"
+	@echo "Starting Simulation $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/simulation ]]; then \
 		make run_simulation &> steps/logs/sim; \
 		make plot_simulation &> steps/logs/sim_plot; \
 		make plot_cdf_motivation &> steps/logs/sim_mot_plot; \
 		touch steps/simulation; \
 	fi
-	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting boottime Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/boottime ]]; then \
 		make run_boottime_native &> steps/logs/boot_native; \
 		make run_boottime_kata &> steps/logs/boot_kata; \
@@ -844,7 +844,7 @@ _run_all_:
 		make plot_boottime_motivation &> steps/logs/boot_plot; \
 		touch steps/boottime; \
 	fi
-	@echo "Starting communicaton Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting communicaton Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/comm ]]; then \
 		make run_comm_native &> steps/logs/comm_native; \
 		make run_comm_gramine &> steps/logs/comm_gramine; \
@@ -855,14 +855,14 @@ _run_all_:
 		make plot_comm_motivation &> steps/logs/comm_plot; \
 		touch steps/comm; \
 	fi
-	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting scale Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/scale ]]; then \
 		make run_scale_vm &> steps/logs/scale_vm; \
 		make run_scale_kata &> steps/logs/scale_kata; \
 		make run_scale_wallet &> steps/logs/scale_wallet; \
 		touch steps/scale; \
 	fi
-	@echo "Finishng plots $(shell date +"%H:%M:%S")"
+	@echo "Finishng plots $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/plot ]]; then \
 		make plot_attest_motivation &> steps/logs/att_plot; \
 		make plot_scaling_motivation &> steps/logs/scale_plot; \
@@ -873,23 +873,23 @@ _run_all_:
 _run_all_cvm_:
 	@#Setup
 	@mkdir -p steps/logs
-	@echo "Starting Initialization $(shell date +"%H:%M:%S")"
+	@echo "Starting Initialization $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
                 rm -r guest.qcow2 &> steps/logs/init; \
                 make initialize_experiments &>> steps/logs/init; \
                 touch steps/init; \
         fi
-	@echo "Starting end to end Benchmarks $(shell date +"%H:%M:%S")"
+	@echo "Starting end to end Benchmarks $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/end_to_end ]]; then \
 		make run_sebs_cvm &> steps/logs/end_cvm; \
 		touch steps/end_to_end; \
 	fi
-	@echo "Starting boottime Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting boottime Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/boottime ]]; then \
 		make run_boottime_cvm &> steps/logs/boot_cvm; \
 		touch steps/boottime; \
 	fi
-	@echo "Starting scale Benchmark $(shell date +"%H:%M:%S")"
+	@echo "Starting scale Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/scale ]]; then \
 		make run_scale_vm &> steps/logs/scale_cvm; \
 		touch steps/scale; \
