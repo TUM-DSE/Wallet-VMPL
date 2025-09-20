@@ -27,7 +27,7 @@ run_vm() {
         -virtfs local,path=${root}module/,mount_tag=mo,security_model=passthrough \
         -virtfs local,path=${root}Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
         -virtfs local,path=${root}gramine-svsm/,mount_tag=gramine,security_model=passthrough &
-    VM=$!
+    export VM=$!
 }
 
 
