@@ -18,6 +18,30 @@ Please contact the paper author to obtain ssh access. The machines will have the
 - Nix for dependency management 
 - Git LFS
 
+### Running all benchmarks
+
+This will run all experiments to reproduce the results for Wallet in three steps.
+
+
+```bash
+git clone https://github.com/TUM-DSE/Wallet-VMPL.git
+cd Wallet-VMPL
+nix develop
+make run_all
+```
+
+```bash
+git clone https://github.com/TUM-DSE/Wallet-VMPL.git
+cd Wallet-VMPL
+nix develop
+make run_all_cvm
+```
+
+```bash
+make update_figures
+```
+
+
 ### Getting Started
 
 The first step is to get the source code for Wallet and enter the nix shell
