@@ -106,6 +106,7 @@ def load_and_process_data():
             result_path = Path(f"./results/{variant}/{bench}/perf-cost/result.csv")
             if result_path.exists():
                 df = pd.read_csv(result_path)
+                df = df[~((df["type"] == "sequential") & (df["is_cold"] == True))]
                 #print(df, result_path)
                 # Calculate averages for cold and hot runs for specific columns only
                 cold_mask = df['type'] == 'cold'

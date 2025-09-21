@@ -320,7 +320,7 @@ latency_setup:
 	make simple_latency_fs
 	make gramine
 	cp module/libsysdb.so Benchmarks/IPC/wallet/extended/
-	cp module/libsysdb.so Benchmarks/IPC/wallet/extended/
+	cp module/libpal.so Benchmarks/IPC/wallet/extended/
 
 
 IPC_ITERATIONS?=5
@@ -334,6 +334,7 @@ ssh_alloc:
 ipc:
 	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
 	cd Benchmarks/IPC/wallet/; ./run.sh
+	cd Benchmarks/IPC/wallet/; python parse.py
 
 shutdown:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "shutdown now"
@@ -821,6 +822,7 @@ _run_all_:
 		make run_sebs_native &> steps/logs/end_native; \
 		make plot_end_to_end &> steps/logs/end_plot; \
 		make plot_invocation_latency &>> steps/logs/end_plot; \
+		touch steps/end_to_end; \
 	fi
 	@echo "Starting runtime Benchmark $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/breakdown ]]; then \
@@ -882,7 +884,7 @@ _run_all_:
 	@if [[ ! -f steps/plot ]]; then \
 		make plot_attest_motivation &> steps/logs/att_plot; \
 		make plot_scaling_motivation &> steps/logs/scale_plot; \
-		touch steps/plot;
+		touch steps/plot; \
 	fi
 	@echo "Done"
 
