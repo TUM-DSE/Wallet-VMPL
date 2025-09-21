@@ -477,7 +477,7 @@ run_sebs_wallet:
 	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_warm_cow_prealloc/
 	cd Benchmarks/SeBS; git apply ../../patches/wallet_cold.patch
 	make run_sebs_external_benchmark
-	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
+	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
 
 
 RESULT_TARGET?=gramine
