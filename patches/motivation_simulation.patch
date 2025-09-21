@@ -6,7 +6,7 @@ index 1f2461f..04f9ef4 100644
      tmp_file_num = 0
      input_file = sys.argv[1]
  
--    num_nodes = [50, 75, 100, 125, 150]
+-    num_nodes = [100]
 -    cache_sizes = [32]
 -    execution_slots = [32]
 +    num_nodes = [5]

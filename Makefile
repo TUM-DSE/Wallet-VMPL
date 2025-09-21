@@ -254,6 +254,14 @@ simple_ipc_fs:
 	cp ${IPC_BIN} runtime/filesystem/simple/fs/lib/com
 	cd runtime/filesystem/simple/; ./create.sh
 
+simple_latency_fs:
+	mkdir -p runtime/filesystem/simple/fs/lib/
+	rm -rf runtime/filesystem/simple/fs_out/
+	rm -rf runtime/filesystem/simple/fs/lib/*
+	make -B -C Benchmarks/IPC/wallet/extended 
+	cp Benchmarks/IPC/wallet/extended/com_extended runtime/filesystem/simple/fs/lib/
+	cd runtime/filesystem/simple/; ./create.sh
+
 python_fs:
 	mkdir -p runtime/filesystem/python/fs/lib
 	mkdir -p runtime/filesystem/python/fs/python
@@ -307,6 +315,13 @@ ipc_setup:
 	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make ipc_setup"
 	cp module/libsysdb.so Benchmarks/IPC/wallet/
 	cp module/libpal.so Benchmarks/IPC/wallet/
+
+latency_setup:
+	make simple_latency_fs
+	make gramine
+	cp module/libsysdb.so Benchmarks/IPC/wallet/extended/
+	cp module/libsysdb.so Benchmarks/IPC/wallet/extended/
+
 
 IPC_ITERATIONS?=5
 IPC_SIZE?=64
@@ -462,7 +477,7 @@ run_sebs_wallet:
 	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_warm_cow_prealloc/
 	cd Benchmarks/SeBS; git apply ../../patches/wallet_cold.patch
 	make run_sebs_external_benchmark
-	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern_warm/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
+	cp -r Benchmarks/SeBS_analysis/results/SeBS_extern/wallet_extern_cow_prealloc/* Benchmarks/SeBS_analysis/results/wallet_cow_prealloc/
 
 
 RESULT_TARGET?=gramine
@@ -569,8 +584,9 @@ run_comm_latency_cvm: Benchmarks/IPC/extended/results.csv
 	cd Benchmarks/IPC/extended/; ./run.sh CVM &> /dev/null
 
 run_comm_latency_wallet:
+	make latency_setup
 	LOG_LEVEL="no_print" SVSM_DEBUG="" FEATURE="boottime prealloc" make build_svsm &> /dev/null
-	cd Benchmarks/IPC/wallet/extended/; ./run.sh &> /dev/null
+	cd Benchmarks/IPC/wallet/extended/; ./run.sh 
 	cat Benchmarks/IPC/wallet/extended/result.csv > Benchmarks/IPC/extended/results.csv
 
 Benchmarks/IPC/output/IPC_chain_linear.pdf:
