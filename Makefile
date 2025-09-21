@@ -796,6 +796,8 @@ run_all_cvm:
 _run_all_:
 	@#Setup
 	@mkdir -p steps/logs
+	@sudo kill $$(pgrep qemu) || true
+	@sudo kill $$(pgrep minio) || true
 	@echo "Starting Initialization $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
 		rm -r guest.qcow2 &> steps/logs/init; \
@@ -926,10 +928,10 @@ _run_all_cvm_:
 update_plots:
 	cp -r /home/${USER}/cvm_results/end/* Benchmarks/SeBS_analysis/results/cvm/
 	cp /home/${USER}/cvm_results/boot.txt Benchmarks/Boottime/cvm_result.txt
-	tail -n +1 /home/${USER}/cvm_results/scale.csv >> Benchmarks/scale/result.csv
-	make plot_scaling_motivation
-	make plot_end_to_end
-	make plot_boottime_motivation
+	tail -n +2 /home/${USER}/cvm_results/scale.csv >> Benchmarks/scale/result.csv
+	make -B plot_scaling_motivation
+	make -B plot_end_to_end
+	make -B plot_boottime_motivation
 
 ifeq ($(wildcard ${LOCK_FILE}),)
 NOLOCK=1
