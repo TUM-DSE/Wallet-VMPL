@@ -873,10 +873,12 @@ _run_all_:
 _run_all_cvm_:
 	@#Setup
 	@mkdir -p steps/logs
+	@sudo setfacl -m u:${USER}:rw /dev/sev
 	@echo "Starting Initialization $$(date +"%H:%M:%S")"
 	@if [[ ! -f steps/init ]]; then \
                 rm -r guest.qcow2 &> steps/logs/init; \
                 make initialize_experiments &>> steps/logs/init; \
+		git submodule update --init --recursive Benchmarks/SeBS; \
                 touch steps/init; \
         fi
 	@echo "Starting end to end Benchmarks $$(date +"%H:%M:%S")"
@@ -894,7 +896,22 @@ _run_all_cvm_:
 		make run_scale_cvm &> steps/logs/scale_cvm; \
 		touch steps/scale; \
 	fi
+	@echo "Copying results into user's home directory"
+	@rm -rf /home/${USER}/cvm_results/
+	@mkdir -p /home/${USER}/cvm_results/
+	@cp Benchmarks/Boottime/cvm_result.txt /home/${USER}/cvm_results/boot.txt
+	@mkdir -p /home/${USER}/cvm_results/end/
+	@cp -r Benchmarks/SeBS_analysis/results/cvm/* /home/${USER}/cvm_results/end/
+	@cp Benchmarks/scale/result.csv /home/${USER}/cvm_results/scale.csv
 	@echo "Done"
+
+update_plots:
+	cp -r /home/${USER}/cvm_results/end/* Benchmarks/SeBS_analysis/results/cvm/
+	cp /home/${USER}/cvm_results/boot.txt Benchmarks/Boottime/cvm_result.txt
+	tail -n +1 /home/${USER}/cvm_results/scale.csv >> Benchmarks/scale/result.csv
+	make plot_scaling_motivation
+	make plot_end_to_end
+	make plot_boottime_motivation
 
 ifeq ($(wildcard ${LOCK_FILE}),)
 NOLOCK=1
