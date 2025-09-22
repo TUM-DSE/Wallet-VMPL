@@ -945,8 +945,8 @@ USERMATCH=1
 endif
 
 ifdef LOCK
-	ifndef USERMATCH
-		$(error Lock file is engage. User $(shell cat ${LOCK_FILE}) is running a benchmark since $(shell date -r ${LOCK_FILE}). If this is not the case please delete ${LOCK_FILE}.)
-	endif
+ifndef USERMATCH
+$(error Lock file is engage. User $(shell cat ${LOCK_FILE}) is running a benchmark since $(shell date -r ${LOCK_FILE}). If this is not the case please delete ${LOCK_FILE}.)
+endif
 endif
 
