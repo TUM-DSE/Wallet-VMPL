@@ -625,12 +625,12 @@ plot_simulation: AzureTraces/simulation_results_parallel_100.txt AzureTraces/sim
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_100_slowdowns_log.pdf figures/figure10b.pdf
 	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_percentile_delay_nodes.pdf figures/figure10c.pdf
 	cd Benchmarks/Simulation_analysis/; python motivation_plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel_5.txt
-	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_5_delays_log.pdf figures/figure2a.pdf
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_5_node_size_5_delays_log.pdf figures/figure2a.pdf
 
 plot_cdf_motivation:
 	cd Benchmarks/Simulation_analysis/; python motivation_plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel_5.txt
 	mkdir -p figures
-	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_node_size_5_delays_log.pdf figures/figure2a.pdf
+	cp Benchmarks/Simulation_analysis/output/pdf/simulation_results_parallel_5_node_size_5_delays_log.pdf figures/figure2a.pdf
 
 ##### Attestation
 

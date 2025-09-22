@@ -16,7 +16,7 @@ def main():
     tmp_file_num = 0
     input_file = sys.argv[1]
 
-    num_nodes = [100]
+    num_nodes = [50, 75, 100, 125, 150]
     cache_sizes = [32]
     execution_slots = [32]
     cache_time = 600
