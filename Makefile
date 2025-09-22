@@ -925,7 +925,9 @@ _run_all_cvm_:
 	@cp Benchmarks/scale/result.csv /home/${USER}/cvm_results/scale.csv
 	@echo "Done"
 
-update_plots:
+update_plots: update_figures
+
+update_figures:
 	cp -r /home/${USER}/cvm_results/end/* Benchmarks/SeBS_analysis/results/cvm/
 	cp /home/${USER}/cvm_results/boot.txt Benchmarks/Boottime/cvm_result.txt
 	tail -n +2 /home/${USER}/cvm_results/scale.csv >> Benchmarks/scale/result.csv
