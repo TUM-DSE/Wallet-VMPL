@@ -166,14 +166,14 @@ run:
 
 
 ssh:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
 
 SSH_COMMAND?="shutdown"
 ssh_with_command:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
+	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
 
 trustlet_test:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
+	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
 
 WARM_COLD?=wallet
 run_benchmark_sebs:
