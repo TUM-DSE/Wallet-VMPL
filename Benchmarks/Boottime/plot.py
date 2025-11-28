@@ -223,6 +223,64 @@ def create_cutoff_plot(categories, output_dir, y_scale='linear'):
     
     plt.close()
 
+def create_plot_presentation(categories, output_dir, y_scale='linear'):
+    """Create stacked bar chart for boot time data"""
+    # Convert to DataFrame
+    data = []
+    for category, components in categories.items():
+        if category != "Native" and category != "LibOS" and category != "Wallet\n(lukewarm)":
+          if category == "Linux VM":
+            category = "VM"
+          row = {'Category': category}
+          row.update(components)
+          data.append(row)
+    
+    df = pd.DataFrame(data)
+    df.set_index('Category', inplace=True)
+    
+    # Create standardized plot
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.1, bottom_margin = 0.3)
+    ax.set_ylim(0, 13500)
+    
+    colors = plt.get_cmap('tab10').colors
+    for idx, (category, row) in enumerate(df.iterrows()):
+        bottom = 0
+        for component, value in row.items():
+            ax.bar(category, value, bottom=bottom, color=colors[idx % len(colors)], edgecolor=colors[idx % len(colors)], width=0.8)
+            bottom += value
+    
+    # Add value labels on the top bars
+    for i, category in enumerate(df.index):
+        total = 0
+        for j, value in enumerate(df.loc[category]):
+            if value > 0:  # Only show non-zero values
+                total += value
+        
+        # Add total on top of each bar - choose the axis depending where the total is
+        if category != "Wallet\n(warm)":
+            ax.text(i, total, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+        else:
+            ax.text(i, total+150, f'{total:.1f}', ha='center', va='bottom', fontsize=LEGEND_FONTSIZE-2)
+
+    # Apply consistent styling
+    apply_consistent_style(ax, title="", grid=False)
+    ax.legend().remove()
+    
+    # Fix xticks rotation
+    plt.xticks(rotation=0)
+    
+    # Add y-axis label in the middle
+    create_annotation_y_label(ax, 'Time (ms)', position=(0.3, 6500))
+    
+    # Save plots
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    plt.savefig(output_dir / 'boot_time_cutoff_presentation.pdf', format='pdf', dpi=300, bbox_inches=None)
+    plt.savefig(output_dir / 'boot_time_cutoff_presentation.png', format='png', dpi=300, bbox_inches=None)
+    
+    plt.close()
+
 def create_plot(categories, output_dir, y_scale='linear'):
     """Create standard stacked bar chart"""
     # Convert to DataFrame
@@ -319,6 +377,8 @@ def main():
     create_plot(categories, args.output_dir)
     create_plot(categories, args.output_dir, 'log')
 
+    create_plot_presentation(categories, args.output_dir)
+    
     print(f"Plots saved in {args.output_dir}")
     
     # Print summary of each bar
