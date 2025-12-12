@@ -1,0 +1,52 @@
+[libos]
+entrypoint = "/external/helloworld"
+
+[loader]
+log_level = "debug"
+#log_level = "error"
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+argv = ["/external/helloworld"]
+loader.insecure__disable_aslr  = true
+
+[loader.env]
+#LD_LIBRARY_PATH = "/lib"
+LD_LIBRARY_PATH = "/external/lib"
+PYTHONPATH = "/lib/stdlib.zip"
+
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+  #{ type = "pseudo", path = "/python", uri = "python" },
+  { path = "/external", uri = "file:/root/module/libwallet/external" },
+]
+
+[svsm]
+file_check_policy = "strict"
+#file_check_policy = "allow_all_but_log"
+allowed_files = [
+  "file:/root/module/libwallet/external/lib",
+]
+# use sha256sum to get the hash of the file
+trusted_files = [
+  { uri="file:/root/module/libwallet/external/helloworld", sha256="9e7f594364c7d8b3bff5cc4984c7192fce14aa676a9ce145fe3553119b557258"},
+  { uri="file:/root/module/libwallet/external/test.txt", sha256="5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"},
+]
+
+[sgx]
+debug = true
+edmm_enable = false
+max_threads = 4
+isvprodid = 0
+isvsvn = 0
+remote_attestation = "none"
+enable_stats = false
+enclave_size = "256M"
+use_exinfo = false
+
+[sgx.cpu_features]
+avx = "unspecified"
+avx512 = "unspecified"
+amx = "unspecified"
+mpx = "disabled"
+pkru = "disabled"

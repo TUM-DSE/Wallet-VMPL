@@ -8,9 +8,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "memory.h"
 #include "vmpl.h"
+
+#ifdef NODEBUG
+#define debug_printf(fmt, ...) do {} while (0)
+#else
+#define debug_printf(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#endif
 
 #include <sys/syscall.h>
 #include <dirent.h>
@@ -260,6 +267,8 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size){
     call.invokation.data = invoke_data;
     call.invokation.data_size = sizeof(struct trustlet_invokation);
 
+    static void *read_buffer = NULL;
+    static size_t read_buffer_size = 0;
 retry:
     void* return_buffer_address = NULL;
     int ret = ioctl(con, VMPL_WR, &call);
@@ -280,22 +289,22 @@ retry:
         arg->fileattr.size = st.st_size;
         arg->fileattr.mode = st.st_mode;
         invoke_data->invokation_type = requestFileattr;
-        printf("Guest request: fileattr: ret=%d, path=%s, size=%ld, mode=%d\n", arg->fileattr.ret, arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
+        debug_printf("Guest request: fileattr: ret=%d, path=%s, size=%ld, mode=%d\n", arg->fileattr.ret, arg->fileattr.path, arg->fileattr.size, arg->fileattr.mode);
         goto retry;
     } else if (ret == guestRequestOpen) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         int fd = open(arg->fileattr.path, O_RDONLY);
         if (fd == -1) {
-            printf("Failed to open file!\n");
+            debug_printf("Failed to open file!\n");
         }
         arg->open.fd = fd;
         invoke_data->invokation_type = requestOpen;
-        printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
+        debug_printf("Guest request: open: path=%s, fd=%d\n", arg->open.path, arg->open.fd);
         goto retry;
     } else if (ret == guestRequestRead) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
         int fd = arg->read.fd;
-        void* read_buffer = &arg->read.buf[0];
+        char *buf = &arg->read.buf[0];
         int count = arg->read.count;
         if (count > sizeof(arg->read.buf)) {
             count = sizeof(arg->read.buf);
@@ -305,17 +314,16 @@ retry:
         if (arg->read.offset == (uint64_t)-1) {
             // dir read
             // XXX: code adopted from read_dir() of linux pal of gramine
-            char *buf = read_buffer;
             char dirbuf[1024];
             // gcc does not provide a wrapper for getdents64
             int size = syscall(SYS_getdents64, fd, dirbuf, sizeof(dirbuf));
             if (size == -1) {
-                printf("Failed to read dir!\n");
+                debug_printf("Failed to read dir!\n");
                 // TODO: handle error
             } else {
                 char *ptr = dirbuf;
                 int remaining = size;
-                printf("Guest requet: dire_read: %d bytes for dentry\n", size);
+                debug_printf("Guest requet: dire_read: %d bytes for dentry\n", size);
                 while(remaining > 0) {
                     struct linux_dirent64* dirent = (struct linux_dirent64*)ptr;
                     if (is_dot_or_dotdot(dirent->d_name)) {
@@ -350,20 +358,59 @@ skip:
             }
         } else {
             // file read
-            read_bytes = pread(fd, read_buffer, count, arg->read.offset);
+            read_bytes = pread(fd, buf, count, arg->read.offset);
         }
         arg->read.count = read_bytes;
         invoke_data->invokation_type = requestRead;
-        printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
+        debug_printf("Guest request: read: fd=%d, offset=%ld, count=%lu\n", fd, arg->read.offset, arg->read.count);
+        goto retry;
+    } else if (ret == guestRequestRead2) {
+        struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
+        int fd = arg->read2.fd;
+        uint64_t read_size = arg->read2.count;
+        debug_printf("read2: fd=%d, offset=%ld, count=%lu\n", fd, arg->read2.offset, read_size);
+        if (!read_buffer) {
+            read_buffer = aligned_alloc(4096, read_size);
+            if (!read_buffer) {
+                debug_printf("Failed to allocate read buffer!\n");
+                goto exit;
+            }
+            read_buffer_size = read_size;
+        } else if (read_buffer_size < read_size) {
+            free(read_buffer);
+            read_buffer = aligned_alloc(4096, read_size);
+            if (!read_buffer) {
+                debug_printf("Failed to reallocate read buffer!\n");
+                goto exit;
+            }
+            read_buffer_size = read_size;
+        }
+        int read_bytes = pread(fd, read_buffer, read_size, arg->read2.offset);
+        if (read_bytes == -1) {
+            fprintf(stderr, "Failed to read file!: errno=%d\n", errno);
+            int is_fd_valid = fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+            fprintf(stderr, "fd=%d (valid=%d), read_buffer=%p, read_size=%lu, offset=%ld\n", fd, is_fd_valid, read_buffer, read_size, arg->read2.offset);
+        }
+        arg->read2.ptr = (uint64_t)read_buffer;
+        arg->read2.bufsize = read_size;
+        arg->read2.count = read_bytes;
+        invoke_data->invokation_type = requestRead2;
+        debug_printf("Guest request: read2: ptr=%lx, fd=%d, offset=%ld, count=%lu\n", arg->read2.ptr, fd, arg->read2.offset, arg->read2.count);
+#if 0
+        for (int i = 0; i < 64; i++) {
+            debug_printf("%02x ", ((uint8_t*)read_buffer)[i]);
+        }
+        debug_printf("\n");
+#endif
         goto retry;
     } else if (ret == guestRequestMmap) {
         struct guest_request_args* arg = invoke_data->guest_request_args.ptr;
-        printf("Guest request: mmap: fd=%d, size=%ld, offset=%ld, addr_offset=%ld\n", (int)arg->mmap.fd, arg->mmap.size, arg->mmap.offset, arg->mmap.addr_offset);
+        debug_printf("Guest request: mmap: fd=%d, size=%ld, offset=%ld, addr_offset=%ld\n", (int)arg->mmap.fd, arg->mmap.size, arg->mmap.offset, arg->mmap.addr_offset);
         void *addr = NULL;
         memset(mmap_read_buffer, 0, 4096);
         int ret = pread(arg->mmap.fd, mmap_read_buffer, 4096, arg->mmap.offset + arg->mmap.addr_offset);
         if (ret == -1) {
-            printf("Failed to read file!\n");
+            debug_printf("Failed to read file!\n");
         }
         arg->mmap.buf_addr = (uint64_t)mmap_read_buffer;
         invoke_data->invokation_type = requestMmap;
@@ -373,6 +420,10 @@ skip:
 exit:
 
     free(mmap_read_buffer);
+    if (read_buffer) {
+        free(read_buffer);
+        read_buffer = NULL;
+    }
     return return_buffer_address;
 }
 
@@ -381,7 +432,7 @@ void create_channel(const int trustlet_id_1, const int trustlet_id_2){
     assert(con);
     #endif
 
-    printf("Creating channel between %d and %d\n", trustlet_id_1, trustlet_id_2);
+    debug_printf("Creating channel between %d and %d\n", trustlet_id_1, trustlet_id_2);
 
     struct monitor_call call;
     call.type = createChannel;
