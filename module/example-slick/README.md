@@ -47,5 +47,8 @@ With the script at `module/example-slick` a simple Trustlet can be created
 and excecuted.
 ```bash
 python3 ipc_run.py
+# or
+make run
+./run
 ```
 This will exectue `module/example-slick/com.c` in VMPL2 as a Trustlet.

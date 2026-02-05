@@ -26,6 +26,8 @@ VMPLkernel6.5.tar.gz
 module/libsysdb.so
 module/libpal.so
 module/*.txt
+module/example-slick/run
+module/example-slick/com_extended
 Benchmarks/Boottime/wallet/run
 Benchmarks/Boottime/wallet/res
 Benchmarks/Boottime/wallet/outb
