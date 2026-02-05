@@ -262,6 +262,14 @@ simple_latency_fs:
 	cp Benchmarks/IPC/wallet/extended/com_extended runtime/filesystem/simple/fs/lib/
 	cd runtime/filesystem/simple/; ./create.sh
 
+simple_slick_fs:
+	mkdir -p runtime/filesystem/simple/fs/lib/
+	rm -rf runtime/filesystem/simple/fs_out/
+	rm -rf runtime/filesystem/simple/fs/lib/*
+	make -B -C module/example-slick com_extended
+	cp module/example-slick/com_extended runtime/filesystem/simple/fs/lib/
+	cd runtime/filesystem/simple/; ./create.sh
+
 python_fs:
 	mkdir -p runtime/filesystem/python/fs/lib
 	mkdir -p runtime/filesystem/python/fs/python
