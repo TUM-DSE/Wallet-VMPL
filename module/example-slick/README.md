@@ -52,3 +52,9 @@ make run
 ./run
 ```
 This will exectue `module/example-slick/com.c` in VMPL2 as a Trustlet.
+
+
+### TODOs
+
+- add clangd-lsp plugin
+- Implement low-latency polling using shared memory: The shared memory feature can be used for continuous communication between guest and trustlet without invoke overhead. Use polling with volatile flags for synchronization.

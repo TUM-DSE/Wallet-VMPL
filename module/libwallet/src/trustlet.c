@@ -400,3 +400,21 @@ int delete_trustlet(const int trustlet_id) {
 #endif
     return ioctl(con, VMPL_WR, &call);
 }
+
+void* create_shared_memory(const int trustlet_id, void* buffer, uint64_t size) {
+#ifndef NODEBUG
+    assert(con);
+    printf("Creating shared memory for trustlet %d: buffer=%p, size=%lu\n", trustlet_id, buffer, size);
+#endif
+
+    struct monitor_call call;
+    call.type = createSharedMemory;
+    call.shared_memory.trustlet_id = trustlet_id;
+    call.shared_memory.guest_buffer = buffer;
+    call.shared_memory.size = size;
+
+    if (ioctl(con, VMPL_WR, &call) < 0) {
+        return NULL;
+    }
+    return buffer;
+}

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <zygote.h>
 #include <trustlet.h>
 #include <monitor.h>
@@ -44,38 +45,65 @@ void measure_ioctl() {
     exit(0);
 }
 
+#define SHARED_SIZE (1024 * 1024)  // 1MB
+
 int main() {
     struct timespec aux_;
     unsigned int aux;
 
     /* measure_ioctl(); */
 
-
-
-    /* if (ioperm(BENCHMARK_PORT, 1, 1)) { */
-    /*     printf("Failed to get access to the benchmark port\n"); */
-    /*     return -1; */
-    /* } */
-    /* call(101); */
     monitor_connect();
-    /* call(102); */
-    /* call(103); */
+
     printf("Create zygotes\n");
     int z = create_zygote("../libpal.so", "manifest_ipc_1", "../libsysdb.so");
-    /* call(104); */
-    /* call(105); */
+
     printf("Create trustlets\n");
     int t = create_trustlet(z, "./empty.py");
-    /* call(106); */
-    /* call(107); */
-    printf("Invoke trustlests to initialize\n");
-    invoke_trustlet(t, "1337", 5);
-    /* call(108); */
 
-    /* printf("Chreate chain\n"); */
-    // create_channel
-    printf("Invoke chain to initialize\n");
-    /* invoke_trustlet(t, "a", 0); */
+    printf("Invoke trustlet to initialize\n");
+    invoke_trustlet(t, "1337", 5);
+
+    // Test shared memory
+    printf("=== Shared Memory Test ===\n");
+
+    // Allocate page-aligned shared buffer
+    char* shared = aligned_alloc(4096, SHARED_SIZE);
+    if (!shared) {
+        printf("Failed to allocate shared memory\n");
+        return -1;
+    }
+
+    // Write initial data "AAAA"
+    memset(shared, 'A', 4);
+    shared[4] = '\0';
+    printf("Before trustlet: shared = %.4s\n", shared);
+
+    // Register shared memory with the trustlet
+    if (!create_shared_memory(t, shared, SHARED_SIZE)) {
+        printf("Failed to create shared memory\n");
+        free(shared);
+        return -1;
+    }
+    printf("Shared memory registered\n");
+
+    // Invoke trustlet - it will modify the shared memory
+    printf("Invoking trustlet to modify shared memory...\n");
+    invoke_trustlet(t, "x", 0);
+
+    // Verify the trustlet modified the shared buffer
+    printf("After trustlet: shared = %.4s\n", shared);
+
+    if (memcmp(shared, "BBBB", 4) == 0) {
+        printf("SUCCESS: Shared memory was modified by trustlet!\n");
+    } else {
+        printf("FAILED: Shared memory was not modified as expected\n");
+    }
+
+    free(shared);
+
+    // Original benchmark code
+    printf("\n=== Benchmark ===\n");
     invoke_trustlet(t, "x", 0);
 
     printf("Start benchmarking\n");
@@ -93,10 +121,9 @@ int main() {
     ret[ret_size - 1] = '\0';
     printf("result: %s\n", ret);
 
-    printf("Ioctl time per invocation: %lu cycles\n",
-           sum / ITERATIONS);
     printf("Time per invocation: %lu ns, %lu cycles\n",
            (end_ns - start_ns) / ITERATIONS,
            (end_cycles - start_cycles) / ITERATIONS);
-    
+
+    return 0;
 }

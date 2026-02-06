@@ -321,6 +321,31 @@ static long reset_stat_(struct monitor_call* mcall){
 	return 0;
 }
 
+/**
+ * rax: call ID
+ * rcx: ProcessID of Trustlet
+ * rdx: Guest page table (CR3)
+ * r8: Guest buffer virtual address
+ * r9: Size in bytes
+ *
+ * return:
+ *	-  0 on success
+ *  - -1 on failure
+ */
+static long create_shared_memory_(struct monitor_call* mcall){
+	struct svsm_call call;
+
+	call.rax = MONITORCALLID(mcall->type);
+	call.rcx = mcall->shared_memory.trustlet_id;
+	call.rdx = (u64)get_pgd_phys();
+	call.r8 = (u64)mcall->shared_memory.guest_buffer;
+	call.r9 = mcall->shared_memory.size;
+
+	if(do_monitor_call(&call) != 1)
+		return -1;
+	return 0;
+}
+
 static long parse_request(struct file *file, unsigned int cmd, unsigned long arg){
 
 	struct monitor_call call;
@@ -362,6 +387,9 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return get_stat_(&call);
 	case reset_stat:
 		return reset_stat_(&call);
+
+	case createSharedMemory:
+		return create_shared_memory_(&call);
 
 	default:
 		printk(KERN_ERR "Invalid type");
