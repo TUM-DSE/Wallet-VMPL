@@ -62,16 +62,49 @@ int main() {
     int t = create_trustlet(z, "./empty.py");
 
     printf("Invoke trustlet to initialize\n");
-    char* init_result = invoke_trustlet(t, "1337", 5);
-    if (init_result) {
-        printf("Init result: %.4s\n", init_result);
-    } else {
-        printf("Init failed (null result)\n");
+    invoke_trustlet(t, "1337", 5);
+
+    // Test shared memory
+    printf("=== Shared Memory Test ===\n");
+
+    // Allocate page-aligned shared buffer
+    char* shared = aligned_alloc(4096, SHARED_SIZE);
+    if (!shared) {
+        printf("Failed to allocate shared memory\n");
+        return -1;
     }
 
-    // Skip shared memory test for now - testing baseline
-    printf("\n=== Baseline Test (no shared memory) ===\n");
-    invoke_trustlet(t, "test", 0);
+    // Write initial data "AAAA"
+    memset(shared, 'A', 4);
+    shared[4] = '\0';
+    printf("Before trustlet: shared = %.4s\n", shared);
+
+    // Register shared memory with the trustlet
+    if (!create_shared_memory(t, shared, SHARED_SIZE)) {
+        printf("Failed to create shared memory\n");
+        free(shared);
+        return -1;
+    }
+    printf("Shared memory registered\n");
+
+    // Invoke trustlet - it will modify the shared memory
+    printf("Invoking trustlet to modify shared memory...\n");
+    invoke_trustlet(t, "x", 0);
+
+    // Verify the trustlet modified the shared buffer
+    printf("After trustlet: shared = %.4s\n", shared);
+
+    if (memcmp(shared, "BBBB", 4) == 0) {
+        printf("SUCCESS: Shared memory was modified by trustlet!\n");
+    } else {
+        printf("FAILED: Shared memory was not modified as expected\n");
+    }
+
+    free(shared);
+
+    // Original benchmark code
+    printf("\n=== Benchmark ===\n");
+    invoke_trustlet(t, "x", 0);
 
     printf("Start benchmarking\n");
     uint64_t sum = 0;
@@ -85,12 +118,8 @@ int main() {
     uint64_t end_cycles = get_time_cycles(&aux);
     uint64_t end_ns = get_time_ns(&aux_);
 
-    if (ret) {
-        ret[ret_size - 1] = '\0';
-        printf("result: %s\n", ret);
-    } else {
-        printf("Benchmark invocation failed (ret is NULL)\n");
-    }
+    ret[ret_size - 1] = '\0';
+    printf("result: %s\n", ret);
 
     printf("Time per invocation: %lu ns, %lu cycles\n",
            (end_ns - start_ns) / ITERATIONS,
