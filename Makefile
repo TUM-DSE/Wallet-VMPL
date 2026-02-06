@@ -143,6 +143,8 @@ guest_libs:
 
 build_and_run: build_svsm run
 
+SERIAL ?= stdio
+
 ## Runs guest.qcow2 with SVSM
 ## Mounts ./module/ at /root/module 
 run:
@@ -158,15 +160,44 @@ run:
 	-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on \
 	-device scsi-hd,drive=disk0,bootindex=0 \
 	-netdev tap,ifname=tap0_${USER},id=net0,script=no,downscript=no -device e1000,netdev=net0 \
-	-serial stdio \
+	-serial ${SERIAL} \
 	-serial pty \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough \
 	-virtfs local,path=Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
 	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough
 
+slick:
+	@make -C module/example-slick all
+	@make kill
+	@make simple_slick_fs
+	@make gramine
+	sudo rm /tmp/slick.log || true
+	make run SERIAL="file:/tmp/slick.log" &
+	sleep 1
+	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
+	@make ssh_wait
+	@echo "VM up and running"
+	@echo "VM output (e.g., kernel warnings) are streamed to /tmp/slick.log."
+	@echo "You can run commands in the VM using 'make ssh_with_command COMMAND=\"<your command>\"'"
+
+kill:
+	sudo pkill -9 qemu-system || true
 
 ssh:
 	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+
+ssh_wait:
+	@echo "Waiting for SSH to become available..."
+	@for i in $$(seq 1 60); do \
+		if SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no -o ConnectTimeout=1 root@192.168.${USERADDR}.10 "exit 0" 2>/dev/null; then \
+			echo "SSH is ready!"; \
+			exit 0; \
+		fi; \
+		echo "Attempt $$i/60 - SSH not ready, retrying..."; \
+		sleep 1; \
+	done; \
+	echo "Timeout: SSH not available after 60 seconds"; \
+	exit 1
 
 SSH_COMMAND?="shutdown"
 ssh_with_command:
