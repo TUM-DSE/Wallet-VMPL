@@ -18,6 +18,9 @@ $(RUNNERS): %: %.py
 $(TRUSTLETS): %: %.c
 	gcc -I../../runtime/client/ -o $@ $<
 
+test5_run: test5_run.c ../../module/libwallet/libwallet.a # compile in guest
+	gcc -I../../module/libwallet/src/ test5_run.c -O3 -g0 -o test5_run -L../../module/libwallet/ -l:libwallet.a
+
 simple_slick_fs: $(TRUSTLETS)
 	mkdir -p ../../runtime/filesystem/simple/fs/lib/
 	rm -rf ../../runtime/filesystem/simple/fs_out/
