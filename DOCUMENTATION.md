@@ -2,7 +2,7 @@
 
 ## The daily init
 
-Remembe to run `make setup_guest_net` after every host reboot.
+Remembe to run `make setup_guest_net && make unload_kvm && make load_kvm` after every host reboot.
 
 
 ## Trustlet File System

@@ -180,6 +180,19 @@ slick:
 	@echo "VM output (e.g., kernel warnings) are streamed to /tmp/slick.log."
 	@echo "You can run commands in the VM using 'make ssh_with_command COMMAND=\"<your command>\"'"
 
+run_tests:
+	@make kill
+	@make -C module/example-tests simple_slick_fs
+	@make gramine
+	make run &
+	sleep 1
+	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
+	@make ssh_wait
+	@echo "VM up and running"
+	@make ssh_with_command SSH_COMMAND="insmod module/vmpl.ko || true"
+	@make -C module/example-tests run_tests
+
+
 kill:
 	sudo pkill -9 qemu-system || true
 
@@ -201,7 +214,7 @@ ssh_wait:
 
 SSH_COMMAND?="shutdown"
 ssh_with_command:
-	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
+	SSH_AUTH_SOCK="" ssh -tt -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
 
 trustlet_test:
 	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
@@ -299,6 +312,12 @@ simple_slick_fs:
 	rm -rf runtime/filesystem/simple/fs/lib/*
 	make -B -C module/example-slick com_extended
 	cp module/example-slick/com_extended runtime/filesystem/simple/fs/lib/
+	make -B -C module/example-slick trustlet_simple
+	cp module/example-slick/trustlet_simple runtime/filesystem/simple/fs/lib/
+	make -B -C module/example-slick trustlet_converge1
+	cp module/example-slick/trustlet_converge1 runtime/filesystem/simple/fs/lib/
+	make -B -C module/example-slick trustlet_converge2
+	cp module/example-slick/trustlet_converge2 runtime/filesystem/simple/fs/lib/
 	cd runtime/filesystem/simple/; ./create.sh
 
 python_fs:
