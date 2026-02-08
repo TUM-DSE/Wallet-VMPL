@@ -25,10 +25,12 @@ int main(int argc, char** argv) {
         if(input[0] != 'x'){
             trustlet_exit();
             strcpy(output, input);
-            trustlet_exit();
+            output[1] += 1;
+            notify_monitor();
         } else {
             trustlet_exit();
             strcpy(output, input);
+            output[2] += 1;
             notify_monitor();
         }
     }

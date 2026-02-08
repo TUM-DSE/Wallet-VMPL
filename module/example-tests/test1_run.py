@@ -8,8 +8,8 @@ with wallet.Wallet() as w:
 
     input_size = 16
 
-    chain_len = 2
-    chains = [2]
+    chain_len = 3
+    chains = [3]
 
     iterations = 1
 
@@ -30,27 +30,34 @@ with wallet.Wallet() as w:
 
     for i in chains:
         #Create chains
-        for c in range(chained,i - 1):
-            trustlets[c].create_channel(trustlets[c+1])
+        # for c in range(chained,i - 1):
+        #     trustlets[c].create_channel(trustlets[c+1])
         chained += i - chained - 1
 
         #Prepair input data
         input_data = b"b" * (input_size - 1) + b"\00"
 
-        #Setup Trustlets
-        for t in range(i - 1):
-            #Transfer nodes (input->output)
-            trustlets[t].invoke_trustlet(b"a", 0)
-        #End node (input->output->copy_to_caller)
-        trustlets[i - 1].invoke_trustlet(b"x", 0)
-
         for _ in range(iterations):
+            #Setup Trustlets
+            for t in range(i - 1):
+                #Transfer nodes (input->output)
+                trustlets[t].invoke_trustlet(b"a", 0)
+            #End node (input->output->copy_to_caller)
+            trustlets[i - 1].invoke_trustlet(b"x", 0)
+
             start = time.time_ns()
-            trustlets[0].invoke_trustlet(input_data,0)
+            ret = trustlets[0].invoke_trustlet(input_data,len(input_data))
             for t in range(1, i - 1):
-                trustlets[t].invoke_trustlet(b"", 0)
-            res = trustlets[i - 1].invoke_trustlet(b"", len(input_data))
+                hop = ret.encode('ascii') + b"\00" * (input_size - len(ret))
+                ret = trustlets[t].invoke_trustlet(hop, len(input_data))
+            hop = ret.encode('ascii') + b"\00" * (input_size - len(ret))
+            res = trustlets[i - 1].invoke_trustlet(hop, len(input_data))
             print(f"Output: {res}")
             end = time.time_ns()
             print((end - start) / 1e9)
-            assert res == input_data.decode('ascii').strip('\x00')
+            expected = bytearray(input_data)
+            expected[2] += 1
+            expected[1] += i-1
+            expected = expected.decode('ascii').strip('\x00')
+            print(expected)
+            assert res == expected
