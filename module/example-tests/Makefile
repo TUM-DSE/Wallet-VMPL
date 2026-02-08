@@ -2,6 +2,9 @@ TRUSTLET_SRCS := $(wildcard *_trustlet.c)
 TRUSTLETS := $(TRUSTLET_SRCS:.c=)
 RUNNER_SRCS := $(wildcard *_run.py)
 RUNNERS := $(RUNNER_SRCS:.py=)
+C_RUNNER_SRCS := $(wildcard *_run.c)
+C_RUNNERS := $(C_RUNNER_SRCS:.c=)
+
 
 all: $(TRUSTLETS)
 
@@ -9,6 +12,10 @@ run_tests:
 	@for runner in $(RUNNERS); do \
 		echo "Running $$runner..."; \
 		make $$runner; \
+	done
+	@for c_runner in $(C_RUNNERS); do \
+		echo "Running $$c_runner..."; \
+		make $$c_runner; \
 	done
 	# make -C ../../ trustlet_test
 
@@ -18,8 +25,9 @@ $(RUNNERS): %: %.py
 $(TRUSTLETS): %: %.c
 	gcc -I../../runtime/client/ -o $@ $<
 
-test5_run: test5_run.c ../../module/libwallet/libwallet.a # compile in guest
-	gcc -I../../module/libwallet/src/ test5_run.c -O3 -g0 -o test5_run -L../../module/libwallet/ -l:libwallet.a
+$(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a # compile in guest
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ $< -O3 -g -o $@ -L../../module/libwallet/ -l:libwallet.a"
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
 simple_slick_fs: $(TRUSTLETS)
 	mkdir -p ../../runtime/filesystem/simple/fs/lib/
@@ -31,4 +39,4 @@ simple_slick_fs: $(TRUSTLETS)
 clean:
 	rm -f $(TRUSTLETS)
 
-.PHONY: all clean $(RUNNERS)
+.PHONY: all clean $(RUNNERS) $(C_RUNNERS)
