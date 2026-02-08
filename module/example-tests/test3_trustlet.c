@@ -21,14 +21,16 @@ int main(int argc, char** argv) {
 
     trustlet_exit();
 
-    while(1){
-        if(input[0] != 'x'){
-            trustlet_exit();
+    if(input[0] != 'x'){
+        trustlet_exit();
+        while(1){
             strcpy(output, input);
             output[1] += 1;
             notify_monitor();
-        } else {
-            trustlet_exit();
+        }
+    } else {
+        trustlet_exit();
+        while(1){
             strcpy(output, input);
             output[2] += 1;
             notify_monitor();
