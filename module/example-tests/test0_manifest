@@ -1,10 +1,10 @@
 [libos]
-entrypoint = "/lib/trustlet_converge2"
+entrypoint = "/lib/test0_trustlet"
 
 [loader]
 log_level = "error"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-argv = ["trustlet_converge2"]
+argv = ["test0_trustlet"]
 loader.insecure__disable_aslr  = true
 
 [loader.env]

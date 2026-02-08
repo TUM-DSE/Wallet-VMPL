@@ -18,7 +18,7 @@ with wallet.Wallet() as w:
     trustlets = []
 
     for i in range(chain_len):
-        zygotes.append(w.create_zygote("../libpal.so", "trustlet_converge2_manifest", "../libsysdb.so"))
+        zygotes.append(w.create_zygote("../libpal.so", "test0_manifest", "../libsysdb.so"))
 
     for i in range(chain_len):
         trustlets.append(zygotes[i].create_trustlet("./empty.py"))

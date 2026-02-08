@@ -1,4 +1,4 @@
-TRUSTLET_SRCS := $(wildcard trustlet_*.c)
+TRUSTLET_SRCS := $(wildcard *_trustlet.c)
 TRUSTLETS := $(TRUSTLET_SRCS:.c=)
 RUNNER_SRCS := $(wildcard *_run.py)
 RUNNERS := $(RUNNER_SRCS:.py=)
@@ -15,7 +15,7 @@ run_tests:
 $(RUNNERS): %: %.py
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && python3 $<"
 
-$(TRUSTLETS): trustlet_%: trustlet_%.c
+$(TRUSTLETS): %: %.c
 	gcc -I../../runtime/client/ -o $@ $<
 
 simple_slick_fs: $(TRUSTLETS)
