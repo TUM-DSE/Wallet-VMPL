@@ -3,16 +3,16 @@ import sys
 import wallet
 import time
 
-# like test2, but with resonably written trustlet
+# continue refactoring from test3, but with chaining as test0
 
 with wallet.Wallet() as w:
 
     input_size = 16
 
-    chain_len = 1
-    chains = [1]
+    chain_len = 2
+    chains = [2]
 
-    iterations = 3
+    iterations = 1
 
     zygotes = []
     trustlets = []
@@ -31,8 +31,8 @@ with wallet.Wallet() as w:
 
     for i in chains:
         #Create chains
-        # for c in range(chained,i - 1):
-        #     trustlets[c].create_channel(trustlets[c+1])
+        for c in range(chained,i - 1):
+            trustlets[c].create_channel(trustlets[c+1])
         chained += i - chained - 1
 
         #Prepair input data
@@ -47,10 +47,11 @@ with wallet.Wallet() as w:
 
         for _ in range(iterations):
             start = time.time_ns()
-            res = trustlets[0].invoke_trustlet(input_data, len(input_data))
+            trustlets[0].invoke_trustlet(input_data,0)
+            for t in range(1, i - 1):
+                trustlets[t].invoke_trustlet(b"", 0)
+            res = trustlets[i - 1].invoke_trustlet(b"", len(input_data))
             print(f"Output: {res}")
-            end = time.time_ns()
-            print((end - start) / 1e9)
             expected = bytearray(input_data)
             expected[2] += 1
             expected[1] += i-1

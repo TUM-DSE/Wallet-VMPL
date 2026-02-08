@@ -3,6 +3,7 @@ import sys
 import wallet
 import time
 
+# like test0, but with guest assisted chain hops instead of channels
 
 with wallet.Wallet() as w:
 
