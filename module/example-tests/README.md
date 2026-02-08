@@ -1,6 +1,6 @@
 ## Known Test Failures
 
-* trustlet_converge2 with > 1 iteration
+* ...
 
 ## Tests to Add
 

@@ -12,7 +12,7 @@ with wallet.Wallet() as w:
     chain_len = 2
     chains = [2]
 
-    iterations = 1
+    iterations = 3
 
     zygotes = []
     trustlets = []
@@ -38,14 +38,15 @@ with wallet.Wallet() as w:
         #Prepair input data
         input_data = b"b" * (input_size - 1) + b"\00"
 
-        #Setup Trustlets
-        for t in range(i - 1):
-            #Transfer nodes (input->output)
-            trustlets[t].invoke_trustlet(b"a", 0)
-        #End node (input->output->copy_to_caller)
-        trustlets[i - 1].invoke_trustlet(b"x", 0)
-
         for _ in range(iterations):
+
+            #Setup Trustlets
+            for t in range(i - 1):
+                #Transfer nodes (input->output)
+                trustlets[t].invoke_trustlet(b"a", 0)
+            #End node (input->output->copy_to_caller)
+            trustlets[i - 1].invoke_trustlet(b"x", 0)
+
             start = time.time_ns()
             trustlets[0].invoke_trustlet(input_data,0)
             for t in range(1, i - 1):
