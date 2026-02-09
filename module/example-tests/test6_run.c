@@ -7,7 +7,8 @@
 #include <time.h>
 #include <stdint.h>
 
-// continue refactoring from test3, but with chaining as test0
+// like test5, but with binary input and output and only a single trustlet invocation.
+// All input reaches the trustlet, but output is truncated at the first null byte.
 
 void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
@@ -62,7 +63,7 @@ int main() {
         // for c in range(chained,i - 1):
         //     trustlets[c].create_channel(trustlets[c+1])
         for (int c = chained; c < i - 1; c++) {
-            create_channel(trustlets[c], trustlets[c+1]);
+            // create_channel(trustlets[c], trustlets[c+1]);
         }
         chained += i - chained - 1;
 
@@ -91,19 +92,21 @@ int main() {
             uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
             // trustlets[0].invoke_trustlet(input_data,0)
-            invoke_trustlet_bin(trustlets[0], input_data, input_size, 0);
+            char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, 0);
+            hexdump(input_data, input_size);
+            hexdump(res, input_size);
 
-            // for t in range(1, i - 1):
-            //     trustlets[t].invoke_trustlet(b"", 0)
-            for (int t = 1; t < i - 1; t++) {
-                invoke_trustlet(trustlets[t], "", 0);
-            }
+            // // for t in range(1, i - 1):
+            // //     trustlets[t].invoke_trustlet(b"", 0)
+            // for (int t = 1; t < i - 1; t++) {
+            //     invoke_trustlet_bin(trustlets[t], input_data, input_size, 0);
+            // }
 
-            // res = trustlets[i - 1].invoke_trustlet(b"", len(input_data))
-            char* res = invoke_trustlet(trustlets[i - 1], "", input_size);
+            // // res = trustlets[i - 1].invoke_trustlet(b"", len(input_data))
+            // res = invoke_trustlet_bin(trustlets[i - 1], input_data, input_size, input_size);
 
-            // print(f"Output: {res}")
-            printf("Output: %s\n", res);
+            // // print(f"Output: {res}")
+            // printf("Output: %s\n", res);
 
             // expected = bytearray(input_data)
             char expected[16];
@@ -111,8 +114,8 @@ int main() {
 
             // expected[2] += 1
             expected[2] += 1;
-            // expected[1] += i-1
-            expected[1] += i - 1;
+            // // expected[1] += i-1
+            // expected[1] += i - 1;
             // expected = expected.decode('ascii').strip('\x00')
             // (in C, expected is already a string, strip null not needed for comparison)
 
