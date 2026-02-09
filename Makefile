@@ -180,6 +180,8 @@ slick:
 	@echo "VM output (e.g., kernel warnings) are streamed to /tmp/slick.log."
 	@echo "You can run commands in the VM using 'make ssh_with_command COMMAND=\"<your command>\"'"
 
+TEST_TARGET ?= run_tests
+
 run_tests:
 	@make kill
 	@make -C module/example-tests simple_slick_fs
@@ -190,7 +192,7 @@ run_tests:
 	@make ssh_wait
 	@echo "VM up and running"
 	@make ssh_with_command SSH_COMMAND="insmod module/vmpl.ko || true"
-	@make -C module/example-tests run_tests
+	@make -C module/example-tests $(TEST_TARGET)
 
 
 kill:
