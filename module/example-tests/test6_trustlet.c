@@ -9,6 +9,7 @@
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
 #define DATA_OUT 0x30000000000
+#define DATA_SIZE 16
 
 void main_default(bool suppress_output) {
     char* input = (char*)DATA_IN;
@@ -16,7 +17,7 @@ void main_default(bool suppress_output) {
     trustlet_exit();
 
     while (1) {
-        strcpy(output, input);
+        memcpy(output, input, DATA_SIZE);
 
         if (suppress_output) {
             output[1] += 1;

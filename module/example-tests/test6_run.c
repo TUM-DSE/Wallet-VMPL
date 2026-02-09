@@ -9,6 +9,11 @@
 
 // continue refactoring from test3, but with chaining as test0
 
+void hexdump(const void *data, size_t size) {
+    for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
+    printf("\n");
+}
+
 int main() {
     // with wallet.Wallet() as w:
     monitor_connect();
@@ -64,6 +69,7 @@ int main() {
         // #Prepair input data
         // input_data = b"b" * (input_size - 1) + b"\00"
         memset(input_data, 'b', input_size - 1);
+        input_data[input_size / 2] = '\0';
         input_data[input_size - 1] = '\0';
 
         // #Setup Trustlets
@@ -85,7 +91,7 @@ int main() {
             uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
             // trustlets[0].invoke_trustlet(input_data,0)
-            invoke_trustlet(trustlets[0], input_data, 0);
+            invoke_trustlet_bin(trustlets[0], input_data, input_size, 0);
 
             // for t in range(1, i - 1):
             //     trustlets[t].invoke_trustlet(b"", 0)
@@ -112,9 +118,11 @@ int main() {
 
             // print(expected)
             printf("%s\n", expected);
+            hexdump(expected, input_size);
+            hexdump(res, input_size);
 
             // assert res == expected
-            assert(strcmp(res, expected) == 0);
+            assert(memcmp(res, expected, input_size) == 0);
         }
     }
 
