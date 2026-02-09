@@ -11,6 +11,13 @@
 #define DATA_OUT 0x30000000000
 #define DATA_SIZE 16
 
+#define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
+
+void hexdump(const void *data, size_t size) {
+    for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
+    println("");
+}
+
 void main_default(bool suppress_output) {
     char* input = (char*)DATA_IN;
     char* output = (char*)DATA_OUT;
@@ -21,9 +28,13 @@ void main_default(bool suppress_output) {
 
         if (suppress_output) {
             output[1] += 1;
+            printf("Trustlet processed: ");
+            hexdump(output, DATA_SIZE);
             trustlet_exit();
         } else {
             output[2] += 1;
+            printf("Trustlet processed: ");
+            hexdump(output, DATA_SIZE);
             notify_monitor();
         }
     }

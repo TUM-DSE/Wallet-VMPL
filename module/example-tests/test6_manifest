@@ -2,7 +2,7 @@
 entrypoint = "/lib/test6_trustlet"
 
 [loader]
-log_level = "error"
+log_level = "debug"
 entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
 argv = ["test6_trustlet"]
 loader.insecure__disable_aslr  = true
