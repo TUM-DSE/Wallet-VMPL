@@ -7,7 +7,7 @@
 #include <time.h>
 #include <stdint.h>
 
-// like test5, but with binary input and output and only a single trustlet invocation.
+// like test6, but with shm between trustlet and guest OS
 
 void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
@@ -32,7 +32,7 @@ int main() {
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
     for (int i = 0; i < chain_len; i++) {
-        zygotes[i] = create_zygote("../libpal.so", "test6_manifest", "../libsysdb.so");
+        zygotes[i] = create_zygote("../libpal.so", "test7_manifest", "../libsysdb.so");
     }
 
     // for i in range(chain_len):
