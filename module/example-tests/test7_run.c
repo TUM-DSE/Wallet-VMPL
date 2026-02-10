@@ -129,7 +129,7 @@ int main() {
             memcpy(expected, input_data, input_size);
 
             // expected[2] += 1
-            expected[2] += 1;
+            expected[3] += 1;
             // // expected[1] += i-1
             // expected[1] += i - 1;
             // expected = expected.decode('ascii').strip('\x00')

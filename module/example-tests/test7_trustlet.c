@@ -25,7 +25,9 @@ void main_shm() {
 
     while (1) {
         // Process shared memory in-place
-        shared[2] += 1;
+        println("About to access shared memory at %p", (void*)shared);
+        shared[3] += 1;
+        println("Trustlet processed shm: %s", shared);
         printf("Trustlet processed shm: ");
         hexdump(shared, DATA_SIZE);
         notify_monitor();

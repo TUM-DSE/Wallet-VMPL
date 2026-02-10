@@ -341,8 +341,7 @@ static long create_shared_memory_(struct monitor_call* mcall){
 	call.r8 = (u64)mcall->shared_memory.guest_buffer;
 	call.r9 = mcall->shared_memory.size;
 
-	if(do_monitor_call(&call) != 1)
-		return -1;
+	do_monitor_call(&call);
 	return 0;
 }
 
