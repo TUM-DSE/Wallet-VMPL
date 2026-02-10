@@ -9,6 +9,8 @@
 
 // like test6, but with shm between trustlet and guest OS
 
+#define SHARED_SIZE 4096
+
 void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
     printf("\n");
@@ -40,6 +42,19 @@ int main() {
     for (int i = 0; i < chain_len; i++) {
         trustlets[i] = create_trustlet(zygotes[i], "./empty.py");
     }
+
+    // Allocate and register shared memory
+    char* shared = aligned_alloc(4096, SHARED_SIZE);
+    if (!shared) {
+        printf("Failed to allocate shared memory\n");
+        return -1;
+    }
+    shared[0] = 'I';
+    if (!create_shared_memory(trustlets[1], shared, SHARED_SIZE)) {
+        printf("Failed to create shared memory\n");
+        return -1;
+    }
+    printf("Shared memory registered\n");
 
     // input_data = b"a" * (input_size - 1) + b"\00"
     char input_data[16];
@@ -79,9 +94,9 @@ int main() {
             // Transfer nodes (input->output)
             invoke_trustlet(trustlets[t], "a", 0);
         }
-        // trustlets[i - 1].invoke_trustlet(b"x", 0)
-        // End node (input->output->copy_to_caller)
-        invoke_trustlet(trustlets[i - 1], "x", 0);
+        // trustlets[i - 1].invoke_trustlet(b"s", 0)
+        // End node - use shm mode
+        invoke_trustlet(trustlets[i - 1], "s", 0);
 
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
@@ -90,8 +105,10 @@ int main() {
             clock_gettime(CLOCK_MONOTONIC, &ts);
             uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
-            // trustlets[0].invoke_trustlet(input_data,0)
-            char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, 0);
+            // Write to shared memory, then invoke with 's' mode
+            memcpy(shared, input_data, input_size);
+            invoke_trustlet(trustlets[1], "s", 0);
+            char* res = shared;
             hexdump(input_data, input_size);
             hexdump(res, input_size);
 

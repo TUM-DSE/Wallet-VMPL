@@ -9,6 +9,7 @@
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
 #define DATA_OUT 0x30000000000
+#define DATA_SHARED 0x38000000000
 #define DATA_SIZE 16
 
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
@@ -16,6 +17,19 @@
 void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
     println("");
+}
+
+void main_shm() {
+    char* shared = (char*)DATA_SHARED;
+    trustlet_exit();
+
+    while (1) {
+        // Process shared memory in-place
+        shared[2] += 1;
+        printf("Trustlet processed shm: ");
+        hexdump(shared, DATA_SIZE);
+        notify_monitor();
+    }
 }
 
 void main_default(bool suppress_output) {
@@ -52,11 +66,13 @@ int main(int argc, char** argv) {
 
     trustlet_exit();
 
-    if(input[0] != 'x'){
-        bool suppress_output = true;
+    if(input[0] == 's'){
+        main_shm();
+    } else if(input[0] == 'x'){
+        bool suppress_output = false;
         main_default(suppress_output);
     } else {
-        bool suppress_output = false;
+        bool suppress_output = true;
         main_default(suppress_output);
     }
 }
