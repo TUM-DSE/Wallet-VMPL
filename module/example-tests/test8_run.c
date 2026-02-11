@@ -78,6 +78,16 @@ int main() {
         input_data[input_size / 2] = '\0';
         input_data[input_size - 1] = '\0';
 
+        // prepare expected output
+        char expected[INPUT_SIZE];
+        memcpy(expected, input_data, input_size);
+        // expected[2] += 1
+        expected[2] += 1;
+        // // expected[1] += i-1
+        // expected[1] += i - 1;
+        // expected = expected.decode('ascii').strip('\x00')
+        // (in C, expected is already a string, strip null not needed for comparison)
+
         // #Setup Trustlets
         // for t in range(i - 1):
         //     trustlets[t].invoke_trustlet(b"a", 0)
@@ -89,12 +99,13 @@ int main() {
         // End node (input->output->copy_to_caller)
         invoke_trustlet(trustlets[i - 1], "x", 0);
 
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
             // start = time.time_ns()
-            struct timespec ts;
-            clock_gettime(CLOCK_MONOTONIC, &ts);
-            uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
             // trustlets[0].invoke_trustlet(input_data,0)
             char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, input_size);
@@ -116,15 +127,6 @@ int main() {
             // printf("Output: %s\n", res);
 
             // expected = bytearray(input_data)
-            char expected[INPUT_SIZE];
-            memcpy(expected, input_data, input_size);
-
-            // expected[2] += 1
-            expected[2] += 1;
-            // // expected[1] += i-1
-            // expected[1] += i - 1;
-            // expected = expected.decode('ascii').strip('\x00')
-            // (in C, expected is already a string, strip null not needed for comparison)
 
             // print(expected)
             printf("Expected: \n");
@@ -134,6 +136,10 @@ int main() {
             // assert res == expected
             assert(memcmp(res, expected, input_size) == 0);
         }
+
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        printf("Packet rate: %.2f packets/sec\n", (double)iterations * 1e9 / (end - start));
     }
 
     return 0;
