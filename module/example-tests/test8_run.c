@@ -7,8 +7,15 @@
 #include <time.h>
 #include <stdint.h>
 
-// like test6, but we want to make it a simple packet throughput test
+// like test6, but we make it a simple packet throughput test
 
+#define DEBUG 0
+
+#if DEBUG
+#define debug
+#else
+#define debug if(0)
+#endif
 
 #define INPUT_SIZE 64
 
@@ -30,7 +37,7 @@ int main() {
     int chains[] = {2};
     int chains_len = 1;
 
-    int iterations = 2;
+    int iterations = 2000 * 5; // should take 5 sec
 
     int zygotes[2];
     int trustlets[2];
@@ -109,10 +116,10 @@ int main() {
 
             // trustlets[0].invoke_trustlet(input_data,0)
             char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, input_size);
-            printf("Input: \n");
-            hexdump(input_data, input_size);
-            printf("Output: \n");
-            hexdump(res, input_size);
+            debug printf("Input: \n");
+            debug hexdump(input_data, input_size);
+            debug printf("Output: \n");
+            debug hexdump(res, input_size);
 
             // // for t in range(1, i - 1):
             // //     trustlets[t].invoke_trustlet(b"", 0)
@@ -129,9 +136,9 @@ int main() {
             // expected = bytearray(input_data)
 
             // print(expected)
-            printf("Expected: \n");
-            printf("%s\n", expected);
-            hexdump(expected, input_size);
+            debug printf("Expected: \n");
+            debug printf("%s\n", expected);
+            debug hexdump(expected, input_size);
 
             // assert res == expected
             assert(memcmp(res, expected, input_size) == 0);
