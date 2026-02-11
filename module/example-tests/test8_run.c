@@ -9,22 +9,28 @@
 
 // like test6, but we want to make it a simple packet throughput test
 
+
+#define INPUT_SIZE 64
+
 void hexdump(const void *data, size_t size) {
-    for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
-    printf("\n");
+    for (size_t i = 0; i < size; i++) {
+        printf("%02x ", ((unsigned char *)data)[i]);
+        if ((i + 1) % 16 == 0) printf("\n");
+    }
+    if (size % 16 != 0) printf("\n");
 }
 
 int main() {
     // with wallet.Wallet() as w:
     monitor_connect();
 
-    int input_size = 16;
+    int input_size = INPUT_SIZE;
 
     int chain_len = 2;
     int chains[] = {2};
     int chains_len = 1;
 
-    int iterations = 1;
+    int iterations = 2;
 
     int zygotes[2];
     int trustlets[2];
@@ -42,7 +48,7 @@ int main() {
     }
 
     // input_data = b"a" * (input_size - 1) + b"\00"
-    char input_data[16];
+    char input_data[INPUT_SIZE];
     memset(input_data, 'a', input_size - 1);
     input_data[input_size - 1] = '\0';
 
@@ -91,8 +97,10 @@ int main() {
             uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
             // trustlets[0].invoke_trustlet(input_data,0)
-            char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, 0);
+            char* res = invoke_trustlet_bin(trustlets[1], input_data, input_size, input_size);
+            printf("Input: \n");
             hexdump(input_data, input_size);
+            printf("Output: \n");
             hexdump(res, input_size);
 
             // // for t in range(1, i - 1):
@@ -108,7 +116,7 @@ int main() {
             // printf("Output: %s\n", res);
 
             // expected = bytearray(input_data)
-            char expected[16];
+            char expected[INPUT_SIZE];
             memcpy(expected, input_data, input_size);
 
             // expected[2] += 1
@@ -119,9 +127,9 @@ int main() {
             // (in C, expected is already a string, strip null not needed for comparison)
 
             // print(expected)
+            printf("Expected: \n");
             printf("%s\n", expected);
             hexdump(expected, input_size);
-            hexdump(res, input_size);
 
             // assert res == expected
             assert(memcmp(res, expected, input_size) == 0);
