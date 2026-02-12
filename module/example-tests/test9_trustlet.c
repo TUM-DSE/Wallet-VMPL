@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include "cpuid.c"
 
 #define PORT 0xF4
@@ -19,11 +20,36 @@ void hexdump(const void *data, size_t size) {
     println("");
 }
 
+// CPU frequency in GHz - used to correct clock_gettime which returns TSC cycles
+#define CPU_GHZ 2.0
+
+void delay(uint64_t nsecs) {
+    // clock_gettime returns TSC cycles misinterpreted as usec, then converted to nsec
+    // Effective value is cycles * 1000, so divide by (CPU_GHZ * 1000) to get real nsec
+    struct timespec ts;
+    int ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+    println("delay: clock_gettime returned %d, tv_sec=%ld, tv_nsec=%ld", ret, ts.tv_sec, ts.tv_nsec);
+    uint64_t start = (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
+    uint64_t end = start + nsecs;
+    println("delay: start=%lu, end=%lu, waiting for %lu ns", start, end, nsecs);
+    while (1) {
+        ret = clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t now = (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
+        if (now >= end) {
+            println("delay: done, now=%lu", now);
+            break;
+        }
+    }
+}
+
 void main_shm() {
     char* shared = (char*)DATA_SHARED;
     trustlet_exit();
 
     while (1) {
+        println("Trustlet sleeping ...");
+        delay(125*1e9); // Sleep for 1 second
+
         // Process shared memory in-place
         println("About to access shared memory at %p", (void*)shared);
         shared[3] += 1;

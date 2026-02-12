@@ -142,6 +142,10 @@ int main() {
 
             // assert res == expected
             assert(memcmp(res, expected, input_size) == 0);
+
+            clock_gettime(CLOCK_MONOTONIC, &ts);
+            uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+            printf("Iteration %d took %.3f s\n", iter, 1.0 * (end - start) / 1e9);
         }
     }
 
