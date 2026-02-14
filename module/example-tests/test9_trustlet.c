@@ -23,6 +23,7 @@ void hexdump(const void *data, size_t size) {
 // CPU frequency in GHz - used to correct clock_gettime which returns TSC cycles
 #define CPU_GHZ 2.0
 
+// build our own delay, because gramine's sleep is unimplemented
 void delay(uint64_t nsecs) {
     // clock_gettime returns TSC cycles misinterpreted as usec, then converted to nsec
     // Effective value is cycles * 1000, so divide by (CPU_GHZ * 1000) to get real nsec
@@ -48,7 +49,7 @@ void main_shm() {
 
     while (1) {
         println("Trustlet sleeping ...");
-        delay(125*1e9); // Sleep for 1 second
+        delay(1*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us
 
         // Process shared memory in-place
         println("About to access shared memory at %p", (void*)shared);

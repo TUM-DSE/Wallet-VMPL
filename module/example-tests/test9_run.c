@@ -6,8 +6,15 @@
 #include <monitor.h>
 #include <time.h>
 #include <stdint.h>
+#include <sys/time.h>
 
 // like test6, but with shm between trustlet and guest OS
+// needs
+// * increased kernel stall timeouts and
+// * /etc/default/grub GRUB_CMDLINE_LINUX="isolcpus=1 irqaffinity=0 nohz=on nohz_full=1" update-grub
+// * use taskset -c 1 ./test9_run and start the VM with 2 cores
+//
+// With kernel stall timout patches, ssh etc on core 0 remains responsive in the guest, but establishing new ssh connections takes 3 minutes
 
 #define SHARED_SIZE 4096
 
@@ -107,6 +114,9 @@ int main() {
 
             // Write to shared memory, then invoke with 's' mode
             memcpy(shared, input_data, input_size);
+            time_t now = time(NULL);
+            struct tm *tm = localtime(&now);
+            printf("Time: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
             invoke_trustlet(trustlets[1], "s", 0);
             char* res = shared;
             hexdump(input_data, input_size);
@@ -140,12 +150,12 @@ int main() {
             hexdump(expected, input_size);
             hexdump(res, input_size);
 
-            // assert res == expected
-            assert(memcmp(res, expected, input_size) == 0);
-
             clock_gettime(CLOCK_MONOTONIC, &ts);
             uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
             printf("Iteration %d took %.3f s\n", iter, 1.0 * (end - start) / 1e9);
+
+            // assert res == expected
+            assert(memcmp(res, expected, input_size) == 0);
         }
     }
 
