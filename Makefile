@@ -82,6 +82,12 @@ LINUX_KERNEL_BUILD_FILES := $(wildcard container/**)
 build/kernel/linux: linux/.config .buildcontainer
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
 
+build-linux:
+	mv build/kernel/linux build/kernel/linux-old
+	@make linux/.config
+	@make .buildcontainer
+	@make build/kernel/linux
+
 setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
 	sudo ip addr add 192.168.${USERADDR}.1/24 dev tap0_${USER}
