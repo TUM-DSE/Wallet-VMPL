@@ -8,7 +8,8 @@
 #include <linux/init.h>
 #include <linux/ioctl.h>
 #include <linux/err.h>
-#include <linux/percpu-defs.h> 
+#include <linux/percpu-defs.h>
+#include <linux/context_tracking.h>
 #include <asm/sev.h>
 
 #include <asm/io.h>
@@ -177,7 +178,19 @@ static long invoke_trustlet(struct monitor_call* mcall) {
 	call.r8 = (u64)mcall->invokation.data;
 	call.r9 = mcall->invokation.data_size;
 
-	res = do_monitor_call(&call);
+	/* local_irq_disable(); // should not be necessary as long as we use isolcpus=1 irqaffinity=0 */
+  // Even when the RCU_CPU_STALL_TIMEOUT doesn't kill this trustlet, some
+  // kernel operations (e.g., to accept new ssh connections) on other
+  // guest CPUs still lock up because the trustlet CPU doenst update the
+  // linux RCU. With ct_idle_enter() we tell the RCU that we are in an
+  // "extended quiencent state" (even if we aren't really), causing the
+  // RCU to ignore this CPU.
+  ct_idle_enter();
+
+  res = do_monitor_call(&call);
+
+	ct_idle_exit();
+  /* local_irq_enable(); */
 
 	return call.rcx;
 }
