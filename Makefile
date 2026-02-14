@@ -68,15 +68,18 @@ make update_guest:
 	bash ./scripts/update_image.sh guest linux
 
 
-linux/.config:
+linux/.config: config
 	cp config linux/.config
 
+LINUX_KERNEL_BUILD_FILES := $(wildcard container/**)
+
 #Build container to build svsm kernel image
-.buildcontainer: container/Dockerfile container/build.sh container/user.sh
+.buildcontainer: container/Dockerfile container/build.sh container/user.sh $(LINUX_KERNEL_BUILD_FILES)
 	cd container; docker build -f Dockerfile -t vmplbuild .
 	touch .buildcontainer
 
-build/kernel/linux: linux/.config
+
+build/kernel/linux: linux/.config .buildcontainer
 	docker run -v ${shell pwd}:/mount -it vmplbuild bash -c "./user.sh $(shell id -g) $(shell id -u) linux"
 
 setup_guest_net: #131.159.254.1
