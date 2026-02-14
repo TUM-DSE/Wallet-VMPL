@@ -12,15 +12,10 @@ scripts/config --disable SYSTEM_BLACKLIST_KEYRING
 scripts/config --disable SYSTEM_EXTRA_CERTIFICATE
 scripts/config --disable SECONDARY_TRUSTED_KEYRING
 scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
-sed -i "s/range 3 300/range 3 86400/" kernel/rcu/Kconfig.debug # increate allowed timeout
-scripts/config --set-val RCU_CPU_STALL_TIMEOUT 86400
-sed -i "s/range 0 300000/range 3 86400000/" kernel/rcu/Kconfig.debug # increate allowed timeout
-scripts/config --set-val RCU_EXP_CPU_STALL_TIMEOUT 9999999
-sed -i 's/> 300)/> 86400)/g; s/timeout, 300)/timeout, 86400)/g; s/= 300;/= 86400;/g' kernel/rcu/tree_stall.h
 make olddefconfig
 
 mkdir -p /mount/build/$1/
-make bindeb-pkg -j $(nproc) LOCALVERSION=-svsm KDEB_COMPRESS=none
+make bindeb-pkg -j $(nproc) LOCALVERSION=-svsm
 #KBUILD_OUTPUT=/mount/$1/../build
 cd /mount/$1/../
 rm -f /mount/build/$1/*
