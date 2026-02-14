@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
+#include "util.h"
+
 // like test6, but with shm between trustlet and guest OS
 // needs
 // * increased kernel stall timeouts and
@@ -51,12 +53,12 @@ int main() {
     }
 
     // Allocate and register shared memory
-    char* shared = aligned_alloc(4096, SHARED_SIZE);
+    struct buffer* shared = (struct buffer*)aligned_alloc(4096, SHARED_SIZE);
     if (!shared) {
         printf("Failed to allocate shared memory\n");
         return -1;
     }
-    shared[0] = 'I';
+    shared->data[0] = 'I';
     if (!create_shared_memory(trustlets[1], shared, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
@@ -113,12 +115,14 @@ int main() {
             uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
             // Write to shared memory, then invoke with 's' mode
-            memcpy(shared, input_data, input_size);
+            memcpy(shared->data, input_data, input_size);
+            driver_tx(shared, input_size);
             time_t now = time(NULL);
             struct tm *tm = localtime(&now);
             printf("Time: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
             invoke_trustlet(trustlets[1], "s", 0);
-            char* res = shared;
+            size_t _ = driver_rx(shared);
+            char* res = shared->data;
             hexdump(input_data, input_size);
             hexdump(res, input_size);
 

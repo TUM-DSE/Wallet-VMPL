@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include "cpuid.c"
+#include "util.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
@@ -45,18 +46,15 @@ void delay(uint64_t nsecs) {
 
 void main_shm() {
     char* shared = (char*)DATA_SHARED;
+    struct buffer* buf = (struct buffer*)shared; // TODO
+    size_t buf_used = 0;
     trustlet_exit();
 
     while (1) {
-        println("Trustlet sleeping ...");
-        delay(1*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us
+        buf_used = trustlet_rx(buf);
+        buf->data[3] += 1;
+        trustlet_tx(buf, buf_used);
 
-        // Process shared memory in-place
-        println("About to access shared memory at %p", (void*)shared);
-        shared[3] += 1;
-        println("Trustlet processed shm: %s", shared);
-        printf("Trustlet processed shm: ");
-        hexdump(shared, DATA_SIZE);
         notify_monitor();
     }
 }
