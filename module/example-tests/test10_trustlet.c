@@ -51,6 +51,7 @@ void main_shm() {
     trustlet_exit();
 
     while (1) {
+        delay(10*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us
         buf_used = trustlet_rx(buf);
         buf->data[3] += 1;
         trustlet_tx(buf, buf_used);

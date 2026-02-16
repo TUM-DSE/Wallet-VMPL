@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -7,22 +9,81 @@
 #include <time.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <pthread.h>
+#include <sched.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
 
 #include "util.h"
 
 // like test6, but with shm between trustlet and guest OS
 // needs
-// * increased kernel stall timeouts and
 // * /etc/default/grub GRUB_CMDLINE_LINUX="isolcpus=1 irqaffinity=0 nohz=on nohz_full=1" update-grub
-// * use taskset -c 1 ./test9_run and start the VM with 2 cores
-//
-// With kernel stall timout patches, ssh etc on core 0 remains responsive in the guest, but establishing new ssh connections takes 3 minutes
 
 #define SHARED_SIZE 4096
 
 void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
     printf("\n");
+}
+
+// Threaded trustlet invocation
+struct threaded_invoke_args {
+  int trustlet;
+  int cpu;
+  char* input;
+  uint64_t result_len;
+  char* result;
+};
+
+struct threaded_invoke_handle {
+  pthread_t thread;
+  struct threaded_invoke_args args;
+};
+
+static void* threaded_invoke_fn(void* arg) {
+  struct threaded_invoke_args* args = (struct threaded_invoke_args*)arg;
+
+  // Set CPU affinity
+  cpu_set_t cpuset;
+  CPU_ZERO(&cpuset);
+  CPU_SET(args->cpu, &cpuset);
+  int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+  if (ret == EINVAL) {
+    printf("Invalid CPU %d for affinity\n", args->cpu);
+  } else if (ret != 0) {
+    printf("Failed to set thread affinity: %s\n", strerror(ret));
+  }
+
+  // Invoke trustlet
+  args->result = invoke_trustlet(args->trustlet, args->input, args->result_len);
+
+  return NULL;
+}
+
+// Start a thread that invokes trustlet on specified CPU
+static inline struct threaded_invoke_handle* threaded_invoke(int trustlet, int cpu, char* input, uint64_t result_len) {
+  struct threaded_invoke_handle* handle = malloc(sizeof(struct threaded_invoke_handle));
+  handle->args.trustlet = trustlet;
+  handle->args.cpu = cpu;
+  handle->args.input = input;
+  handle->args.result_len = result_len;
+  handle->args.result = NULL;
+
+  pthread_create(&handle->thread, NULL, threaded_invoke_fn, &handle->args);
+  return handle;
+}
+
+// Wait for threaded invoke to complete, return result
+static inline char* threaded_join(struct threaded_invoke_handle* handle) {
+  pthread_join(handle->thread, NULL);
+  return handle->args.result;
+}
+
+// Free the handle (call after threaded_join)
+static inline void threaded_free(struct threaded_invoke_handle* handle) {
+  free(handle);
 }
 
 int main() {
@@ -120,7 +181,17 @@ int main() {
             time_t now = time(NULL);
             struct tm *tm = localtime(&now);
             printf("Time: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
-            invoke_trustlet(trustlets[1], "s", 0);
+            struct threaded_invoke_handle* handle = threaded_invoke(trustlets[1], 1, "s", 0);
+            /* invoke_trustlet(trustlets[1], "s", 0); */
+            printf("Waiting for trustlet to finish on CPU 1");
+            sleep(1);
+            printf("."); fflush(stdout);
+            sleep(1);
+            printf("."); fflush(stdout);
+            sleep(1);
+            printf(".\n"); fflush(stdout);
+            char* _res = threaded_join(handle);
+            threaded_free(handle);
             size_t _ = driver_rx(shared);
             char* res = shared->data;
             hexdump(input_data, input_size);
