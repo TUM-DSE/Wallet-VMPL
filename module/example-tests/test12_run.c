@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <rte_eal.h>
+#include <rte_errno.h>
+#include <rte_ring.h>
+
 #include "util.h"
 #include "util_run.h"
 
@@ -25,9 +29,27 @@
 #define SHARED_SIZE 4096
 
 
-int main() {
+int main(int argc, char *argv[]) {
     // with wallet.Wallet() as w:
     monitor_connect();
+
+    // Initialize DPDK EAL with --no-huge for environments without hugepages
+    char *eal_args[] = {"test12_run", "--no-huge", "-l", "0"};
+    int eal_argc = sizeof(eal_args) / sizeof(eal_args[0]);
+    int ret = rte_eal_init(eal_argc, eal_args);
+    if (ret < 0) {
+        printf("Failed to initialize EAL: %s\n", rte_strerror(rte_errno));
+        return -1;
+    }
+
+    // Initialize DPDK ring
+    struct rte_ring *ring = rte_ring_create("test_ring", 1024, SOCKET_ID_ANY,
+                                             RING_F_SP_ENQ | RING_F_SC_DEQ);
+    if (!ring) {
+        printf("Failed to create ring\n");
+        return -1;
+    }
+    printf("Ring created: %s, count=%u\n", ring->name, rte_ring_count(ring));
 
     int input_size = 16;
 

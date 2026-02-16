@@ -37,6 +37,7 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --install "python3-bottle" \
              --install "docker.io" \
              --install "jq" \
+             --install "dpdk" \
              --run-command "grub-mkconfig -o /boot/grub/grub.cfg"\
              --run-command "python3 -m pip install minio==7.2.16"\
 	     --run-command "python3 -m pip install pybind11 pytest fire"

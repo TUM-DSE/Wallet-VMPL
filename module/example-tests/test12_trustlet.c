@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+
+#include <rte_eal.h>
+#include <rte_errno.h>
+#include <rte_ring.h>
+#include <rte_memzone.h>
+
 #include "cpuid.c"
 #include "util.h"
 
@@ -20,6 +26,26 @@ void hexdump(const void *data, size_t size) {
     for (size_t i = 0; i < size; i++) printf("%02x ", ((unsigned char *)data)[i]);
     println("");
 }
+
+// when statically linking DPDK, we make DPDK use this wrapper via --wrap compile flag
+void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
+    return calloc(1, size);
+}
+
+const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align) {
+/* const struct rte_memzone __wrap_rte_memzone_reserve_aligned(unsigned flags, int socket_id, const char* name, unsigned align, size_t len) { */
+    println("rte_memzone_reserve_aligned: name=%s, len=%lu, socket_id=%d, flags=%u, align=%u", name, len, socket_id, flags, align);
+    struct rte_memzone *mz = calloc(1, sizeof(struct rte_memzone));
+    mz->len = len;
+    mz->socket_id = socket_id;
+    mz->flags = flags;
+    mz->addr = malloc(len);
+    if (!mz->addr) {
+        println("Failed to allocate memory for memzone");
+    }
+    return mz;
+}
+
 
 // CPU frequency in GHz - used to correct clock_gettime which returns TSC cycles
 #define CPU_GHZ 2.0
@@ -94,6 +120,25 @@ int main(int argc, char** argv) {
     int data_size = 64 * 1024;
 
     char* buf = malloc(2097152);
+
+    // Initialize DPDK EAL with --no-huge for environments without hugepages
+    println("Initializing EAL...");
+    /* char *eal_args[] = {"slick_vnflet", "--no-huge"}; */
+    /* int eal_argc = sizeof(eal_args) / sizeof(eal_args[0]); */
+    /* int ret = rte_eal_init(eal_argc, eal_args); */
+    /* if (ret < 0) { */
+    /*     println("Failed to initialize EAL: %s\n", rte_strerror(rte_errno)); */
+    /*     return -1; */
+    /* } */
+
+    // Initialize DPDK ring
+    struct rte_ring *ring = rte_ring_create("test_ring", 8, SOCKET_ID_ANY,
+                                             RING_F_SP_ENQ | RING_F_SC_DEQ);
+    if (!ring) {
+        println("Failed to create ring");
+        return -1;
+    }
+    println("Ring created: %s, count=%u", ring->name, rte_ring_count(ring));
 
     trustlet_exit();
 

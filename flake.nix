@@ -161,6 +161,17 @@
 		python311Packages.igraph
                 texliveMedium
 		stdenv.cc.cc.lib
+		            dpdk
+		            # (dpdk.overrideAttrs (final: prev: let
+              #       debug = false;
+              #     in {
+              #     src = /scratch/okelmann/dpdk;
+              #     mesonFlags = prev.mesonFlags ++ lib.optional debug "--buildtype=debug";
+              #     outputs= ["out"];
+              #     dontFixup = debug;
+              #     dontStrip = debug;
+              #   }))
+
               ] ++ common_deps ++ [
                 self.packages.${system}.qemu-coconut-igvm
                 self.packages.${system}.igvm
