@@ -30,6 +30,7 @@ module/example-slick/run
 module/example-slick/com_extended
 module/example-tests/*_trustlet
 module/example-tests/*_run
+module/linux-build*
 Benchmarks/Boottime/wallet/run
 Benchmarks/Boottime/wallet/res
 Benchmarks/Boottime/wallet/outb

@@ -172,13 +172,16 @@ run:
 	-virtfs local,path=Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
 	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough
 
+srun:
+	@make run CORES=2
+
 slick:
 	@make -C module/example-slick all
 	@make kill
 	@make simple_slick_fs
 	@make gramine
 	sudo rm /tmp/slick.log || true
-	make run SERIAL="file:/tmp/slick.log" &
+	make srun SERIAL="file:/tmp/slick.log" &
 	sleep 1
 	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
 	@make ssh_wait
@@ -192,7 +195,7 @@ run_tests:
 	@make kill
 	@make -C module/example-tests simple_slick_fs
 	@make gramine
-	make run &
+	make srun &
 	sleep 1
 	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
 	@make ssh_wait

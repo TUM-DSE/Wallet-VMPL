@@ -1,3 +1,7 @@
+#define _GNU_SOURCE
+
+#include "pthread.h"
+#include "sched.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -7,14 +11,13 @@
 #include <time.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <errno.h>
 
 // like test6, but with shm between trustlet and guest OS
 // needs
 // * increased kernel stall timeouts and
 // * /etc/default/grub GRUB_CMDLINE_LINUX="isolcpus=1 irqaffinity=0 nohz=on nohz_full=1" update-grub
-// * use taskset -c 1 ./test9_run and start the VM with 2 cores
-//
-// With kernel stall timout patches, ssh etc on core 0 remains responsive in the guest, but establishing new ssh connections takes 3 minutes
+// * use taskset -c 1 ./test9_run and start the VM with 2 cores (we do that with pthread_setaffinity_np())
 
 #define SHARED_SIZE 4096
 
@@ -24,6 +27,18 @@ void hexdump(const void *data, size_t size) {
 }
 
 int main() {
+    // Set CPU affinity
+    int cpu = 1;// pin self to CPU 1
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(cpu, &cpuset);
+    int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+    if (ret == EINVAL) {
+        printf("Invalid CPU %d for affinity\n", cpu);
+    } else if (ret != 0) {
+        printf("Failed to set thread affinity: %s\n", strerror(ret));
+    }
+
     // with wallet.Wallet() as w:
     monitor_connect();
 

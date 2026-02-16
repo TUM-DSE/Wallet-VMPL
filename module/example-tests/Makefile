@@ -26,7 +26,7 @@ $(TRUSTLETS): %: %.c
 	gcc -I../../runtime/client/ -o $@ $<
 
 $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a # compile in guest
-	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ $< -O3 -g -o $@ -L../../module/libwallet/ -l:libwallet.a"
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ $< -O3 -g -o $@ -L../../module/libwallet/ -l:libwallet.a -lpthread"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
 simple_slick_fs: $(TRUSTLETS)
