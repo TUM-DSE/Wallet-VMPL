@@ -48,16 +48,19 @@ void main_shm() {
     char* shared = (char*)DATA_SHARED;
     struct buffer* buf = (struct buffer*)shared; // TODO
     size_t buf_used = 0;
+    delay(1); // warm up CoW triggered by delay
     trustlet_exit();
 
-    while (1) {
-        delay(10*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us
+    int iterations = 1e6;
+    for (int iter = 0; iter < iterations; iter++) {
+        /* delay(10*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us */
         buf_used = trustlet_rx(buf);
         buf->data[3] += 1;
         trustlet_tx(buf, buf_used);
 
-        notify_monitor();
     }
+    delay(1*1e9); // try to mitigate print interleaving
+    notify_monitor();
 }
 
 void main_default(bool suppress_output) {

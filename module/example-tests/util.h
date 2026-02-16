@@ -5,6 +5,16 @@
 
 #define BUFFER_SIZE 1600
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
+#if DEBUG
+#define debug
+#else
+#define debug if(0)
+#endif
+
 struct buffer {
   atomic_bool trustlet_owned;
   size_t data_used;

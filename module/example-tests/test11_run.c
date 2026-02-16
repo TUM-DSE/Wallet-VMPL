@@ -35,7 +35,7 @@ int main() {
     int chains[] = {2};
     int chains_len = 1;
 
-    int iterations = 1;
+    int iterations = 1e6;
 
     int zygotes[2];
     int trustlets[2];
@@ -107,70 +107,45 @@ int main() {
         // End node - use shm mode
         invoke_trustlet(trustlets[i - 1], "s", 0);
 
+        // start long-running trustlet
+        /* invoke_trustlet(trustlets[1], "s", 0); */
+        struct threaded_invoke_handle* handle = threaded_invoke(trustlets[1], 1, "s", 0);
+        sleep(1); // give trustlet time to start
+
+        printf("Starting %d iterations...\n", iterations);
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
-            // start = time.time_ns()
-            struct timespec ts;
-            clock_gettime(CLOCK_MONOTONIC, &ts);
-            uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-
             // Write to shared memory, then invoke with 's' mode
             memcpy(shared->data, input_data, input_size);
             driver_tx(shared, input_size);
-            time_t now = time(NULL);
-            struct tm *tm = localtime(&now);
-            printf("Time: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
-            struct threaded_invoke_handle* handle = threaded_invoke(trustlets[1], 1, "s", 0);
-            /* invoke_trustlet(trustlets[1], "s", 0); */
-            printf("Waiting for trustlet to finish on CPU 1");
-            sleep(1);
-            printf("."); fflush(stdout);
-            sleep(1);
-            printf("."); fflush(stdout);
-            sleep(1);
-            printf(".\n"); fflush(stdout);
-            char* _res = threaded_join(handle);
-            threaded_free(handle);
             size_t _ = driver_rx(shared);
             char* res = shared->data;
-            hexdump(input_data, input_size);
-            hexdump(res, input_size);
+            debug hexdump(input_data, input_size);
+            debug hexdump(res, input_size);
 
-            // // for t in range(1, i - 1):
-            // //     trustlets[t].invoke_trustlet(b"", 0)
-            // for (int t = 1; t < i - 1; t++) {
-            //     invoke_trustlet_bin(trustlets[t], input_data, input_size, 0);
-            // }
-
-            // // res = trustlets[i - 1].invoke_trustlet(b"", len(input_data))
-            // res = invoke_trustlet_bin(trustlets[i - 1], input_data, input_size, input_size);
-
-            // // print(f"Output: {res}")
-            // printf("Output: %s\n", res);
-
-            // expected = bytearray(input_data)
             char expected[16];
             memcpy(expected, input_data, input_size);
 
-            // expected[2] += 1
             expected[3] += 1;
-            // // expected[1] += i-1
-            // expected[1] += i - 1;
-            // expected = expected.decode('ascii').strip('\x00')
-            // (in C, expected is already a string, strip null not needed for comparison)
 
-            // print(expected)
-            printf("%s\n", expected);
-            hexdump(expected, input_size);
-            hexdump(res, input_size);
+            debug printf("%s\n", expected);
+            debug hexdump(expected, input_size);
+            debug hexdump(res, input_size);
 
-            clock_gettime(CLOCK_MONOTONIC, &ts);
-            uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-            printf("Iteration %d took %.3f s\n", iter, 1.0 * (end - start) / 1e9);
-
-            // assert res == expected
             assert(memcmp(res, expected, input_size) == 0);
         }
+
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
+        printf("Mpps: %.3f\n", iterations / ((end - start) / 1e9) / 1e6);
+
+        char* _res = threaded_join(handle);
+        threaded_free(handle);
     }
 
     return 0;
