@@ -34,6 +34,8 @@ struct buffer {
 struct shm {
   struct buffer legacy_buffer; // TODO remove backwards compatibility
 
+  atomic_bool keep_running; // used as termination signal for long-running trustlets
+
   char tailq_entry_buf[TAILQ_ENTRY_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
 
   union {

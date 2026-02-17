@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
     memset(shared, 0, SHARED_SIZE);
     DATA_SHARED = shared;
     shared->legacy_buffer.data[0] = 'I';
+    shared->keep_running = true;
     if (!create_shared_memory(trustlets[1], shared, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
@@ -234,6 +235,7 @@ int main(int argc, char *argv[]) {
             // assert(memcmp(res, expected, input_size) == 0);
         }
 
+        shared->keep_running = false; // signal trustlet to stop
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
@@ -241,7 +243,7 @@ int main(int argc, char *argv[]) {
         threaded_free(handle);
 
         printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
-        printf("Mpps: %.3f\n", iterations / ((end - start) / 1e9) / 1e6);
+        printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);
         printf("Successfully enqueued %lu objects\n", num_enqed);
         printf("Successfully dequeued %lu objects\n", num_deqed);
     }

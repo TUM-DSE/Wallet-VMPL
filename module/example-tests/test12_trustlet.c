@@ -122,7 +122,7 @@ void main_shm() {
 
 
     uint64_t duration_ns = 15ULL * 1000000000ULL; // 15 seconds
-    uint64_t check_interval = 1e8;
+    uint64_t check_interval = 1e6;
     uint64_t start_time = clock_monotonic_get();
     uint64_t end_time = start_time + duration_ns;
     uint64_t iterations = 0;
@@ -145,18 +145,18 @@ void main_shm() {
         }
 
         total_rx += num_deq;
-        println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
+        debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
         num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), BURST_SIZE, NULL);
         total_tx += num_enq;
-        println("Enqueued %lu objects to ring.", num_enq);
+        debug println("Enqueued %lu objects to ring.", num_enq);
 
         /* ndelay(workload_cycles); */
 
         /* num_enq = rte_ring_sp_enqueue_bulk(TODO, deq_objs, num_deq, NULL); */
 
         iterations++;
-        if (iterations % check_interval == 0 && clock_monotonic_get() >= end_time) {
+        if (iterations % check_interval == 0 && !buf->keep_running) {
             break;
         }
     }
