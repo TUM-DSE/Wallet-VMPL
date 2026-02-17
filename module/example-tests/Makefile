@@ -33,6 +33,7 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_kvargs.a \
 	$(DPDK_PATH)/lib/librte_telemetry.a \
 	$(DPDK_PATH)/lib/librte_mempool.a \
+	$(DPDK_PATH)/lib/librte_mbuf.a \
 	-Wl,--no-whole-archive
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
 WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned

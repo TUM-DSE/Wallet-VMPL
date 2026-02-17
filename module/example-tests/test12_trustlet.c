@@ -10,6 +10,7 @@
 #include <rte_errno.h>
 #include <rte_ring.h>
 #include <rte_memzone.h>
+#include <rte_mbuf.h>
 
 #include "cpuid.c"
 #include "util.h"
@@ -146,6 +147,10 @@ void main_shm() {
 
         total_rx += num_deq;
         debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
+
+        /* struct rte_mbuf *first = (struct rte_mbuf *)deq_objs[0]; */
+        /* uint64_t pkt_iter = *(uint64_t *)(first->buf_addr + first->data_off); */
+        /* println("iter=%lu", pkt_iter); */
 
         num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), BURST_SIZE, NULL);
         total_tx += num_enq;

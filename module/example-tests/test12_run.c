@@ -29,6 +29,8 @@
 // needs
 // * /etc/default/grub GRUB_CMDLINE_LINUX="isolcpus=1 irqaffinity=0 nohz=on nohz_full=1" update-grub
 
+#define DATA_SIZE 16
+
 static void* DATA_SHARED = NULL;
 static __thread bool use_shm_alloc = false;
 
@@ -221,6 +223,9 @@ int main(int argc, char *argv[]) {
             for (size_t i = 0; i < BURST_SIZE; i++) {
                 struct rte_mbuf *m = rte_pktmbuf_alloc(pool);
                 assert(m && "rte_pktmbuf_alloc failed: pool exhausted");
+                m->data_len = DATA_SIZE;
+                m->pkt_len = DATA_SIZE;
+                /* *rte_pktmbuf_mtod(m, uint64_t *) = (uint64_t)iter; */
                 enq_objs[i] = (void *)m;
             }
 
