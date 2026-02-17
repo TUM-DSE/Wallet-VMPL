@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/mman.h>
 
 #include <rte_eal.h>
 #include <rte_errno.h>
@@ -123,10 +124,14 @@ int main(int argc, char *argv[]) {
         trustlets[i] = create_trustlet(zygotes[i], "./empty.py");
     }
 
-    // Allocate and register shared memory
-    struct shm* shared = (struct shm*)aligned_alloc(4096, SHARED_SIZE);
-    if (!shared) {
-        printf("Failed to allocate shared memory\n");
+    // Allocate shared memory at the same VA the trustlet uses (DATA_SHARED),
+    // so pointers within shm (e.g. mbuf buf_addr) are valid in both address spaces.
+    void *target_addr = (void *)0x38000000000ULL;
+    struct shm* shared = (struct shm*)mmap(target_addr, SHARED_SIZE,
+        PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
+        -1, 0);
+    if (shared == MAP_FAILED) {
+        printf("mmap at %p failed: %s\n", target_addr, strerror(errno));
         return -1;
     }
     if (SHARED_SIZE < sizeof(struct shm)) {
