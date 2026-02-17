@@ -18,9 +18,11 @@
 #include <rte_eal.h>
 #include <rte_errno.h>
 #include <rte_ring.h>
+#include <rte_mbuf.h>
 
 #include "util.h"
 #include "util_run.h"
+#include "shm_mempool.h"
 
 // like test6, but with shm between trustlet and guest OS
 // needs
@@ -141,6 +143,14 @@ int main(int argc, char *argv[]) {
     }
     printf("Shared memory registered\n");
 
+    // Create mbuf pool backed by shared memory
+    struct rte_mempool *pool = create_shm_mbuf_pool(shared);
+    if (!pool) {
+        printf("Failed to create shm mbuf pool\n");
+        return -1;
+    }
+    printf("Mbuf pool created with %u objects\n", pool->populated_size);
+
     // input_data = b"a" * (input_size - 1) + b"\00"
     char input_data[16];
     memset(input_data, 'a', input_size - 1);
@@ -193,7 +203,6 @@ int main(int argc, char *argv[]) {
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
         void *deq_objs[BURST_SIZE];
-        size_t obj_idx = 1;
 
 
         printf("Starting %d iterations...\n", iterations);
@@ -203,36 +212,29 @@ int main(int argc, char *argv[]) {
 
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
-            // Write to shared memory, then invoke with 's' mode
-
-            // memcpy(shared->data, input_data, input_size);
-            // driver_tx(shared, input_size);
-            // size_t _ = driver_rx(shared);
-            // char* res = shared->data;
-            // debug hexdump(input_data, input_size);
-            // debug hexdump(res, input_size);
-
+            // Allocate a burst of mbufs from the shm pool
+            size_t n_alloc = 0;
             for (size_t i = 0; i < BURST_SIZE; i++) {
-                enq_objs[i] = (void*)(obj_idx + i);
+                struct rte_mbuf *m = rte_pktmbuf_alloc(pool);
+                if (!m)
+                    break;
+                enq_objs[n_alloc++] = (void *)m;
             }
-            obj_idx += BURST_SIZE;
 
-            enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, (void**)(&(enq_objs[0])), BURST_SIZE, NULL);
-            num_enqed += enq_num;
+            if (n_alloc > 0) {
+                enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, n_alloc, NULL);
+                if (enq_num == 0)
+                    for (size_t i = 0; i < n_alloc; i++)
+                        rte_pktmbuf_free((struct rte_mbuf *)enq_objs[i]);
+                else
+                    num_enqed += enq_num;
+            }
 
+            // Dequeue processed mbufs and return to pool
             deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
+            for (size_t i = 0; i < deq_num; i++)
+                rte_pktmbuf_free((struct rte_mbuf *)deq_objs[i]);
             num_deqed += deq_num;
-
-            // char expected[16];
-            // memcpy(expected, input_data, input_size);
-
-            // expected[3] += 1;
-
-            // debug printf("%s\n", expected);
-            // debug hexdump(expected, input_size);
-            // debug hexdump(res, input_size);
-
-            // assert(memcmp(res, expected, input_size) == 0);
         }
 
         shared->keep_running = false; // signal trustlet to stop

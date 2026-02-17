@@ -43,7 +43,7 @@ $(TRUSTLETS): %: %.c
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma
 
 $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a # compile in guest
-	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread -lrte_eal -lrte_ring"
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread -lrte_eal -lrte_ring -lrte_mempool -lrte_mbuf"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
 NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib

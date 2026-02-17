@@ -1,3 +1,5 @@
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <stddef.h>
 #include <stdatomic.h>
@@ -9,10 +11,23 @@
 
 #define CACHE_LINE_SIZE 64
 
-#define SHARED_SIZE 8*4096
+#define SHARED_SIZE (128*1024)
 #define RING_SIZE 1024
 #define RING_BUF_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
 #define TAILQ_ENTRY_SIZE sizeof(struct rte_tailq_entry)
+
+// Number of rte_mbuf objects in the shared mempool (2^6 - 1, optimal for DPDK)
+#define SHM_POOL_SIZE 63
+// Packet data buffer size per mbuf (128 bytes headroom + 128 bytes payload)
+#define SHM_POOL_DATA_ROOM 256
+// Backing memory for mbuf objects: fits SHM_POOL_SIZE elements of ~448 bytes each
+#define SHM_POOL_BUF_SIZE (32 * 1024)
+
+struct shm_stack {
+  uint32_t size;
+  uint32_t top;
+  void *objs[SHM_POOL_SIZE];
+};
 
 
 #ifndef DEBUG
@@ -47,6 +62,9 @@ struct shm {
     struct rte_ring ring;
     char buf[RING_BUF_SIZE];
   } egress __attribute__((aligned(CACHE_LINE_SIZE)));
+
+  struct shm_stack pool_stack __attribute__((aligned(CACHE_LINE_SIZE)));
+  char pool_buf[SHM_POOL_BUF_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
 };
 
 // Trustlet side: wait until we own the buffer, return data length
@@ -77,3 +95,4 @@ static inline void driver_tx(struct buffer* buf, size_t len) {
   atomic_store_explicit(&buf->trustlet_owned, true, memory_order_release);
 }
 
+#endif /* UTIL_H */
