@@ -35,15 +35,15 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_mempool.a \
 	-Wl,--no-whole-archive
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
+WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned
 
 $(TRUSTLETS): %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -o $@ $< \
-		-Wl,--wrap=rte_zmalloc \
-		-Wl,--wrap=rte_memzone_reserve_aligned \
+		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma
 
 $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a # compile in guest
-	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -g -o $@ -L../../module/libwallet/ -l:libwallet.a -lpthread -lrte_eal -lrte_ring"
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread -lrte_eal -lrte_ring"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
 NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
