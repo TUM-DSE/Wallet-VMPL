@@ -37,6 +37,8 @@ void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
     /* return calloc(1, size); */
 }
 
+static void* next_alloc_buffer = NULL;
+
 const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align) {
     println("rte_memzone_reserve_aligned: name=%s, len=%lu, socket_id=%d, flags=%u, align=%u", name, len, socket_id, flags, align);
     struct rte_memzone *mz = calloc(1, sizeof(struct rte_memzone));
@@ -44,7 +46,7 @@ const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, s
     mz->socket_id = socket_id;
     mz->flags = flags;
     if (len == RING_BUF_SIZE) {
-        mz->addr = ((struct shm*)DATA_SHARED)->ingress.buf;
+        mz->addr = next_alloc_buffer;
     }
     /* mz->addr = malloc(len); */
     if (!mz->addr) {
@@ -84,7 +86,7 @@ void main_shm() {
     char* shared = (char*)DATA_SHARED;
     struct shm* buf = (struct shm*)shared; // TODO
     size_t buf_used = 0;
-    size_t num_deq, num_enq, total_rx = 0;
+    size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
     void *deq_objs[BURST_SIZE];
     delay(1); // warm up CoW triggered by delay
 
@@ -99,13 +101,22 @@ void main_shm() {
     /* } */
 
     // Initialize DPDK ring
+    next_alloc_buffer = ((struct shm*)DATA_SHARED)->ingress.buf; // rte_ring_create will create itself in this buffer
     struct rte_ring *ring = rte_ring_create("test_ring", RING_SIZE, SOCKET_ID_ANY,
                                              RING_F_SP_ENQ | RING_F_SC_DEQ);
     if (!ring) {
-        println("Failed to create ring");
+        println("Failed to create ingress ring");
         return;
     }
-    println("Ring created: %s, count=%u", ring->name, rte_ring_count(ring));
+    println("Ingress ring created: %s, count=%u", ring->name, rte_ring_count(ring));
+    next_alloc_buffer = ((struct shm*)DATA_SHARED)->egress.buf; // rte_ring_create will create itself in this buffer
+    ring = rte_ring_create("test_ring", RING_SIZE, SOCKET_ID_ANY,
+                                             RING_F_SP_ENQ | RING_F_SC_DEQ);
+    if (!ring) {
+        println("Failed to create exgress ring");
+        return;
+    }
+    println("Egress ring created: %s, count=%u", ring->name, rte_ring_count(ring));
     trustlet_exit();
 
 
@@ -135,6 +146,10 @@ void main_shm() {
 
         total_rx += num_deq;
         println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
+
+        num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), BURST_SIZE, NULL);
+        total_tx += num_enq;
+        println("Enqueued %lu objects to ring.", num_enq);
 
         /* ndelay(workload_cycles); */
 

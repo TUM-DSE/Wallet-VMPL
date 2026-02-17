@@ -189,8 +189,9 @@ int main(int argc, char *argv[]) {
         struct threaded_invoke_handle* handle = threaded_invoke(trustlets[1], 1, "s", 0);
         sleep(1); // give trustlet time to start
 
-        size_t enq_num, num_enqed = 0;
+        size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
+        void *deq_objs[BURST_SIZE];
         size_t obj_idx = 1;
 
 
@@ -218,6 +219,9 @@ int main(int argc, char *argv[]) {
             enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, (void**)(&(enq_objs[0])), BURST_SIZE, NULL);
             num_enqed += enq_num;
 
+            deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
+            num_deqed += deq_num;
+
             // char expected[16];
             // memcpy(expected, input_data, input_size);
 
@@ -239,6 +243,7 @@ int main(int argc, char *argv[]) {
         printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
         printf("Mpps: %.3f\n", iterations / ((end - start) / 1e9) / 1e6);
         printf("Successfully enqueued %lu objects\n", num_enqed);
+        printf("Successfully dequeued %lu objects\n", num_deqed);
     }
 
     return 0;
