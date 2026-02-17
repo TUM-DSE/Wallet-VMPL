@@ -110,18 +110,26 @@ void main_shm() {
 
 
 
-    int iterations = 1e9;
-    for (int iter = 0; iter < iterations; iter++) {
+    uint64_t duration_ns = 15ULL * 1000000000ULL; // 15 seconds
+    uint64_t check_interval = 1e8;
+    uint64_t start_time = clock_monotonic_get();
+    uint64_t end_time = start_time + duration_ns;
+    uint64_t iterations = 0;
+
+    while (1) {
         /* delay(10*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us */
         /* buf_used = trustlet_rx(buf); */
         /* buf->data[3] += 1; */
         /* trustlet_tx(buf, buf_used); */
 
-
         num_deq = rte_ring_sc_dequeue_burst(buf->memzone_buf, deq_objs, BURST_SIZE, NULL);
 
         if(num_deq == 0) {
             /* vnflet_stats[vnfletId].dequeue_failures++; */
+            iterations++;
+            if (iterations % check_interval == 0 && clock_monotonic_get() >= end_time) {
+                break;
+            }
             continue;
         }
 
@@ -132,9 +140,13 @@ void main_shm() {
 
         /* num_enq = rte_ring_sp_enqueue_bulk(TODO, deq_objs, num_deq, NULL); */
 
-
+        iterations++;
+        if (iterations % check_interval == 0 && clock_monotonic_get() >= end_time) {
+            break;
+        }
     }
-    println("Finished %d iterations, total_rx=%lu", iterations, total_rx);
+    uint64_t elapsed_ns = clock_monotonic_get() - start_time;
+    println("Finished %lu iterations in %.1f s, total_rx=%lu", iterations, elapsed_ns / 1e9, total_rx);
     delay(1*1e9); // try to mitigate print interleaving
     notify_monitor();
 }
