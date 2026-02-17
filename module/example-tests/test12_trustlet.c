@@ -57,21 +57,24 @@ const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, s
 // CPU frequency in GHz - used to correct clock_gettime which returns TSC cycles
 #define CPU_GHZ 2.0
 
+// Returns monotonic time in nanoseconds
+// Note: clock_gettime returns TSC cycles misinterpreted as usec, then converted to nsec
+// Effective value is cycles * 1000, so divide by (CPU_GHZ * 1000) to get real nsec
+static inline uint64_t clock_monotonic_get(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
+}
+
 // build our own delay, because gramine's sleep is unimplemented
 void delay(uint64_t nsecs) {
-    // clock_gettime returns TSC cycles misinterpreted as usec, then converted to nsec
-    // Effective value is cycles * 1000, so divide by (CPU_GHZ * 1000) to get real nsec
-    struct timespec ts;
-    int ret = clock_gettime(CLOCK_MONOTONIC, &ts);
-    println("delay: clock_gettime returned %d, tv_sec=%ld, tv_nsec=%ld", ret, ts.tv_sec, ts.tv_nsec);
-    uint64_t start = (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
+    uint64_t start = clock_monotonic_get();
     uint64_t end = start + nsecs;
     println("delay: start=%lu, end=%lu, waiting for %lu ns", start, end, nsecs);
     while (1) {
-        ret = clock_gettime(CLOCK_MONOTONIC, &ts);
-        uint64_t now = (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
+        uint64_t now = clock_monotonic_get();
         if (now >= end) {
-            println("delay: done, now=%lu", now);
+            println("delay: done, slept %lu ns", now - start);
             break;
         }
     }
