@@ -43,8 +43,8 @@ const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, s
     mz->len = len;
     mz->socket_id = socket_id;
     mz->flags = flags;
-    if (len == MEMZONE_SIZE) {
-        mz->addr = ((struct shm*)DATA_SHARED)->memzone_buf;
+    if (len == RING_BUF_SIZE) {
+        mz->addr = ((struct shm*)DATA_SHARED)->ingress.buf;
     }
     /* mz->addr = malloc(len); */
     if (!mz->addr) {
@@ -103,7 +103,7 @@ void main_shm() {
                                              RING_F_SP_ENQ | RING_F_SC_DEQ);
     if (!ring) {
         println("Failed to create ring");
-        return -1;
+        return;
     }
     println("Ring created: %s, count=%u", ring->name, rte_ring_count(ring));
     trustlet_exit();
@@ -122,7 +122,7 @@ void main_shm() {
         /* buf->data[3] += 1; */
         /* trustlet_tx(buf, buf_used); */
 
-        num_deq = rte_ring_sc_dequeue_burst(buf->memzone_buf, deq_objs, BURST_SIZE, NULL);
+        num_deq = rte_ring_sc_dequeue_burst(&buf->ingress.ring, deq_objs, BURST_SIZE, NULL);
 
         if(num_deq == 0) {
             /* vnflet_stats[vnfletId].dequeue_failures++; */

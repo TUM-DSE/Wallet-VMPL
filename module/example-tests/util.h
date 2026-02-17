@@ -9,9 +9,9 @@
 
 #define CACHE_LINE_SIZE 64
 
-#define SHARED_SIZE 4*4096
+#define SHARED_SIZE 8*4096
 #define RING_SIZE 1024
-#define MEMZONE_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
+#define RING_BUF_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
 #define TAILQ_ENTRY_SIZE sizeof(struct rte_tailq_entry)
 
 
@@ -33,10 +33,18 @@ struct buffer {
 
 struct shm {
   struct buffer legacy_buffer; // TODO remove backwards compatibility
-  // bool tailq_entry_buf_used;
-  // bool memzone_buf_used;
+
   char tailq_entry_buf[TAILQ_ENTRY_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
-  char memzone_buf[MEMZONE_SIZE] __attribute__((aligned(CACHE_LINE_SIZE))); // TODO rename to what it actually contains
+
+  union {
+    struct rte_ring ring;
+    char buf[RING_BUF_SIZE];
+  } ingress __attribute__((aligned(CACHE_LINE_SIZE)));
+
+  union {
+    struct rte_ring ring;
+    char buf[RING_BUF_SIZE];
+  } egress __attribute__((aligned(CACHE_LINE_SIZE)));
 };
 
 // Trustlet side: wait until we own the buffer, return data length

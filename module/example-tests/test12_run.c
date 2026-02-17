@@ -60,8 +60,8 @@ const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, s
         mz->len = len;
         mz->socket_id = socket_id;
         mz->flags = flags;
-        if (len == MEMZONE_SIZE) {
-            mz->addr = ((struct shm*)DATA_SHARED)->memzone_buf;
+        if (len == RING_BUF_SIZE) {
+            mz->addr = ((struct shm*)DATA_SHARED)->ingress.buf;
         }
         /* mz->addr = malloc(len); */
         if (!mz->addr) {
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     if (SHARED_SIZE < sizeof(struct shm)) {
-        printf("Shared memory size is too small\n");
+        printf("Shared memory size is too small (is: %d, need: %d)\n", SHARED_SIZE, (int)sizeof(struct shm));
         return -1;
     }
     memset(shared, 0, SHARED_SIZE);
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
             }
             obj_idx += BURST_SIZE;
 
-            enq_num = rte_ring_sp_enqueue_bulk(shared->memzone_buf, (void**)(&(enq_objs[0])), BURST_SIZE, NULL);
+            enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, (void**)(&(enq_objs[0])), BURST_SIZE, NULL);
             num_enqed += enq_num;
 
             // char expected[16];
