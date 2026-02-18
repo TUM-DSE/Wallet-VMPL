@@ -29,7 +29,7 @@
 // needs
 // * /etc/default/grub GRUB_CMDLINE_LINUX="isolcpus=1 irqaffinity=0 nohz=on nohz_full=1" update-grub
 
-#define DATA_SIZE 16
+#define DATA_SIZE 64
 
 static void* DATA_SHARED = NULL;
 static __thread bool use_shm_alloc = false;
