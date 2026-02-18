@@ -4,7 +4,9 @@
 #include <stddef.h>
 #include <stdatomic.h>
 #include <stdbool.h>
+
 #include <rte_tailq.h>
+#include <rte_ring.h>
 
 #define BUFFER_SIZE 1600
 #define BURST_SIZE 1

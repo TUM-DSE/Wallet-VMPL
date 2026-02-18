@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "cpuid.c"
+#include "dpdk_stub.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000

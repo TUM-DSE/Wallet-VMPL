@@ -62,6 +62,7 @@ simple_slick_fs: $(TRUSTLETS)
 	cd ../../runtime/filesystem/simple/; ./create.sh
 
 clean:
-	rm -f $(TRUSTLETS)
+	rm -f $(TRUSTLETS) $(C_RUNNERS)
+
 
 .PHONY: all clean $(RUNNERS) $(C_RUNNERS)
