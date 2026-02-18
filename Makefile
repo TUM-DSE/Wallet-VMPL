@@ -168,6 +168,7 @@ run:
 	-netdev tap,ifname=tap0_${USER},id=net0,script=no,downscript=no -device e1000,netdev=net0 \
 	-serial ${SERIAL} \
 	-serial pty \
+	-qmp unix:/tmp/${USER}.qmp,server=on,wait=off \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough \
 	-virtfs local,path=Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
 	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough
@@ -200,6 +201,8 @@ run_tests:
 	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
 	@make ssh_wait
 	@echo "VM up and running"
+	sudo taskset -cp 9 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 0) | ."thread-id"')
+	sudo taskset -cp 10 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 1) | ."thread-id"')
 	@make ssh_with_command SSH_COMMAND="insmod module/vmpl.ko || true"
 	@make -C module/example-tests $(TEST_TARGET)
 
