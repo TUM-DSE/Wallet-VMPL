@@ -220,26 +220,24 @@ int main(int argc, char *argv[]) {
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
             // Allocate a burst of mbufs from the shm pool
+            if (rte_pktmbuf_alloc_bulk(pool, (struct rte_mbuf **)enq_objs, BURST_SIZE) != 0) {
+                assert(0 && "rte_pktmbuf_alloc_bulk failed: pool exhausted");
+            }
             for (size_t i = 0; i < BURST_SIZE; i++) {
-                struct rte_mbuf *m = rte_pktmbuf_alloc(pool);
-                assert(m && "rte_pktmbuf_alloc failed: pool exhausted");
-                m->data_len = DATA_SIZE;
-                m->pkt_len = DATA_SIZE;
-                /* *rte_pktmbuf_mtod(m, uint64_t *) = (uint64_t)iter; */
-                enq_objs[i] = (void *)m;
+                ((struct rte_mbuf *)enq_objs[i])->data_len = DATA_SIZE;
+                ((struct rte_mbuf *)enq_objs[i])->pkt_len = DATA_SIZE;
             }
 
             enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, BURST_SIZE, NULL);
             if (enq_num == 0)
-                for (size_t i = 0; i < BURST_SIZE; i++)
-                    rte_pktmbuf_free((struct rte_mbuf *)enq_objs[i]);
+                rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, BURST_SIZE);
             else
                 num_enqed += enq_num;
 
             // Dequeue processed mbufs and return to pool
             deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
-            for (size_t i = 0; i < deq_num; i++)
-                rte_pktmbuf_free((struct rte_mbuf *)deq_objs[i]);
+            if (deq_num > 0)
+                rte_pktmbuf_free_bulk((struct rte_mbuf **)deq_objs, deq_num);
             num_deqed += deq_num;
         }
 
