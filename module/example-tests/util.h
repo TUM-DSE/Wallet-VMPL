@@ -44,6 +44,11 @@ struct shm_stack {
 #define debug if(0)
 #endif
 
+struct trustlet_configuration {
+  char mode[1];
+  void* shm_addr;
+};
+
 struct buffer {
   atomic_bool trustlet_owned;
   size_t data_used;

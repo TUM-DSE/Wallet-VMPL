@@ -185,10 +185,9 @@ int main(int argc, char *argv[]) {
         chained += i - chained - 1;
 
         // #Prepair input data
-        // input_data = b"b" * (input_size - 1) + b"\00"
-        memset(input_data, 'b', input_size - 1);
-        input_data[input_size / 2] = '\0';
-        input_data[input_size - 1] = '\0';
+        struct trustlet_configuration config;
+        config.mode[0] = 'a';
+        config.shm_addr = shared;
 
         // #Setup Trustlets
         // for t in range(i - 1):
@@ -196,11 +195,12 @@ int main(int argc, char *argv[]) {
         printf("185:invoke_trustlet()");
         for (int t = 0; t < i - 1; t++) {
             // Transfer nodes (input->output)
-            invoke_trustlet(trustlets[t], "a", 0);
+            invoke_trustlet_bin(trustlets[t], &config, sizeof(config), 0);
         }
         // trustlets[i - 1].invoke_trustlet(b"s", 0)
         // End node - use shm mode
-        invoke_trustlet(trustlets[i - 1], "s", 0);
+        config.mode[0] = 's';
+        invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
 
         // start long-running trustlet
         /* invoke_trustlet(trustlets[1], "s", 0); */

@@ -28,11 +28,12 @@ void hexdump(const void *data, size_t size) {
     println("");
 }
 
+static void* next_tailq_buf = NULL;
+
 // when statically linking DPDK, we make DPDK use these wrappers via --wrap compile flag
 void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
-    struct shm* shm = (struct shm*)DATA_SHARED;
     if (size == TAILQ_ENTRY_SIZE) {
-        return shm->tailq_entry_buf;
+        return next_tailq_buf;
     }
     return NULL;
     /* return calloc(1, size); */
@@ -83,8 +84,8 @@ void delay(uint64_t nsecs) {
     }
 }
 
-void main_shm() {
-    char* shared = (char*)DATA_SHARED;
+void main_shm(void* data_shared) {
+    char* shared = (char*)data_shared;
     struct shm* buf = (struct shm*)shared; // TODO
     size_t buf_used = 0;
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
@@ -102,7 +103,8 @@ void main_shm() {
     /* } */
 
     // Initialize DPDK ring
-    next_alloc_buffer = ((struct shm*)DATA_SHARED)->ingress.buf; // rte_ring_create will create itself in this buffer
+    next_tailq_buf = buf->tailq_entry_buf;
+    next_alloc_buffer = buf->ingress.buf; // rte_ring_create will create itself in this buffer
     struct rte_ring *ring = rte_ring_create("test_ring", RING_SIZE, SOCKET_ID_ANY,
                                              RING_F_SP_ENQ | RING_F_SC_DEQ);
     if (!ring) {
@@ -110,7 +112,8 @@ void main_shm() {
         return;
     }
     println("Ingress ring created: %s, count=%u", ring->name, rte_ring_count(ring));
-    next_alloc_buffer = ((struct shm*)DATA_SHARED)->egress.buf; // rte_ring_create will create itself in this buffer
+    next_tailq_buf = buf->tailq_entry_buf; // we can reuse the same buffer for this new tailq, trust me bro (the entry will be the same and is not really relevant anyways)
+    next_alloc_buffer = buf->egress.buf; // rte_ring_create will create itself in this buffer
     ring = rte_ring_create("test_ring", RING_SIZE, SOCKET_ID_ANY,
                                              RING_F_SP_ENQ | RING_F_SC_DEQ);
     if (!ring) {
@@ -201,9 +204,11 @@ int main(int argc, char** argv) {
     trustlet_exit();
     println("main exit exit");
 
-    if(input[0] == 's'){
-        main_shm();
-    } else if(input[0] == 'x'){
+    struct trustlet_configuration *config = (struct trustlet_configuration *)input;
+
+    if(config->mode[0] == 's'){
+        main_shm(config->shm_addr);
+    } else if(config->mode[0] == 'x'){
         bool suppress_output = false;
         main_default(suppress_output);
     } else {
