@@ -128,7 +128,8 @@ void main_shm() {
     uint64_t end_time = start_time + duration_ns;
     uint64_t iterations = 0;
 
-    while (1) {
+    while (likely(atomic_load(&buf->keep_running))) {
+        iterations++;
         /* delay(10*1e9); // Sleep for, e.g., 65 seconds to see if kernel stall detection will kill us */
         /* buf_used = trustlet_rx(buf); */
         /* buf->data[3] += 1; */
@@ -138,10 +139,6 @@ void main_shm() {
 
         if(num_deq == 0) {
             /* vnflet_stats[vnfletId].dequeue_failures++; */
-            iterations++;
-            if (iterations % check_interval == 0 && clock_monotonic_get() >= end_time) {
-                break;
-            }
             continue;
         }
 
@@ -152,18 +149,13 @@ void main_shm() {
         /* uint64_t pkt_iter = *(uint64_t *)(first->buf_addr + first->data_off); */
         /* println("iter=%lu", pkt_iter); */
 
-        num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), BURST_SIZE, NULL);
+        num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL);
         total_tx += num_enq;
         debug println("Enqueued %lu objects to ring.", num_enq);
 
         /* ndelay(workload_cycles); */
 
         /* num_enq = rte_ring_sp_enqueue_bulk(TODO, deq_objs, num_deq, NULL); */
-
-        iterations++;
-        if (iterations % check_interval == 0 && !buf->keep_running) {
-            break;
-        }
     }
     uint64_t elapsed_ns = clock_monotonic_get() - start_time;
     println("Finished %lu iterations in %.1f s, total_rx=%lu", iterations, elapsed_ns / 1e9, total_rx);

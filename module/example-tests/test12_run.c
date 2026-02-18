@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     int chains[] = {2};
     int chains_len = 1;
 
-    int iterations = 1e9;
+    int iterations = 1e8;
 
     int zygotes[2];
     int trustlets[2];
