@@ -2,19 +2,16 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    enp0s2:
+    adminif:
+      match:
+        driver: e1000
       addresses:
-        - 192.168.120.10/24
+        - 192.168.8.10/24
+        - 192.168.56.10/21
       routes:
         - to: default
-          via: 192.168.120.1
+          via: 192.168.8.1
       nameservers:
-          addresses: [131.159.254.1]
-    enp0s3:
-      addresses:
-        - 192.168.120.10/24
-      routes:
-        - to: default
-          via: 192.168.120.1
-      nameservers:
-          addresses: [131.159.254.1]
+        addresses:
+          - 131.159.254.1
+
