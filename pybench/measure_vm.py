@@ -10,6 +10,7 @@ import pandas as pd
 from os.path import join as path_join
 import numpy as np
 from enums import Interface
+from time import sleep
 
 TARGET = {
     "polling": "build/polling_test-shared",
@@ -113,6 +114,24 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             info(f"Running {test}")
             with measurement.virtual_machine(Interface.BRIDGE) as guest:
                 guest.exec("echo hello world")
+
+
+                # vhost_sock = "/tmp/vhost0.sock"
+                # host.tmux_kill("Pktgen")
+                # host.exec(f"sudo rm {vhost_sock} || true")
+                # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
+
+                host.stop_pktgen_vhost()
+                host.start_pktgen_vhost()
+                sleep(1)
+                print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+                # command = 'printf("Hello from Python!\\n")'
+                # script = f"""
+                #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"
+                #     require "Pktgen"
+                #     {command}
+                # """
+                # print(host.exec(f"echo '{script}' | socat - TCP4:localhost:22022"))
                 breakpoint()
                 pass
             # host.start_vpp()

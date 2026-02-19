@@ -2145,6 +2145,27 @@ class Host(Server):
         """
         self.tmux_kill('vmux')
 
+    def start_pktgen_vhost(self: 'Host') -> None:
+        vhost_sock = "/tmp/vhost0.sock"
+        self.exec(f"sudo rm {vhost_sock} || true")
+        self.tmux_new("pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
+
+    def stop_pktgen_vhost(self: 'Host') -> None:
+        self.tmux_kill("pktgen")
+
+    def exec_pktgen(self: 'Host', lua_command: str) -> str:
+        """
+        call like: print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+        Take care to escape single quotes and backslashes for the shell this will travel thorugh.
+        """
+        script = f"""
+            package.path = package.path .. ";{self.project_root}/pybench/Pktgen.lua;"
+            require "Pktgen"
+            {lua_command}
+        """
+        output = self.exec(f"echo '{script}' | socat - TCP4:localhost:22022")
+        return output
+
     def cleanup_network(self: 'Host', number_vms: int = MAX_VMS) -> None:
         """
         Cleanup the network setup.

@@ -12,6 +12,7 @@
     nixpkgs-2111.url = "github:NixOS/nixpkgs/nixos-21.11";
     nixpkgs-2305.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixpkgs-2311.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs-2505.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:Sabanic-P/rust-overlay";
     nixos-generators = {
@@ -35,6 +36,7 @@
         pkgs2111 = args.nixpkgs-2111.legacyPackages.${system};
         pkgs2305 = args.nixpkgs-2305.legacyPackages.${system};
         pkgs2311 = args.nixpkgs-2311.legacyPackages.${system};
+        pkgs2505 = args.nixpkgs-2505.legacyPackages.${system};
         flakepkgs = self.packages.${system};
         selfpkgs = self.packages.${system};
         overlays = [ (import rust-overlay) ];
@@ -165,6 +167,19 @@
                 texliveMedium
 		stdenv.cc.cc.lib
 		            dpdk
+		            (pkgs2505.pktgen.overrideAttrs (final: prev: {
+		              postPatch = prev.postPatch + ''
+                    substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
+                  '';
+
+                  # lua users have to require("Pktgen") so they need Pktgen.lua (although it won't be found automatically yet)
+                  postInstall = ''
+                    mkdir -p $out/lib/lua/5.3/
+                    cp $src/Pktgen.lua $out/lib/lua/5.3/
+                  '';
+
+		              mesonFlags = [ "-Denable_lua=true" ];
+		            }))
 		            # (dpdk.overrideAttrs (final: prev: let
               #       debug = false;
               #     in {
