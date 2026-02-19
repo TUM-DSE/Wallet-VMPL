@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/mman.h>
 
 #include "util.h"
 #include "util_run.h"
@@ -54,9 +55,12 @@ int main() {
     }
 
     // Allocate and register shared memory
-    struct buffer* shared = (struct buffer*)aligned_alloc(4096, SHARED_SIZE);
-    if (!shared) {
-        printf("Failed to allocate shared memory\n");
+    void *target_addr = (void *)0x38000000000ULL;
+    struct buffer *shared = mmap(target_addr, SHARED_SIZE,
+        PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
+        -1, 0);
+    if (shared == MAP_FAILED) {
+        printf("mmap at %p failed: %s\n", target_addr, strerror(errno));
         return -1;
     }
     shared->data[0] = 'I';
