@@ -112,7 +112,10 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")
-            with measurement.virtual_machine(Interface.BRIDGE) as guest:
+            host.stop_pktgen_vhost()
+            host.start_pktgen_vhost()
+            sleep(1) # wait and pray for pktgen
+            with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
                 guest.exec("echo hello world")
 
 
@@ -121,8 +124,6 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # host.exec(f"sudo rm {vhost_sock} || true")
                 # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
 
-                host.stop_pktgen_vhost()
-                host.start_pktgen_vhost()
                 sleep(1)
                 print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
                 # command = 'printf("Hello from Python!\\n")'

@@ -65,6 +65,9 @@ class Interface(Enum):
     # vMux e810 emulation to dpdk backend
     VMUX_DPDK_E810 = "vmux-dpdk-e810"
 
+    # Pktgen-DPDK using DPDK's builtin vhost-user emulation backend
+    PKTGEN_DPDK = "pktgen-dpdk"
+
 
     def needs_br_tap(self) -> bool:
         return self in [ Interface.BRIDGE, Interface.BRIDGE_VHOST, Interface.BRIDGE_E1000, Interface.VMUX_EMU, Interface.VMUX_EMU_E810 ]
@@ -82,7 +85,7 @@ class Interface(Enum):
         return self in [ Interface.VPP ]
 
     def is_vhost_user(self) -> bool:
-        return self in [ Interface.VPP ]
+        return self in [ Interface.VPP, Interface.PKTGEN_DPDK ]
 
     def is_passthrough(self) -> bool:
         return self in [ Interface.VFIO, Interface.VMUX_PT ]
@@ -95,7 +98,7 @@ class Interface(Enum):
             return "ice"
         if self in [ Interface.BRIDGE_E1000, Interface.VMUX_EMU, Interface.VMUX_DPDK ]:
             return "e1000"
-        if self in [ Interface.BRIDGE, Interface.BRIDGE_VHOST, Interface.MACVTAP, Interface.VPP ]:
+        if self in [ Interface.BRIDGE, Interface.BRIDGE_VHOST, Interface.MACVTAP, Interface.VPP, Interface.PKTGEN_DPDK ]:
             return "virtio-net"
         raise Exception(f"Dont know which guest driver is used with {self}")
 

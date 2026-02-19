@@ -68,6 +68,7 @@
             version = "8.2.0";
             buildInputs = old.buildInputs ++ [ self.packages.${system}.igvm ];
             igvm = self.packages.${system}.igvm;
+            patches = old.patches ++ [ ./patches/qemu_cvm_vhost.patch ];
             configureFlags = old.configureFlags ++ [
               "--target-list=x86_64-softmmu"
               "--disable-gtk"
@@ -78,6 +79,19 @@
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
+          pktgen = pkgs2505.pktgen.overrideAttrs (final: prev: {
+		        postPatch = prev.postPatch + ''
+              substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
+            '';
+
+            # lua users have to require("Pktgen") so they need Pktgen.lua (although it won't be found automatically yet)
+            postInstall = ''
+              mkdir -p $out/lib/lua/5.3/
+              cp $src/Pktgen.lua $out/lib/lua/5.3/
+            '';
+
+		        mesonFlags = [ "-Denable_lua=true" ];
+		      });
           test = pkgs.callPackage ./node/pkg.nix { };
         };
         pkgs = nixpkgs.legacyPackages.${system};
@@ -167,19 +181,7 @@
                 texliveMedium
 		stdenv.cc.cc.lib
 		            dpdk
-		            (pkgs2505.pktgen.overrideAttrs (final: prev: {
-		              postPatch = prev.postPatch + ''
-                    substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
-                  '';
-
-                  # lua users have to require("Pktgen") so they need Pktgen.lua (although it won't be found automatically yet)
-                  postInstall = ''
-                    mkdir -p $out/lib/lua/5.3/
-                    cp $src/Pktgen.lua $out/lib/lua/5.3/
-                  '';
-
-		              mesonFlags = [ "-Denable_lua=true" ];
-		            }))
+		            selfpkgs.pktgen
 		            # (dpdk.overrideAttrs (final: prev: let
               #       debug = false;
               #     in {

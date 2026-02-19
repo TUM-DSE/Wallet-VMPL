@@ -1,0 +1,30 @@
+From ebf59033861aa0ab82279cea371b9606f848c4f1 Mon Sep 17 00:00:00 2001
+From: Pogobanane <aenderboy@gmx.de>
+Date: Thu, 19 Feb 2026 16:59:04 +0100
+Subject: [PATCH] disable iommu device support warning
+
+To be applied on https://github.com/Sabanic-P/qemu/releases/download/v8.2.0-igvm/qemu8.2.0.tar.gz
+---
+ hw/virtio/virtio-bus.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/hw/virtio/virtio-bus.c b/hw/virtio/virtio-bus.c
+index 896feb3..14a6938 100644
+--- a/hw/virtio/virtio-bus.c
++++ b/hw/virtio/virtio-bus.c
+@@ -90,9 +90,10 @@ void virtio_bus_device_plugged(VirtIODevice *vdev, Error **errp)
+         if (klass->get_dma_as) {
+             vdev->dma_as = klass->get_dma_as(qbus->parent);
+             if (!vdev_has_iommu && vdev->dma_as != &address_space_memory) {
+-                error_setg(errp,
+-                       "iommu_platform=true is not supported by the device");
+-                return;
++                // don't fail. Things work regardless of this check.
++                // error_setg(errp,
++                //        "iommu_platform=true is not supported by the device");
++                // return;
+             }
+         }
+     }
+--
+2.51.2
