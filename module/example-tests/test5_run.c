@@ -7,6 +7,8 @@
 #include <time.h>
 #include <stdint.h>
 
+#include "dpdk_stub.h"
+
 // continue refactoring from test3, but with chaining as test0
 
 int main() {

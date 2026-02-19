@@ -7,6 +7,8 @@
 
 #include <rte_tailq.h>
 #include <rte_ring.h>
+#include <rte_mempool.h>
+#include <rte_mbuf.h>
 
 #define BUFFER_SIZE 1600
 #define BURST_SIZE 1

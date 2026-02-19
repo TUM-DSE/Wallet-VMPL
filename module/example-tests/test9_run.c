@@ -13,6 +13,8 @@
 #include <sys/time.h>
 #include <errno.h>
 
+#include "dpdk_stub.h"
+
 // like test6, but with shm between trustlet and guest OS
 // needs
 // * increased kernel stall timeouts and

@@ -7,6 +7,8 @@
 #include <time.h>
 #include <stdint.h>
 
+#include "dpdk_stub.h"
+
 // like test6, but with shm between trustlet and guest OS
 
 #define SHARED_SIZE 4096

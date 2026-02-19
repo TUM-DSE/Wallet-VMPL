@@ -7,6 +7,8 @@
 #include <time.h>
 #include <stdint.h>
 
+#include "dpdk_stub.h"
+
 // like test6, but we make it a simple packet throughput test
 
 #define DEBUG 0

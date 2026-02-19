@@ -17,6 +17,7 @@
 
 #include "util.h"
 #include "util_run.h"
+#include "dpdk_stub.h"
 
 // like test6, but with shm between trustlet and guest OS
 // needs

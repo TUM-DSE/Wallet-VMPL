@@ -7,6 +7,8 @@
 #include <time.h>
 #include <stdint.h>
 
+#include "dpdk_stub.h"
+
 // like test5, but with binary input and output and only a single trustlet invocation.
 
 void hexdump(const void *data, size_t size) {
