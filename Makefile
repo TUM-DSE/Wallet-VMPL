@@ -171,10 +171,18 @@ run:
 	-qmp unix:/tmp/${USER}.qmp,server=on,wait=off \
 	-virtfs local,path=module/,mount_tag=mo,security_model=passthrough \
 	-virtfs local,path=Benchmarks/,mount_tag=benchmarks,security_model=passthrough \
-	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough
+	-virtfs local,path=gramine-svsm/,mount_tag=gramine,security_model=passthrough \
+	-virtfs local,path=../,mount_tag=home,security_model=passthrough \
+	-virtfs local,path=/nix/store/,mount_tag=nixstore,security_model=passthrough
 
 srun:
 	@make run CORES=2
+
+sssh:
+	SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor vm.local
+
+slick-tmux:
+	tmux -L vmux-${USER}.tmux.sock at
 
 slick:
 	@make -C module/example-slick all

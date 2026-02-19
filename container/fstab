@@ -3,3 +3,5 @@ LABEL=UEFI      /boot/efi       vfat    umask=0077      0 1
 mo /root/module 9p trans=virtio,rw,nofail 0 0
 benchmarks /root/Benchmarks 9p trans=virtio,rw,nofail 0 0
 gramine /root/gramine-svsm 9p trans=virtio,rw,nofail 0 0
+home /root/home 9p trans=virtio,rw,nofail 0 0
+nixstore /nix/store 9p trans=virtio,rw,nofail 0 0
