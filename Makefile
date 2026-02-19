@@ -218,13 +218,16 @@ run_tests:
 kill:
 	sudo pkill -9 qemu-system || true
 
+sssh:
+	SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor vm.local
+
 ssh:
-	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+	SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor vm.local
 
 ssh_wait:
 	@echo "Waiting for SSH to become available..."
 	@for i in $$(seq 1 60); do \
-		if SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no -o ConnectTimeout=1 root@192.168.${USERADDR}.10 "exit 0" 2>/dev/null; then \
+		if SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor -o ConnectTimeout=1 vm.local "exit 0" 2>/dev/null; then \
 			echo "SSH is ready!"; \
 			exit 0; \
 		fi; \
@@ -236,10 +239,10 @@ ssh_wait:
 
 SSH_COMMAND?="shutdown"
 ssh_with_command:
-	SSH_AUTH_SOCK="" ssh -tt -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "${SSH_COMMAND}"
+	SSH_AUTH_SOCK="" ssh -tt -F ./pybench/ssh_conf_doctor vm.local "${SSH_COMMAND}"
 
 trustlet_test:
-	SSH_AUTH_SOCK="" ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
+	SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor vm.local "cd module; make -B; insmod vmpl.ko; make -B t; ./test"
 
 WARM_COLD?=wallet
 run_benchmark_sebs:
@@ -273,7 +276,7 @@ run_benchmark_sebs:
 	  	exit 1; \
 	fi
 	sleep 5
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "~/Benchmarks/sebs_script.sh $(name) ${WARM_COLD} && poweroff"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "~/Benchmarks/sebs_script.sh $(name) ${WARM_COLD} && poweroff"
 
 benchmark_sebs: run run_benchmark_sebs
 
@@ -374,7 +377,7 @@ boottime_setup:
 	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
 	make run > /dev/null &
 	sleep 30
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "cd module; make boottime_setup"
 	make simple_python_fs
 	make gramine
 	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
@@ -384,7 +387,7 @@ boottime_setup:
 boottime_setup_vm:
 	make run > /dev/null &
 	sleep 20
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make boottime_setup_vm"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "cd module; make boottime_setup_vm"
 
 ipc_setup:
 	make simple_ipc_fs
@@ -392,7 +395,7 @@ ipc_setup:
 	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
 	make run > /dev/null &
 	sleep 30
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd module; make ipc_setup"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "cd module; make ipc_setup"
 	cp module/libsysdb.so Benchmarks/IPC/wallet/
 	cp module/libpal.so Benchmarks/IPC/wallet/
 
@@ -406,10 +409,10 @@ latency_setup:
 IPC_ITERATIONS?=5
 IPC_SIZE?=64
 ssh_ipc:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS} ${ZYGOTE_ID}"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "cd Benchmarks/IPC/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS} ${ZYGOTE_ID}"
 
 ssh_alloc:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "cd Benchmarks/test/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "cd Benchmarks/test/wallet/; python3 run.py ${IPC_SIZE} ${IPC_ITERATIONS}"
 
 ipc:
 	LOG_LEVEL="no_print" FEATURE="boottime prealloc" make build_svsm
@@ -417,7 +420,7 @@ ipc:
 	cd Benchmarks/IPC/wallet/; python parse.py
 
 shutdown:
-	ssh -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10 "shutdown now"
+	ssh -F ./pybench/ssh_conf_doctor vm.local "shutdown now"
 
 boottime:
 	LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm
