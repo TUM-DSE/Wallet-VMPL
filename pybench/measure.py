@@ -239,9 +239,8 @@ class Measurement:
         # start VM
 
         info(f"Starting VM ({interface.value})")
-        self.host.run_guest(
+        self.host.run_confidential_guest(
                 net_type=interface,
-                machine_type='pc',
                 qemu_build_dir=self.config.get('host', 'qemu_path', fallback=None),
                 **run_guest_args
                 )

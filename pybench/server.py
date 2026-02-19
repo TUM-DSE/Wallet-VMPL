@@ -1815,6 +1815,127 @@ class Host(Server):
         """
         self.tmux_kill('qemu')
 
+    def run_confidential_guest(self: 'Host',
+                  net_type: Interface,
+                  vcpus: int = None,
+                  memory: int = None,
+                  root_disk: str = None,
+                  debug_qemu: bool = False,
+                  ioregionfd: bool = False,
+                  qemu_build_dir: str = None,
+                  vhost: bool = False,
+                  rx_queue_size: int = 256,
+                  tx_queue_size: int = 256,
+                  vm_number: int = 0,
+                  extkern: Optional[str] = None,
+                  ) -> None:
+        # TODO this function should get a Guest object as argument
+        # TODO this command should be build by the Guest object
+        # it should take all the settings from the config file
+        # and compile them.
+
+        # Build misc parameters
+
+        dev_type = 'pci'
+
+        # TODO we need a different qemu build dir for vmux
+        qemu_bin_path = 'qemu-system-x86_64'
+        if qemu_build_dir:
+            qemu_bin_path = path_join(qemu_build_dir, qemu_bin_path)
+
+        cpus = vcpus if vcpus else self.guest_vcpus
+        mem = memory if memory else self.guest_memory
+        disk_path = self.guest_root_disk_path
+        if root_disk:
+            disk_path = root_disk
+
+        disk_path = MultiHost.disk_path(disk_path, vm_number)
+        fsdev_config = ''
+        if self.fsdevs:
+            for name, path in self.fsdevs.items():
+                fsdev_config += (
+                    f' -fsdev local,path={path},security_model=none,' +
+                    f'id={name}fs' +
+                    f' -device virtio-9p-{dev_type},mount_tag={name},' +
+                    f'fsdev={name}fs'
+                )
+
+        # Build test network parameters
+        test_net_config = self._test_network_qemu_args(net_type, ioregionfd, vhost, dev_type, vm_number, rx_queue_size, tx_queue_size)
+
+        # Actually start qemu in tmux
+        project_root = str(Path(self.project_root) / "../..") # nix wants nicely formatted paths
+        extkern_options = ""
+        if extkern is not None:
+            extkern_options = ("" +
+                f' -kernel {project_root}/nix/results/test-guest-kernel/bzImage' +
+                f' -initrd {project_root}/nix/results/test-guest-initrd/initrd' +
+                f' -append \\"root=/dev/vda console=ttyS0 init=/init $(cat {project_root}/nix/results/test-guest-kernelParams) {extkern}\\"')
+
+        project_root = str(Path(self.project_root)) # nix wants nicely formatted paths
+        nix_shell = f"nix shell --inputs-from {project_root} nixpkgs#numactl --command"
+        numactl = f"numactl -C {self.cpupinner.qemu(vm_number)}"
+        # numactl = ""
+
+        self.tmux_new(
+            MultiHost.enumerate('qemu', vm_number),
+            ('gdbserver 0.0.0.0:1234 ' if debug_qemu else '') +
+            f"sudo {nix_shell} {numactl} " +
+            qemu_bin_path +
+            f' -machine q35,confidential-guest-support=sev0,memory-backend=ram1' +
+            f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={self.project_root}/svsm/bin/coconut-qemu.igvm' +
+            ' -cpu EPYC-v4,host-phys-bits=true' +
+            f' -smp {cpus}' +
+
+            # shared memory
+            # f' -m {mem}' +
+            f' -object memory-backend-memfd,id=ram1,size={mem}M,share=true' +
+
+            # optionally a linux kernel
+            extkern_options +
+
+            ' -display none' + # avoid opening all the vnc ports
+            ' -enable-kvm' +
+            ' -no-reboot' +
+            f' -drive id=root,format=qcow2,file={disk_path},'
+            'if=none,cache=none' +
+            f' -device virtio-blk-{dev_type},id=rootdisk,drive=root' +
+            (',use-ioregionfd=true' if ioregionfd else '') +
+            f',queue-size={rx_queue_size}' +
+            # ' -cdrom /home/networkadmin/images/guest_init.iso' +
+            fsdev_config +
+            ' -serial stdio' +
+            (' -monitor tcp:127.0.0.1:2345,server,nowait' if debug_qemu else '') +
+            f' -netdev tap,vhost=on,id=admin0,ifname={MultiHost.iface_name(self.admin_tap, vm_number)},' +
+            'script=no,downscript=no' +
+            f' -device e1000,id=admif,netdev=admin0,' +
+            f'mac={MultiHost.mac(self.guest_admin_iface_mac, vm_number)}' +
+            test_net_config
+            # +
+            # ' -drive id=test1,format=raw,file=/dev/ssd/test1,if=none,' +
+            # 'cache=none' +
+            # f' -device virtio-blk-{dev_type},id=test1,drive=test1' +
+            # ' -drive id=test2,format=raw,file=/dev/ssd/test2,if=none,' +
+            # 'cache=none' +
+            # f' -device virtio-blk-{dev_type},id=test2,drive=test2'
+            # +
+            # ' --trace virtio_mmio_read --trace virtio_mmio_write' +
+            +
+            f' 2>/tmp/trace-vm{vm_number}.log'
+            )
+
+    def kill_confidential_guest(self: 'Host') -> None:
+        """
+        Kill all guest VMs.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        self.tmux_kill('qemu')
+
     def _memory_backend(self: 'Host', mem: int, vm_number: int) -> str:
         """
         Build memory backend parameters. Needed for some setups like vhost-user or vfio-user.

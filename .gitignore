@@ -44,5 +44,6 @@ runtime/filesystem/**/fs_out/
 runtime/requirements.txt
 runtime/pip/
 runtime/python*
+pybench/__pycache__/
 report_generation_measurements*
 *.so

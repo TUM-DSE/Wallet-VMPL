@@ -5,7 +5,7 @@ from configparser import ConfigParser, ExtendedInterpolation
 from dataclasses import dataclass
 
 FILEDIR: str = abspath(dirname(realpath(__file__)))
-PDIR: str = dirname(dirname(FILEDIR)) # this file is expected to be at ./*/*/autotest.py relative to project root
+PDIR: str = dirname(FILEDIR) # this file is expected to be at ./*/*/autotest.py relative to project root
 PDIR_PARENT: str = dirname(PDIR)
 PDIR_NAME: str = basename(PDIR)
 USERNAME: str = getpass.getuser()
@@ -15,6 +15,8 @@ CONFIG_DEFAULTS = {
         "projectDirectoryParent": PDIR_PARENT,
         "username": USERNAME
        }
+
+print(f"Project directory: {PDIR}")
 
 def default_config_parser() -> ConfigParser:
     return ConfigParser(defaults=CONFIG_DEFAULTS, interpolation=ExtendedInterpolation())

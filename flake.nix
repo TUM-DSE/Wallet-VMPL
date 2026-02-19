@@ -159,6 +159,9 @@
                 python311Packages.pandas
                 python311Packages.bottle
 		python311Packages.igraph
+		            python311Packages.netaddr
+		            python311Packages.colorlog
+		            python311Packages.argcomplete
                 texliveMedium
 		stdenv.cc.cc.lib
 		            dpdk
