@@ -74,7 +74,7 @@ create_shm_mbuf_pool(struct shm *shared)
 	unsigned priv_size = sizeof(struct rte_pktmbuf_pool_private);
 
 	struct rte_mempool *mp = rte_mempool_create_empty(
-		"shm_mbuf_pool", n, elt_size, 0, priv_size,
+		"MBUF_POOL", n, elt_size, 0, priv_size,
 		SOCKET_ID_ANY, 0);
 	if (!mp) {
 		printf("Failed to create empty mempool: %s\n",

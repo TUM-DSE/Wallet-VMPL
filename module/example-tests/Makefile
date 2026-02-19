@@ -12,11 +12,11 @@ all: $(TRUSTLETS)
 run_tests:
 	@for runner in $(RUNNERS); do \
 		echo "Running $$runner..."; \
-		make $$runner; \
+		make $$runner || exit 1; \
 	done
 	@for c_runner in $(C_RUNNERS); do \
 		echo "Running $$c_runner..."; \
-		make $$c_runner; \
+		make $$c_runner || exit 1; \
 	done
 	# make -C ../../ trustlet_test
 
@@ -33,6 +33,7 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_kvargs.a \
 	$(DPDK_PATH)/lib/librte_telemetry.a \
 	$(DPDK_PATH)/lib/librte_mempool.a \
+	$(DPDK_PATH)/lib/librte_mempool_ring.a \
 	$(DPDK_PATH)/lib/librte_mbuf.a \
 	-Wl,--no-whole-archive
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
