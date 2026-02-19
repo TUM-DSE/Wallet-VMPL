@@ -79,9 +79,7 @@
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
-          dpdk = pkgs2505.dpdk.overrideAttrs (final: prev: let
-            debug = false;
-          in {
+          dpdk = pkgs2505.dpdk.overrideAttrs (final: prev: {
             # Github only allows to fetch this from a browser right now, but not from bash. Check out manually for now.
             # src = pkgs2505.fetchFromGitHub {
             #   owner = "TUM-DSE";
@@ -90,8 +88,10 @@
             #   sha256 = "";
             # };
             src = /scratch/okelmann/dpdk-cvms;
-            dontFixup = debug;
-            dontStrip = debug;
+          });
+          dpdk-debug = selfpkgs.dpdk.overrideAttrs (final: prev: {
+            dontFixup = true;
+            dontStrip = true;
           });
           pktgen-dpdk = pkgs2505.pktgen.overrideAttrs (final: prev: {
 		        postPatch = prev.postPatch + ''
