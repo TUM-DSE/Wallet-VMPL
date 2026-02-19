@@ -129,6 +129,7 @@ initialize:
 	git submodule update --init --recursive gramine-svsm
 	cd gramine-svsm; docker build -t gramine-build-container .
 	make gramine
+	make nix-builds
 	cd scripts; ./sebs.sh one
 	make kvm
 	make unload_kvm
@@ -178,8 +179,11 @@ run:
 srun:
 	@make run CORES=2
 
-sssh:
-	SSH_AUTH_SOCK="" ssh -F ./pybench/ssh_conf_doctor vm.local
+
+nix-builds:
+	nix build .#dpdk -o ./.nix-builds/dpdk --impure
+	nix build .#qemu-coconut-igvm -o ./.nix-builds/qemu-coconut-igvm
+	nix build .#pktgen-dpdk -o ./.nix-builds/pktgen-dpdk
 
 slick-tmux:
 	tmux -L vmux-${USER}.tmux.sock at

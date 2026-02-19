@@ -79,7 +79,21 @@
           });
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
-          pktgen = pkgs2505.pktgen.overrideAttrs (final: prev: {
+          dpdk = pkgs2505.dpdk.overrideAttrs (final: prev: let
+            debug = false;
+          in {
+            # Github only allows to fetch this from a browser right now, but not from bash. Check out manually for now.
+            # src = pkgs2505.fetchFromGitHub {
+            #   owner = "TUM-DSE";
+            #   repo = "dpdk-cvms";
+            #   rev = "2e60199505e22493ec1afb56dc8e192fac13b06b"; # branch wallet-vfio-snp 2026-02-19
+            #   sha256 = "";
+            # };
+            src = /scratch/okelmann/dpdk-cvms;
+            dontFixup = debug;
+            dontStrip = debug;
+          });
+          pktgen-dpdk = pkgs2505.pktgen.overrideAttrs (final: prev: {
 		        postPatch = prev.postPatch + ''
               substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
             '';
@@ -180,8 +194,8 @@
 		            python311Packages.argcomplete
                 texliveMedium
 		stdenv.cc.cc.lib
-		            dpdk
-		            selfpkgs.pktgen
+		            selfpkgs.dpdk
+		            selfpkgs.pktgen-dpdk
 		            # (dpdk.overrideAttrs (final: prev: let
               #       debug = false;
               #     in {
