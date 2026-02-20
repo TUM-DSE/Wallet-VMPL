@@ -106,6 +106,40 @@
 
 		        mesonFlags = [ "-Denable_lua=true" ];
 		      });
+		      # cvm-vfio = pkgs.linuxPackages.kernel.dev.stdenv.mkDerivation {
+		      cvm-vfio = pkgs.stdenv.mkDerivation {
+		        name = "cvm-vfio";
+		        src = pkgs.fetchFromGitHub {
+              owner = "TUM-DSE";
+              repo = "slick-linux";
+              rev = "276b98a06d670080c34fcf018c78de813568d546"; # branch wallet-vfio-snp 2026-02-20
+              sha256 = "sha256-pVe3xiBHil3cy9H5GRwVY0xJXG2/mBU/iiyoxOCp9ss=";
+            };
+		        nativeBuildInputs = with pkgs; [ elfutils flex bison bc perl openssl ];
+		        postPatch = ''
+		          patchShebangs scripts/
+		        '';
+		        configurePhase = ''
+	            make olddefconfig
+	            ./scripts/config --module VFIO
+	            ./scripts/config --module VFIO_PCI
+	            ./scripts/config --enable VFIO_CONTAINER
+	            ./scripts/config --enable VFIO_NOIOMMU
+	            make olddefconfig
+		        '';
+		        buildPhase = ''
+	            make repare -j$(nproc)
+	            make modules_prepare -j$(nproc)
+	            make M=drivers/vfio modules -j$(nproc) KCFLAGS="-Wno-error"
+		        '';
+		        installPhase = ''
+	            mkdir -p $out/linux/drivers/vfio/
+	            find drivers/vfio -name '*.ko' -exec cp {} $out/linux/drivers/vfio/ \;
+		        '';
+		        dontFixup = true;
+		        dontStrip = true;
+		        hardeningDisable = [ "all" ];
+		      };
           test = pkgs.callPackage ./node/pkg.nix { };
         };
         pkgs = nixpkgs.legacyPackages.${system};

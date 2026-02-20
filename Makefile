@@ -184,6 +184,7 @@ nix-builds:
 	nix build .#dpdk -o ./.nix-builds/dpdk --impure
 	nix build .#qemu-coconut-igvm -o ./.nix-builds/qemu-coconut-igvm
 	nix build .#pktgen-dpdk -o ./.nix-builds/pktgen-dpdk
+	nix build .#cvm-vfio -o ./.nix-builds/cvm-vfio
 
 slick-tmux:
 	tmux -L vmux-${USER}.tmux.sock at
