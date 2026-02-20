@@ -81,6 +81,7 @@ build/kernel/linux: linux/.config
 
 build-linux:
 	mv build/kernel/linux build/kernel/linux-old
+	git submodule update --init linux
 	@make linux/.config
 	@make .buildcontainer
 	@make build/kernel/linux
@@ -135,6 +136,7 @@ initialize:
 	make unload_kvm
 	make load_kvm
 	make setup_guest_net
+	make build-linux
 	make guest.qcow2
 	chmod 0600 ./container/key
 

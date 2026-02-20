@@ -4,8 +4,8 @@
 	branch = svsm
 [submodule "linux"]
 	path = linux
-	url = https://github.com/Sabanic-P/linux.git
-	branch = svsm-vmpl-guest
+	url = https://github.com/TUM-DSE/slick-linux.git
+	branch = wallet-vfio-snp
 [submodule "svsm"]
 	path = svsm
 	url = https://github.com/TUM-DSE/svsm.git
