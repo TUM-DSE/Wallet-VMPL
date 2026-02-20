@@ -82,13 +82,13 @@
           bpftrace = bpftrace.packages.x86_64-linux.default;
           dpdk = pkgs2505.dpdk.overrideAttrs (final: prev: {
             # Github only allows to fetch this from a browser right now, but not from bash. Check out manually for now.
-            # src = pkgs2505.fetchFromGitHub {
-            #   owner = "TUM-DSE";
-            #   repo = "dpdk-cvms";
-            #   rev = "2e60199505e22493ec1afb56dc8e192fac13b06b"; # branch wallet-vfio-snp 2026-02-19
-            #   sha256 = "";
-            # };
-            src = /scratch/okelmann/dpdk-cvms;
+            src = pkgs2505.fetchFromGitHub {
+              owner = "TUM-DSE";
+              repo = "dpdk-cvms";
+              rev = "2e60199505e22493ec1afb56dc8e192fac13b06b"; # branch wallet-vfio-snp 2026-02-19
+              sha256 = "sha256-hFa+yAx2P8hDFpBP4PQbhDG5902yGWuV+LRvJ+aj6sA=";
+            };
+            # src = /scratch/okelmann/dpdk-cvms;
           });
           dpdk-debug = selfpkgs.dpdk.overrideAttrs (final: prev: {
             dontFixup = true;
