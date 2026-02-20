@@ -1,0 +1,17 @@
+[libos]
+entrypoint = "/lib/noiomgr_trustlet"
+
+[loader]
+log_level = "debug"
+entrypoint = "file:/gramine/python-libs/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+argv = ["noiomgr_trustlet"]
+loader.insecure__disable_aslr  = true
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib"
+
+[fs]
+root.type = "tmpfs"
+mounts = [
+  { type = "pseudo", path = "/lib", uri = "lib" },
+]
