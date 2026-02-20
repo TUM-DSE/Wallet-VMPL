@@ -24,6 +24,7 @@
 #include "../example-tests/util.h"
 #include "../example-tests/util_run.h"
 #include "../example-tests/shm_mempool.h"
+#include "cvmio.h"
 
 // like test12, but with real CVM IO
 
@@ -41,40 +42,40 @@ static __thread bool use_shm_alloc = false;
 
 
 // when statically linking DPDK, we make DPDK use these wrappers via --wrap compile flag
-extern void *__real_rte_zmalloc(const char *type, size_t size, unsigned align);
-void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
-    if (use_shm_alloc) {
-        struct shm* shm = (struct shm*)DATA_SHARED;
-        if (size == TAILQ_ENTRY_SIZE) {
-            return shm->tailq_entry_buf;
-        }
-        return NULL;
-    } else {
-        return __real_rte_zmalloc(type, size, align);
-    }
-    /* return calloc(1, size); */
-}
-
-extern const struct rte_memzone *__real_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align);
-const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align) {
-    if (use_shm_alloc) {
-        printf("rte_memzone_reserve_aligned: name=%s, len=%lu, socket_id=%d, flags=%u, align=%u\n", name, len, socket_id, flags, align);
-        struct rte_memzone *mz = calloc(1, sizeof(struct rte_memzone));
-        mz->len = len;
-        mz->socket_id = socket_id;
-        mz->flags = flags;
-        if (len == RING_BUF_SIZE) {
-            mz->addr = ((struct shm*)DATA_SHARED)->ingress.buf;
-        }
-        /* mz->addr = malloc(len); */
-        if (!mz->addr) {
-            printf("Failed to allocate memory for memzone\n");
-        }
-        return mz;
-    } else {
-        return __real_rte_memzone_reserve_aligned(name, len, socket_id, flags, align);
-    }
-}
+// extern void *__real_rte_zmalloc(const char *type, size_t size, unsigned align);
+// void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
+//     if (use_shm_alloc) {
+//         struct shm* shm = (struct shm*)DATA_SHARED;
+//         if (size == TAILQ_ENTRY_SIZE) {
+//             return shm->tailq_entry_buf;
+//         }
+//         return NULL;
+//     } else {
+//         return __real_rte_zmalloc(type, size, align);
+//     }
+//     /* return calloc(1, size); */
+// }
+//
+// extern const struct rte_memzone *__real_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align);
+// const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align) {
+//     if (use_shm_alloc) {
+//         printf("rte_memzone_reserve_aligned: name=%s, len=%lu, socket_id=%d, flags=%u, align=%u\n", name, len, socket_id, flags, align);
+//         struct rte_memzone *mz = calloc(1, sizeof(struct rte_memzone));
+//         mz->len = len;
+//         mz->socket_id = socket_id;
+//         mz->flags = flags;
+//         if (len == RING_BUF_SIZE) {
+//             mz->addr = ((struct shm*)DATA_SHARED)->ingress.buf;
+//         }
+//         /* mz->addr = malloc(len); */
+//         if (!mz->addr) {
+//             printf("Failed to allocate memory for memzone\n");
+//         }
+//         return mz;
+//     } else {
+//         return __real_rte_memzone_reserve_aligned(name, len, socket_id, flags, align);
+//     }
+// }
 
 
 int main(int argc, char *argv[]) {
@@ -82,13 +83,23 @@ int main(int argc, char *argv[]) {
     monitor_connect();
 
     // Initialize DPDK EAL with --no-huge for environments without hugepages
-    char *eal_args[] = {"noiomgr_run", "--no-huge", "-l", "0"};
+    char *eal_args[] = {"noiomgr_run", "--no-huge", "-l", "0", "--iova-mode=pa"};
     int eal_argc = sizeof(eal_args) / sizeof(eal_args[0]);
     int ret = rte_eal_init(eal_argc, eal_args);
     if (ret < 0) {
         printf("Failed to initialize EAL: %s\n", rte_strerror(rte_errno));
         return -1;
     }
+
+    // Restore full CPU affinity (EAL restricts it to -l cores)
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    for (int i = 0; i < sysconf(_SC_NPROCESSORS_ONLN); i++)
+        CPU_SET(i, &cpuset);
+    sched_setaffinity(0, sizeof(cpuset), &cpuset);
+
+    struct rte_mempool *cvmio_pool = cvmio_init();
+    uint16_t port = rte_eth_find_next(0);
 
     // Ring already initialized. We just cast the shm buffer to a ring.
     // // Initialize DPDK ring
@@ -107,7 +118,7 @@ int main(int argc, char *argv[]) {
     int chains[] = {2};
     int chains_len = 1;
 
-    int iterations = 1e8;
+    int iterations = 1e9;
 
     int zygotes[2];
     int trustlets[2];
@@ -208,6 +219,7 @@ int main(int argc, char *argv[]) {
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
         void *deq_objs[BURST_SIZE];
+        struct rte_mbuf *bufs[BURST_SIZE];
 
 
         printf("Starting %d iterations...\n", iterations);
@@ -217,26 +229,50 @@ int main(int argc, char *argv[]) {
 
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations; iter++) {
-            // Allocate a burst of mbufs from the shm pool
-            if (rte_pktmbuf_alloc_bulk(pool, (struct rte_mbuf **)enq_objs, BURST_SIZE) != 0) {
-                assert(0 && "rte_pktmbuf_alloc_bulk failed: pool exhausted");
-            }
-            for (size_t i = 0; i < BURST_SIZE; i++) {
-                ((struct rte_mbuf *)enq_objs[i])->data_len = DATA_SIZE;
-                ((struct rte_mbuf *)enq_objs[i])->pkt_len = DATA_SIZE;
-            }
 
-            enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, BURST_SIZE, NULL);
-            if (enq_num == 0)
-                rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, BURST_SIZE);
-            else
-                num_enqed += enq_num;
+            const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
+                    bufs, BURST_SIZE);
+
+            if (unlikely(nb_rx == 0)) {
+                /* rx_err++; */
+            } else {
+                // Copy received packets into mbufs from the shm pool
+                for (size_t i = 0; i < nb_rx; i++) {
+                    enq_objs[i] = rte_pktmbuf_copy(bufs[i], pool, 0, UINT32_MAX); // TODO not MAX
+                    assert(enq_objs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
+                    rte_pktmbuf_free(bufs[i]);
+                }
+
+                enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_rx, NULL);
+                if (enq_num == 0)
+                    rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_rx);
+                else
+                    num_enqed += enq_num;
+            }
 
             // Dequeue processed mbufs and return to pool
             deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
-            if (deq_num > 0)
-                rte_pktmbuf_free_bulk((struct rte_mbuf **)deq_objs, deq_num);
-            num_deqed += deq_num;
+            if (deq_num > 0) {
+                for (size_t i = 0; i < deq_num; i++) {
+                    bufs[i] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
+                    assert(bufs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
+                    rte_pktmbuf_free(deq_objs[i]);
+                }
+
+                const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
+                        bufs, deq_num);
+
+                /* Free any unsent packets */
+                if (unlikely(nb_tx < deq_num)) {
+                    uint16_t buf;
+                    for (buf = nb_tx; buf < deq_num; buf++)
+                        rte_pktmbuf_free(bufs[buf]);
+                }
+
+                /* rte_pktmbuf_free_bulk((struct rte_mbuf **)deq_objs, deq_num); */
+                num_deqed += deq_num;
+
+            }
         }
 
         shared->keep_running = false; // signal trustlet to stop

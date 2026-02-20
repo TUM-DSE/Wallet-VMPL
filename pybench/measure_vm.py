@@ -119,6 +119,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 guest.exec("echo hello world")
 
 
+                # TODO rebuild fs
+
                 # vhost_sock = "/tmp/vhost0.sock"
                 # host.tmux_kill("Pktgen")
                 # host.exec(f"sudo rm {vhost_sock} || true")
@@ -133,6 +135,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
                 # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
                 guest.exec("modprobe vfio-pci")
+                guest.exec("insmod module/vmpl.ko")
                 # guest.exec(f"dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
                 remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                 guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
@@ -140,6 +143,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 remote_mirror_output = "/tmp/mirror_output.log"
                 guest.exec(f"rm {remote_mirror_output} || true")
                 print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
+                print("cd module/example-dpdk; gdb --ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa")
                 breakpoint()
                 # guest.tmux_new("workload", f"gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
                 # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)

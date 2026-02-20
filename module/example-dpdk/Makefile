@@ -36,9 +36,9 @@ noiomgr_trustlet: %: %.c
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma
 
 noiomgr_run: %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ $(WRAPPERS) -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS)
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS)
 
-run_noiomgr:
+run_noiomgr: noiomgr_run noiomgr_trustlet
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-dpdk && ./noiomgr_run"
 
 simple_slick_fs: $(TRUSTLETS)
