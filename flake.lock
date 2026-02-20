@@ -268,6 +268,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-pktgen": {
+      "locked": {
+        "lastModified": 1755704039,
+        "narHash": "sha256-gKlP0LbyJ3qX0KObfIWcp5nbuHSb5EHwIvU6UcNBg2A=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9cb344e96d5b6918e94e1bca2d9f3ea1e9615545",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "9cb344e96d5b6918e94e1bca2d9f3ea1e9615545",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1714253743,
@@ -330,6 +346,7 @@
         "nixpkgs-2305": "nixpkgs-2305",
         "nixpkgs-2311": "nixpkgs-2311",
         "nixpkgs-2505": "nixpkgs-2505",
+        "nixpkgs-pktgen": "nixpkgs-pktgen",
         "qemu-coconut-src": "qemu-coconut-src",
         "rust-overlay": "rust-overlay"
       }

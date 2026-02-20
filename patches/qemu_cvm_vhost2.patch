@@ -1,0 +1,27 @@
+From 33e18636aa8132c85d1039b36921cafa98b98311 Mon Sep 17 00:00:00 2001
+From: Pogobanane <aenderboy@gmx.de>
+Date: Tue, 19 Aug 2025 17:41:21 +0200
+Subject: [PATCH 1/2] attempt a fix for 4k pages
+
+---
+ include/exec/memory.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/include/exec/memory.h b/include/exec/memory.h
+index 42d3089..d106063 100644
+--- a/include/exec/memory.h
++++ b/include/exec/memory.h
+@@ -2992,7 +2992,10 @@ static inline bool memory_access_is_direct(MemoryRegion *mr, bool is_write)
+                !mr->rom_device && !memory_region_is_ram_device(mr);
+     } else {
+         return (memory_region_is_ram(mr) && !memory_region_is_ram_device(mr)) ||
+-               memory_region_is_romd(mr);
++               memory_region_is_romd(mr) ||
++                mr->owner == NULL; // also match our broken niche case which, i assure you, is direct as well
++        // I assume this stuff is uninitialized because this page was derived from a ordinary RAM page when we decrypted it. That could hit some poorly implemented code path.
++                // mr == symbol io_mem_unassigned from physmem.c;
+     }
+ }
+
+--
+2.51.2

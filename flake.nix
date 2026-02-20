@@ -13,6 +13,7 @@
     nixpkgs-2305.url = "github:NixOS/nixpkgs/nixos-23.05";
     nixpkgs-2311.url = "github:NixOS/nixpkgs/nixos-23.11";
     nixpkgs-2505.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-pktgen.url = "github:NixOS/nixpkgs/9cb344e96d5b6918e94e1bca2d9f3ea1e9615545";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:Sabanic-P/rust-overlay";
     nixos-generators = {
@@ -68,7 +69,7 @@
             version = "8.2.0";
             buildInputs = old.buildInputs ++ [ self.packages.${system}.igvm ];
             igvm = self.packages.${system}.igvm;
-            patches = old.patches ++ [ ./patches/qemu_cvm_vhost.patch ];
+            patches = old.patches ++ [ ./patches/qemu_cvm_vhost.patch ./patches/qemu_cvm_vhost2.patch ];
             configureFlags = old.configureFlags ++ [
               "--target-list=x86_64-softmmu"
               "--disable-gtk"
@@ -93,7 +94,7 @@
             dontFixup = true;
             dontStrip = true;
           });
-          pktgen-dpdk = pkgs2505.pktgen.overrideAttrs (final: prev: {
+          pktgen-dpdk = args.nixpkgs-pktgen.legacyPackages.${system}.pktgen.overrideAttrs (final: prev: {
 		        postPatch = prev.postPatch + ''
               substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
             '';
