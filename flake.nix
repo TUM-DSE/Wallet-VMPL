@@ -108,6 +108,7 @@
 		      });
 		      # cvm-vfio = pkgs.linuxPackages.kernel.dev.stdenv.mkDerivation {
 		      cvm-vfio = pkgs.stdenv.mkDerivation {
+		        # doesnt seem to work: guest complains about invalid module format
 		        name = "cvm-vfio";
 		        src = pkgs.fetchFromGitHub {
               owner = "TUM-DSE";
@@ -128,9 +129,8 @@
 	            make olddefconfig
 		        '';
 		        buildPhase = ''
-	            make repare -j$(nproc)
 	            make modules_prepare -j$(nproc)
-	            make M=drivers/vfio modules -j$(nproc) KCFLAGS="-Wno-error"
+	            make M=drivers/vfio modules -j$(nproc) KCFLAGS="-Wno-error" KBUILD_MODPOST_WARN=1
 		        '';
 		        installPhase = ''
 	            mkdir -p $out/linux/drivers/vfio/
