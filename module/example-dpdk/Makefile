@@ -13,9 +13,15 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_mempool.a \
 	$(DPDK_PATH)/lib/librte_mempool_ring.a \
 	$(DPDK_PATH)/lib/librte_mbuf.a \
-	-Wl,--no-whole-archive
+	$(DPDK_PATH)/lib/librte_ethdev.a \
+	$(DPDK_PATH)/lib/librte_net.a \
+	$(DPDK_PATH)/lib/librte_bus_pci.a \
+	$(DPDK_PATH)/lib/librte_pci.a \
+	$(DPDK_PATH)/lib/librte_bus_vdev.a \
+	$(DPDK_PATH)/lib/librte_net_virtio.a \
+	-Wl,--no-whole-archive -lm
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
 WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS)
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS)
