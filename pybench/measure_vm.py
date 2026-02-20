@@ -124,8 +124,40 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # host.exec(f"sudo rm {vhost_sock} || true")
                 # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
 
-                sleep(1)
-                print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+
+                # guest.exec("modprobe virtio-net")
+                # guest.exec("ip l set enp0s9 up")
+
+                # remote_kmod_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/cvm-vfio").strip()
+                # remote_kmod_path = f"home/Wallet-VMPL4/linux/drivers/vfio" # TODO someone needs to build these; dont hardcode VMPL4
+                # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
+                # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
+                guest.exec("modprobe vfio-pci")
+                # guest.exec(f"dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
+                guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                sleep(1) # for good measure
+                remote_mirror_output = "/tmp/mirror_output.log"
+                guest.exec(f"rm {remote_mirror_output} || true")
+                print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
+                breakpoint()
+                # guest.tmux_new("workload", f"gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
+                # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
+
+
+                # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+                # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
+                # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
+                # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
+                host.exec_pktgen('pktgen.start(0)')
+                sleep(3)
+                pps = []
+                for _ in range(5):
+                    pps += [ int(host.exec_pktgen('printf(pktgen.portStats("0", "rate")[0].pkts_rx)')) ]
+                    sleep(1)
+                host.exec_pktgen('pktgen.stop(0)')
+
+                print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
                 # command = 'printf("Hello from Python!\\n")'
                 # script = f"""
                 #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"

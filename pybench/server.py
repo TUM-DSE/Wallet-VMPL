@@ -2149,7 +2149,8 @@ class Host(Server):
         vm_number = 0
         vhost_sock = MultiHost.vhost_user_sock(vm_number)
         self.exec(f"sudo rm {vhost_sock} || true")
-        self.tmux_new("pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
+        # self.tmux_new("pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0'") #  -G")
+        self.tmux_new("pktgen", f"sudo pktgen --vdev 'eth_vhost0,iface={vhost_sock}' -l0-4 -- -m '1.0' -G")
 
     def stop_pktgen_vhost(self: 'Host') -> None:
         self.tmux_kill("pktgen")
