@@ -21,9 +21,9 @@
 #include <rte_ring.h>
 #include <rte_mbuf.h>
 
-#include "util.h"
-#include "util_run.h"
-#include "shm_mempool.h"
+#include "../example-tests/util.h"
+#include "../example-tests/util_run.h"
+#include "../example-tests/shm_mempool.h"
 
 // like test12, but with real CVM IO
 

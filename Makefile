@@ -206,10 +206,11 @@ slick:
 	@echo "You can run commands in the VM using 'make ssh_with_command COMMAND=\"<your command>\"'"
 
 TEST_TARGET ?= run_tests
+TEST_DIR ?= example-tests
 
 run_tests:
 	@make kill
-	@make -C module/example-tests simple_slick_fs
+	@make -C module/$(TEST_DIR) simple_slick_fs
 	@make gramine
 	make srun &
 	sleep 1
@@ -219,7 +220,7 @@ run_tests:
 	sudo taskset -cp 9 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 0) | ."thread-id"')
 	sudo taskset -cp 10 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 1) | ."thread-id"')
 	@make ssh_with_command SSH_COMMAND="insmod module/vmpl.ko || true"
-	@make -C module/example-tests $(TEST_TARGET)
+	@make -C module/$(TEST_DIR) $(TEST_TARGET)
 
 
 kill:

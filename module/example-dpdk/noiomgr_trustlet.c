@@ -13,7 +13,7 @@
 #include <rte_mbuf.h>
 
 #include "cpuid.c"
-#include "util.h"
+#include "../example-tests/util.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
