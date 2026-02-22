@@ -131,7 +131,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # guest.exec("ip l set enp0s9 up")
 
                 # remote_kmod_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/cvm-vfio").strip()
-                # remote_kmod_path = f"home/Wallet-VMPL4/linux/drivers/vfio" # TODO someone needs to build these; dont hardcode VMPL4
+                # remote_kmod_path = f"home/Wallet-VMPL" # TODO someone needs to build these; dont hardcode VMPL4
                 # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
                 # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
                 guest.exec("modprobe vfio-pci")
@@ -142,12 +142,19 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 sleep(1) # for good measure
                 remote_mirror_output = "/tmp/mirror_output.log"
                 guest.exec(f"rm {remote_mirror_output} || true")
-                print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
-                print("cd module/example-dpdk; gdb --ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa")
-                breakpoint()
-                # guest.tmux_new("workload", f"gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
+                # print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
+                # print("cd module/example-dpdk; gdb --ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa")
+                # breakpoint()
+                # guest.tmux_new("workload", f"gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+                # guest.tmux_new("workload", f"cd module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
                 # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
 
+                guest.exec("rm /tmp/.dpdk-running || true")
+                guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+                # breakpoint()
+                # sleep(30)
+                # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
+                guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=30)
 
                 # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
                 # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
@@ -169,7 +176,6 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 #     {command}
                 # """
                 # print(host.exec(f"echo '{script}' | socat - TCP4:localhost:22022"))
-                breakpoint()
                 pass
             # host.start_vpp()
             # test.compile(host)
@@ -177,14 +183,14 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             #     test.run(host, repetition)
             bench.done(test)
 
-    dfs = []
-    for test in tests:
-        for repetition in range(test.repetitions):
-            dfs += [ test.parse_results(repetition) ]
-    df = pd.concat(dfs)
-    df.to_csv(path_join(G.OUT_DIR, "userspace_summary.csv"))
-    with open(path_join(G.OUT_DIR, "userspace_summary.log"), 'w') as f:
-        f.write(df.to_string())
+    # dfs = []
+    # for test in tests:
+    #     for repetition in range(test.repetitions):
+    #         dfs += [ test.parse_results(repetition) ]
+    # df = pd.concat(dfs)
+    # df.to_csv(path_join(G.OUT_DIR, "userspace_summary.csv"))
+    # with open(path_join(G.OUT_DIR, "userspace_summary.log"), 'w') as f:
+    #     f.write(df.to_string())
 
 
 

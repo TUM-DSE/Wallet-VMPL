@@ -26,6 +26,10 @@
         "git+https://github.com/coconut-svsm/qemu.git?ref=svsm-v8.0.0&submodules=1";
       flake = false;
     };
+    dpdk-cvms-src = {
+      url = "github:TUM-DSE/dpdk-cvms/wallet-vfio-snp";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, flake-utils, nixos-generators, rust-overlay
@@ -81,18 +85,15 @@
           vmplguest-image = pkgs.callPackage ./nix/vmplguest-image.nix { };
           bpftrace = bpftrace.packages.x86_64-linux.default;
           dpdk = pkgs2505.dpdk.overrideAttrs (final: prev: {
-            # Github only allows to fetch this from a browser right now, but not from bash. Check out manually for now.
-            src = pkgs2505.fetchFromGitHub {
-              owner = "TUM-DSE";
-              repo = "dpdk-cvms";
-              rev = "2e60199505e22493ec1afb56dc8e192fac13b06b"; # branch wallet-vfio-snp 2026-02-19
-              sha256 = "sha256-hFa+yAx2P8hDFpBP4PQbhDG5902yGWuV+LRvJ+aj6sA=";
-            };
+            src = self.inputs.dpdk-cvms-src;
             # src = /scratch/okelmann/dpdk-cvms;
           });
           dpdk-debug = selfpkgs.dpdk.overrideAttrs (final: prev: {
+            outputs = [ "out" ];
             dontFixup = true;
             dontStrip = true;
+            mesonFlags = prev.mesonFlags ++ [ "--buildtype=debug" "-Ddeveloper_mode=enabled" ];
+            hardeningDisable = [ "all" ];
           });
           pktgen-dpdk = args.nixpkgs-pktgen.legacyPackages.${system}.pktgen.overrideAttrs (final: prev: {
 		        postPatch = prev.postPatch + ''
@@ -231,6 +232,7 @@
 		stdenv.cc.cc.lib
 		            selfpkgs.dpdk
 		            selfpkgs.pktgen-dpdk
+		            libbsd.dev
 		            # (dpdk.overrideAttrs (final: prev: let
               #       debug = false;
               #     in {

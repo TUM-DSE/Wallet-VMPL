@@ -9,6 +9,8 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -314,6 +316,14 @@ lcore_mirror(void)
 
     printf("\nCore %u receiving packets. [Ctrl+C to quit]\n",
             rte_lcore_id());
+    // create file /tmp/.dpdk-running to signal that the program is running (for external scripts)
+    int fd = open("/tmp/.dpdk-running", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        printf("Failed to create /tmp/.dpdk-running: %s\n", strerror(errno));
+        fflush(stdout);
+        return;
+    }
+    close(fd);
 
     RTE_ETH_FOREACH_DEV(port) {
     /* Run until the application is quit or killed. */
