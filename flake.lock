@@ -37,6 +37,23 @@
         "type": "github"
       }
     },
+    "dpdk-cvms-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771784859,
+        "narHash": "sha256-L7abOixY1OGMSxjLFyQhHv5kfqBPT75Yq5c5uJ36sSU=",
+        "owner": "TUM-DSE",
+        "repo": "dpdk-cvms",
+        "rev": "2a5bc59cfca5521c804b872011de535a10fe3186",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TUM-DSE",
+        "ref": "wallet-vfio-snp",
+        "repo": "dpdk-cvms",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -338,6 +355,7 @@
     "root": {
       "inputs": {
         "bpftrace": "bpftrace",
+        "dpdk-cvms-src": "dpdk-cvms-src",
         "flake-utils": "flake-utils_2",
         "nixos-generators": "nixos-generators",
         "nixpkgs": "nixpkgs_2",
