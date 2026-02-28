@@ -21,12 +21,12 @@ TARGET = {
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 
 @dataclass
-class UserspaceTest(AbstractBenchTest):
+class PktgenTest(AbstractBenchTest):
 
     batchsize: int
     workload: int
     chaining: int
-    system: str
+    system: str # mirror, noiomgr
     pktsize: int
 
     def test_infix(self):
@@ -38,13 +38,29 @@ class UserspaceTest(AbstractBenchTest):
     def compile(self, server: Server):
         cflags = " ".join([
             f"-DBURST_SIZE={self.batchsize}",
-            f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
-            f"-DCHAINING={self.chaining}",
-            f"-DLLC_SIZE={LLC_SIZE}",
             f"-DPACKET_SIZE={self.pktsize}",
+            # f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
+            # f"-DCHAINING={self.chaining}",
+            # f"-DLLC_SIZE={LLC_SIZE}",
         ])
-        server.exec(f"make -C {PROJECT_ROOT} {TARGET[self.system]} -B CFLAGS=\"{cflags}\"")
-        pass
+
+        trustlets = []
+        dpdk_examples = []
+        runners = []
+        if self.system == "mirror":
+            dpdk_examples = ["mirror"]
+        elif self.system == "noiomgr":
+            trustlets = ["noiomgr_trustlet"]
+            runners = ["noiomgr_run"]
+        else:
+            raise ValueError(f"Unknown system {self.system}")
+
+        if len(trustlets) > 0:
+            # limit what "all" target refers to with TRUSTLETS and DPDK_EXAMPLES
+            server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk all -B TRUSTLETS=\"{' '.join(trustlets)}\" DPDK_EXAMPLES=\"{' '.join(dpdk_examples)}\" RUNNERS=\"{' '.join(runners)}\" CFLAGS=\"{cflags}\"")
+        else:
+            # without trustlets, make all will fail (more specifically building the fs)
+            server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def run(self, server: Server, repetition: int):
         remote_output_file = "/tmp/output.log"
@@ -93,16 +109,17 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             batchsize = [1], # , 32],
             workload = [ 0 ], # , 100 ],
             chaining = [3],
-            system = [ "polling" ], #, "procedural", "noiomgr" ],
+            # system = [ "noiomgr" ],
+            system = [ "mirror" ],
             pktsize = [ 64 ],
 
             # legacy args
             num_vms = [0],
         )
 
-    tests : List[UserspaceTest] = []
-    tests = UserspaceTest.list_tests(test_matrix)
-    UserspaceTest.estimate_time2(tests, [])
+    tests : List[PktgenTest] = []
+    tests = PktgenTest.list_tests(test_matrix)
+    PktgenTest.estimate_time2(tests, [])
 
     if plan_only:
         return
@@ -114,7 +131,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             info(f"Running {test}")
             host.stop_pktgen_vhost()
             host.start_pktgen_vhost()
-            sleep(1) # wait and pray for pktgen
+            test.compile(host)
+            # sleep(1) # wait and pray for pktgen
             with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
                 guest.exec("echo hello world")
 

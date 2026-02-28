@@ -1,7 +1,8 @@
 DPDK_EXAMPLES := mirror
 TRUSTLETS := noiomgr_trustlet
+RUNNERS := noiomgr_run
 
-all: $(DPDK_EXAMPLES) $(TRUSTLETS) noiomgr_run simple_slick_fs
+all: $(DPDK_EXAMPLES) $(TRUSTLETS) $(RUNNERS) simple_slick_fs
 	@make -C ../../ gramine
 
 DPDK_PATH := $(shell realpath ../../.nix-builds/dpdk)

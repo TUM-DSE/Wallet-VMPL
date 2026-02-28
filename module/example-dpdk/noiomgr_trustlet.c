@@ -19,7 +19,10 @@
 #define DATA_IN 0x28000000000
 #define DATA_OUT 0x30000000000
 #define DATA_SHARED 0x38000000000
+
+#ifndef DATA_SIZE
 #define DATA_SIZE 16
+#endif
 
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 
@@ -199,7 +202,6 @@ int main(int argc, char** argv) {
     char* output = (char*)DATA_OUT;
     finalize_zygote();
     int type = 0;
-    int data_size = 64 * 1024;
 
     println("malloc start");
     char* buf = malloc(2097152);

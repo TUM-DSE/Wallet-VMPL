@@ -30,7 +30,7 @@
 
 // like test12, but with real CVM IO
 
-#define DATA_SIZE 64
+#define DATA_SIZE PACKET_SIZE
 
 static void* DATA_SHARED = NULL;
 static __thread bool use_shm_alloc = false;
