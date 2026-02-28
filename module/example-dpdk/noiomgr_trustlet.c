@@ -130,6 +130,7 @@ void main_shm(void* data_shared) {
     uint64_t start_time = clock_monotonic_get();
     uint64_t end_time = start_time + duration_ns;
     uint64_t iterations = 0;
+    char local_buf[SHM_POOL_DATA_ROOM];
 
     while (likely(atomic_load(&buf->keep_running))) {
         iterations++;
@@ -148,9 +149,13 @@ void main_shm(void* data_shared) {
         total_rx += num_deq;
         debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
-        /* struct rte_mbuf *first = (struct rte_mbuf *)deq_objs[0]; */
-        /* uint64_t pkt_iter = *(uint64_t *)(first->buf_addr + first->data_off); */
-        /* println("iter=%lu", pkt_iter); */
+        // Copy packet data from shm mbuf to local buffer and back
+        for (size_t i = 0; i < num_deq; i++) {
+            struct rte_mbuf *m = (struct rte_mbuf *)deq_objs[i];
+            uint16_t len = m->data_len;
+            memcpy(local_buf, rte_pktmbuf_mtod(m, void *), len);
+            memcpy(rte_pktmbuf_mtod(m, void *), local_buf, len);
+        }
 
         num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL);
         total_tx += num_enq;

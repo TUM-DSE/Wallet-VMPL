@@ -1,6 +1,9 @@
 DPDK_EXAMPLES := mirror
 TRUSTLETS := noiomgr_trustlet
 
+all: $(DPDK_EXAMPLES) $(TRUSTLETS) noiomgr_run simple_slick_fs
+	@make -C ../../ gramine
+
 DPDK_PATH := $(shell realpath ../../.nix-builds/dpdk)
 # DPDK_PATH := /scratch/okelmann/dpdk/build
 GLIBC_STATIC := /nix/store/24hs0bbh26w5zfvkv5ps2amfrbwnz8pd-glibc-2.40-66-static/lib

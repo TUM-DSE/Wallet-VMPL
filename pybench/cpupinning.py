@@ -1,4 +1,5 @@
 rose_cluster_size = 6 # shares L3 cache
+ryan_cluster_size = 8 # shares L3 cache
 rose_hyperthreads = 2
 wilfred_hyperthreads = 2
 
@@ -33,7 +34,11 @@ class CpuPinner:
 
     def qemu(self, vm_number: int) -> str:
         vm_number = self._vm_number(vm_number)
+        return "4-7"
         return self.in_cluster(vm_number, 0, length=rose_cluster_size)
+
+    def pktgen(self):
+        return ("0,1,2,3", '1.0')
 
     def vmux_main(self):
         return "0"

@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <rte_eal.h>
 #include <rte_errno.h>
@@ -223,6 +225,14 @@ int main(int argc, char *argv[]) {
 
 
         printf("Starting %d iterations...\n", iterations);
+        // create file /tmp/.dpdk-running to signal that the program is running (for external scripts)
+        int fd = open("/tmp/.dpdk-running", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd < 0) {
+            printf("Failed to create /tmp/.dpdk-running: %s\n", strerror(errno));
+            fflush(stdout);
+            return 1;
+        }
+        close(fd);
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;

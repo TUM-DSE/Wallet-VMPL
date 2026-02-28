@@ -39,7 +39,7 @@
 #define TX_RING_SIZE 1024
 #define NUM_MBUFS 2*512
 #define MBUF_CACHE_SIZE 250
-#define BURST_SIZE 32
+#define BURST_SIZE 1
 
 #ifndef LLC_SIZE
 #define LLC_SIZE 512*1024 // 512 kB (for weak laptops)

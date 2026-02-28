@@ -150,7 +150,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
 
                 guest.exec("rm /tmp/.dpdk-running || true")
-                guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+                # guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+                guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
                 # breakpoint()
                 # sleep(30)
                 # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
@@ -160,6 +161,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
                 # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
                 # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
+                host.exec_pktgen('pktgen.set("all", "size", 64)')
                 host.exec_pktgen('pktgen.start(0)')
                 sleep(3)
                 pps = []
@@ -169,6 +171,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 host.exec_pktgen('pktgen.stop(0)')
 
                 print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
+                # breakpoint()
+                # pass
                 # command = 'printf("Hello from Python!\\n")'
                 # script = f"""
                 #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"
