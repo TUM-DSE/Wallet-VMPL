@@ -11,6 +11,7 @@ from os.path import join as path_join
 import numpy as np
 from enums import Interface
 from time import sleep
+import os
 
 TARGET = {
     "polling": "build/polling_test-shared",
@@ -90,17 +91,31 @@ class PktgenTest(AbstractBenchTest):
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
         # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
-        host.exec_pktgen('pktgen.set("all", "size", 64)')
+        host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})')
         host.exec_pktgen('pktgen.start(0)')
         sleep(3)
         pps = []
         for _ in range(5):
-            pps += [ int(host.exec_pktgen('printf(pktgen.portStats("0", "rate")[0].pkts_rx)')) ]
+            lua = """
+                printf(pktgen.portStats("0", "rate")[0].pkts_rx)
+            """
+            pps += [ int(host.exec_pktgen(lua)) ]
             sleep(1)
         host.exec_pktgen('pktgen.stop(0)')
 
         print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
 
+        local_output_file = self.output_filepath(repetition)
+        os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
+        data = []
+        for foo in pps:
+            data += [{
+                **asdict(self),
+                "repetition": repetition,
+                "Mpps": foo/1e6
+            }]
+        df = DataFrame(data=data)
+        df.to_csv(local_output_file, index=False)
 
         # remote_output_file = "/tmp/output.log"
         # local_output_file = self.output_filepath(repetition)
@@ -149,8 +164,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             batchsize = [1], # , 32],
             workload = [ 0 ], # , 100 ],
             chaining = [3],
-            # system = [ "noiomgr" ],
-            system = [ "mirror", "noiomgr" ],
+            system = [ "mirror" ],
+            # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
             # legacy args

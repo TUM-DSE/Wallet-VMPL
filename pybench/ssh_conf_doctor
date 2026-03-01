@@ -3,3 +3,5 @@ Hostname 192.168.56.10
 User root
 IdentityFile container/key
 StrictHostKeyChecking no
+ControlMaster auto
+ControlPersist 60
