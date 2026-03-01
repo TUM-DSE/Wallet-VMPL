@@ -40,7 +40,7 @@ class PktgenTest(AbstractBenchTest):
         cflags = " ".join([
             f"-DBURST_SIZE={self.batchsize}",
             f"-DPACKET_SIZE={self.pktsize}",
-            # f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
+            f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
             # f"-DCHAINING={self.chaining}",
             # f"-DLLC_SIZE={LLC_SIZE}",
         ])
@@ -64,6 +64,9 @@ class PktgenTest(AbstractBenchTest):
             server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def run(self, host: Server, guest: Server, repetition: int):
+        if self.chaining != 1:
+            raise NotImplementedError("Workload and chaining > 1 not implemented")
+
         sleep(1) # for good measure
         remote_mirror_output = "/tmp/mirror_output.log"
         guest.exec(f"rm {remote_mirror_output} || true")
@@ -161,11 +164,12 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
         test_matrix = dict(
             repetitions=[1],
-            batchsize = [1], # , 32],
-            workload = [ 0 ], # , 100 ],
-            chaining = [3],
-            system = [ "mirror" ],
-            # system = [ "mirror", "noiomgr" ],
+            batchsize = [32], # , 32],
+            workload = [ 0, 1000 ], # , 100 ],
+            chaining = [1],
+            # system = [ "mirror" ],
+            # system = [ "noiomgr" ],
+            system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
             # legacy args
@@ -232,14 +236,16 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             #     test.run(host, repetition)
             bench.done(test)
 
-    # dfs = []
-    # for test in tests:
-    #     for repetition in range(test.repetitions):
-    #         dfs += [ test.parse_results(repetition) ]
-    # df = pd.concat(dfs)
-    # df.to_csv(path_join(G.OUT_DIR, "userspace_summary.csv"))
-    # with open(path_join(G.OUT_DIR, "userspace_summary.log"), 'w') as f:
-    #     f.write(df.to_string())
+    dfs = []
+    for test in tests:
+        for repetition in range(test.repetitions):
+            dfs += [ pd.read_csv(test.output_filepath(repetition)) ]
+    df = pd.concat(dfs)
+    del df['repetition']
+    df = df.groupby([ col for col in df.columns if col != "Mpps" ]).describe()
+    df.to_csv(path_join(G.OUT_DIR, "vm_summary.csv"))
+    with open(path_join(G.OUT_DIR, "vm_summary.log"), 'w') as f:
+        f.write(df.to_string())
 
 
 

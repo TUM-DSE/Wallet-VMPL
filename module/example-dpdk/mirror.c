@@ -56,6 +56,10 @@
 /* #define PACKET_POOL_SIZE 2ull*LLC_SIZE / PACKET_SIZE */
 #define PACKET_POOL_SIZE 2ull*LLC_SIZE / RTE_MBUF_DEFAULT_BUF_SIZE - 1
 
+#ifndef PER_VNFLET_WORKLOAD_NS
+#define PER_VNFLET_WORKLOAD_NS 0
+#endif
+
 #define QUIET
 
 /* Configuration */
@@ -315,7 +319,7 @@ lcore_mirror(void)
                     "polling thread.\n\tPerformance will "
                     "not be optimal.\n", port);
 
-    uint64_t sleep = (uint64_t)((double)0.000001* rte_get_tsc_hz());
+    uint64_t sleep = (uint64_t)((double)PER_VNFLET_WORKLOAD_NS * rte_get_tsc_hz() / 1e9);
 
     printf("\nCore %u receiving packets. [Ctrl+C to quit]\n",
             rte_lcore_id());
@@ -361,7 +365,7 @@ lcore_mirror(void)
                 hexdump(pkt_data, pkt->data_len);
             }
 #endif
-            /* ndelay_accurate(sleep); */
+            ndelay_accurate(sleep * nb_rx); // simulate per-packet processing time
 
             /* Send packets back out on the same port */
             const uint16_t nb_tx = rte_eth_tx_burst(port, 0,

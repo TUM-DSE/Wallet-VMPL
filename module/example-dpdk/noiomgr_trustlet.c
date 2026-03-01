@@ -24,6 +24,10 @@
 #define DATA_SIZE 16
 #endif
 
+#ifndef PER_VNFLET_WORKLOAD_NS
+#define PER_VNFLET_WORKLOAD_NS 0
+#endif
+
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 
 void hexdump(const void *data, size_t size) {
@@ -75,13 +79,15 @@ static inline uint64_t clock_monotonic_get(void) {
 
 // build our own delay, because gramine's sleep is unimplemented
 void delay(uint64_t nsecs) {
+    if (nsecs == 0) return;
+
     uint64_t start = clock_monotonic_get();
     uint64_t end = start + nsecs;
-    println("delay: start=%lu, end=%lu, waiting for %lu ns", start, end, nsecs);
+    debug println("delay: start=%lu, end=%lu, waiting for %lu ns", start, end, nsecs);
     while (1) {
         uint64_t now = clock_monotonic_get();
         if (now >= end) {
-            println("delay: done, slept %lu ns", now - start);
+            debug println("delay: done, slept %lu ns", now - start);
             break;
         }
     }
@@ -157,6 +163,7 @@ void main_shm(void* data_shared) {
             struct rte_mbuf *m = (struct rte_mbuf *)deq_objs[i];
             uint16_t len = m->data_len;
             memcpy(local_buf, rte_pktmbuf_mtod(m, void *), len);
+            delay(PER_VNFLET_WORKLOAD_NS); // simulate per-packet processing
             memcpy(rte_pktmbuf_mtod(m, void *), local_buf, len);
         }
 
