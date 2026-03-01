@@ -11,7 +11,10 @@
 #include <rte_mbuf.h>
 
 #define BUFFER_SIZE 1600
+
+#ifndef BURST_SIZE
 #define BURST_SIZE 1
+#endif
 
 #define CACHE_LINE_SIZE 64
 
