@@ -4,8 +4,7 @@ RUNNER_SRCS := $(wildcard *_run.py)
 RUNNERS := $(RUNNER_SRCS:.py=)
 C_RUNNER_SRCS := $(wildcard *_run.c)
 C_RUNNERS := $(C_RUNNER_SRCS:.c=)
-
-
+CFLAGS ?=
 
 all: $(TRUSTLETS)
 
@@ -17,6 +16,10 @@ run_tests:
 	@for c_runner in $(C_RUNNERS); do \
 		echo "Running $$c_runner..."; \
 		make $$c_runner || exit 1; \
+	done
+	@for c_runner in $(C_RUNNERS); do \
+		echo "Running $$c_runner with privileged trustlets..."; \
+		CFLAGS="-Dcreate_zygote=create_zygote_privileged" make $$c_runner || exit 1; \
 	done
 	# make -C ../../ trustlet_test
 
@@ -45,7 +48,7 @@ $(TRUSTLETS): %: %.c
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma
 
 $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS)
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
 	# make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread $(DPDK_LIBS)"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
