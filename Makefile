@@ -207,12 +207,21 @@ slick:
 	@echo "You can run commands in the VM using 'make ssh_with_command COMMAND=\"<your command>\"'"
 
 TEST_TARGET ?= run_tests
+TEST_FILTER ?=
 TEST_DIR ?= example-tests
 
 run_tests:
-	@make kill
 	@make -C module/$(TEST_DIR) simple_slick_fs
 	@make gramine
+ifneq ($(filter run_tests,$(TEST_TARGET)),)
+	@make -C module/$(TEST_DIR) run_tests TEST_FILTER="$(TEST_FILTER)"
+else
+	@make _boot_and_test
+endif
+
+_boot_and_test:
+	@make kill
+	@sleep 1
 	make srun &
 	sleep 1
 	@pgrep qemu-system || (echo "QEMU crashed during startup"; exit 1)
@@ -221,7 +230,7 @@ run_tests:
 	sudo taskset -cp 9 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 0) | ."thread-id"')
 	sudo taskset -cp 10 $$(echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 1) | ."thread-id"')
 	@make ssh_with_command SSH_COMMAND="insmod module/vmpl.ko || true"
-	@make -C module/$(TEST_DIR) $(TEST_TARGET)
+	@make -C module/$(TEST_DIR) $(TEST_TARGET) TEST_FILTER="$(TEST_FILTER)"
 
 
 kill:

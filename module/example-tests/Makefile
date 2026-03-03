@@ -5,21 +5,46 @@ RUNNERS := $(RUNNER_SRCS:.py=)
 C_RUNNER_SRCS := $(wildcard *_run.c)
 C_RUNNERS := $(C_RUNNER_SRCS:.c=)
 CFLAGS ?=
+TEST_FILTER ?=
+
+ifdef TEST_FILTER
+_C_RUNNERS := $(filter $(TEST_FILTER),$(C_RUNNERS))
+_RUNNERS := $(filter $(TEST_FILTER),$(RUNNERS))
+else
+_C_RUNNERS := $(C_RUNNERS)
+_RUNNERS := $(RUNNERS)
+endif
 
 all: $(TRUSTLETS)
 
 run_tests:
-	@for runner in $(RUNNERS); do \
-		echo "Running $$runner..."; \
-		make $$runner || exit 1; \
-	done
-	@for c_runner in $(C_RUNNERS); do \
+ifneq ($(_C_RUNNERS),)
+	@echo "=== run_tests1 (rebooting VM) ==="
+	@make -C ../../ _boot_and_test TEST_TARGET=run_tests1 TEST_FILTER="$(TEST_FILTER)"
+	@echo "=== run_tests2 (rebooting VM) ==="
+	@make -C ../../ _boot_and_test TEST_TARGET=run_tests2 TEST_FILTER="$(TEST_FILTER)"
+endif
+ifneq ($(_RUNNERS),)
+	@echo "=== run_tests3 (rebooting VM) ==="
+	@make -C ../../ _boot_and_test TEST_TARGET=run_tests3 TEST_FILTER="$(TEST_FILTER)"
+endif
+
+run_tests1:
+	@for c_runner in $(_C_RUNNERS); do \
 		echo "Running $$c_runner..."; \
 		make $$c_runner || exit 1; \
 	done
-	@for c_runner in $(C_RUNNERS); do \
-		echo "Running $$c_runner with privileged trustlets..."; \
-		CFLAGS="-Dcreate_zygote=create_zygote_privileged" make $$c_runner || exit 1; \
+
+run_tests2:
+	@for c_runner in $(addsuffix _privileged,$(_C_RUNNERS)); do \
+		echo "Running $$c_runner..."; \
+		make $$c_runner || exit 1; \
+	done
+
+run_tests3:
+	@for runner in $(_RUNNERS); do \
+		echo "Running $$runner..."; \
+		make $$runner || exit 1; \
 	done
 	# make -C ../../ trustlet_test
 
@@ -47,10 +72,15 @@ $(TRUSTLETS): %: %.c
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma
 
+C_RUNNERS_PRIVILEGED := $(addsuffix _privileged,$(C_RUNNERS))
+
 $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a
 	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
 	# make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread $(DPDK_LIBS)"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
+
+$(C_RUNNERS_PRIVILEGED): %_privileged:
+	@make $* CFLAGS="-Dcreate_zygote=create_zygote_privileged"
 
 NUMA_LIB := $(shell pkg-config --variable=libdir numa)
 ATOMIC_LIB ?= /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
@@ -70,4 +100,4 @@ clean:
 	rm -f $(TRUSTLETS) $(C_RUNNERS)
 
 
-.PHONY: all clean $(RUNNERS) $(C_RUNNERS)
+.PHONY: all clean run_tests run_tests1 run_tests2 run_tests3 $(RUNNERS) $(C_RUNNERS) $(C_RUNNERS_PRIVILEGED)
