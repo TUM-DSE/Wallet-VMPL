@@ -251,6 +251,9 @@
             hardeningDisable = [ "all" ];
             shellHook = ''
               PATH="${pkgs.clang-tools}/bin:$PATH"
+              export ATOMIC_LIB="${pkgs.stdenv.cc.cc.lib}/lib"
+              export GLIBC_LIB="${pkgs.glibc}/lib"
+              export GLIBC_STATIC="${pkgs.glibc.static}/lib"
               if [ ! -f "./container/99_config.yaml" ]; then
                 ./container/netconf.sh 2> /dev/null
               fi;

@@ -25,7 +25,7 @@ $(RUNNERS): %: %.py
 
 DPDK_PATH := $(shell realpath ../../.nix-builds/dpdk)
 # DPDK_PATH := /scratch/okelmann/dpdk/build
-GLIBC_STATIC := /nix/store/24hs0bbh26w5zfvkv5ps2amfrbwnz8pd-glibc-2.40-66-static/lib
+GLIBC_STATIC ?= /nix/store/24hs0bbh26w5zfvkv5ps2amfrbwnz8pd-glibc-2.40-66-static/lib
 DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_eal.a \
 	$(DPDK_PATH)/lib/librte_ring.a \
@@ -49,9 +49,9 @@ $(C_RUNNERS): %: %.c ../../module/libwallet/libwallet.a
 	# make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && gcc -I../../module/libwallet/src/ -include rte_config.h -I/usr/include/dpdk -I/usr/include/x86_64-linux-gnu/dpdk $< -O3 -march=native -g -o $@ $(WRAPPERS) -L../../module/libwallet/ -l:libwallet.a -lpthread $(DPDK_LIBS)"
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-tests && ./$@"
 
-NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
-ATOMIC_LIB := /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
-GLIBC_LIB := /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
+NUMA_LIB := $(shell pkg-config --variable=libdir numa)
+ATOMIC_LIB ?= /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
+GLIBC_LIB ?= /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
 
 simple_slick_fs: $(TRUSTLETS)
 	mkdir -p ../../runtime/filesystem/simple/fs/lib/
