@@ -7,6 +7,7 @@ struct zygote_data {
 };
 
 int create_zygote(const char* pal, const char* m, const char* os);
+int create_zygote_privileged(const char* pal, const char* m, const char* os);
 int delete_zygote(const int zygote_id);
 
 #endif // ZYGOTE_H_

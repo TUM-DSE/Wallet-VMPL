@@ -20,7 +20,7 @@ static void allocate_zygote_struct(struct zygote_data** z){
 
 
 
-int create_zygote(const char* pal, const char* m, const char* os) {
+int _create_zygote(const char* pal, const char* m, const char* os, bool privileged) {
     uint8_t* data;
     uint64_t size;
     load_file(pal, &data, &size);
@@ -46,6 +46,7 @@ int create_zygote(const char* pal, const char* m, const char* os) {
     struct monitor_call call;
     call.zygote.zygote_data = (void*)z;
     call.zygote.size = PAGE_SIZE;
+    call.zygote.privileged = privileged;
     call.type = createZygote;
     #ifndef NODEBUG
     assert(con);
@@ -55,6 +56,14 @@ int create_zygote(const char* pal, const char* m, const char* os) {
     printf("Zygote ID: %d\n", ret);
     #endif
     return ret;
+}
+
+int create_zygote(const char* pal, const char* m, const char* os) {
+    return _create_zygote(pal, m, os, false);
+}
+
+int create_zygote_privileged(const char* pal, const char* m, const char* os) {
+    return _create_zygote(pal, m, os, true);
 }
 
 int delete_zygote(const int zygote_id) {

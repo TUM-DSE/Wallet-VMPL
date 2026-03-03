@@ -84,6 +84,7 @@ struct monitor_call {
         struct {
             void* zygote_data;
             uint64_t size;
+            uint64_t privileged;
         } zygote;
         struct {
             void* trustlet_data;

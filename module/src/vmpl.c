@@ -116,6 +116,7 @@ static long create_zygote(struct monitor_call* mcall){
 	call.rax = MONITORCALLID(mcall->type);
 	call.rcx = mcall->zygote.size;
 	call.r8 = (u64)get_pgd_phys();
+	call.r9 = mcall->zygote.privileged;
 	call.rdx = (u64)mcall->zygote.zygote_data;
 
 	do_monitor_call(&call);
