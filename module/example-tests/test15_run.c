@@ -9,13 +9,15 @@
 
 #include "dpdk_stub.h"
 
-// continue refactoring from test3, but with chaining as test0
+#define INPUT_SIZE 16
+
+// like test5, but with shared memory at a user defined address instead of Wallet channels
 
 int main() {
     // with wallet.Wallet() as w:
     monitor_connect();
 
-    int input_size = 16;
+    int input_size = INPUT_SIZE;
 
     int chain_len = 2;
     int chains[] = {2};
@@ -39,7 +41,7 @@ int main() {
     }
 
     // input_data = b"a" * (input_size - 1) + b"\00"
-    char input_data[16];
+    char input_data[INPUT_SIZE];
     memset(input_data, 'a', input_size - 1);
     input_data[input_size - 1] = '\0';
 
@@ -60,6 +62,8 @@ int main() {
         //     trustlets[c].create_channel(trustlets[c+1])
         for (int c = chained; c < i - 1; c++) {
             create_channel(trustlets[c], trustlets[c+1]);
+            void *target_addr = (void *)0x38000000000ULL; // DATA_SHARED
+            create_channel_at(trustlets[c], trustlets[c+1], (uint64_t)target_addr, input_size);
         }
         chained += i - chained - 1;
 

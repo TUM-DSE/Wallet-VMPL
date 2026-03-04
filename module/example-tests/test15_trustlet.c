@@ -10,20 +10,22 @@
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
 #define DATA_OUT 0x30000000000
+#define DATA_SHARED 0x38000000000
 
 void main_default(bool suppress_output) {
     char* input = (char*)DATA_IN;
     char* output = (char*)DATA_OUT;
+    char* shared = (char*)DATA_SHARED;
     trustlet_exit();
 
     while (1) {
-        strcpy(output, input);
-
-        if (suppress_output) {
-            output[1] += 1;
+        if (suppress_output) { // actually we are not only testing if suppress_output, but we assume there are max 2 trustlets and if suppress_ouput, we are the first one.
+            strcpy(shared, input);
+            shared[1] += 1;
             trustlet_exit();
         } else {
-            output[2] += 1;
+            shared[2] += 1;
+            strcpy(output, shared);
             notify_monitor();
         }
     }
