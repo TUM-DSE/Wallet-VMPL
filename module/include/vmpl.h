@@ -34,6 +34,7 @@ enum monitor_call_type {
 
     createSharedMemory = 102,
     deleteSharedMemory = 103,
+    createChannelAt = 104,
 };
 
 enum attestation_report_type {
@@ -109,6 +110,12 @@ struct monitor_call {
             tpid_t trustlet_id_1;
             tpid_t trustlet_id_2;
         } channel;
+        struct {
+            tpid_t trustlet_id_1;
+            tpid_t trustlet_id_2;
+            uint64_t vaddr;
+            uint64_t size;
+        } channelAt;
         struct {
             tpid_t trustlet_id;
             void* guest_buffer;

@@ -238,6 +238,21 @@ static long create_channel(struct monitor_call* mcall){
 	return 0;
 }
 
+static long create_channel_at(struct monitor_call* mcall){
+	struct svsm_call call;
+	int res;
+
+	call.rax = MONITORCALLID(mcall->type);
+	call.rcx = mcall->channel.trustlet_id_1;
+	call.rdx = mcall->channel.trustlet_id_2;
+	call.r8 = mcall->channelAt.vaddr;
+	call.r9 = mcall->channelAt.size;
+
+	if((res = do_monitor_call(&call))!= 1)
+		return -1;
+	return 0;
+}
+
 static long get_pub_key(struct monitor_call* mcall){
 
 	struct svsm_call call;
@@ -384,6 +399,8 @@ static long parse_request(struct file *file, unsigned int cmd, unsigned long arg
 		return delete_trustlet(&call);
 	case createChannel:
 		return create_channel(&call);
+	case createChannelAt:
+		return create_channel_at(&call);
 	case get_public_key:
 		return get_pub_key(&call);
 	case send_policy:

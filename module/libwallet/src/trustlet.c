@@ -390,6 +390,23 @@ void create_channel(const int trustlet_id_1, const int trustlet_id_2){
     ioctl(con, VMPL_WR, &call);
 }
 
+void create_channel_at(const int trustlet_id_1, const int trustlet_id_2, uint64_t vaddr, uint64_t size) {
+    #ifndef NODEBUG
+    assert(con);
+    #endif
+
+    printf("Creating channel between %d and %d at %ld\n", trustlet_id_1, trustlet_id_2, vaddr);
+
+    struct monitor_call call;
+    call.type = createChannelAt;
+    call.channelAt.trustlet_id_1 = trustlet_id_1;
+    call.channelAt.trustlet_id_2 = trustlet_id_2;
+    call.channelAt.vaddr = vaddr;
+    call.channelAt.size = size;
+
+    ioctl(con, VMPL_WR, &call);
+}
+
 int delete_trustlet(const int trustlet_id) {
     struct monitor_call call;
     call.type = deleteTrustlet;

@@ -72,5 +72,6 @@ char* invoke_trustlet(const int trustlet_id, char* args, uint64_t output_size);
 char* invoke_trustlet_bin(const int trustlet_id, void* args, uint64_t args_size, uint64_t output_size);
 int delete_trustlet(const int trustlet_id);
 void create_channel(const int trustlet_id_1, const int trustlet_id_2);
+void create_channel_at(const int trustlet_id_1, const int trustlet_id_2, uint64_t vaddr, uint64_t size);
 void* create_shared_memory(const int trustlet_id, void* buffer, uint64_t size);
 #endif // TRUSTLET_H_
