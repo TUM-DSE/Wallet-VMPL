@@ -430,6 +430,30 @@ class Server(ABC):
         _ = self.exec(f'tmux -L {self.tmux_socket}' +
                       f' send-keys -t {session_name} {keys}')
 
+    def tmux_get_pid(self: 'Server', session_name: str) -> int:
+        """
+        Get the PID of the process running in a tmux session.
+
+        Returns the PID of the child process of the tmux pane
+
+        Parameters
+        ----------
+        session_name : str
+            The name of the session.
+
+        See Also
+        --------
+        tmux_new : Start a tmux session on the server.
+        tmux_kill : Stop a tmux session on the server.
+        """
+        pane_pid = self.exec(f'tmux -L {self.tmux_socket}' +
+                             f' list-panes -t {session_name}' +
+                             " -F '#{pane_pid}'").strip()
+        # pane_pid is the shell; get its child (the actual command)
+        # child_pid = self.exec(f'pgrep -P {pane_pid}').strip()
+        # return int(child_pid)
+        return int(pane_pid)
+
     def tmux_is_alive(self: 'Server', session_name: str) -> bool:
         return self.test(f'tmux -L {self.tmux_socket}' +
                       f' list-sessions | grep {session_name}')

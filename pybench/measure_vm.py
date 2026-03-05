@@ -12,6 +12,7 @@ import numpy as np
 from enums import Interface
 from time import sleep
 import os
+import getpass
 
 TARGET = {
     "polling": "build/polling_test-shared",
@@ -35,6 +36,32 @@ class PktgenTest(AbstractBenchTest):
 
     def estimated_runtime(self) -> float:
         return 5
+
+    @staticmethod
+    def _read_pidfile(path: str):
+        try:
+            with open(path, "r") as f:
+                return int(f.read().strip())
+        except (FileNotFoundError, ValueError):
+            return None
+
+    def pre_initial_cleanup(self, host: Host, qemu_pid, pktgen_pid):
+        debug('Pre-Initial cleanup (pktgen-specific)')
+        try:
+            host.kill_guest()
+        except Exception:
+            pass
+        host.stop_pktgen_vhost()
+        # sometimes qemu and pktgen refuse to die. Lets try not to kill other peoples processes though.
+        username = getpass.getuser()
+        if qemu_pid is None:
+            qemu_pid = self._read_pidfile(f"/tmp/pidfile.{username}.qemu")
+        if pktgen_pid is None:
+            pktgen_pid = self._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
+        if qemu_pid is not None:
+            host.exec(f"sudo kill {qemu_pid} || true")
+        if pktgen_pid is not None:
+            host.exec(f"sudo kill {pktgen_pid} || true")
 
     def compile(self, server: Server):
         cflags = " ".join([
@@ -184,17 +211,25 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     if plan_only:
         return
 
+    qemu_pid = None
+    pktgen_pid = None
+
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
         for [repetitions, batchsize, workload, chaining, system, pktsize], a_tests in bench.multi_iterator(bench_tests, ["repetitions", "batchsize", "workload", "chaining", "system", "pktsize"]):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")
-            host.stop_pktgen_vhost()
+            test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
             host.start_pktgen_vhost()
             test.compile(host)
             # sleep(1) # wait and pray for pktgen
             with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
-                guest.exec("echo hello world")
+                qemu_pid = host.tmux_get_pid("qemu")
+                with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
+                    f.write(str(qemu_pid))
+                pktgen_pid = host.tmux_get_pid("pktgen")
+                with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
+                    f.write(str(pktgen_pid))
 
 
                 # TODO rebuild fs
@@ -236,6 +271,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             # for repetition in range(test.repetitions):
             #     test.run(host, repetition)
             bench.done(test)
+
+    test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
 
     dfs = []
     for test in tests:
