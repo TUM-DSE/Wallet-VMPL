@@ -62,10 +62,17 @@ def setup_parser() -> ArgumentParser:
                         '--verbose',
                         dest='verbosity',
                         action='count',
-                        default=0,
+                        default=2,
                         help='''Verbosity, can be given multiple times to set
                              the log level (0: error, 1: warn, 2: info, 3:
                              debug)''',
+                        )
+    parser.add_argument('-q',
+                        '--quiet',
+                        action='count',
+                        default=0,
+                        help='''Reduce verbosity. -q sets verbosity to 1
+                             (warn), -qq sets it to 0 (error).''',
                         )
     return parser
 
@@ -169,6 +176,7 @@ class Measurement:
 
 
         self.args: Namespace = autotest.parse_args(parser)
+        self.args.verbosity = max(0, self.args.verbosity - self.args.quiet)
         autotest.setup_logging(self.args)
         self.config: ConfigParser = autotest.setup_and_parse_config(self.args)
 
