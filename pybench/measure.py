@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, fields as dataclass_fields
 from util import safe_cast, product_dict, randomword
 from typing import Iterator, cast, List, Dict, Callable, Tuple, Any, Self, TypeVar, Iterable, Type, Generic
 from os.path import isfile, join as path_join, basename
@@ -70,6 +70,56 @@ def setup_parser() -> ArgumentParser:
     return parser
 
 
+def add_test_arguments(parser: ArgumentParser, test_cls: Type['AbstractBenchTest']) -> None:
+    """
+    Add an argparse argument for each field of a dataclass that inherits AbstractBenchTest.
+
+    Each argument accepts one or more values (nargs='+'), suitable for building test matrices.
+    The argument type is inferred from the dataclass field's type annotation.
+
+    Example:
+        parser = setup_parser()
+        add_test_arguments(parser, PktgenTest)
+        args = parser.parse_args()
+        # args.batchsize = [1, 32], args.workload = [0, 50], ...
+    """
+    from typing import get_type_hints
+    hints = get_type_hints(test_cls)
+    for field in dataclass_fields(test_cls):
+        field_type = hints[field.name]
+        parser.add_argument(
+            f'--{field.name}',
+            nargs='+',
+            type=field_type,
+            default=None,
+            help=f'Set to not None to override {field.name} values ({field_type.__name__})',
+        )
+
+
+def test_matrix_from_args(args: Namespace, test_cls: Type['AbstractBenchTest'],
+                          defaults: Dict[str, List[Any]] = {}) -> Dict[str, List[Any]]:
+    """
+    Build a test_matrix dict from parsed arguments.
+
+    For each field of test_cls, uses the value from args if provided,
+    otherwise falls back to defaults.
+
+    Example:
+        defaults = dict(repetitions=[1], batchsize=[1, 32], ...)
+        matrix = test_matrix_from_args(args, PktgenTest, defaults)
+        tests = PktgenTest.list_tests(matrix)
+    """
+    matrix = {}
+    for field in dataclass_fields(test_cls):
+        value = getattr(args, field.name, None)
+        if value is not None:
+            matrix[field.name] = value
+            warning(f"Overriding {test_cls.__name__}.{field.name} with command line argument: {value}")
+        elif field.name in defaults:
+            matrix[field.name] = defaults[field.name]
+    return matrix
+
+
 def setup_host_interface(host: Host, interface: Interface, vm_range: range = range(0)) -> None:
     autotest.LoadLatencyTestGenerator.setup_interface(host, Machine.PCVM, interface, vm_range=vm_range)
 
@@ -91,6 +141,7 @@ def end_foreach(guests: Dict[int, Guest], func: Callable[[int, Guest], None], wo
 class Measurement:
     args: Namespace
     config: ConfigParser
+    test_type: None|Type['AbstractBenchTest']
 
     host: Host
     guest: Guest
@@ -99,8 +150,12 @@ class Measurement:
     guests: Dict[int, Guest]  # for multihost VMs we start counting VMs at 1
 
 
-    def __init__(self):
+    def __init__(self, test_type: None|Type['AbstractBenchTest'] = None):
         parser: ArgumentParser = setup_parser()
+        self.test_type = test_type
+        if test_type is not None:
+            add_test_arguments(parser, test_type)
+
         self.args: Namespace = autotest.parse_args(parser)
         autotest.setup_logging(self.args)
         self.config: ConfigParser = autotest.setup_and_parse_config(self.args)
@@ -120,6 +175,12 @@ class Measurement:
 
         if G.BRIEF:
             subprocess.run(["sudo", "rm", "-r", G.OUT_DIR])
+
+
+    def apply_cmdline_overrides(self, test_matrix: Dict[str, List[Any]]) -> Dict[str, List[Any]]:
+        if self.test_type is None:
+            return test_matrix
+        return test_matrix_from_args(self.args, self.test_type, defaults=test_matrix)
 
 
     def hosts(self) -> Tuple[Host, LoadGen]:

@@ -176,6 +176,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             num_vms = [0],
         )
 
+    test_matrix = measurement.apply_cmdline_overrides(test_matrix)
     tests : List[PktgenTest] = []
     tests = PktgenTest.list_tests(test_matrix)
     PktgenTest.estimate_time2(tests, [])
@@ -252,5 +253,5 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    measurement = Measurement()
+    measurement = Measurement(test_type=PktgenTest)
     main(measurement)
