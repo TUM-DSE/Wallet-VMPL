@@ -192,11 +192,11 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         test_matrix = dict(
             repetitions=[1],
             batchsize = [32], # , 32],
-            workload = [ 0, 1000 ], # , 100 ],
+            workload = [ 0 ], # , 100 ],
             chaining = [1],
             # system = [ "mirror" ],
-            # system = [ "noiomgr" ],
-            system = [ "mirror", "noiomgr" ],
+            system = [ "noiomgr" ],
+            # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
             # legacy args
@@ -253,6 +253,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                 remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                 guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
 
+                measurement.mark_vm_initialized(0)
+
                 for repetition in range(test.repetitions):
                     test.run(host, guest, repetition)
 
@@ -290,5 +292,5 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    measurement = Measurement(test_type=PktgenTest)
+    measurement = Measurement(test_type=PktgenTest, supports_boot_only=True)
     main(measurement)

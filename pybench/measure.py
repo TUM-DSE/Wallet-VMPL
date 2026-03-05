@@ -143,6 +143,9 @@ class Measurement:
     config: ConfigParser
     test_type: None|Type['AbstractBenchTest']
 
+    supports_boot_only: bool
+    initialized_vms: Dict[int, bool] # vm_number -> vm started but not initialized OR vm started and initialized
+
     host: Host
     guest: Guest
     loadgen: LoadGen
@@ -150,11 +153,20 @@ class Measurement:
     guests: Dict[int, Guest]  # for multihost VMs we start counting VMs at 1
 
 
-    def __init__(self, test_type: None|Type['AbstractBenchTest'] = None):
+    def __init__(self, test_type: None|Type['AbstractBenchTest'] = None, supports_boot_only: bool = False):
         parser: ArgumentParser = setup_parser()
         self.test_type = test_type
         if test_type is not None:
             add_test_arguments(parser, test_type)
+
+        self.supports_boot_only = supports_boot_only
+        self.initialized_vms = dict()
+        if self.supports_boot_only:
+            parser.add_argument('--boot-only',
+                                action='store_true',
+                                help='Only start the VM and initialize it, but dont run benchmarks.',
+                                )
+
 
         self.args: Namespace = autotest.parse_args(parser)
         autotest.setup_logging(self.args)
@@ -182,6 +194,18 @@ class Measurement:
             return test_matrix
         return test_matrix_from_args(self.args, self.test_type, defaults=test_matrix)
 
+    def mark_vm_initialized(self, vm_number: int):
+        if vm_number in self.initialized_vms:
+            self.initialized_vms[vm_number] = True
+        else:
+            error(f"Trying to mark VM {vm_number} as initialized, but it was not started yet.")
+
+        if len(self.initialized_vms.values()) > 0 and all(self.initialized_vms.values()):
+            info("All VMs initialized")
+            if self.args.boot_only:
+                breakpoint()
+                pass
+
 
     def hosts(self) -> Tuple[Host, LoadGen]:
         return (self.host, self.loadgen)
@@ -202,6 +226,7 @@ class Measurement:
         """
         Creates a unikraft-click virtual machine
         """
+        assert not self.supports_boot_only, "Measurement.unikraft_vm() does not support the boot-only flag."
 
         # host: inital cleanup
 
@@ -309,6 +334,8 @@ class Measurement:
         debug("Waiting for guest connectivity")
         self.guest.wait_for_connection(timeout=120)
 
+        self.initialized_vms[0] = False # mark VM 0 as started but not initialized yet
+
         yield self.guest
 
         # teardown
@@ -319,6 +346,8 @@ class Measurement:
         if interface.needs_vpp():
             self.host.stop_vpp()
         self.host.cleanup_network()
+
+        del self.initialized_vms[0] # remove VM 0 from initialized_vms
 
 
     @contextmanager
@@ -396,6 +425,7 @@ class Measurement:
             info(f"Waiting for connectivity of guests")
             for i in vm_range:
                 self.guests[i].wait_for_connection(timeout=120)
+                self.initialized_vms[i] = False # mark VM i as started but not initialized yet
 
         yield self.guests
 
@@ -407,6 +437,9 @@ class Measurement:
         if interface.needs_vpp():
             self.host.stop_vpp()
         self.host.cleanup_network()
+
+        for i in MultiHost.range(num):
+            del self.initialized_vms[i] # remove VM i from initialized_vms
 
 
 A = TypeVar("A", bound='AbstractBenchTest')
