@@ -32,7 +32,7 @@
 
 #define DATA_SIZE PACKET_SIZE
 
-static void* DATA_SHARED = NULL;
+/* static void* DATA_SHARED = NULL; */
 static __thread bool use_shm_alloc = false;
 
 #define WITH_SHM_ALLOC(expr) ({ \
@@ -124,6 +124,7 @@ int main(int argc, char *argv[]) {
 
     int zygotes[2];
     int trustlets[2];
+    struct threaded_invoke_handle*handles[2];
 
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
@@ -139,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     // Allocate shared memory at the same VA the trustlet uses (DATA_SHARED),
     // so pointers within shm (e.g. mbuf buf_addr) are valid in both address spaces.
-    void *target_addr = (void *)0x38000000000ULL;
+    void *target_addr = (void *)CHANNEL_ADDR(0);
     struct shm* shared = (struct shm*)mmap(target_addr, SHARED_SIZE,
         PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
         -1, 0);
@@ -152,22 +153,52 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     memset(shared, 0, SHARED_SIZE);
-    DATA_SHARED = shared;
     shared->legacy_buffer.data[0] = 'I';
     shared->keep_running = true;
-    if (!create_shared_memory(trustlets[1], shared, SHARED_SIZE)) {
+    if (!create_shared_memory(trustlets[0], shared, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
     }
     printf("Shared memory registered\n");
 
     // Create mbuf pool backed by shared memory
-    struct rte_mempool *pool = create_shm_mbuf_pool(shared);
+    printf("create_shm_mbuf_pool(%s, %p)\n", "SHM1_MBUF_POOL", shared);
+    struct rte_mempool *pool = create_shm_mbuf_pool("SHM1_MBUF_POOL", shared);
     if (!pool) {
         printf("Failed to create shm mbuf pool\n");
         return -1;
     }
+
+    shared->mbuf_pool = pool;
     printf("Mbuf pool created with %u objects\n", pool->populated_size);
+
+    // allocate second shm
+    target_addr = (void *)CHANNEL_ADDR(1);
+    struct shm* shared2 = (struct shm*)mmap(target_addr, SHARED_SIZE,
+        PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
+        -1, 0);
+    if (shared2 == MAP_FAILED) {
+        printf("mmap at %p failed: %s\n", target_addr, strerror(errno));
+        return -1;
+    }
+    memset(shared2, 0, SHARED_SIZE);
+    shared2->legacy_buffer.data[0] = 'I';
+    shared2->keep_running = true;
+    if (!create_shared_memory(trustlets[chain_len-1], shared2, SHARED_SIZE)) {
+        printf("Failed to create shared memory\n");
+        return -1;
+    }
+
+    // Create mbuf pool backed by shared memory
+    printf("create_shm_mbuf_pool(%s, %p)\n", "SHM2_MBUF_POOL", shared2);
+    struct rte_mempool *pool2 = create_shm_mbuf_pool("SHM2_MBUF_POOL", shared2);
+    if (!pool2) {
+        printf("Failed to create shm mbuf pool\n");
+        return -1;
+    }
+
+    shared2->mbuf_pool = pool2;
+    printf("Mbuf pool created with %u objects\n", pool2->populated_size);
 
     // input_data = b"a" * (input_size - 1) + b"\00"
     char input_data[16];
@@ -181,8 +212,6 @@ int main(int argc, char *argv[]) {
         invoke_trustlet(trustlets[t], input_data, input_size);
     }
 
-    int chained = 0;
-
     // for i in chains:
     for (int idx = 0; idx < chains_len; idx++) {
         int i = chains[idx];
@@ -190,33 +219,47 @@ int main(int argc, char *argv[]) {
         // #Create chains
         // for c in range(chained,i - 1):
         //     trustlets[c].create_channel(trustlets[c+1])
-        for (int c = chained; c < i - 1; c++) {
+        for (int c = 0; c < i - 1; c++) {
             // create_channel(trustlets[c], trustlets[c+1]);
+            create_channel_at(trustlets[c], trustlets[c+1], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
         }
-        chained += i - chained - 1;
 
         // #Prepair input data
         struct trustlet_configuration config;
-        config.mode[0] = 'a';
-        config.shm_addr = shared;
+        config.mode[0] = MODE_FIRST_NODE;
+        config.shm_addr_previous = shared;
+        config.shm_addr_next = CHANNEL_ADDR(2);
+        invoke_trustlet_bin(trustlets[0], &config, sizeof(config), 0);
 
         // #Setup Trustlets
         // for t in range(i - 1):
         //     trustlets[t].invoke_trustlet(b"a", 0)
         printf("185:invoke_trustlet()");
-        for (int t = 0; t < i - 1; t++) {
+        for (int t = 1; t < i - 1; t++) {
             // Transfer nodes (input->output)
+            config.mode[0] = MODE_MIDDLE_NODE;
+            config.shm_addr_previous = CHANNEL_ADDR(1+t);
+            config.shm_addr_next = CHANNEL_ADDR(2+t);
             invoke_trustlet_bin(trustlets[t], &config, sizeof(config), 0);
         }
         // trustlets[i - 1].invoke_trustlet(b"s", 0)
         // End node - use shm mode
-        config.mode[0] = 's';
+        config.mode[0] = MODE_LAST_NODE;
+        config.shm_addr_previous = CHANNEL_ADDR(i);
+        config.shm_addr_next = CHANNEL_ADDR(1);
         invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
 
         // start long-running trustlet
         /* invoke_trustlet(trustlets[1], "s", 0); */
-        struct threaded_invoke_handle* handle = threaded_invoke(trustlets[1], 1, "s", 0);
-        sleep(1); // give trustlet time to start
+        printf("Starting trustlet 0 on core 1\n");
+        handles[0] = threaded_invoke(trustlets[0], 1, "", 0);
+        for (int t = 1; t < i - 1; t++) {
+            printf("Starting trustlet %d on core %d\n", t, t+1);
+            handles[t] = threaded_invoke(trustlets[t], t + 1, "", 0);
+        }
+            printf("Starting trustlet %d on core %d\n", i - 1, i - 1 + 1);
+        handles[i-1] = threaded_invoke(trustlets[i - 1], i - 1 + 1, "", 0);
+        sleep(10); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
@@ -241,7 +284,7 @@ int main(int argc, char *argv[]) {
         for (int iter = 0; iter < iterations; iter++) {
 
             const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
-                    bufs, BURST_SIZE);
+                    bufs, BURST_SIZE); // bufs in cvmio pool
 
             if (unlikely(nb_rx == 0)) {
                 /* rx_err++; */
@@ -250,7 +293,7 @@ int main(int argc, char *argv[]) {
                 for (size_t i = 0; i < nb_rx; i++) {
                     enq_objs[i] = rte_pktmbuf_copy(bufs[i], pool, 0, UINT32_MAX); // TODO not MAX
                     assert(enq_objs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
-                    rte_pktmbuf_free(bufs[i]);
+                    rte_pktmbuf_free(bufs[i]); // return to cvmio_pool
                 }
 
                 enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_rx, NULL);
@@ -258,15 +301,23 @@ int main(int argc, char *argv[]) {
                     rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_rx);
                 else
                     num_enqed += enq_num;
+
+                // receive empty buffers back and return them to pool
+                deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
+                if (deq_num > 0) {
+                    for (size_t j = 0; j < deq_num; j++) {
+                        rte_pktmbuf_free(deq_objs[j]); // return to pool
+                    }
+                }
             }
 
-            // Dequeue processed mbufs and return to pool
-            deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
+            // Dequeue processed mbufs
+            deq_num = rte_ring_sc_dequeue_burst(&shared2->ingress.ring, deq_objs, BURST_SIZE, NULL);
             if (deq_num > 0) {
                 for (size_t i = 0; i < deq_num; i++) {
                     bufs[i] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
                     assert(bufs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
-                    rte_pktmbuf_free(deq_objs[i]);
+                    /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
                 }
 
                 const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
@@ -276,8 +327,12 @@ int main(int argc, char *argv[]) {
                 if (unlikely(nb_tx < deq_num)) {
                     uint16_t buf;
                     for (buf = nb_tx; buf < deq_num; buf++)
-                        rte_pktmbuf_free(bufs[buf]);
+                        rte_pktmbuf_free(bufs[buf]); // return to cvmio_pool
                 }
+
+                // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
+                size_t nb_returned = rte_ring_sp_enqueue_bulk(&shared2->egress.ring, (void**)(&(deq_objs[0])), deq_num, NULL);
+                assert(nb_returned == deq_num && "Failed to return all buffers to previous VNFlet. Is pool bigger than the ring pair combined?");
 
                 /* rte_pktmbuf_free_bulk((struct rte_mbuf **)deq_objs, deq_num); */
                 num_deqed += deq_num;
@@ -289,8 +344,12 @@ int main(int argc, char *argv[]) {
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
-        char* _res = threaded_join(handle);
-        threaded_free(handle);
+        for (int t = 0; t < i; t++) {
+            if (handles[t] != NULL) {
+                char* _res = threaded_join(handles[t]);
+                threaded_free(handles[t]);
+            }
+        }
 
         printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
         printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);

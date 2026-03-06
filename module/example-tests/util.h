@@ -35,6 +35,11 @@
 #define SHM_POOL_ELT_TOTAL RTE_ALIGN(sizeof(struct rte_mempool_objhdr) + sizeof(struct rte_mbuf) + SHM_POOL_DATA_ROOM, RTE_CACHE_LINE_SIZE)
 #define SHM_POOL_BUF_SIZE  (SHM_POOL_SIZE * SHM_POOL_ELT_TOTAL)
 
+// Some primitives like create_channel(_at) work on page level 3, requiring 512G-alignment.
+// The two before shared is used by the default INPUT and OUTPUT
+#define CHANNEL_ADDR(x) ((void*)(0x38000000000ULL+ (x) * 0x8000000000ULL))
+#define SHARED_ADDR CHANNEL_ADDR(0)
+
 struct shm_stack {
   uint32_t size;
   uint32_t top;
@@ -43,7 +48,7 @@ struct shm_stack {
 
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 #if DEBUG
@@ -53,8 +58,12 @@ struct shm_stack {
 #endif
 
 struct trustlet_configuration {
+#define MODE_FIRST_NODE '1'
+#define MODE_MIDDLE_NODE '2'
+#define MODE_LAST_NODE '3'
   char mode[1];
-  void* shm_addr;
+  void* shm_addr_previous; // previous VNFlets or driver
+  void* shm_addr_next; // next VNFlet or driver
 };
 
 struct buffer {
@@ -69,6 +78,7 @@ struct shm {
   atomic_bool keep_running; // used as termination signal for long-running trustlets
 
   char tailq_entry_buf[TAILQ_ENTRY_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
+  struct rte_mempool *mbuf_pool;
 
   union {
     struct rte_ring ring;
@@ -82,6 +92,10 @@ struct shm {
 
   struct shm_stack pool_stack __attribute__((aligned(CACHE_LINE_SIZE)));
   char pool_buf[SHM_POOL_BUF_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
+// (size + MASK & MASK) to align for mempool cache size 0
+#define POOL_PRIV_SIZE (((sizeof(struct rte_pktmbuf_pool_private) + RTE_MEMPOOL_HEADER_SIZE((struct rte_mempool*)0x1, 0))+ RTE_MEMPOOL_ALIGN_MASK) & (~RTE_MEMPOOL_ALIGN_MASK))
+  char pool_priv[POOL_PRIV_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
+  struct rte_mempool_memhdr pool_memhdr;
 };
 
 // Trustlet side: wait until we own the buffer, return data length

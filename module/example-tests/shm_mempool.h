@@ -67,14 +67,14 @@ static const struct rte_mempool_ops shm_stack_ops = {
 RTE_MEMPOOL_REGISTER_OPS(shm_stack_ops);
 
 static inline struct rte_mempool *
-create_shm_mbuf_pool(struct shm *shared)
+create_shm_mbuf_pool(char *name, struct shm *shared)
 {
 	unsigned n = SHM_POOL_SIZE;
 	unsigned elt_size = sizeof(struct rte_mbuf) + SHM_POOL_DATA_ROOM;
 	unsigned priv_size = sizeof(struct rte_pktmbuf_pool_private);
 
 	struct rte_mempool *mp = rte_mempool_create_empty(
-		"SHM_MBUF_POOL", n, elt_size, 0, priv_size,
+		name, n, elt_size, 0, priv_size,
 		SOCKET_ID_ANY, 0);
 	if (!mp) {
 		printf("Failed to create empty mempool: %s\n",

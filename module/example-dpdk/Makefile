@@ -26,7 +26,7 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_net_virtio.a \
 	-Wl,--no-whole-archive -lm
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
-WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned
+WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned -Wl,--wrap=rte_memzone_reserve
 
 NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
 ATOMIC_LIB := /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
@@ -34,10 +34,10 @@ GLIBC_LIB := /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
 BSD_INCLUDE := /nix/store/xiw9h3ssfsj1qnap4nzg2hzhq8zc54r5-libbsd-0.11.8-dev/include
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(BSD_INCLUDE) $< -O3 -march=znver3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(BSD_INCLUDE) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
-	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -o $@ $< \
+	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -O3 -g -mssse3 -o $@ $< \
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
 
