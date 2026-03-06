@@ -184,18 +184,32 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
 
 
     // Initialize DPDK ring
+    struct rte_mempool *pool2 = data_shared_next->mbuf_pool;
     if (mode == MODE_LAST_NODE) { // last node pool has no next to allocate the rings
         if (!ring_pair_create(data_shared_next))
             return;
 
-        data_shared_previous->keep_running = true;
+        println("create_shm_mbuf_pool(%s, %p)", "VNFlet_MBUF_POOL", data_shared_next);
+        next_alloc_buffer = data_shared_next->pool_priv; // TODO:
+        next_tailq_buf = data_shared_next->tailq_entry_buf; // we can reuse the same buffer for this new tailq, trust me bro (the entry will be the same and is not really relevant anyways)
+        next_memhdr_buf = (void*)&data_shared_next->pool_memhdr;
+        data_shared_next->mbuf_pool = create_shm_mbuf_pool("VNFlet_MBUF_POOL", data_shared_next);
+        next_alloc_buffer = NULL;
+        next_tailq_buf = NULL;
+        next_memhdr_buf = NULL;
+        pool2 = data_shared_next->mbuf_pool;
+        if (!pool2) {
+            printf("Failed to create shm mbuf pool\n");
+            return;
+        }
+        printf("Mbuf pool %p created with %u objects\n", pool2, pool2->populated_size);
     }
 
     trustlet_exit();
 
     /* println("Waiting for pool2 to be allocated by next VNFlet..."); */
     /* while (READ_ONCE(data_shared_next->mbuf_pool) == NULL) {} */
-    struct rte_mempool *pool2 = data_shared_next->mbuf_pool;
+    pool2 = data_shared_next->mbuf_pool;
     // data_shared_next mbuf pool is always allocated by the next VNFlet (or the driver in case of MODE_LAST_NODE)
     /* if (mode != MODE_LAST_NODE) { // last node pool allocated by driver */
     /*     // Create mbuf pool backed by shared memory */

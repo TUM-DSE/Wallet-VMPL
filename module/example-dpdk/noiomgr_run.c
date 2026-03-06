@@ -189,16 +189,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    // Create mbuf pool backed by shared memory
-    printf("create_shm_mbuf_pool(%s, %p)\n", "SHM2_MBUF_POOL", shared2);
-    struct rte_mempool *pool2 = create_shm_mbuf_pool("SHM2_MBUF_POOL", shared2);
-    if (!pool2) {
-        printf("Failed to create shm mbuf pool\n");
-        return -1;
-    }
+    // We do the following in the first trustlet now, because we are missing the allocator wrappers here that are present in the trustlet. I dont want to add them here, because it would pollute our cvmio external setup maybe?
+    // // Create mbuf pool backed by shared memory
+    // printf("create_shm_mbuf_pool(%s, %p)\n", "SHM2_MBUF_POOL", shared2);
+    // struct rte_mempool *pool2 = create_shm_mbuf_pool("SHM2_MBUF_POOL", shared2);
+    // if (!pool2) {
+    //     printf("Failed to create shm mbuf pool\n");
+    //     return -1;
+    // }
 
-    shared2->mbuf_pool = pool2;
-    printf("Mbuf pool created with %u objects\n", pool2->populated_size);
+    // shared2->mbuf_pool = pool2;
+    // printf("Mbuf pool created with %u objects\n", pool2->populated_size);
 
     // input_data = b"a" * (input_size - 1) + b"\00"
     char input_data[16];
@@ -259,7 +260,7 @@ int main(int argc, char *argv[]) {
         }
             printf("Starting trustlet %d on core %d\n", i - 1, i - 1 + 1);
         handles[i-1] = threaded_invoke(trustlets[i - 1], i - 1 + 1, "", 0);
-        sleep(10); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
+        sleep(60); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];

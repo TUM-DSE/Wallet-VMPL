@@ -115,7 +115,7 @@ class PktgenTest(AbstractBenchTest):
         # breakpoint()
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
-        guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=30)
+        guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=90)
 
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
@@ -133,7 +133,10 @@ class PktgenTest(AbstractBenchTest):
             sleep(1)
         host.exec_pktgen('pktgen.stop(0)')
 
+        pkt_counts = host.exec_pktgen('printf(pktgen.portStats("0", "port")[0].opackets .. "/" .. pktgen.portStats("0", "port")[0].ipackets)').split("/")
+
         print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
+        print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
 
         local_output_file = self.output_filepath(repetition)
         os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
