@@ -233,16 +233,14 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     size_t local_buf_lens[BURST_SIZE];
 
     while (likely(atomic_load(&data_shared_previous->keep_running))) {
-        println("p1");
         iterations++;
-        delay(1*1e9);
+        /* delay(1*1e9); */
         /* buf_used = trustlet_rx(buf); */
         /* buf->data[3] += 1; */
         /* trustlet_tx(buf, buf_used); */
 
-        println("p2");
         num_deq = rte_ring_sc_dequeue_burst(&data_shared_previous->ingress.ring, deq_objs, BURST_SIZE, NULL); // pool1 bufs
-        println("%lu = rte_ring_sc_dequeue_burst(%p, ...)", num_deq, &data_shared_previous->ingress.ring);
+        debug println("%lu = rte_ring_sc_dequeue_burst(%p, ...)", num_deq, &data_shared_previous->ingress.ring);
 
         if(num_deq == 0) {
             /* vnflet_stats[vnfletId].dequeue_failures++; */
@@ -291,18 +289,17 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
                     debug println("Enqueued %lu objects to ring.", num_enq);
                 }
 
-                num_deq = rte_ring_sc_dequeue_burst(&data_shared_next->egress.ring, deq_objs, BURST_SIZE, NULL);
-                if (num_deq > 0) {
-                    for (size_t i = 0; i < num_deq; i++) {
-                        rte_pktmbuf_free(deq_objs[i]);
-                    }
-                }
 
             }
 
-
         }
 
+        num_deq = rte_ring_sc_dequeue_burst(&data_shared_next->egress.ring, deq_objs, BURST_SIZE, NULL);
+        if (num_deq > 0) {
+            for (size_t i = 0; i < num_deq; i++) {
+                rte_pktmbuf_free(deq_objs[i]);
+            }
+        }
 
 
         // TODO: copy mbufs to local mem, send back empty buffer, allocate mbuf from pool2, copy data to it, sent it to data_shared_next ring, receive empty mbufs

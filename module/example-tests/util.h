@@ -27,7 +27,7 @@
 
 // Number of rte_mbuf objects in the shared mempool (>= 2*RING_SIZE so the pool
 // can never be exhausted by both rings' worth of in-flight mbufs)
-#define SHM_POOL_SIZE (NUM_RINGS * RING_SIZE - 1)
+#define SHM_POOL_SIZE (RING_SIZE - 1)
 // Packet data buffer size per mbuf (128 bytes headroom + 128 bytes payload)
 #define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 1522)
 // Backing memory for mbuf objects: each element is objhdr + rte_mbuf + data room,
@@ -48,7 +48,7 @@ struct shm_stack {
 
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 #if DEBUG

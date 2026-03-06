@@ -303,12 +303,13 @@ int main(int argc, char *argv[]) {
                 else
                     num_enqed += enq_num;
 
-                // receive empty buffers back and return them to pool
-                deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
-                if (deq_num > 0) {
-                    for (size_t j = 0; j < deq_num; j++) {
-                        rte_pktmbuf_free(deq_objs[j]); // return to pool
-                    }
+            }
+
+            // receive empty buffers back and return them to pool
+            deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
+            if (deq_num > 0) {
+                for (size_t j = 0; j < deq_num; j++) {
+                    rte_pktmbuf_free(deq_objs[j]); // return to pool
                 }
             }
 
