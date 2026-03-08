@@ -133,9 +133,9 @@ int main(int argc, char *argv[]) {
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
     for (int i = 0; i < chain_len; i++) {
-        zygotes[i] = create_zygote("../libpal.so", "noiomgr_manifest", "../libsysdb.so");
+        zygotes[i] = create_zygote("../libpal.so", "iomgr_manifest", "../libsysdb.so");
     }
-    iomgr_zygote = create_zygote("../libpal.so", "noiomgr_manifest", "../libsysdb.so");
+    iomgr_zygote = create_zygote("../libpal.so", "iomgr_manifest", "../libsysdb.so");
 
     // for i in range(chain_len):
     //     trustlets.append(zygotes[i].create_trustlet("./empty.py"))
