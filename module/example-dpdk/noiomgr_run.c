@@ -291,17 +291,21 @@ int main(int argc, char *argv[]) {
                 /* rx_err++; */
             } else {
                 // Copy received packets into mbufs from the shm pool
+                size_t nb_copied = 0;
                 for (size_t i = 0; i < nb_rx; i++) {
-                    enq_objs[i] = rte_pktmbuf_copy(bufs[i], pool, 0, UINT32_MAX); // TODO not MAX
-                    assert(enq_objs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
+                    enq_objs[nb_copied] = rte_pktmbuf_copy(bufs[i], pool, 0, UINT32_MAX); // TODO not MAX
                     rte_pktmbuf_free(bufs[i]); // return to cvmio_pool
+                    if (enq_objs[nb_copied] != NULL)
+                        nb_copied++;
                 }
 
-                enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_rx, NULL);
-                if (enq_num == 0)
-                    rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_rx);
-                else
-                    num_enqed += enq_num;
+                if (nb_copied > 0) {
+                    enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_copied, NULL);
+                    if (enq_num == 0)
+                        rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_copied);
+                    else
+                        num_enqed += enq_num;
+                }
 
             }
 
@@ -316,27 +320,32 @@ int main(int argc, char *argv[]) {
             // Dequeue processed mbufs
             deq_num = rte_ring_sc_dequeue_burst(&shared2->ingress.ring, deq_objs, BURST_SIZE, NULL);
             if (deq_num > 0) {
+                size_t nb_copied2 = 0;
                 for (size_t i = 0; i < deq_num; i++) {
-                    bufs[i] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
-                    assert(bufs[i] != NULL && "rte_pktmbuf_copy failed: pool exhausted");
+                    bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
                     /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
+                    if (bufs[nb_copied2] != NULL)
+                        nb_copied2++;
                 }
 
-                const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
-                        bufs, deq_num);
+                if (nb_copied2 > 0) {
+                    const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
+                            bufs, nb_copied2);
 
-                /* Free any unsent packets */
-                if (unlikely(nb_tx < deq_num)) {
-                    uint16_t buf;
-                    for (buf = nb_tx; buf < deq_num; buf++)
-                        rte_pktmbuf_free(bufs[buf]); // return to cvmio_pool
+                    /* Free any unsent packets */
+                    if (unlikely(nb_tx < nb_copied2)) {
+                        uint16_t buf;
+                        for (buf = nb_tx; buf < nb_copied2; buf++)
+                            rte_pktmbuf_free(bufs[buf]); // return to cvmio_pool
+                    }
                 }
 
                 // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
                 size_t nb_returned = rte_ring_sp_enqueue_bulk(&shared2->egress.ring, (void**)(&(deq_objs[0])), deq_num, NULL);
-                assert(nb_returned == deq_num && "Failed to return all buffers to previous VNFlet. Is pool bigger than the ring pair combined?");
+                if (nb_returned != deq_num) {
+                    printf("Warning: failed to return %lu buffers to shared2->egress\n", deq_num);
+                }
 
-                /* rte_pktmbuf_free_bulk((struct rte_mbuf **)deq_objs, deq_num); */
                 num_deqed += deq_num;
 
             }
