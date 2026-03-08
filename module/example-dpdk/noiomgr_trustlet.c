@@ -138,6 +138,27 @@ bool ring_pair_create(struct shm* data_shared) {
     return true;
 }
 
+struct rte_mempool* mbuf_pool_create(struct shm* data_shared) {
+    struct rte_mempool *pool = data_shared->mbuf_pool;
+
+    println("create_shm_mbuf_pool(%s, %p)", "VNFlet_MBUF_POOL", data_shared);
+    next_alloc_buffer = data_shared->pool_priv; // TODO:
+    next_tailq_buf = data_shared->tailq_entry_buf; // we can reuse the same buffer for this new tailq, trust me bro (the entry will be the same and is not really relevant anyways)
+    next_memhdr_buf = (void*)&data_shared->pool_memhdr;
+    data_shared->mbuf_pool = create_shm_mbuf_pool("VNFlet_MBUF_POOL", data_shared);
+    next_alloc_buffer = NULL;
+    next_tailq_buf = NULL;
+    next_memhdr_buf = NULL;
+    pool = data_shared->mbuf_pool;
+    if (!pool) {
+        printf("Failed to create shm mbuf pool\n");
+        return NULL;
+    }
+    printf("Mbuf pool %p created with %u objects\n", pool, pool->populated_size);
+
+    return pool;
+}
+
 void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shared_next) {
     struct shm* buf = data_shared_previous;
     size_t buf_used = 0;
@@ -163,20 +184,9 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     // Create mbuf pool backed by shared memory
     struct rte_mempool *pool1 = data_shared_previous->mbuf_pool;
     if (mode != MODE_FIRST_NODE) { // first node pool allocated by driver
-        println("create_shm_mbuf_pool(%s, %p)", "VNFlet_MBUF_POOL", data_shared_previous);
-        next_alloc_buffer = data_shared_previous->pool_priv; // TODO:
-        next_tailq_buf = data_shared_previous->tailq_entry_buf; // we can reuse the same buffer for this new tailq, trust me bro (the entry will be the same and is not really relevant anyways)
-        next_memhdr_buf = (void*)&data_shared_previous->pool_memhdr;
-        data_shared_previous->mbuf_pool = create_shm_mbuf_pool("VNFlet_MBUF_POOL", data_shared_previous);
-        next_alloc_buffer = NULL;
-        next_tailq_buf = NULL;
-        next_memhdr_buf = NULL;
-        pool1 = data_shared_previous->mbuf_pool;
-        if (!pool1) {
-            printf("Failed to create shm mbuf pool\n");
+        pool1 = mbuf_pool_create(data_shared_previous);
+        if (!pool1)
             return;
-        }
-        printf("Mbuf pool %p created with %u objects\n", pool1, pool1->populated_size);
 
         data_shared_previous->keep_running = true;
     }
@@ -189,20 +199,9 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
         if (!ring_pair_create(data_shared_next))
             return;
 
-        println("create_shm_mbuf_pool(%s, %p)", "VNFlet_MBUF_POOL", data_shared_next);
-        next_alloc_buffer = data_shared_next->pool_priv; // TODO:
-        next_tailq_buf = data_shared_next->tailq_entry_buf; // we can reuse the same buffer for this new tailq, trust me bro (the entry will be the same and is not really relevant anyways)
-        next_memhdr_buf = (void*)&data_shared_next->pool_memhdr;
-        data_shared_next->mbuf_pool = create_shm_mbuf_pool("VNFlet_MBUF_POOL", data_shared_next);
-        next_alloc_buffer = NULL;
-        next_tailq_buf = NULL;
-        next_memhdr_buf = NULL;
-        pool2 = data_shared_next->mbuf_pool;
-        if (!pool2) {
-            printf("Failed to create shm mbuf pool\n");
+        pool2 = mbuf_pool_create(data_shared_previous);
+        if (!pool2)
             return;
-        }
-        printf("Mbuf pool %p created with %u objects\n", pool2, pool2->populated_size);
     }
 
     trustlet_exit();
