@@ -61,6 +61,7 @@ struct trustlet_configuration {
 #define MODE_FIRST_NODE '1'
 #define MODE_MIDDLE_NODE '2'
 #define MODE_LAST_NODE '3'
+#define MODE_IOMGR_NODE '4'
   char mode[1];
   void* shm_addr_previous; // previous VNFlets or driver
   void* shm_addr_next; // next VNFlet or driver

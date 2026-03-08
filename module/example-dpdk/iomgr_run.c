@@ -23,6 +23,7 @@
 #include <rte_ring.h>
 #include <rte_mbuf.h>
 
+#include "../include/cpuid.h"
 #include "../example-tests/util.h"
 #include "../example-tests/util_run.h"
 #include "../example-tests/shm_mempool.h"
@@ -124,19 +125,24 @@ int main(int argc, char *argv[]) {
 
     int zygotes[2];
     int trustlets[2];
-    struct threaded_invoke_handle*handles[2];
+    int iomgr_zygote;
+    int iomgr_trustlet;
+    struct threaded_invoke_handle* handles[2];
+    struct threaded_invoke_handle* iomgr_handle;
 
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
     for (int i = 0; i < chain_len; i++) {
         zygotes[i] = create_zygote("../libpal.so", "noiomgr_manifest", "../libsysdb.so");
     }
+    iomgr_zygote = create_zygote("../libpal.so", "noiomgr_manifest", "../libsysdb.so");
 
     // for i in range(chain_len):
     //     trustlets.append(zygotes[i].create_trustlet("./empty.py"))
     for (int i = 0; i < chain_len; i++) {
         trustlets[i] = create_trustlet(zygotes[i], "./empty.py");
     }
+    iomgr_trustlet = create_trustlet(iomgr_zygote, "./empty.py");
 
     // Allocate shared memory at the same VA the trustlet uses (DATA_SHARED),
     // so pointers within shm (e.g. mbuf buf_addr) are valid in both address spaces.
@@ -155,7 +161,7 @@ int main(int argc, char *argv[]) {
     memset(shared, 0, SHARED_SIZE);
     shared->legacy_buffer.data[0] = 'I';
     shared->keep_running = true;
-    if (!create_shared_memory(trustlets[0], shared, SHARED_SIZE)) {
+    if (!create_shared_memory(iomgr_trustlet, shared, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
     }
@@ -184,7 +190,7 @@ int main(int argc, char *argv[]) {
     memset(shared2, 0, SHARED_SIZE);
     shared2->legacy_buffer.data[0] = 'I';
     shared2->keep_running = true;
-    if (!create_shared_memory(trustlets[chain_len-1], shared2, SHARED_SIZE)) {
+    if (!create_shared_memory(iomgr_trustlet, shared2, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
     }
@@ -212,6 +218,7 @@ int main(int argc, char *argv[]) {
         printf("152:invoke_trustlet()");
         invoke_trustlet(trustlets[t], input_data, input_size);
     }
+    invoke_trustlet(iomgr_trustlet, input_data, input_size);
 
     // for i in chains:
     for (int idx = 0; idx < chains_len; idx++) {
@@ -220,16 +227,17 @@ int main(int argc, char *argv[]) {
         // #Create chains
         // for c in range(chained,i - 1):
         //     trustlets[c].create_channel(trustlets[c+1])
-        for (int c = 0; c < i - 1; c++) {
+        for (int c = 0; c < i; c++) {
             // create_channel(trustlets[c], trustlets[c+1]);
-            create_channel_at(trustlets[c], trustlets[c+1], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
+            create_channel_at(iomgr_trustlet, trustlets[c], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
         }
 
-        // #Prepair input data
+        // Configure first-in-chain trustlet
         struct trustlet_configuration config;
-        config.mode[0] = MODE_FIRST_NODE;
-        config.shm_addr_previous = shared;
-        config.shm_addr_next = CHANNEL_ADDR(2);
+        config.mode[0] = MODE_MIDDLE_NODE;
+        config.shm_addr_previous = CHANNEL_ADDR(3);
+        /* config.shm_addr_next = CHANNEL_ADDR(2); */
+        config.shm_addr_next = NULL;
         invoke_trustlet_bin(trustlets[0], &config, sizeof(config), 0);
 
         // #Setup Trustlets
@@ -239,16 +247,22 @@ int main(int argc, char *argv[]) {
         for (int t = 1; t < i - 1; t++) {
             // Transfer nodes (input->output)
             config.mode[0] = MODE_MIDDLE_NODE;
-            config.shm_addr_previous = CHANNEL_ADDR(1+t);
-            config.shm_addr_next = CHANNEL_ADDR(2+t);
+            config.shm_addr_previous = CHANNEL_ADDR(3+t);
+            /* config.shm_addr_next = CHANNEL_ADDR(2+t); */
             invoke_trustlet_bin(trustlets[t], &config, sizeof(config), 0);
         }
         // trustlets[i - 1].invoke_trustlet(b"s", 0)
         // End node - use shm mode
         config.mode[0] = MODE_LAST_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(i);
-        config.shm_addr_next = CHANNEL_ADDR(1);
+        config.shm_addr_previous = CHANNEL_ADDR(i+2);
+        /* config.shm_addr_next = CHANNEL_ADDR(1); */
         invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
+
+        // Setup IoMgr
+        config.mode[0] = MODE_IOMGR_NODE;
+        config.shm_addr_previous = CHANNEL_ADDR(3);
+        /* config.shm_addr_next = CHANNEL_ADDR(2); */
+        invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
 
         // start long-running trustlet
         /* invoke_trustlet(trustlets[1], "s", 0); */
@@ -260,6 +274,9 @@ int main(int argc, char *argv[]) {
         }
             printf("Starting trustlet %d on core %d\n", i - 1, i - 1 + 1);
         handles[i-1] = threaded_invoke(trustlets[i - 1], i - 1 + 1, "", 0);
+            printf("Starting IoMgr on core %d\n", i - 1 + 1);
+        iomgr_handle = threaded_invoke(iomgr_trustlet, i - 1 + 2, "", 0);
+
         sleep(60); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
