@@ -28,7 +28,7 @@ class PktgenTest(AbstractBenchTest):
     batchsize: int
     workload: int
     chaining: int
-    system: str # mirror, noiomgr
+    system: str # mirror, noiomgr, iomgr
     pktsize: int
 
     def test_infix(self):
@@ -80,6 +80,9 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
             runners = ["noiomgr_run"]
+        elif self.system == "iomgr":
+            trustlets = ["iomgr_trustlet"]
+            runners = ["iomgr_run"]
         else:
             raise ValueError(f"Unknown system {self.system}")
 
@@ -109,13 +112,15 @@ class PktgenTest(AbstractBenchTest):
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+        elif self.system == "iomgr":
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         else:
             raise ValueError(f"Unknown system {self.system}")
 
         # breakpoint()
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
-        guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=90)
+        guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=180)
 
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
@@ -184,7 +189,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         batchsize = [1, 32],
         workload = [ int(i) for i in np.linspace(0, 50, 20) ] + [ int(i) for i in np.linspace(20, 2000, 20) ],
         chaining = [3],
-        system = [ "polling", "procedural", "noiomgr" ],
+        system = [ "polling", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args

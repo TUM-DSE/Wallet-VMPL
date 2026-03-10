@@ -289,7 +289,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             total_rx += num_deq;
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
-            delay(0); // TODO: RMPADJUST
+            delay(100); // TODO: RMPADJUST
 
             // pass buffers to first VNFlet
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[0]->ingress.ring, deq_objs, num_deq, NULL);
@@ -308,7 +308,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             if (num_deq == 0) {
                 continue;
             }
-            delay(0); // TODO: pte adjust
+            delay(100); // TODO: pte adjust
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[i+1]->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
@@ -319,6 +319,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
         num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[CHAINING-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
         if (num_deq == 0) {
         } else {
+            delay(100); // TODO: RMPADJUST
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!

@@ -1,6 +1,6 @@
 DPDK_EXAMPLES := mirror
-TRUSTLETS := noiomgr_trustlet
-RUNNERS := noiomgr_run
+TRUSTLETS := noiomgr_trustlet iomgr_trustlet
+RUNNERS := noiomgr_run iomgr_run
 CFLAGS :=
 
 all: $(DPDK_EXAMPLES) $(TRUSTLETS) $(RUNNERS) simple_slick_fs
