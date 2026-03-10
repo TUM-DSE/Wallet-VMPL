@@ -33,6 +33,10 @@
 
 #define DATA_SIZE PACKET_SIZE
 
+#ifndef CHAINING
+#define CHAINING 2
+#endif
+
 /* static void* DATA_SHARED = NULL; */
 static __thread bool use_shm_alloc = false;
 
@@ -117,8 +121,8 @@ int main(int argc, char *argv[]) {
 
     int input_size = 16;
 
-    int chain_len = 2;
-    int chains[] = {2};
+    int chain_len = CHAINING;
+    int chains[] = {CHAINING};
     int chains_len = 1;
 
     int iterations = 1e9;
@@ -161,6 +165,12 @@ int main(int argc, char *argv[]) {
     memset(shared, 0, SHARED_SIZE);
     shared->legacy_buffer.data[0] = 'I';
     shared->keep_running = true;
+    for (int i = 0; i < chain_len; i++) {
+        if (!create_shared_memory(trustlets[i], shared, SHARED_SIZE)) {
+            printf("Failed to create shared memory to trustlet %d\n", i);
+            return -1;
+        }
+    }
     if (!create_shared_memory(iomgr_trustlet, shared, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
@@ -235,9 +245,8 @@ int main(int argc, char *argv[]) {
         // Configure first-in-chain trustlet
         struct trustlet_configuration config;
         config.mode[0] = MODE_MIDDLE_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(3);
-        /* config.shm_addr_next = CHANNEL_ADDR(2); */
-        config.shm_addr_next = NULL;
+        config.shm_addr_previous = CHANNEL_ADDR(2);
+        config.shm_addr_next = CHANNEL_ADDR(0);
         invoke_trustlet_bin(trustlets[0], &config, sizeof(config), 0);
 
         // #Setup Trustlets
@@ -247,21 +256,21 @@ int main(int argc, char *argv[]) {
         for (int t = 1; t < i - 1; t++) {
             // Transfer nodes (input->output)
             config.mode[0] = MODE_MIDDLE_NODE;
-            config.shm_addr_previous = CHANNEL_ADDR(3+t);
-            /* config.shm_addr_next = CHANNEL_ADDR(2+t); */
+            config.shm_addr_previous = CHANNEL_ADDR(2+t);
+            config.shm_addr_next = CHANNEL_ADDR(0);
             invoke_trustlet_bin(trustlets[t], &config, sizeof(config), 0);
         }
         // trustlets[i - 1].invoke_trustlet(b"s", 0)
         // End node - use shm mode
         config.mode[0] = MODE_LAST_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(i+2);
-        /* config.shm_addr_next = CHANNEL_ADDR(1); */
+        config.shm_addr_previous = CHANNEL_ADDR(i+1);
+        config.shm_addr_next = CHANNEL_ADDR(0);
         invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
 
         // Setup IoMgr
         config.mode[0] = MODE_IOMGR_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(3);
-        /* config.shm_addr_next = CHANNEL_ADDR(2); */
+        config.shm_addr_previous = CHANNEL_ADDR(0);
+        config.shm_addr_next = CHANNEL_ADDR(1);
         invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
 
         // start long-running trustlet
@@ -277,7 +286,7 @@ int main(int argc, char *argv[]) {
             printf("Starting IoMgr on core %d\n", i - 1 + 1);
         iomgr_handle = threaded_invoke(iomgr_trustlet, i - 1 + 2, "", 0);
 
-        sleep(60); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
+        sleep(120); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
@@ -319,7 +328,7 @@ int main(int argc, char *argv[]) {
                 if (nb_copied > 0) {
                     enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_copied, NULL);
                     if (enq_num == 0)
-                        rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_copied);
+                        rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_copied); // return to pool
                     else
                         num_enqed += enq_num;
                 }
@@ -330,7 +339,7 @@ int main(int argc, char *argv[]) {
             deq_num = rte_ring_sc_dequeue_burst(&shared->egress.ring, deq_objs, BURST_SIZE, NULL);
             if (deq_num > 0) {
                 for (size_t j = 0; j < deq_num; j++) {
-                    rte_pktmbuf_free(deq_objs[j]); // return to pool
+                    rte_pktmbuf_free(deq_objs[j]); // return to pool TODO: this is propably also wrong
                 }
             }
 
@@ -341,8 +350,9 @@ int main(int argc, char *argv[]) {
                 for (size_t i = 0; i < deq_num; i++) {
                     bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
                     /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
-                    if (bufs[nb_copied2] != NULL)
+                    if (bufs[nb_copied2] != NULL) 
                         nb_copied2++;
+                    rte_pktmbuf_free(deq_objs[i]); // return to pool1
                 }
 
                 if (nb_copied2 > 0) {
@@ -357,11 +367,12 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
-                size_t nb_returned = rte_ring_sp_enqueue_bulk(&shared2->egress.ring, (void**)(&(deq_objs[0])), deq_num, NULL);
-                if (nb_returned != deq_num) {
-                    printf("Warning: failed to return %lu buffers to shared2->egress\n", deq_num);
-                }
+                // i think this is not necessary. We the buffers are from pool1, so we must free them ourselves:
+                // // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
+                // size_t nb_returned = rte_ring_sp_enqueue_bulk(&shared2->egress.ring, (void**)(&(deq_objs[0])), deq_num, NULL);
+                // if (nb_returned != deq_num) {
+                //     printf("Warning: failed to return %lu buffers to shared2->egress\n", deq_num);
+                // }
 
                 num_deqed += deq_num;
 
@@ -378,6 +389,8 @@ int main(int argc, char *argv[]) {
                 threaded_free(handles[t]);
             }
         }
+        char* _res = threaded_join(iomgr_handle);
+        threaded_free(iomgr_handle);
 
         printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
         printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);

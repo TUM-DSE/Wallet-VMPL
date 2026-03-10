@@ -29,6 +29,10 @@
 #define PER_VNFLET_WORKLOAD_NS 0
 #endif
 
+#ifndef CHAINING
+#define CHAINING 2
+#endif
+
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 #define READ_ONCE(x) (*(volatile typeof(x) *)&(x))
 
@@ -159,7 +163,41 @@ struct rte_mempool* mbuf_pool_create(struct shm* data_shared) {
     return pool;
 }
 
-void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shared_next) {
+void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
+    size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
+    void *deq_objs[BURST_SIZE];
+    void *enq_objs[BURST_SIZE];
+    delay(1); // warm up CoW triggered by delay
+
+    println("Initializing EAL...");
+
+    // Initialize DPDK ring
+    if (!ring_pair_create(data_shared_iomgr))
+        return;
+
+    struct rte_ring* ingress = &data_shared_iomgr->ingress.ring;
+    struct rte_ring* egress = &data_shared_iomgr->egress.ring;
+    struct rte_mempool* pool = data_shared_pool->mbuf_pool;
+    assert(pool != NULL && "pool need to be allocated by driver");
+
+    trustlet_exit();
+
+    while (likely(atomic_load(&data_shared_pool->keep_running))) {
+        num_deq = rte_ring_sc_dequeue_burst(ingress, deq_objs, BURST_SIZE, NULL);
+        if (num_deq == 0) {
+            continue;
+        }
+        delay(PER_VNFLET_WORKLOAD_NS);
+        num_enq = rte_ring_sp_enqueue_bulk(egress, deq_objs, num_deq, NULL);
+        if (num_deq != num_enq) {
+            // TODO: slitently drops mbuf right now, leaking it and never returning it to the pool.
+        }
+    }
+
+    notify_monitor();
+}
+
+void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) {
     struct shm* buf = data_shared_previous;
     size_t buf_used = 0;
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
@@ -181,33 +219,35 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     if (!ring_pair_create(data_shared_previous))
         return;
 
-    // Create mbuf pool backed by shared memory
-    struct rte_mempool *pool1 = data_shared_previous->mbuf_pool;
-    if (mode != MODE_FIRST_NODE) { // first node pool allocated by driver
-        pool1 = mbuf_pool_create(data_shared_previous);
-        if (!pool1)
-            return;
+    struct rte_mempool* pool1 = NULL;
+    // Allocated by driver:
+    // // Create mbuf pool backed by shared memory
+    // struct rte_mempool *pool1 = mbuf_pool_create(data_shared_previous);
+    // if (!pool1)
+    //     return;
 
-        data_shared_previous->keep_running = true;
-    }
-    assert(pool1 != NULL && "pool1 need to be allocated by driver");
+    data_shared_previous->keep_running = true;
 
 
     // Initialize DPDK ring
     struct rte_mempool *pool2 = data_shared_next->mbuf_pool;
-    if (mode == MODE_LAST_NODE) { // last node pool has no next to allocate the rings
-        if (!ring_pair_create(data_shared_next))
-            return;
+    if (!ring_pair_create(data_shared_next))
+        return;
 
-        pool2 = mbuf_pool_create(data_shared_previous);
-        if (!pool2)
-            return;
+    pool2 = mbuf_pool_create(data_shared_next);
+    if (!pool2)
+        return;
+
+    struct shm* shm_trustlet[CHAINING];
+    for (int i = 0 ; i < CHAINING; i++) {
+        shm_trustlet[i] = CHANNEL_ADDR(2+i);
     }
 
     trustlet_exit();
 
     /* println("Waiting for pool2 to be allocated by next VNFlet..."); */
     /* while (READ_ONCE(data_shared_next->mbuf_pool) == NULL) {} */
+    pool1 = data_shared_previous->mbuf_pool;
     pool2 = data_shared_next->mbuf_pool;
     // data_shared_next mbuf pool is always allocated by the next VNFlet (or the driver in case of MODE_LAST_NODE)
     /* if (mode != MODE_LAST_NODE) { // last node pool allocated by driver */
@@ -221,6 +261,7 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     /*     printf("Mbuf pool created with %u objects\n", pool2->populated_size); */
     /* } */
     printf("Require pool %p\n", pool2);
+    assert(pool1 != NULL && "pool1 need to be allocated by driver");
     assert(pool2 != NULL && "pool2 need to be allocated by someone else");
 
     uint64_t duration_ns = 15ULL * 1000000000ULL; // 15 seconds
@@ -238,70 +279,51 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
         /* buf->data[3] += 1; */
         /* trustlet_tx(buf, buf_used); */
 
+        // driver -> iomgr -> VNFlet 0
         num_deq = rte_ring_sc_dequeue_burst(&data_shared_previous->ingress.ring, deq_objs, BURST_SIZE, NULL); // pool1 bufs
         debug println("%lu = rte_ring_sc_dequeue_burst(%p, ...)", num_deq, &data_shared_previous->ingress.ring);
 
         if(num_deq == 0) {
             /* vnflet_stats[vnfletId].dequeue_failures++; */
-            continue;
         } else {
             total_rx += num_deq;
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
-            // pkts -> local buffer
-            for (size_t i = 0; i < num_deq; i++) {
-                struct rte_mbuf *m = (struct rte_mbuf *)deq_objs[i];
-                uint16_t len = m->data_len;
-                local_buf_lens[i] = len;
-                memcpy(local_bufs[i], rte_pktmbuf_mtod(m, void *), len);
-            }
+            delay(0); // TODO: RMPADJUST
 
-            // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
-            size_t nb_returned = rte_ring_sp_enqueue_bulk(&data_shared_previous->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL);
-            if (nb_returned != num_deq) {
-                println("Failed to return all buffers to previous VNFlet. Is pool bigger than the ring pair combined?");
-                return;
-            }
-
-            delay(PER_VNFLET_WORKLOAD_NS); // simulate per-packet processing
-
-            int ret = rte_pktmbuf_alloc_bulk(pool2, (struct rte_mbuf **)enq_objs, num_deq);
-            if (ret != 0) {
-                // maybe next VNFlet is overloaded?
-                // drop num_deq packets
+            // pass buffers to first VNFlet
+            num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[0]->ingress.ring, deq_objs, num_deq, NULL);
+            if (num_enq == 0) {
+                /* rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, num_deq); */
+                // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
             } else {
-                // local buffer -> pkts
-                for (size_t i = 0; i < num_deq; i++) {
-                    struct rte_mbuf *m = (struct rte_mbuf *)enq_objs[i];
-                    uint16_t len = local_buf_lens[i];
-                    m->data_len = len;
-                    m->pkt_len = len;
-                    memcpy(rte_pktmbuf_mtod(m, void *), local_bufs[i], len);
-                }
-
-                // pass buffers to next VNFlet
-                num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, enq_objs, num_deq, NULL);
-                if (num_enq == 0)
-                    rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, num_deq);
-                else {
-                    total_tx += num_enq;
-                    debug println("Enqueued %lu objects to ring.", num_enq);
-                }
-
-
-            }
-
-        }
-
-        num_deq = rte_ring_sc_dequeue_burst(&data_shared_next->egress.ring, deq_objs, BURST_SIZE, NULL);
-        if (num_deq > 0) {
-            for (size_t i = 0; i < num_deq; i++) {
-                rte_pktmbuf_free(deq_objs[i]);
+                total_tx += num_enq;
+                debug println("Enqueued %lu objects to ring.", num_enq);
             }
         }
 
+        // VNFlet n -> iomgr -> VNFlet n+1
+        for (int i = 0; i < CHAINING-1; i++) {
+            num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[i]->egress.ring, deq_objs, BURST_SIZE, NULL);
+            if (num_deq == 0) {
+                continue;
+            }
+            delay(0); // TODO: pte adjust
+            num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[i+1]->ingress.ring, deq_objs, num_deq, NULL);
+            if (num_deq != num_enq) {
+                // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
+            }
+        }
 
-        // TODO: copy mbufs to local mem, send back empty buffer, allocate mbuf from pool2, copy data to it, sent it to data_shared_next ring, receive empty mbufs
+        // VNFlet CHAINING-1 -> iomgr -> driver
+        num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[CHAINING-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
+        if (num_deq == 0) {
+        } else {
+            num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
+            if (num_deq != num_enq) {
+                // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
+            }
+        }
 
         /* num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL); */
         /* total_tx += num_enq; */
@@ -360,6 +382,8 @@ int main(int argc, char** argv) {
 
     if(config->mode[0] == MODE_FIRST_NODE || config->mode[0] == MODE_MIDDLE_NODE || config->mode[0] == MODE_LAST_NODE){
         main_shm(config->mode[0], config->shm_addr_previous, config->shm_addr_next);
+    } else if(config->mode[0] == MODE_IOMGR_NODE) {
+        main_iomgr(config->shm_addr_previous, config->shm_addr_next);
     } else if(config->mode[0] == 'x'){
         bool suppress_output = false;
         main_default(suppress_output);
