@@ -199,7 +199,7 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
         if (!ring_pair_create(data_shared_next))
             return;
 
-        pool2 = mbuf_pool_create(data_shared_previous);
+        pool2 = mbuf_pool_create(data_shared_next);
         if (!pool2)
             return;
     }

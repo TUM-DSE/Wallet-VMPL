@@ -286,8 +286,6 @@ int main(int argc, char *argv[]) {
             printf("Starting IoMgr on core %d\n", i - 1 + 1);
         iomgr_handle = threaded_invoke(iomgr_trustlet, i - 1 + 2, "", 0);
 
-        sleep(120); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
-
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
         void *deq_objs[BURST_SIZE];

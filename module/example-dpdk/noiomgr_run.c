@@ -260,7 +260,6 @@ int main(int argc, char *argv[]) {
         }
             printf("Starting trustlet %d on core %d\n", i - 1, i - 1 + 1);
         handles[i-1] = threaded_invoke(trustlets[i - 1], i - 1 + 1, "", 0);
-        sleep(60); // give trustlet time to start TODO: if truslets need more than this to init queues and pools, we may be cooked
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
