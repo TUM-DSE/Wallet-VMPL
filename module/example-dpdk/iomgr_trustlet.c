@@ -95,6 +95,54 @@ static inline uint64_t clock_monotonic_get(void) {
     return (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
 }
 
+static inline void nop_loop(uint64_t count) {
+    for (volatile uint64_t i = 0; i < count; i++) {
+        __asm__ volatile("nop");
+    }
+}
+
+static double nops_per_ns = 1.617; // result of calibrate_nop_delay() on ryan
+
+// Calibrate how many NOPs correspond to 1 ns of wall-clock time.
+// Runs an increasing number of NOPs and measures elapsed time with clock_monotonic_get.
+// Note: each clock_monotonic_get call takes ~11ms in Gramine/SVSM, so we need
+// enough NOPs to dominate that overhead.
+void calibrate_nop_delay(void) {
+    uint64_t target_ns = 100000000ULL; // 100ms calibration target
+    uint64_t nops = 1000000; // start with 1M NOPs
+
+    for (int attempt = 0; attempt < 10; attempt++) {
+        uint64_t start = clock_monotonic_get();
+        nop_loop(nops);
+        uint64_t end = clock_monotonic_get();
+        uint64_t elapsed_ns = end - start;
+
+        println("calibrate: %lu NOPs took %lu ns", nops, elapsed_ns);
+
+        if (elapsed_ns > 0) {
+            nops_per_ns = (double)nops / (double)elapsed_ns;
+            // If elapsed is close enough to target (within 2x), we're done
+            if (elapsed_ns >= target_ns / 2 && elapsed_ns <= target_ns * 2) {
+                println("calibrated: %.3f NOPs/ns", nops_per_ns);
+                return;
+            }
+            // Scale nops to hit the target
+            nops = (uint64_t)((double)nops * (double)target_ns / (double)elapsed_ns);
+        } else {
+            nops *= 10;
+        }
+    }
+    println("calibrated (fallback): %.3f NOPs/ns", nops_per_ns);
+}
+
+// NOP-based delay that avoids expensive clock_gettime calls.
+// Must call calibrate_nop_delay() once before using this.
+void nop_delay(uint64_t nsecs) {
+    if (nsecs == 0) return;
+    assert(nops_per_ns > 0 && "nop_delay called before calibration");
+    nop_loop((uint64_t)(nsecs * nops_per_ns));
+}
+
 // build our own delay, because gramine's sleep is unimplemented
 void delay(uint64_t nsecs) {
     if (nsecs == 0) return;
@@ -289,7 +337,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             total_rx += num_deq;
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
-            delay(100); // TODO: RMPADJUST
+            nop_delay(100); // TODO: RMPADJUST
 
             // pass buffers to first VNFlet
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[0]->ingress.ring, deq_objs, num_deq, NULL);
@@ -308,7 +356,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             if (num_deq == 0) {
                 continue;
             }
-            delay(100); // TODO: pte adjust
+            nop_delay(100); // TODO: pte adjust
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[i+1]->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
@@ -319,7 +367,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
         num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[CHAINING-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
         if (num_deq == 0) {
         } else {
-            delay(100); // TODO: RMPADJUST
+            nop_delay(100); // TODO: RMPADJUST
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
