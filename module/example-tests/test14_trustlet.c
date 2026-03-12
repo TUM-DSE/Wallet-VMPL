@@ -19,17 +19,19 @@ void main_default(bool suppress_output) {
     while (1) {
         strcpy(output, input);
 
-        // check that we are in ring 0. Faults otherwise.
-        uint32_t lo, hi;
-        __asm__ volatile("rdmsr" : "=a"(lo), "=d"(hi) : "c"(0x1b));
-
         if (suppress_output) {
             output[1] += 1;
             trustlet_exit();
         } else {
+            // Only the second trustlet is a privileged one that can run rdmsr
+            // check that we are in ring 0. Faults otherwise.
+            uint32_t lo, hi;
+            __asm__ volatile("rdmsr" : "=a"(lo), "=d"(hi) : "c"(0x1b));
+
             output[2] += 1;
             notify_monitor();
         }
+
     }
 }
 

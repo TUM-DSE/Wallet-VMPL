@@ -28,7 +28,8 @@ int main() {
 
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
-    for (int i = 0; i < chain_len; i++) {
+    zygotes[0] = create_zygote("../libpal.so", "test14_manifest", "../libsysdb.so");
+    for (int i = 1; i < chain_len; i++) {
         zygotes[i] = create_zygote_privileged("../libpal.so", "test14_manifest", "../libsysdb.so");
     }
 
