@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < chain_len; i++) {
         zygotes[i] = create_zygote("../libpal.so", "iomgr_manifest", "../libsysdb.so");
     }
-    iomgr_zygote = create_zygote("../libpal.so", "iomgr_manifest", "../libsysdb.so");
+    iomgr_zygote = create_zygote_privileged("../libpal.so", "iomgr_manifest", "../libsysdb.so");
 
     // for i in range(chain_len):
     //     trustlets.append(zygotes[i].create_trustlet("./empty.py"))
@@ -225,7 +225,7 @@ int main(int argc, char *argv[]) {
     // for t in trustlets:
     //     t.invoke_trustlet(input_data, len(input_data))
     for (int t = 0; t < chain_len; t++) {
-        printf("152:invoke_trustlet()");
+        printf("152:invoke_trustlet()\n");
         invoke_trustlet(trustlets[t], input_data, input_size);
     }
     invoke_trustlet(iomgr_trustlet, input_data, input_size);
@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
         // #Setup Trustlets
         // for t in range(i - 1):
         //     trustlets[t].invoke_trustlet(b"a", 0)
-        printf("185:invoke_trustlet()");
+        printf("185:invoke_trustlet()\n");
         for (int t = 1; t < i - 1; t++) {
             // Transfer nodes (input->output)
             config.mode[0] = MODE_MIDDLE_NODE;

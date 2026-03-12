@@ -159,6 +159,48 @@ void delay(uint64_t nsecs) {
     }
 }
 
+
+// vaddr: guest virtual address of the page to adjust
+// rmp_psize: RMP_PG_SIZE_4K
+#define RMP_PG_SIZE_4K      0
+#define RMPADJUST_VMSA_PAGE_BIT   (1<<(16))
+
+#define VMPL0 0
+#define VMPL1 1
+#define VMPL2 2
+#define VMPL3 3
+#define VMPL_MASK_START
+#define VMPL_READ (1<<(VMPL_MASK_START+0))
+#define VMPL_WRITE (1<<(VMPL_MASK_START+1))
+#define VMPL_EXEC_USER (1<<(VMPL_MASK_START+2))
+#define VMPL_EXEC_SUPERVISOR (1<<(VMPL_MASK_START+3))
+#define VMPL_SSS (1<<(VMPL_MASK_START+4))
+// bit 5-7 reserved
+
+
+static inline int rmpadjust(unsigned long vaddr, bool rmp_psize, unsigned long attrs)
+{
+	int rc;
+
+	attrs &= !RMPADJUST_VMSA_PAGE_BIT; // We never want to declare pages for use for VMSA
+
+	/* "rmpadjust" mnemonic support in binutils 2.36 and newer */
+	asm volatile(".byte 0xF3,0x0F,0x01,0xFE\n\t"
+		     : "=a"(rc)
+		     : "a"(vaddr), "c"(rmp_psize), "d"(attrs)
+		     : "memory", "cc");
+
+	return rc; // 0: SUCCESS, 1 FAIL_INPUT illegal input parameters, 2 FAIL_PERMISSION insufficient permissions, 6 FAIL_SIZEMISMATCH Page size mismatch between guest and RMP
+}
+
+static inline int rmpadjust_allow(unsigned long vaddr, uint8_t vmpl) {
+    return rmpadjust(vaddr, RMP_PG_SIZE_4K, VMPL_READ | VMPL_WRITE | VMPL_EXEC_USER | VMPL_EXEC_SUPERVISOR | VMPL_SSS | vmpl);
+}
+
+static inline int rmpadjust_deny(unsigned long vaddr, uint8_t vmpl) {
+    return rmpadjust(vaddr, RMP_PG_SIZE_4K, vmpl);
+}
+
 /// Creates a ring into data_shared->ingress and ->egress
 bool ring_pair_create(struct shm* data_shared) {
     next_tailq_buf = data_shared->tailq_entry_buf;
@@ -337,7 +379,8 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             total_rx += num_deq;
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
-            nop_delay(100); // TODO: RMPADJUST
+            /* nop_delay(100); // RMPADJUST */
+            rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access
 
             // pass buffers to first VNFlet
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[0]->ingress.ring, deq_objs, num_deq, NULL);
@@ -367,7 +410,8 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
         num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[CHAINING-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
         if (num_deq == 0) {
         } else {
-            nop_delay(100); // TODO: RMPADJUST
+            /* nop_delay(100); // RMPADJUST */
+            rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
