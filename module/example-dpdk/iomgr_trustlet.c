@@ -262,6 +262,7 @@ struct pte_descriptor {
 
 static volatile struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
 
+/// maps page tables at >= CHANNEL(17)
 void dump_vnflet_page_tables() {
     for (int i = 0; i < CHAINING; i++) {
         println("VNFlet %d page directory", i);
