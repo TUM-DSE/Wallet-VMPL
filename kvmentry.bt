@@ -182,6 +182,6 @@ rawtracepoint:kvm_entry
     $vcpu = (struct kvm_vcpu*)arg0;
     $vcpu_svm = (struct vcpu_svm *)($vcpu);
     $vmpl = $vcpu_svm->sev_es.snp_current_vmpl;
-	printf("--------------------\nVMPL Level: %d\n%s", $vmpl);
+	printf("--------------------\nVMPL Level: %d\n", $vmpl);
 
 }
