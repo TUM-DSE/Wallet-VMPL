@@ -260,7 +260,7 @@ struct pte_descriptor {
     uint64_t paddrs[PTE_DESCRIPTOR_ENTRIES];
 };
 
-static volatile struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
+static struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
 
 /// maps page tables at >= CHANNEL(17)
 void dump_vnflet_page_tables() {
