@@ -253,6 +253,44 @@ struct rte_mempool* mbuf_pool_create(struct shm* data_shared) {
     return pool;
 }
 
+struct pte_descriptor {
+    uint64_t page_directory_vaddr;
+    uint64_t vaddrs[255]; // look up vaddr by checking vaddrs[idx] where paddrs[idx] == paddr
+    uint64_t paddrs[255];
+};
+
+static volatile struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
+
+void dump_vnflet_page_tables() {
+    for (int i = 0; i < CHAINING; i++) {
+        println("VNFlet %d page directory at vaddr %p", i, (void*)vnflet_page_tables[i].page_directory_vaddr);
+        println("First entry in page directory: %lu", vnflet_page_tables[i].vaddrs[0] ? *(uint64_t*)vnflet_page_tables[i].vaddrs[0] : 0);
+        /* println("First entry in page directory: %lu", vnflet_page_tables[i].page_directory_vaddr ? *(uint64_t*)vnflet_page_tables[i].page_directory_vaddr : 0); */
+        for (int j = 0; j < 5; j++) {
+            if (vnflet_page_tables[i].vaddrs[j] != 0) {
+                println("  vaddr %p -> paddr %p", (void*)vnflet_page_tables[i].vaddrs[j], (void*)vnflet_page_tables[i].paddrs[j]);
+            }
+        }
+        println("  ...");
+    }
+}
+
+// void unmap_buffer_to_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
+//     void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
+//     void* vnflet_page_directory = vnflet_page_tables[vnflet_id];
+//     uint64_t* pte = TODO_walk_page_table(vnflet_page_directory, vaddr);
+//     TODO_mark_not_present(pte):
+// }
+
+void init_pt(struct pte_descriptor page_tables[CHAINING]) {
+    println("get_unprivileged_page_tables");
+    page_tables[0].page_directory_vaddr = 0x1337; // TODO: remove
+    get_unprivileged_page_tables((void*)page_tables, sizeof(struct pte_descriptor) * CHAINING);
+    dump_vnflet_page_tables();
+}
+
+// TODO: call new functions
+
 void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
     void *deq_objs[BURST_SIZE];
@@ -288,6 +326,8 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
 }
 
 void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) {
+    init_pt(vnflet_page_tables);
+
     struct shm* buf = data_shared_previous;
     size_t buf_used = 0;
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;

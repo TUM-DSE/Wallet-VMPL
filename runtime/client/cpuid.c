@@ -30,3 +30,7 @@ void nop(){
 void finalize_zygote() {
     __asm__ volatile("mov $0x4FFFFFF4, %%rax; cpuid":::"rax", "rbx", "rcx", "rdx");
 }
+
+void get_unprivileged_page_tables(void* page_tables_descriptors, uint64_t size) {
+    __asm__ volatile("mov $0x4EFFFFFD, %%rax; mov %0, %%rbx; mov %1, %%rcx; cpuid":: "r" (page_tables_descriptors), "r" (size) :"rax", "rbx", "rcx", "rdx");
+}
