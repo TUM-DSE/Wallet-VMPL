@@ -253,17 +253,18 @@ struct rte_mempool* mbuf_pool_create(struct shm* data_shared) {
     return pool;
 }
 
+#define PTE_DESCRIPTOR_ENTRIES 256
+// entry 0 is the first one
 struct pte_descriptor {
-    uint64_t page_directory_vaddr;
-    uint64_t vaddrs[255]; // look up vaddr by checking vaddrs[idx] where paddrs[idx] == paddr
-    uint64_t paddrs[255];
+    uint64_t vaddrs[PTE_DESCRIPTOR_ENTRIES]; // look up vaddr by checking vaddrs[idx] where paddrs[idx] == paddr
+    uint64_t paddrs[PTE_DESCRIPTOR_ENTRIES];
 };
 
 static volatile struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
 
 void dump_vnflet_page_tables() {
     for (int i = 0; i < CHAINING; i++) {
-        println("VNFlet %d page directory at vaddr %p", i, (void*)vnflet_page_tables[i].page_directory_vaddr);
+        println("VNFlet %d page directory", i);
         println("First entry in page directory: %lu", vnflet_page_tables[i].vaddrs[0] ? *(uint64_t*)vnflet_page_tables[i].vaddrs[0] : 0);
         /* println("First entry in page directory: %lu", vnflet_page_tables[i].page_directory_vaddr ? *(uint64_t*)vnflet_page_tables[i].page_directory_vaddr : 0); */
         for (int j = 0; j < 5; j++) {
@@ -284,7 +285,7 @@ void dump_vnflet_page_tables() {
 
 void init_pt(struct pte_descriptor page_tables[CHAINING]) {
     println("get_unprivileged_page_tables");
-    page_tables[0].page_directory_vaddr = 0x1337; // TODO: remove
+    /* page_tables[0].page_directory_vaddr = 0x1337; // TODO: remove */
     get_unprivileged_page_tables((void*)page_tables, sizeof(struct pte_descriptor) * CHAINING);
     dump_vnflet_page_tables();
 }
