@@ -313,28 +313,24 @@ uint64_t page_walk_index(uint64_t vaddr, int level) {
 
 // basically a page table walk
 uint64_t* pte_from_vaddr(struct pte_descriptor* directory, void* vaddr) {
-    uint64_t idx = page_walk_index((uint64_t)vaddr, PGD);
-    uint64_t* pgtable_page = (uint64_t*)(directory->vaddrs[0]); // highest level page table page
-    uint64_t* pte = &(pgtable_page[idx]);
+    uint64_t* pgtable_page = (uint64_t*)(directory->vaddrs[0]);
+    uint64_t* pte = NULL;
 
-    uint64_t previous_pte = *pte;
-
-    if (is_page_present(pte)) {
-        return pte; // page found in root level
-    }
-
-    for (int level = PGD-1; level >= PTE; level--) {
-        previous_pte = strip_paddr(*pte);
-        pgtable_page = vaddr_to_pgtable_paddr(directory, previous_pte);
-        assert(pgtable_page && "page of next page table level seem not to be mapped");
-        idx = page_walk_index((uint64_t)vaddr, level);
+    for (int level = PGD; level >= PTE; level--) {
+        uint64_t idx = page_walk_index((uint64_t)vaddr, level);
         pte = &(pgtable_page[idx]);
-        if (is_page_present(pte)) {
-            return pte; // page found in root level
+        if (!is_page_present(pte))
+            return NULL; // not mapped
+        if (level > PTE) {
+            uint64_t next_paddr = strip_paddr(*pte);
+            pgtable_page = vaddr_to_pgtable_paddr(directory, next_paddr);
+            if (!pgtable_page)
+                return NULL;
         }
     }
-    return NULL;
+    return pte; // leaf PTE
 }
+
 
 void map_buffer_to_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
     void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
