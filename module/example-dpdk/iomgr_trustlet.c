@@ -260,7 +260,7 @@ struct pte_descriptor {
     uint64_t paddrs[PTE_DESCRIPTOR_ENTRIES];
 };
 
-static struct pte_descriptor vnflet_page_tables[CHAINING] __attribute__((aligned(4096)));
+static struct pte_descriptor* vnflet_page_tables; // at runtime, shall be initialized to have CHAINING entries
 
 /// maps page tables at >= CHANNEL(17)
 void dump_vnflet_page_tables() {
@@ -289,7 +289,7 @@ bool is_page_present(uint64_t* pte) {
 }
 
 uint64_t strip_paddr(uint64_t pte) {
-    return pte & ~!0xFFF800000000FFFFULL; // c bit on ryan (51), and all other stuff
+    return pte & 0x0007FFFFFFFFF000ULL; // extract physical address (bits 12-50), strip C-bit (51) and flags
 }
 
 // given a paddr to a page that is part of a page table, get the vaddr at which the page is mapped
@@ -303,7 +303,7 @@ void* vaddr_to_pgtable_paddr(struct pte_descriptor* directory, uint64_t paddr) {
 }
 
 uint64_t page_walk_index(uint64_t vaddr, int level) {
-    return (vaddr >> (12 + level * 9)) ^ 0x1FF;
+    return (vaddr >> (12 + level * 9)) & 0x1FF;
 }
 
 #define PGD 3
@@ -319,39 +319,47 @@ uint64_t* pte_from_vaddr(struct pte_descriptor* directory, void* vaddr) {
     for (int level = PGD; level >= PTE; level--) {
         uint64_t idx = page_walk_index((uint64_t)vaddr, level);
         pte = &(pgtable_page[idx]);
-        if (!is_page_present(pte))
-            return NULL; // not mapped
         if (level > PTE) {
+            if (!is_page_present(pte))
+                return NULL; // intermediate level not present
             uint64_t next_paddr = strip_paddr(*pte);
             pgtable_page = vaddr_to_pgtable_paddr(directory, next_paddr);
             if (!pgtable_page)
                 return NULL;
         }
+        // At PTE level, return the pointer regardless of present bit
     }
     return pte; // leaf PTE
 }
 
 
 void map_buffer_to_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
+    debug println("map_buffer_to_vnflet: vnflet_id=%d, mbuf=%p", vnflet_id, mbuf);
     void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
     struct pte_descriptor* vnflet_directory = &vnflet_page_tables[vnflet_id];
     uint64_t* pte = pte_from_vaddr(vnflet_directory, vaddr);
+    if (!pte) { println("  ERROR: pte is NULL"); return; }
     mark_present(pte);
+    __asm__ volatile("invlpg (%0)" :: "r"(vaddr) : "memory");
 }
 
 void unmap_buffer_from_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
+    debug println("unmap_buffer_from_vnflet: vnflet_id=%d, mbuf=%p", vnflet_id, mbuf);
     void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
     struct pte_descriptor* vnflet_directory = &vnflet_page_tables[vnflet_id];
     uint64_t* pte = pte_from_vaddr(vnflet_directory, vaddr);
+    if (!pte) { println("  ERROR: pte is NULL"); return; }
     mark_not_present(pte);
     __asm__ volatile("invlpg (%0)" :: "r"(vaddr) : "memory");
     /* __asm__ volatile("invlpga" :: "a"(addr), "c"(asid)); // or invlpgb + tlbsync for many pages */
 }
 
-void init_pt(struct pte_descriptor page_tables[CHAINING]) {
+void init_pt() {
     println("get_unprivileged_page_tables");
+    vnflet_page_tables = aligned_alloc(4096, sizeof(struct pte_descriptor) * CHAINING);
+    assert(vnflet_page_tables != NULL && "Failed to allocate memory for page tables");
     /* page_tables[0].page_directory_vaddr = 0x1337; // TODO: remove */
-    get_unprivileged_page_tables((void*)page_tables, sizeof(struct pte_descriptor) * CHAINING);
+    get_unprivileged_page_tables((void*)vnflet_page_tables, sizeof(struct pte_descriptor) * CHAINING);
     dump_vnflet_page_tables();
 }
 
@@ -390,7 +398,7 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
 }
 
 void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) {
-    init_pt(vnflet_page_tables);
+    init_pt();
 
     struct shm* buf = data_shared_previous;
     size_t buf_used = 0;
