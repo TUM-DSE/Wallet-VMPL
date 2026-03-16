@@ -37,7 +37,7 @@
 
 // Some primitives like create_channel(_at) work on page level 3, requiring 512G-alignment.
 // The two before shared is used by the default INPUT and OUTPUT
-#define CHANNEL_ADDR(x) ((void*)(0x38000000000ULL+ (x) * 0x8000000000ULL))
+#define CHANNEL_ADDR(x) ((void*)(0x80000000000ULL+ (x) * 0x8000000000ULL))
 #define SHARED_ADDR CHANNEL_ADDR(0)
 
 struct shm_stack {
