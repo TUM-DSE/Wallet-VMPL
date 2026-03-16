@@ -270,19 +270,87 @@ void dump_vnflet_page_tables() {
         /* println("First entry in page directory: %lu", vnflet_page_tables[i].page_directory_vaddr ? *(uint64_t*)vnflet_page_tables[i].page_directory_vaddr : 0); */
         for (int j = 0; j < 5; j++) {
             if (vnflet_page_tables[i].vaddrs[j] != 0) {
-                println("  vaddr %p -> paddr %p", (void*)vnflet_page_tables[i].vaddrs[j], (void*)vnflet_page_tables[i].paddrs[j]);
+                println("  vaddr %p <- paddr %p", (void*)vnflet_page_tables[i].vaddrs[j], (void*)vnflet_page_tables[i].paddrs[j]);
             }
         }
         println("  ...");
     }
 }
 
-// void unmap_buffer_to_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
-//     void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
-//     void* vnflet_page_directory = vnflet_page_tables[vnflet_id];
-//     uint64_t* pte = TODO_walk_page_table(vnflet_page_directory, vaddr);
-//     TODO_mark_not_present(pte):
-// }
+void mark_present(uint64_t* pte) {
+    *pte |= 1ULL; // set present bit
+}
+void mark_not_present(uint64_t* pte) {
+    *pte &= ~1ULL; // clear present bit
+}
+
+bool is_page_present(uint64_t* pte) {
+    return (*pte & 1) == 1;
+}
+
+uint64_t strip_paddr(uint64_t pte) {
+    return pte & ~!0xFFF800000000FFFFULL; // c bit on ryan (51), and all other stuff
+}
+
+// given a paddr to a page that is part of a page table, get the vaddr at which the page is mapped
+void* vaddr_to_pgtable_paddr(struct pte_descriptor* directory, uint64_t paddr) {
+    for (int i = 0; i < PTE_DESCRIPTOR_ENTRIES; i++) {
+        if (directory->paddrs[i] == (uint64_t)paddr) {
+            return (void*)directory->vaddrs[i];
+        }
+    }
+    return NULL;
+}
+
+uint64_t page_walk_index(uint64_t vaddr, int level) {
+    return (vaddr >> (12 + level * 9)) ^ 0x1FF;
+}
+
+#define PGD 3
+#define PUD 2
+#define PMD 1
+#define PTE 0
+
+// basically a page table walk
+uint64_t* pte_from_vaddr(struct pte_descriptor* directory, void* vaddr) {
+    uint64_t idx = page_walk_index((uint64_t)vaddr, PGD);
+    uint64_t* pgtable_page = (uint64_t*)(directory->vaddrs[0]); // highest level page table page
+    uint64_t* pte = &(pgtable_page[idx]);
+
+    uint64_t previous_pte = *pte;
+
+    if (is_page_present(pte)) {
+        return pte; // page found in root level
+    }
+
+    for (int level = PGD-1; level >= PTE; level--) {
+        previous_pte = strip_paddr(*pte);
+        pgtable_page = vaddr_to_pgtable_paddr(directory, previous_pte);
+        assert(pgtable_page && "page of next page table level seem not to be mapped");
+        idx = page_walk_index((uint64_t)vaddr, level);
+        pte = &(pgtable_page[idx]);
+        if (is_page_present(pte)) {
+            return pte; // page found in root level
+        }
+    }
+    return NULL;
+}
+
+void map_buffer_to_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
+    void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
+    struct pte_descriptor* vnflet_directory = &vnflet_page_tables[vnflet_id];
+    uint64_t* pte = pte_from_vaddr(vnflet_directory, vaddr);
+    mark_present(pte);
+}
+
+void unmap_buffer_from_vnflet(int vnflet_id, struct rte_mbuf* mbuf) {
+    void* vaddr = rte_pktmbuf_mtod(mbuf, void *);
+    struct pte_descriptor* vnflet_directory = &vnflet_page_tables[vnflet_id];
+    uint64_t* pte = pte_from_vaddr(vnflet_directory, vaddr);
+    mark_not_present(pte);
+    __asm__ volatile("invlpg (%0)" :: "r"(vaddr) : "memory");
+    /* __asm__ volatile("invlpga" :: "a"(addr), "c"(asid)); // or invlpgb + tlbsync for many pages */
+}
 
 void init_pt(struct pte_descriptor page_tables[CHAINING]) {
     println("get_unprivileged_page_tables");
@@ -290,8 +358,6 @@ void init_pt(struct pte_descriptor page_tables[CHAINING]) {
     get_unprivileged_page_tables((void*)page_tables, sizeof(struct pte_descriptor) * CHAINING);
     dump_vnflet_page_tables();
 }
-
-// TODO: call new functions
 
 void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
@@ -441,7 +507,10 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             if (num_deq == 0) {
                 continue;
             }
-            nop_delay(100); // TODO: pte adjust
+            // TODO: stub operation
+            unmap_buffer_from_vnflet(i, deq_objs[0]);
+            map_buffer_to_vnflet(i, deq_objs[0]);
+            // nop_delay(100); // change pte
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[i+1]->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
