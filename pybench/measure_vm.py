@@ -229,15 +229,15 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             info(f"Running {test}")
             test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
             host.start_pktgen_vhost()
+            pktgen_pid = host.tmux_get_pid("pktgen")
+            with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
+                f.write(str(pktgen_pid))
             test.compile(host)
             # sleep(1) # wait and pray for pktgen
             with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
                 qemu_pid = host.tmux_get_pid("qemu")
                 with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
                     f.write(str(qemu_pid))
-                pktgen_pid = host.tmux_get_pid("pktgen")
-                with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
-                    f.write(str(pktgen_pid))
 
 
                 # TODO rebuild fs
