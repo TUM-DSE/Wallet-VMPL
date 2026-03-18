@@ -36,6 +36,8 @@
 #include <rte_mempool.h>
 #include <rte_mbuf.h>
 
+#include "vring_trace.h"
+
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
 #define NUM_MBUFS 2*512
@@ -335,6 +337,8 @@ lcore_mirror(void)
     RTE_ETH_FOREACH_DEV(port) {
     /* Run until the application is quit or killed. */
     struct rte_mbuf *bufs[BURST_SIZE];
+    struct vring_sampling sampler;
+    vring_sampling_init(&sampler, port);
     for (;;) {
         /* Check if we should exit */
         if (force_quit)
@@ -345,6 +349,7 @@ lcore_mirror(void)
             const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
                     bufs, BURST_SIZE);
 
+            vring_maybe_sample(&sampler);
             if (unlikely(nb_rx == 0)) {
                 rx_err++;
                 continue;
@@ -391,7 +396,10 @@ lcore_mirror(void)
             }
         /* } */
     }
-    }
+    vring_sampling_print(&sampler, port);
+    printf("\nCore %u exiting. Total RX: %lu, Total TX: %lu, RX Errors: %lu, TX Errors: %lu\n",
+            rte_lcore_id(), packet_count, tx_count, rx_err, tx_err);
+}
 }
 
 /*
