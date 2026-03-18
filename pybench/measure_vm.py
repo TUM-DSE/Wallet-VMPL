@@ -26,7 +26,7 @@ LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 class PktgenTest(AbstractBenchTest):
 
     batchsize: int
-    workload: int
+    workload: int # per packet per vnflet workload in ns
     chaining: int
     system: str # mirror, noiomgr, iomgr
     pktsize: int
@@ -35,7 +35,7 @@ class PktgenTest(AbstractBenchTest):
         return f"userspace_{self.system}_b{self.batchsize}_{self.workload}ns_c{self.chaining}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
-        return 5
+        return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
 
     @staticmethod
     def _read_pidfile(path: str):
@@ -95,7 +95,7 @@ class PktgenTest(AbstractBenchTest):
 
     def run(self, host: Server, guest: Server, repetition: int):
         if self.chaining != 1:
-            raise NotImplementedError("Workload and chaining > 1 not implemented")
+            raise NotImplementedError("Chaining > 1 not implemented")
 
         sleep(1) # for good measure
         remote_mirror_output = "/tmp/mirror_output.log"
@@ -109,7 +109,7 @@ class PktgenTest(AbstractBenchTest):
 
         guest.exec("rm /tmp/.dpdk-running || true")
         if self.system == "mirror":
-            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
@@ -184,17 +184,32 @@ class PktgenTest(AbstractBenchTest):
 def main(measurement: Measurement, plan_only: bool = False) -> None:
     global LLC_SIZE
     host, loadgen = measurement.hosts()
-    test_matrix = dict(
-        repetitions=[1],
+    tests : List[PktgenTest] = []
+    basic_tests = dict(
+        repetitions=[2],
         batchsize = [1, 32],
-        workload = [ int(i) for i in np.linspace(0, 50, 20) ] + [ int(i) for i in np.linspace(20, 2000, 20) ],
-        chaining = [3],
-        system = [ "polling", "iomgr", "noiomgr" ],
+        workload = [ 0 ],
+        chaining = [1],
+        system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
         num_vms = [0],
     )
+    workload_tests_64b = dict(
+        workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
+        system = [ "mirror", "iomgr", "noiomgr" ],
+        pktsize = [ 64 ],
+        repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+    )
+    workload_tests_1500b = dict(
+        workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
+        system = [ "mirror", "iomgr", "noiomgr" ],
+        pktsize = [ 1500 ],
+        repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+    )
+    tests = PktgenTest.list_tests(basic_tests) + PktgenTest.list_tests(workload_tests_64b) + PktgenTest.list_tests(workload_tests_1500b)
+
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
         test_matrix = dict(
@@ -203,17 +218,16 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             workload = [ 0 ], # , 100 ],
             chaining = [1],
             # system = [ "mirror" ],
-            system = [ "noiomgr" ],
+            system = [ "noiomgr", "iomgr" ],
             # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
             # legacy args
             num_vms = [0],
         )
+        test_matrix = measurement.apply_cmdline_overrides(test_matrix)
+        tests = PktgenTest.list_tests(test_matrix)
 
-    test_matrix = measurement.apply_cmdline_overrides(test_matrix)
-    tests : List[PktgenTest] = []
-    tests = PktgenTest.list_tests(test_matrix)
     PktgenTest.estimate_time2(tests, [])
 
     if plan_only:
@@ -227,59 +241,59 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")
-            test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
-            host.start_pktgen_vhost()
-            pktgen_pid = host.tmux_get_pid("pktgen")
-            with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
-                f.write(str(pktgen_pid))
             test.compile(host)
-            # sleep(1) # wait and pray for pktgen
-            with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
-                qemu_pid = host.tmux_get_pid("qemu")
-                with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
-                    f.write(str(qemu_pid))
+            for repetition in range(test.repetitions):
+                test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+                host.start_pktgen_vhost()
+                pktgen_pid = host.tmux_get_pid("pktgen")
+                with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
+                    f.write(str(pktgen_pid))
+                # sleep(1) # wait and pray for pktgen
+                with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
+                    qemu_pid = host.tmux_get_pid("qemu")
+                    with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
+                        f.write(str(qemu_pid))
 
 
-                # TODO rebuild fs
+                    # TODO rebuild fs
 
-                # vhost_sock = "/tmp/vhost0.sock"
-                # host.tmux_kill("Pktgen")
-                # host.exec(f"sudo rm {vhost_sock} || true")
-                # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
+                    # vhost_sock = "/tmp/vhost0.sock"
+                    # host.tmux_kill("Pktgen")
+                    # host.exec(f"sudo rm {vhost_sock} || true")
+                    # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
 
 
-                # guest.exec("modprobe virtio-net")
-                # guest.exec("ip l set enp0s9 up")
+                    # guest.exec("modprobe virtio-net")
+                    # guest.exec("ip l set enp0s9 up")
 
-                # remote_kmod_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/cvm-vfio").strip()
-                # remote_kmod_path = f"home/Wallet-VMPL" # TODO someone needs to build these; dont hardcode VMPL4
-                # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
-                # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
-                guest.exec("modprobe vfio-pci")
-                guest.exec("insmod module/vmpl.ko")
-                # guest.exec(f"dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
-                remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
-                guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                    # remote_kmod_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/cvm-vfio").strip()
+                    # remote_kmod_path = f"home/Wallet-VMPL" # TODO someone needs to build these; dont hardcode VMPL4
+                    # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
+                    # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
+                    guest.exec("modprobe vfio-pci")
+                    guest.exec("insmod module/vmpl.ko")
+                    # guest.exec(f"dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                    remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
+                    guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
 
-                measurement.mark_vm_initialized(0)
+                    measurement.mark_vm_initialized(0)
 
-                for repetition in range(test.repetitions):
                     test.run(host, guest, repetition)
 
-                # breakpoint()
-                # pass
-                # command = 'printf("Hello from Python!\\n")'
-                # script = f"""
-                #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"
-                #     require "Pktgen"
-                #     {command}
-                # """
-                # print(host.exec(f"echo '{script}' | socat - TCP4:localhost:22022"))
-                pass
-            # host.start_vpp()
-            # test.compile(host)
-            # for repetition in range(test.repetitions):
-            #     test.run(host, repetition)
+                    # breakpoint()
+                    # pass
+                    # command = 'printf("Hello from Python!\\n")'
+                    # script = f"""
+                    #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"
+                    #     require "Pktgen"
+                    #     {command}
+                    # """
+                    # print(host.exec(f"echo '{script}' | socat - TCP4:localhost:22022"))
+                    pass
+                # host.start_vpp()
+                # test.compile(host)
+                # for repetition in range(test.repetitions):
+                #     test.run(host, repetition)
             bench.done(test)
 
     test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
