@@ -95,7 +95,15 @@
             mesonFlags = prev.mesonFlags ++ [ "--buildtype=debug" "-Ddeveloper_mode=enabled" ];
             hardeningDisable = [ "all" ];
           });
-          pktgen-dpdk = args.nixpkgs-pktgen.legacyPackages.${system}.pktgen.overrideAttrs (final: prev: {
+          pktgen-dpdk = let
+            pktgenpkgs = args.nixpkgs-pktgen.legacyPackages.${system};
+            dpdk-for-pktgen = pktgenpkgs.dpdk.overrideAttrs (final: prev: {
+              postPatch = prev.postPatch + ''
+                substituteInPlace drivers/net/vhost/rte_eth_vhost.c --replace ".link_speed = 10000," ".link_speed = 100000,"
+              '';
+            });
+            usePatchedDpdk = (pktgen: pktgen.override { dpdk = dpdk-for-pktgen; });
+          in (usePatchedDpdk pktgenpkgs.pktgen).overrideAttrs (final: prev: {
 		        postPatch = prev.postPatch + ''
               substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
             '';
