@@ -263,7 +263,7 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
                 return;
             }
 
-            delay(PER_VNFLET_WORKLOAD_NS); // simulate per-packet processing
+            delay(PER_VNFLET_WORKLOAD_NS*num_deq); // simulate per-packet processing
 
             int ret = rte_pktmbuf_alloc_bulk(pool2, (struct rte_mbuf **)enq_objs, num_deq);
             if (ret != 0) {

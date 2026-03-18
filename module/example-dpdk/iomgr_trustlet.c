@@ -143,6 +143,9 @@ void nop_delay(uint64_t nsecs) {
     nop_loop((uint64_t)(nsecs * nops_per_ns));
 }
 
+uint64_t delayed_ns = 0;
+uint64_t delays = 0;
+
 // build our own delay, because gramine's sleep is unimplemented
 void delay(uint64_t nsecs) {
     if (nsecs == 0) return;
@@ -153,7 +156,9 @@ void delay(uint64_t nsecs) {
     while (1) {
         uint64_t now = clock_monotonic_get();
         if (now >= end) {
-            debug println("delay: done, slept %lu ns", now - start);
+            delays++;
+            delayed_ns += now - start;
+            debug println("my delay: done, slept %lu ns", now - start);
             break;
         }
     }
@@ -358,7 +363,6 @@ void init_pt() {
     println("get_unprivileged_page_tables");
     vnflet_page_tables = aligned_alloc(4096, sizeof(struct pte_descriptor) * CHAINING);
     assert(vnflet_page_tables != NULL && "Failed to allocate memory for page tables");
-    /* page_tables[0].page_directory_vaddr = 0x1337; // TODO: remove */
     get_unprivileged_page_tables((void*)vnflet_page_tables, sizeof(struct pte_descriptor) * CHAINING);
     dump_vnflet_page_tables();
 }
@@ -380,6 +384,9 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
     struct rte_mempool* pool = data_shared_pool->mbuf_pool;
     assert(pool != NULL && "pool need to be allocated by driver");
 
+    delayed_ns = 0;
+    delays = 0;
+
     trustlet_exit();
 
     while (likely(atomic_load(&data_shared_pool->keep_running))) {
@@ -387,12 +394,14 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
         if (num_deq == 0) {
             continue;
         }
-        delay(PER_VNFLET_WORKLOAD_NS);
+        delay(PER_VNFLET_WORKLOAD_NS*num_deq);
         num_enq = rte_ring_sp_enqueue_bulk(egress, deq_objs, num_deq, NULL);
         if (num_deq != num_enq) {
             // TODO: slitently drops mbuf right now, leaking it and never returning it to the pool.
         }
     }
+
+    println("Average per vnflet workload delay: %.2f ns (total delayed ns: %lu over %lu iterations)", delays > 0 ? (double)delayed_ns / (double)delays : 0, delayed_ns, delays);
 
     notify_monitor();
 }

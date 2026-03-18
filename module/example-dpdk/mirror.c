@@ -47,6 +47,10 @@
 #define BURST_SIZE 32
 #endif
 
+#ifndef CHAINING
+#define CHAINING 2
+#endif
+
 #ifndef LLC_SIZE
 #define LLC_SIZE 512*1024 // 512 kB (for weak laptops)
 /* #define LLC_SIZE 512*1024*1024 // 512 MB (-> requires ~25GB mempool including head/tailroom)*/
@@ -370,7 +374,7 @@ lcore_mirror(void)
                 hexdump(pkt_data, pkt->data_len);
             }
 #endif
-            ndelay_accurate(sleep * nb_rx); // simulate per-packet processing time
+            ndelay_accurate(sleep * CHAINING * nb_rx); // simulate per-packet processing time
 
             /* Send packets back out on the same port */
             const uint16_t nb_tx = rte_eth_tx_burst(port, 0,

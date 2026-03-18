@@ -377,7 +377,8 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        shared->keep_running = false; // signal trustlet to stop
+        atomic_store(&shared->keep_running, false); // signal first trustlet to stop
+        /* shared->keep_running = false; // signal trustlet to stop */
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t end = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
