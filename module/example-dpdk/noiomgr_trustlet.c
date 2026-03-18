@@ -15,6 +15,7 @@
 #include "cpuid.c"
 #include "../example-tests/util.h"
 #include "../example-tests/shm_mempool.h"
+#include "workload.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
@@ -166,6 +167,7 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     void *deq_objs[BURST_SIZE];
     void *enq_objs[BURST_SIZE];
     delay(1); // warm up CoW triggered by delay
+    struct workload* workload = workload_alloc();
 
     // Initialize DPDK EAL with --no-huge for environments without hugepages
     println("Initializing EAL...");
@@ -263,6 +265,7 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
                 return;
             }
 
+            artificial_workload(workload, num_deq);
             delay(PER_VNFLET_WORKLOAD_NS*num_deq); // simulate per-packet processing
 
             int ret = rte_pktmbuf_alloc_bulk(pool2, (struct rte_mbuf **)enq_objs, num_deq);

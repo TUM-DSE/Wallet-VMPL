@@ -15,6 +15,7 @@
 #include "cpuid.c"
 #include "../example-tests/util.h"
 #include "../example-tests/shm_mempool.h"
+#include "workload.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
@@ -372,6 +373,7 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
     void *deq_objs[BURST_SIZE];
     void *enq_objs[BURST_SIZE];
     delay(1); // warm up CoW triggered by delay
+    struct workload* workload = workload_alloc();
 
     println("Initializing EAL...");
 
@@ -394,6 +396,7 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
         if (num_deq == 0) {
             continue;
         }
+        artificial_workload(workload, num_deq);
         delay(PER_VNFLET_WORKLOAD_NS*num_deq);
         num_enq = rte_ring_sp_enqueue_bulk(egress, deq_objs, num_deq, NULL);
         if (num_deq != num_enq) {
