@@ -37,6 +37,7 @@
 #include <rte_mbuf.h>
 
 #include "vring_trace.h"
+#include "workload.h"
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
@@ -312,6 +313,7 @@ lcore_mirror(void)
     uint64_t tx_count = 0;
     volatile uint64_t rx_err = 0;
     volatile uint64_t tx_err = 0;
+    struct workload* workload = workload_alloc();
 
     /*
      * Check that the port is on the same NUMA node as the polling thread
@@ -374,6 +376,9 @@ lcore_mirror(void)
                 hexdump(pkt_data, pkt->data_len);
             }
 #endif
+            for (int i = 0; i < CHAINING; i++) {
+                artificial_workload(workload, nb_rx);
+            }
             ndelay_accurate(sleep * CHAINING * nb_rx); // simulate per-packet processing time
 
             /* Send packets back out on the same port */
