@@ -14,12 +14,6 @@ from time import sleep
 import os
 import getpass
 
-TARGET = {
-    "polling": "build/polling_test-shared",
-    "procedural": "build/procedural_test-shared",
-    "noiomgr": "build/noiomgr_test-shared"
-}
-
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 
 @dataclass
@@ -93,7 +87,7 @@ class PktgenTest(AbstractBenchTest):
             # without trustlets, make all will fail (more specifically building the fs)
             server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
-    def run(self, host: Server, guest: Server, repetition: int):
+    def start(self, host: Server, guest: Server, repetition: int):
         if self.chaining != 1:
             raise NotImplementedError("Chaining > 1 not implemented")
 
@@ -122,6 +116,7 @@ class PktgenTest(AbstractBenchTest):
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
         guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=180)
 
+    def measure(self, host: Server, guest: Server, repetition: int):
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
@@ -130,7 +125,7 @@ class PktgenTest(AbstractBenchTest):
         host.exec_pktgen('pktgen.start(0)')
         sleep(3)
         pps = []
-        for _ in range(5):
+        for _ in range(G.DURATION_S):
             lua = """
                 printf(pktgen.portStats("0", "rate")[0].pkts_rx)
             """
@@ -185,6 +180,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     global LLC_SIZE
     host, loadgen = measurement.hosts()
     tests : List[PktgenTest] = []
+    G.DURATION_S = 15
     basic_tests = dict(
         repetitions=[2],
         batchsize = [1, 32],
@@ -254,46 +250,18 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                     with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
                         f.write(str(qemu_pid))
 
-
-                    # TODO rebuild fs
-
-                    # vhost_sock = "/tmp/vhost0.sock"
-                    # host.tmux_kill("Pktgen")
-                    # host.exec(f"sudo rm {vhost_sock} || true")
-                    # host.tmux_new("Pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0' -G")
-
-
-                    # guest.exec("modprobe virtio-net")
-                    # guest.exec("ip l set enp0s9 up")
-
-                    # remote_kmod_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/cvm-vfio").strip()
-                    # remote_kmod_path = f"home/Wallet-VMPL" # TODO someone needs to build these; dont hardcode VMPL4
-                    # guest.exec(f"rmmod vfio-pci || true; rmmod vfio-pci-core || true; rmmod vfio_iommu_type1 || true; rmmod vfio || true;")
-                    # guest.exec(f"modprobe irqbypass; insmod {remote_kmod_path}/linux/drivers/vfio/vfio.ko; insmod {remote_kmod_path}/linux/drivers/vfio/vfio_iommu_type1.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci-core.ko; insmod {remote_kmod_path}/linux/drivers/vfio/pci/vfio-pci.ko")
                     guest.exec("modprobe vfio-pci")
                     guest.exec("insmod module/vmpl.ko")
-                    # guest.exec(f"dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                     guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
 
                     measurement.mark_vm_initialized(0)
 
-                    test.run(host, guest, repetition)
+                    test.start(host, guest, repetition)
+                    test.measure(host, guest, repetition)
 
                     # breakpoint()
-                    # pass
-                    # command = 'printf("Hello from Python!\\n")'
-                    # script = f"""
-                    #     package.path = package.path .. ";{host.project_root}/pybench/Pktgen.lua;"
-                    #     require "Pktgen"
-                    #     {command}
-                    # """
-                    # print(host.exec(f"echo '{script}' | socat - TCP4:localhost:22022"))
                     pass
-                # host.start_vpp()
-                # test.compile(host)
-                # for repetition in range(test.repetitions):
-                #     test.run(host, repetition)
             bench.done(test)
 
     test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
