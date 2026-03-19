@@ -127,11 +127,11 @@ int main(int argc, char *argv[]) {
 
     int iterations = 1e9;
 
-    int zygotes[2];
-    int trustlets[2];
+    int zygotes[CHAINING];
+    int trustlets[CHAINING];
     int iomgr_zygote;
     int iomgr_trustlet;
-    struct threaded_invoke_handle* handles[2];
+    struct threaded_invoke_handle* handles[CHAINING];
     struct threaded_invoke_handle* iomgr_handle;
 
     // for i in range(chain_len):

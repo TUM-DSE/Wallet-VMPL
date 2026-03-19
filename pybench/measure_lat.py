@@ -14,6 +14,7 @@ from enums import Interface
 from time import sleep
 import os
 import getpass
+from util import safe_cast, deduplicate
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 
@@ -90,7 +91,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         repetitions=[2],
         batchsize = [1, 32],
         workload = [ 0 ],
-        chaining = [1],
+        memory_workload = [ 0 ],
+        chaining = [2],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
 
@@ -101,13 +103,13 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64 ],
-        repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 1500 ],
-        repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     tests = PktgenLatencyTest.list_tests(basic_tests) + PktgenLatencyTest.list_tests(workload_tests_64b) + PktgenLatencyTest.list_tests(workload_tests_1500b)
 
@@ -117,7 +119,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             repetitions=[1],
             batchsize = [32], # , 32],
             workload = [ 0 ], # , 100 ],
-            chaining = [1],
+            memory_workload = [ 0 ],
+            chaining = [2],
             # system = [ "mirror" ],
             system = [ "noiomgr", "iomgr", "mirror" ],
             # system = [ "mirror", "noiomgr" ],
@@ -129,6 +132,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         test_matrix = measurement.apply_cmdline_overrides(test_matrix)
         tests = PktgenLatencyTest.list_tests(test_matrix)
 
+    tests = deduplicate(tests)
     PktgenLatencyTest.estimate_time2(tests, [])
 
     if plan_only:
@@ -138,7 +142,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     pktgen_pid = None
 
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
-        for [repetitions, batchsize, workload, chaining, system, pktsize], a_tests in bench.multi_iterator(bench_tests, ["repetitions", "batchsize", "workload", "chaining", "system", "pktsize"]):
+        for [repetitions, batchsize, workload, memory_workload, chaining, system, pktsize], a_tests in bench.multi_iterator(bench_tests, ["repetitions", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"]):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")

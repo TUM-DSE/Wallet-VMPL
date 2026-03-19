@@ -13,6 +13,7 @@ from enums import Interface
 from time import sleep
 import os
 import getpass
+from util import safe_cast, deduplicate
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 
@@ -64,7 +65,7 @@ class PktgenTest(AbstractBenchTest):
             f"-DPACKET_SIZE={self.pktsize}",
             f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
             f"-DWORKLOAD_ACCESSES_B={self.memory_workload}",
-            # f"-DCHAINING={self.chaining}",
+            f"-DCHAINING={self.chaining}",
             # f"-DLLC_SIZE={LLC_SIZE}",
         ])
 
@@ -90,8 +91,8 @@ class PktgenTest(AbstractBenchTest):
             server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def start(self, host: Server, guest: Server, repetition: int):
-        if self.chaining != 1:
-            raise NotImplementedError("Chaining > 1 not implemented")
+        if self.chaining == 1:
+            raise NotImplementedError("Chaining == 1 not implemented")
 
         sleep(1) # for good measure
         remote_mirror_output = "/tmp/mirror_output.log"
@@ -140,7 +141,7 @@ class PktgenTest(AbstractBenchTest):
         print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
         print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
 
-        breakpoint()
+        # breakpoint()
 
         local_output_file = self.output_filepath(repetition)
         os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
@@ -190,7 +191,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         batchsize = [1, 32],
         workload = [ 0 ],
         memory_workload = [ 0 ],
-        chaining = [1],
+        chaining = [2],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
 
@@ -201,24 +202,31 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 1500 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
         workload = [ int(i) for i in np.linspace(0, 0x10000, 10) ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [1], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
+    )
+    chaining_tests = dict(
+        system = [ "mirror", "iomgr", "noiomgr" ],
+        pktsize = [ 64, 1500 ],
+        chaining = [ 2, 3, 4 ],
+        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], num_vms = [0],
     )
     tests = PktgenTest.list_tests(basic_tests) + \
         PktgenTest.list_tests(workload_tests_64b) + \
         PktgenTest.list_tests(workload_tests_1500b) + \
-        PktgenTest.list_tests(memory_workload_tests)
+        PktgenTest.list_tests(memory_workload_tests) + \
+        PktgenTest.list_tests(chaining_tests)
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -228,7 +236,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             batchsize = [32], # , 32],
             workload = [ 0 ], # , 100 ],
             memory_workload = [ 0 ],
-            chaining = [1],
+            chaining = [2],
             # system = [ "mirror" ],
             system = [ "noiomgr", "iomgr", "mirror" ],
             # system = [ "mirror", "noiomgr" ],
@@ -240,6 +248,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         test_matrix = measurement.apply_cmdline_overrides(test_matrix)
         tests = PktgenTest.list_tests(test_matrix)
 
+
+    tests = deduplicate(tests)
     PktgenTest.estimate_time2(tests, [])
 
     if plan_only:

@@ -32,6 +32,10 @@
 
 #define DATA_SIZE PACKET_SIZE
 
+#ifndef CHAINING
+#define CHAINING 2
+#endif
+
 /* static void* DATA_SHARED = NULL; */
 static __thread bool use_shm_alloc = false;
 
@@ -116,15 +120,15 @@ int main(int argc, char *argv[]) {
 
     int input_size = 16;
 
-    int chain_len = 2;
-    int chains[] = {2};
+    int chain_len = CHAINING;
+    int chains[] = {CHAINING};
     int chains_len = 1;
 
     int iterations = 1e9;
 
-    int zygotes[2];
-    int trustlets[2];
-    struct threaded_invoke_handle*handles[2];
+    int zygotes[CHAINING];
+    int trustlets[CHAINING];
+    struct threaded_invoke_handle*handles[CHAINING];
 
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))

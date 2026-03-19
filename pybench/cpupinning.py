@@ -34,7 +34,7 @@ class CpuPinner:
 
     def qemu(self, vm_number: int) -> str:
         vm_number = self._vm_number(vm_number)
-        return "4-7"
+        return "4-10"
         return self.in_cluster(vm_number, 0, length=rose_cluster_size)
 
     def pktgen(self):
