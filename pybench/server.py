@@ -15,6 +15,7 @@ from util import strip_subnet_mask
 import copy
 import base64
 import cpupinning
+import json
 
 BRIDGE_QUEUES: int = 0; # legacy default: 4
 MAX_VMS: int = 35; # maximum number of VMs expected (usually for cleanup functions that dont know what to clean up)
@@ -616,7 +617,7 @@ class Server(ABC):
             self.__scp_from(source, destination)
 
     def wait_for_success(self: 'Server', command: str, timeout: int = 10
-                         ) -> None:
+                         ) -> str:
         """
         Wait for a command to succeed.
 
@@ -637,8 +638,7 @@ class Server(ABC):
         start = datetime.now()
         while (datetime.now() - start).total_seconds() < timeout:
             try:
-                _ = self.exec(command)
-                return
+                return self.exec(command)
             except Exception:
                 sleep(1)
 
@@ -1899,7 +1899,7 @@ class Host(Server):
 
         project_root = str(Path(self.project_root)) # nix wants nicely formatted paths
         nix_shell = f"nix shell --inputs-from {project_root} nixpkgs#numactl --command"
-        numactl = f"numactl -C {self.cpupinner.qemu(vm_number)}"
+        numactl = "" # f"numactl -C {self.cpupinner.qemu(vm_number)}" # we pin vcpus instead
         # numactl = ""
 
         self.tmux_new(
@@ -1930,6 +1930,7 @@ class Host(Server):
             # ' -cdrom /home/networkadmin/images/guest_init.iso' +
             fsdev_config +
             ' -serial stdio' +
+	        f' -qmp unix:{MultiHost.qmp_path(vm_number)},server=on,wait=off' +
             (' -monitor tcp:127.0.0.1:2345,server,nowait' if debug_qemu else '') +
             f' -netdev tap,vhost=on,id=admin0,ifname={MultiHost.iface_name(self.admin_tap, vm_number)},' +
             'script=no,downscript=no' +
@@ -1948,6 +1949,19 @@ class Host(Server):
             +
             f' 2>/tmp/trace-vm{vm_number}.log'
             )
+
+        self.pin_vcpus(vm_number, cpus)
+
+    def pin_vcpus(self: 'Host', vm_number: int, cpus: int):
+        json_line = self.wait_for_success("echo '{\"execute\": \"qmp_capabilities\"}\n{\"execute\": \"query-cpus-fast\"}' | sudo socat - unix-connect:" + MultiHost.qmp_path(vm_number) + " | grep return") # fail unless qmp actually responds with the return json and not only the capabilities
+        qmp_response = json.loads(json_line.splitlines()[-1])
+        vcpus = qmp_response["return"]
+        assert len(vcpus) != cpus, f"We told Qemu to start with {cpus} but now Qemu only knowns {len(vcpus)} vcpus."
+        cmds = []
+        for vcpu, target_core in zip(vcpus, self.cpupinner.qemu_vcpus(vm_number) ):
+            tid = vcpu["thread-id"]
+            cmds += [f"sudo taskset -cp {target_core} {tid}"]
+        self.exec("; ".join(cmds))
 
     def kill_confidential_guest(self: 'Host') -> None:
         """

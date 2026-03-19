@@ -171,6 +171,10 @@ class MultiHost:
         return MultiHost.generic_path(vfio_user_socket_path, vm_number)
 
     @staticmethod
+    def qmp_path(vm_number: int) -> str:
+        return MultiHost.generic_path(f"/tmp/qmp-{USERNAME}", vm_number)
+
+    @staticmethod
     def cloud_init(disk_path: str, vm_number: int) -> str:
         init_disk = Path(disk_path).resolve()
         init_disk = init_disk.parent / f"cloud-init/vm{vm_number}.img"

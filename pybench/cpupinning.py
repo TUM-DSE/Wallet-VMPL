@@ -1,3 +1,5 @@
+from typing import List
+
 rose_cluster_size = 6 # shares L3 cache
 ryan_cluster_size = 8 # shares L3 cache
 rose_hyperthreads = 2
@@ -36,6 +38,9 @@ class CpuPinner:
         vm_number = self._vm_number(vm_number)
         return "4-10"
         return self.in_cluster(vm_number, 0, length=rose_cluster_size)
+
+    def qemu_vcpus(self, vm_number: int) -> List[int]:
+        return list(range(4, 11)) # ranges are exclusive the last one!
 
     def pktgen(self):
         return ("0,1,2,3", '1.0')
