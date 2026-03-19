@@ -210,7 +210,7 @@ class Measurement:
 
         if len(self.initialized_vms.values()) > 0 and all(self.initialized_vms.values()):
             info("All VMs initialized")
-            if self.args.boot_only:
+            if getattr(self.args, "boot_only", False):
                 breakpoint()
                 pass
 
@@ -749,19 +749,21 @@ class Bench(Generic[T], ContextDecorator):
         self.tqdm.update(time_progress_s / 60)
 
 
-# import measure_throughput
-
 def main():
+    import measure_vm
+    import measure_lat
+
     measurement = Measurement()
 
     # estimate runtimes
     info("")
-    # measure_throughput.main(measurement, plan_only=True)
+    measure_vm.main(measurement, plan_only=True)
+    measure_lat.main(measurement, plan_only=True)
 
     info("Running benchmarks ...")
     info("")
-    # measure_vnf.main(measurement)
-    # measure_throughput.main(measurement)
+    measure_vm.main(measurement)
+    measure_lat.main(measurement)
     error("TODO")
 
 if __name__ == "__main__":
