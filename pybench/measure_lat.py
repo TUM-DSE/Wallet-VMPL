@@ -152,7 +152,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         tests = PktgenLatencyTest.list_tests(test_matrix)
 
     tests = deduplicate(tests)
-    test_params = ["repetitions", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"]
+    test_params = ["repetitions", "num_vms", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"] #  define iteration order
+    assert sorted(test_params) == sorted(PktgenTest.test_parameters())
     if measurement.args.extremes_only:
         tests = PktgenLatencyTest.filter_extremes(tests, test_params)
     PktgenLatencyTest.estimate_time2(tests, [])
@@ -164,7 +165,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     pktgen_pid = None
 
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
-        for [repetitions, batchsize, workload, memory_workload, chaining, system, pktsize], a_tests in bench.multi_iterator(bench_tests, test_params):
+        for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, test_params):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")
