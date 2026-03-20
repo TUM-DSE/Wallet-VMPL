@@ -32,6 +32,13 @@ class PktgenLatencyTest(PktgenTest):
         return f"vm_lat_{self.system}_b{self.batchsize}_{self.workload}ns_c{self.chaining}_{self.pktsize}b"
 
     def measure(self, host: Server, guest: Server, repetition: int):
+        local_output_file = self.output_filepath(repetition)
+        remote_csv_file = "/tmp/lat.csv"
+        local_csv_file = self.output_filepath(repetition, extension="csv")
+        host.exec(f"sudo rm {remote_csv_file} || true")
+        # host.tmux_new("perf", "sudo perf record -F 1000 -a -g -- sleep 20")
+        # host.tmux_new("perf", "sudo perf sched record -a -o perf_sched.data -- sleep 20")
+
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
@@ -40,8 +47,10 @@ class PktgenLatencyTest(PktgenTest):
         host.exec_pktgen(f'pktgen.set("all", "rate", 0.1)')
         host.exec_pktgen('pktgen.start(0)')
         host.exec_pktgen(f'pktgen.latency("all", "enable")')
-        host.exec_pktgen('pktgen.latsampler_params(0, "simple", 10000, 1000, "/tmp/lat.csv")') # 10k samples (whatever many we can get), 1000Hz
+        host.exec_pktgen(f'pktgen.latsampler_params(0, "simple", 10000, 1000, "{remote_csv_file}")') # 10k samples (whatever many we can get), 1000Hz
         host.exec_pktgen(f'pktgen.latsampler("all", "enable")')
+        # host.exec_pktgen(f'pktgen.capture_latency("all", "enable")')
+        # host.exec_pktgen(f'pktgen.capture("all", "enable")')
 
         sleep(3)
         lat_us = []
@@ -52,6 +61,11 @@ class PktgenLatencyTest(PktgenTest):
             result_string = host.exec_pktgen(lua)
             lat_us += [ float(result_string) ]
             sleep(1)
+
+        # host.exec_pktgen(f'pktgen.capture_latency("all", "disable")')
+        # host.exec_pktgen(f'pktgen.capture("all", "disable")')
+        # sleep(1)
+        # breakpoint()
         host.exec_pktgen(f'pktgen.latsampler("all", "disable")')
         host.exec_pktgen(f'pktgen.latency("all", "disable")')
         host.exec_pktgen('pktgen.stop(0)')
@@ -61,8 +75,13 @@ class PktgenLatencyTest(PktgenTest):
         print(f"Mean latency: {np.mean(lat_us):.3f} us (stddev: {np.std(lat_us):.3f} us)")
         print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
 
-        local_output_file = self.output_filepath(repetition)
+
+        if np.mean(lat_us) > 2000:
+            print(host.exec("date"))
+            # breakpoint()
+
         os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
+        host.copy_from(remote_csv_file, local_csv_file)
         data = []
         for foo in lat_us:
             data += [{
@@ -94,7 +113,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         memory_workload = [ 0 ],
         chaining = [2],
         system = [ "mirror", "iomgr", "noiomgr" ],
-        pktsize = [ 64, 1500 ],
+        pktsize = [ 64, 128, 1500 ],
 
         # legacy args
         num_vms = [0],
@@ -102,7 +121,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     workload_tests_64b = dict(
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
         system = [ "mirror", "iomgr", "noiomgr" ],
-        pktsize = [ 64 ],
+        pktsize = [ 64, 128 ],
         memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(

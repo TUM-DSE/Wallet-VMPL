@@ -108,9 +108,9 @@ class PktgenTest(AbstractBenchTest):
         if self.system == "mirror":
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
-            guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
-            guest.tmux_new("workload", f"cd ./module/example-dpdk; gdb -ex run --args ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         else:
             raise ValueError(f"Unknown system {self.system}")
 
@@ -211,10 +211,10 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
-        workload = [ int(i) for i in np.linspace(0, 0x10000, 10) ],
+        memory_workload = [ int(i) for i in np.linspace(0, 0x10000, 10) ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
+        workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     chaining_tests = dict(
         system = [ "mirror", "iomgr", "noiomgr" ],

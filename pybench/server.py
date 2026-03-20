@@ -1906,6 +1906,7 @@ class Host(Server):
             MultiHost.enumerate('qemu', vm_number),
             ('gdbserver 0.0.0.0:1234 ' if debug_qemu else '') +
             f"sudo {nix_shell} {numactl} " +
+            # "gdb -q -ex 'set pagination off' -ex 'handle all nostop' -ex run --args " +
             qemu_bin_path +
             f' -machine q35,confidential-guest-support=sev0,memory-backend=ram1' +
             f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={self.project_root}/svsm/bin/coconut-qemu.igvm' +
@@ -1929,7 +1930,9 @@ class Host(Server):
             f',queue-size={rx_queue_size}' +
             # ' -cdrom /home/networkadmin/images/guest_init.iso' +
             fsdev_config +
-            ' -serial stdio' +
+            # ' -serial stdio' +
+            ' -chardev stdio,id=char0,logfile=/tmp/serial.log,signal=off' +
+            ' -serial chardev:char0' +
 	        f' -qmp unix:{MultiHost.qmp_path(vm_number)},server=on,wait=off' +
             (' -monitor tcp:127.0.0.1:2345,server,nowait' if debug_qemu else '') +
             f' -netdev tap,vhost=on,id=admin0,ifname={MultiHost.iface_name(self.admin_tap, vm_number)},' +
@@ -1947,7 +1950,7 @@ class Host(Server):
             # +
             # ' --trace virtio_mmio_read --trace virtio_mmio_write' +
             +
-            f' 2>/tmp/trace-vm{vm_number}.log'
+            f' 2>/tmp/trace-vm{vm_number}.log; echo qemu done; sleep 999'
             )
 
         self.pin_vcpus(vm_number, cpus)
