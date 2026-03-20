@@ -31,7 +31,7 @@
 #endif
 
 #ifndef RUNTIME_S
-#define RUNTIME_S 4
+#define RUNTIME_S 30
 #endif
 
 #ifndef BURST_SIZE

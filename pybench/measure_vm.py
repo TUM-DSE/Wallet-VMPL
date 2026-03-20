@@ -24,7 +24,7 @@ class PktgenTest(AbstractBenchTest):
     workload: int # per packet per vnflet workload in ns
     memory_workload: int # per packet per vnflet memory workload in bytes
     chaining: int
-    system: str # mirror, noiomgr, iomgr
+    system: str # mirror, noiomgr, iomgr, insecure
     pktsize: int
 
     def test_infix(self):
@@ -80,6 +80,8 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "iomgr":
             trustlets = ["iomgr_trustlet"]
             runners = ["iomgr_run"]
+        elif self.system == "insecure":
+            dpdk_examples = ["insecure"]
         else:
             raise ValueError(f"Unknown system {self.system}")
 
@@ -111,6 +113,8 @@ class PktgenTest(AbstractBenchTest):
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+        elif self.system == "insecure":
+            guest.tmux_new("workload", f"cd module/example-dpdk; ./insecure --no-huge -l 0-{self.chaining} --iova-mode=pa")
         else:
             raise ValueError(f"Unknown system {self.system}")
 
@@ -192,7 +196,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         workload = [ 0 ],
         memory_workload = [ 0 ],
         chaining = [2],
-        system = [ "mirror", "iomgr", "noiomgr" ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
@@ -200,24 +204,24 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     )
     workload_tests_64b = dict(
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
-        system = [ "mirror", "iomgr", "noiomgr" ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64 ],
         memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
-        system = [ "mirror", "iomgr", "noiomgr" ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 1500 ],
         memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
-        system = [ "mirror", "iomgr", "noiomgr" ],
+        system = [ "mirror", "iomgr", "noiomgr", "inscure" ],
         pktsize = [ 64, 1500 ],
         workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     chaining_tests = dict(
-        system = [ "mirror", "iomgr", "noiomgr" ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64, 1500 ],
         chaining = [ 2, 3, 4 ],
         workload = [ 0 ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], num_vms = [0],
@@ -238,7 +242,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             memory_workload = [ 0 ],
             chaining = [2],
             # system = [ "mirror" ],
-            system = [ "noiomgr", "iomgr", "mirror" ],
+            system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
             # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
