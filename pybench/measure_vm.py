@@ -190,8 +190,13 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     host, loadgen = measurement.hosts()
     tests : List[PktgenTest] = []
     G.DURATION_S = 15
+    REPETITIONS = 2
+    if measurement.args.extremes_only:
+        G.DURATION_S = 5
+        REPETITIONS = 1
+
     basic_tests = dict(
-        repetitions=[2],
+        repetitions=[REPETITIONS],
         batchsize = [1, 32],
         workload = [ 0 ],
         memory_workload = [ 0 ],
@@ -206,7 +211,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
         system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
@@ -216,15 +221,15 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
-        system = [ "mirror", "iomgr", "noiomgr", "inscure" ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64, 1500 ],
-        workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
+        workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     chaining_tests = dict(
         system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64, 1500 ],
         chaining = [ 2, 3, 4 ],
-        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], num_vms = [0],
+        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     tests = PktgenTest.list_tests(basic_tests) + \
         PktgenTest.list_tests(workload_tests_64b) + \

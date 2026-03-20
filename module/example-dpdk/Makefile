@@ -1,4 +1,4 @@
-DPDK_EXAMPLES := mirror
+DPDK_EXAMPLES := mirror insecure
 TRUSTLETS := noiomgr_trustlet iomgr_trustlet
 RUNNERS := noiomgr_run iomgr_run
 CFLAGS :=
