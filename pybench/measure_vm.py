@@ -262,7 +262,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     qemu_pid = None
     pktgen_pid = None
 
-    with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
+    with Bench(tests=tests, args_reboot=[], brief = G.BRIEF, extremes_only = measurement.args.extremes_only) as (bench, bench_tests):
         for [repetitions, batchsize, workload, memory_workload, chaining, system, pktsize], a_tests in bench.multi_iterator(bench_tests, ["repetitions", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"]):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
