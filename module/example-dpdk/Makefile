@@ -53,6 +53,12 @@ iomgr_trustlet: %: %.c
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
 
+insecure: insecure.c
+	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
+
+run_insecure: insecure
+	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-dpdk && ./insecure --no-huge -l 0-$(CHAINING) --iova-mode=pa"
+
 run_noiomgr: noiomgr_run noiomgr_trustlet
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-dpdk && ./noiomgr_run"
 
