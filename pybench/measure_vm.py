@@ -211,7 +211,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
-        memory_workload = [ int(i) for i in np.linspace(0, 0x10000, 10) ],
+        memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
         system = [ "mirror", "iomgr", "noiomgr" ],
         pktsize = [ 64, 1500 ],
         workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],

@@ -19,7 +19,7 @@
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 
 struct workload {
-  bool placeholder;
+  uint64_t placeholder;
   volatile uint64_t array[];
 };
 
@@ -39,13 +39,15 @@ static struct workload* workload_alloc() {
 
 inline static void artificial_workload(struct workload* self, size_t nr_packets) {
 #ifndef WORKLOAD_DISABLE
-  // Linear accesses
-  // uint64_t start = rte_rand_max(WORKLOAD_STATE_SIZE_B / sizeof(uint64_t));
-  uint64_t start = rand() % (WORKLOAD_STATE_SIZE_B / sizeof(uint64_t));
+  const size_t array_len = WORKLOAD_STATE_SIZE_B / sizeof(uint64_t);
+  uint64_t r = rand();
   for (int i = 0; i < WORKLOAD_ACCESSES_B * nr_packets / sizeof(uint64_t); i++) {
-    uint64_t pos = (start + i) % (WORKLOAD_STATE_SIZE_B / sizeof(uint64_t));
-    volatile uint64_t x = self->array[pos];
+    uint64_t pos = r % array_len;
+    uint64_t data = self->array[pos];
+    r = data ^ (r << 24 ^ r << 16 ^ r << 8 ^ r >> 16); # poor mans new random number: fast, but sufficient to prevent prefetching of subsequent accesses
   }
+  // Prevent the compiler from optimizing away the chain
+  *(volatile uint64_t*)&self->placeholder = r;
   // Random accesses (prng bottlenecked)
   // for (int i = 0; i < WORKLOAD_ACCESSES_B / sizeof(uint64_t); i++) {
   //   uint64_t pos = rte_rand_max(WORKLOAD_STATE_SIZE_B / sizeof(uint64_t));
