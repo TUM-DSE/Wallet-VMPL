@@ -42,10 +42,63 @@
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
-#define NUM_MBUFS 2*512
+#define NUM_MBUFS (CHAINING+2)*2*512
+/* #define NUM_MBUFS 2*512 */
 #define MBUF_CACHE_SIZE 250
 
 #include "workload.h"
+
+// --- simple non-atomic pool (-DSIMPLE_POOL) ---
+#define SIMPLE_POOL
+#ifdef SIMPLE_POOL
+
+#define SPOOL_MAX 2048
+
+struct spool {
+    uint32_t size;
+    uint32_t top;
+    void *objs[SPOOL_MAX];
+};
+
+static struct spool g_spool;
+
+static int spool_alloc(struct rte_mempool *mp) {
+    struct spool *s = (struct spool *)mp->pool_config;
+    s->size = mp->size;
+    s->top = 0;
+    mp->pool_data = s;
+    return 0;
+}
+static void spool_free(struct rte_mempool *mp) { (void)mp; }
+static int spool_enqueue(struct rte_mempool *mp, void * const *obj_table, unsigned n) {
+    struct spool *s = mp->pool_data;
+    if (s->top + n > s->size) return -ENOBUFS;
+    for (unsigned i = 0; i < n; i++)
+        s->objs[s->top++] = (void *)obj_table[i];
+    return 0;
+}
+static int spool_dequeue(struct rte_mempool *mp, void **obj_table, unsigned n) {
+    struct spool *s = mp->pool_data;
+    if (s->top < n) return -ENOBUFS;
+    for (unsigned i = 0; i < n; i++)
+        obj_table[i] = s->objs[--s->top];
+    return 0;
+}
+static unsigned spool_get_count(const struct rte_mempool *mp) {
+    return ((const struct spool *)mp->pool_data)->top;
+}
+
+static const struct rte_mempool_ops spool_ops = {
+    .name = "spool",
+    .alloc = spool_alloc,
+    .free = spool_free,
+    .enqueue = spool_enqueue,
+    .dequeue = spool_dequeue,
+    .get_count = spool_get_count,
+};
+RTE_MEMPOOL_REGISTER_OPS(spool_ops);
+
+#endif /* SIMPLE_POOL */
 
 // --- timing ---
 
@@ -151,7 +204,7 @@ vnflet_thread(void *arg)
         unsigned sent = rte_ring_sp_enqueue_bulk(out, objs, n, NULL);
         if (sent == 0) {
             // Drop: free mbufs so they return to the pool
-            rte_pktmbuf_free_bulk((struct rte_mbuf **)objs, n);
+            /* rte_pktmbuf_free_bulk((struct rte_mbuf **)objs, n); */
         } else {
             total += sent;
         }
@@ -163,9 +216,9 @@ vnflet_thread(void *arg)
         n = rte_ring_sc_dequeue_burst(in, objs, BURST_SIZE, NULL);
         if (n > 0) {
             unsigned sent = rte_ring_sp_enqueue_bulk(out, objs, n, NULL);
-            if (sent == 0)
-                rte_pktmbuf_free_bulk((struct rte_mbuf **)objs, n);
-            else
+            if (sent == 0) {
+                /* rte_pktmbuf_free_bulk((struct rte_mbuf **)objs, n); */
+            } else
                 total += sent;
         }
     } while (n > 0);
@@ -194,10 +247,30 @@ int main(int argc, char **argv)
     if (nb_ports == 0)
         rte_exit(EXIT_FAILURE, "No Ethernet ports\n");
 
+#ifdef SIMPLE_POOL
+    {
+        unsigned n = NUM_MBUFS * nb_ports;
+        unsigned elt = sizeof(struct rte_mbuf) + RTE_MBUF_DEFAULT_BUF_SIZE;
+        mbuf_pool = rte_mempool_create_empty("MBUF_POOL", n, elt,
+            0 /* cache_size */, sizeof(struct rte_pktmbuf_pool_private),
+            rte_socket_id(), 0);
+        if (!mbuf_pool)
+            rte_exit(EXIT_FAILURE, "Cannot create mempool: %s\n", rte_strerror(rte_errno));
+        if (rte_mempool_set_ops_byname(mbuf_pool, "spool", &g_spool) != 0)
+            rte_exit(EXIT_FAILURE, "Cannot set spool ops\n");
+        rte_pktmbuf_pool_init(mbuf_pool, NULL);
+        if (rte_mempool_populate_default(mbuf_pool) < 0)
+            rte_exit(EXIT_FAILURE, "Cannot populate mempool: %s\n", rte_strerror(rte_errno));
+        rte_mempool_obj_iter(mbuf_pool, rte_pktmbuf_init, NULL);
+        printf("SIMPLE_POOL: non-atomic stack, no per-lcore cache, %u mbufs\n",
+               mbuf_pool->populated_size);
+    }
+#else
     mbuf_pool = rte_pktmbuf_pool_create("MBUF_POOL", NUM_MBUFS * nb_ports,
         MBUF_CACHE_SIZE, 0, RTE_MBUF_DEFAULT_BUF_SIZE, rte_socket_id());
     if (mbuf_pool == NULL)
         rte_exit(EXIT_FAILURE, "Cannot create mbuf pool\n");
+#endif
 
     RTE_ETH_FOREACH_DEV(portid)
         if (port_init(portid, mbuf_pool) != 0)
