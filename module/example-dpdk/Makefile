@@ -53,8 +53,23 @@ iomgr_trustlet: %: %.c
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
 
+DPDK_MEMPOOL_LIBS := \
+	$(DPDK_PATH)/lib/librte_mempool_stack.a \
+	$(DPDK_PATH)/lib/librte_mempool_bucket.a \
+	$(DPDK_PATH)/lib/librte_stack.a
+
 insecure: insecure.c
 	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
+
+
+mempool_comparison: mempool_comparison.c
+	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ \
+		-lpthread -lnuma \
+		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
+		$(DPDK_LIBS) $(CFLAGS)
+
+run_mempool_comparison: mempool_comparison
+	./mempool_comparison --no-huge -l 10
 
 run_insecure: insecure
 	make -C ../../ ssh_with_command SSH_COMMAND="cd module/example-dpdk && ./insecure --no-huge -l 0-$(CHAINING) --iova-mode=pa"
