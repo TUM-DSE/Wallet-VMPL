@@ -1,7 +1,33 @@
-Host vm.local
-Hostname 192.168.56.10
+Host vm*.local
 User root
 IdentityFile container/key
 StrictHostKeyChecking no
 ControlMaster auto
 ControlPersist 60
+
+Host vm.local
+Hostname 192.168.56.10
+
+Host vm1.local
+Hostname 192.168.56.11
+
+Host vm2.local
+Hostname 192.168.56.12
+
+Host vm3.local
+Hostname 192.168.56.13
+
+Host vm4.local
+Hostname 192.168.56.14
+
+Host vm5.local
+Hostname 192.168.56.15
+
+Host vm6.local
+Hostname 192.168.56.16
+
+Host vm7.local
+Hostname 192.168.56.17
+
+Host vm8.local
+Hostname 192.168.56.18

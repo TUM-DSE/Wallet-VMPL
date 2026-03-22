@@ -399,7 +399,7 @@ class Measurement:
         if interface.needs_vmux():
             self.host.start_vmux(interface, num_vms=num)
         if interface.needs_vpp():
-            self.host.start_vpp()
+            self.host.start_vpp(num_vms=num)
 
         # start VMs in batches of batch
         range_ = MultiHost.range(num)
@@ -421,9 +421,8 @@ class Measurement:
                 info(f"Starting VM {i} ({interface.value})")
 
                 # self.host.run_guest(net_type=interface.net_type(), machine_type='pc', qemu_build_dir=QEMU_BUILD_DIR, vm_number=81)
-                self.host.run_guest(
+                self.host.run_confidential_guest(
                         net_type=interface,
-                        machine_type='pc',
                         qemu_build_dir=self.config.get('host', 'qemu_path', fallback=None),
                         vm_number=i
                         )

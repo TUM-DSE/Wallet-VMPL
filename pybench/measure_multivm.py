@@ -9,7 +9,7 @@ from pandas import DataFrame
 import pandas as pd
 from os.path import join as path_join
 import numpy as np
-from enums import Interface
+from enums import Interface, MultiHost
 from time import sleep
 import os
 import getpass
@@ -246,13 +246,13 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             workload = [ 0 ], # , 100 ],
             memory_workload = [ 0 ],
             chaining = [2],
-            # system = [ "mirror" ],
-            system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
+            system = [ "mirror" ],
+            # system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
             # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
             # legacy args
-            num_vms = [0],
+            num_vms = [2],
         )
         test_matrix = measurement.apply_cmdline_overrides(test_matrix)
         tests = PktgenTest.list_tests(test_matrix)
@@ -279,27 +279,45 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             test.compile(host)
             for repetition in range(test.repetitions):
                 test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
-                host.start_pktgen_vhost()
-                pktgen_pid = host.tmux_get_pid("pktgen")
-                with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
-                    f.write(str(pktgen_pid))
                 # sleep(1) # wait and pray for pktgen
-                with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
-                    qemu_pid = host.tmux_get_pid("qemu")
+                with measurement.virtual_machines(Interface.VPP, num=test.num_vms) as guests:
+                    breakpoint()
+
+                    # start pktgen after the VM because VPP is not the vhost server
+                    host.start_pktgen_vhost(connect_to_vpp = True)
+                    pktgen_pid = host.tmux_get_pid("pktgen")
+                    with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
+                        f.write(str(pktgen_pid))
+                    breakpoint()
+
+                    qemu_pid = ""
+                    for vm_number, guest in guests.items():
+                        qemu_pid += str(host.tmux_get_pid(MultiHost.enumerate('qemu', vm_number)))
+                        qemu_pid += " "
+                    # qemu_pid = host.tmux_get_pid("qemu")
                     with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
                         f.write(str(qemu_pid))
 
-                    guest.exec("modprobe vfio-pci")
-                    guest.exec("insmod module/vmpl.ko")
+
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
-                    guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                    def foreach_parallel(i, guest): # pyright: ignore[reportGeneralTypeIssues]
+                        guest.exec("modprobe vfio-pci")
+                        guest.exec("insmod module/vmpl.ko")
+                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                    end_foreach(guests, foreach_parallel)
 
-                    measurement.mark_vm_initialized(0)
+                    for vm_number, guest in guests.items():
+                        measurement.mark_vm_initialized(vm_number)
 
-                    test.start(host, guest, repetition)
+                    def foreach_parallel(i, guest): # pyright: ignore[reportGeneralTypeIssues]
+                        test.start(host, guest, repetition)
+                    end_foreach(guests, foreach_parallel)
+
+                    breakpoint()
+
                     test.measure(host, guest, repetition)
 
-                    # breakpoint()
+                    breakpoint()
                     pass
             bench.done(test)
 

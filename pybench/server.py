@@ -1240,17 +1240,19 @@ class Server(ABC):
     # create vhost-user socket /tmp/vhost-user0
     # set int state VirtualEthernet0/0/0 up
     # set interface l2 xconnect GigabitEthernet0/8/0.300 GigabitEthernet0/9/0.300
-    def start_vpp(self: 'Server'):
+    def start_vpp(self: 'Server', num_vms: int = 0):
         self.tmux_kill('vpp')
 
         remote_config_file = "/tmp/vpp.conf"
         remote_startup_file = "/tmp/vpp.exec"
         remote_vpp_sock = "/tmp/vpp-cli"
-        remote_socket = MultiHost.vhost_user_sock(0)
-        vpp_bin = f"vpp"
+        vpp_bin = f"{self.project_root}/.nix-builds/vpp/bin/vpp"
         pnic_interface = "pNIC0"
-        vhost_user_interface = "VirtualEthernet0/0/0"
+        num_interfaces = len(MultiHost.range(num_vms)) + 1 # num_vms 0 refers to 1 interface actually. Plus one for the load generator
+        vhost_user_interfaces = [ f"VirtualEthernet0/0/{i}" for i in range(num_interfaces) ]
+        remote_sockets = []
 
+        # TODO: cpu pinning!
         # escape { with {{
         config = f"""
         unix {{
@@ -1261,31 +1263,44 @@ class Server(ABC):
 
         dpdk {{
             socket-mem 1024,1024
-            dev {self.test_iface_addr} {{
-                name {pnic_interface}
-            }}
             uio-driver vfio-pci
         }}
         """
-        startup_exec = f"""
-            create vhost-user socket {remote_socket} server
-            set int state {pnic_interface} up
-            set int state {vhost_user_interface} up
-            set int l2 xconnect {pnic_interface} {vhost_user_interface}
-            set int l2 xconnect {vhost_user_interface} {pnic_interface}
-        """
+        # dpdk {{
+        #     dev {self.test_iface_addr} {{
+        #         name {pnic_interface}
+        #     }}
+        # }}
+
+        startup_exec = ""
+        # create vhost-user interfaces
+        loadgen_socket = MultiHost.vhost_user_sock('loadgen')
+        startup_exec += f"create vhost-user socket {loadgen_socket} server\n"
+        remote_sockets += [ loadgen_socket ]
+        for vm_number in MultiHost.range(num_vms):
+            vm_socket = MultiHost.vhost_user_sock(vm_number)
+            startup_exec += f"create vhost-user socket {vm_socket} server\n"
+            remote_sockets += [ vm_socket ]
+        # set vhost-user interfaces up
+        for interface in vhost_user_interfaces:
+            startup_exec += f"set int state {interface} up\n"
+        # connect vhost-user interfaces in a ring topology (the load generator is not a forwarder, so it will break the loop)
+        for i in range(num_interfaces):
+            intA = vhost_user_interfaces[i]
+            intB = vhost_user_interfaces[(i+1) % num_interfaces]
+            startup_exec += f"set int l2 xconnect {intA} {intB}\n"
 
         self.exec(f"sudo rm {remote_config_file} || true")
         self.exec(f"sudo rm {remote_startup_file} || true")
         self.write(config, remote_config_file)
         self.write(startup_exec, remote_startup_file)
 
-        # sockets have to pre-exist.
-        self.exec(f"sudo rm {remote_socket} || true")
+        self.exec("; ".join([ f"sudo rm {socket} || true" for socket in remote_sockets ]))
+        # sockets have to pre-exist. Well apparently not cause this is commented.
         # self.exec(f'python -c "import socket as s; sock = s.socket(s.AF_UNIX); sock.bind(\'{remote_socket}\')"')
 
         # start vpp
-        cmd = f"sudo {vpp_bin} -c {remote_config_file} | tee /tmp/foo.log"
+        cmd = f"sudo {vpp_bin} -c {remote_config_file} | tee /tmp/foo.log; sleep 999"
         self.tmux_new('vpp', cmd)
 
         # run startup exec manually so that we block ontil vpp is online
@@ -2187,13 +2202,26 @@ class Host(Server):
         """
         self.tmux_kill('vmux')
 
-    def start_pktgen_vhost(self: 'Host') -> None:
+    def start_pktgen_vhost(self: 'Host', connect_to_vpp: bool = False) -> None:
         vm_number = 0
-        vhost_sock = MultiHost.vhost_user_sock(vm_number)
-        self.exec(f"sudo rm {vhost_sock} || true")
+        if connect_to_vpp:
+            vhost_sock = MultiHost.vhost_user_sock('loadgen')
+            vdev = f"--vdev 'net_virtio_user0,path={vhost_sock}' --single-file-segments"
+        else:
+            vhost_sock = MultiHost.vhost_user_sock(vm_number)
+            vdev = f"--vdev 'eth_vhost0,iface={vhost_sock}'"
+            self.exec(f"sudo rm {vhost_sock} || true") # only clean socket if we create it
         # self.tmux_new("pktgen", f"sudo pktgen -l 6,7,8,9 --vdev 'eth_vhost0,iface={vhost_sock}' -- -m '[0:3].0'") #  -G")
         cpus, mapping = self.cpupinner.pktgen()
-        self.tmux_new("pktgen", f"sudo pktgen --vdev 'eth_vhost0,iface={vhost_sock}' -l{cpus} -- -m '{mapping}' -G")
+        self.tmux_new("pktgen", f"sudo pktgen {vdev} -l{cpus} -- -m '{mapping}' -G; sleep 999")
+        # known good:  sudo pktgen --vdev 'net_virtio_user0,path=/tmp/vhost-user-okelmann.loadgen' -l0,1,2,3 --single-file-segments -- -m '1.0' -G
+        # ptyhon runs: sudo pktgen --vdev 'net_virtio_user0,path=/tmp/vhost-user-okelmann.loadgen' --single-file-segments -l0,1,2,3 -- -m '1.0' -G
+        # vdevs = []
+        # for vm_number in MultiHost.range(num_vms):
+        #     vhost_sock = MultiHost.vhost_user_sock(vm_number)
+        #     self.exec(f"sudo rm {vhost_sock} || true")
+        #     vdevs += [f"--vdev 'eth_vhost{vm_number},iface={vhost_sock}'"]
+        # self.tmux_new("pktgen", f"sudo pktgen --vdev 'eth_vhost0,iface={vhost_sock}' -l{cpus} -- -m '{mapping}' -G")
 
     def stop_pktgen_vhost(self: 'Host') -> None:
         self.tmux_kill("pktgen")
