@@ -13,9 +13,9 @@ else
 
 fi
 cp ${YAMLIN} ${YAMLOUT}
-yq -i -y '.network.ethernets.enp0s2.addresses[0] = "'${Addr}'"' ${YAMLOUT} > /dev/null
-yq -i -y '.network.ethernets.enp0s3.addresses[0] = "'${Addr}'"' ${YAMLOUT} > /dev/null
+yq -i -y '.network.ethernets.adminif.addresses[0] = "'${Addr}'"' ${YAMLOUT} > /dev/null
+yq -i -y '.network.ethernets.adminif.addresses[0] = "'${Addr}'"' ${YAMLOUT} > /dev/null
 
-yq -i -y '.network.ethernets.enp0s2.routes[0].via = "'${Route}'"' ${YAMLOUT} > /dev/null
-yq -i -y '.network.ethernets.enp0s3.routes[0].via = "'${Route}'"' ${YAMLOUT} > /dev/null
+yq -i -y '.network.ethernets.adminif.routes[0].via = "'${Route}'"' ${YAMLOUT} > /dev/null
+yq -i -y '.network.ethernets.adminif.routes[0].via = "'${Route}'"' ${YAMLOUT} > /dev/null
 
