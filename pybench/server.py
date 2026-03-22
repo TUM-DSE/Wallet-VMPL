@@ -1976,7 +1976,7 @@ class Host(Server):
         vcpus = qmp_response["return"]
         assert len(vcpus) != cpus, f"We told Qemu to start with {cpus} but now Qemu only knowns {len(vcpus)} vcpus."
         cmds = []
-        for vcpu, target_core in zip(vcpus, self.cpupinner.qemu_vcpus(vm_number) ):
+        for vcpu, target_core in zip(vcpus, self.cpupinner.qemu_vcpus(vm_number, cpus) ):
             tid = vcpu["thread-id"]
             cmds += [f"sudo taskset -cp {target_core} {tid}"]
         self.exec("; ".join(cmds))

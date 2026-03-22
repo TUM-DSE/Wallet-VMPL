@@ -23,42 +23,49 @@ class CpuPinner:
         else:
             return vm_number
 
-    def cores_available(self) -> int:
-        if self._cores_available is None:
-            self._cores_available = int(self.server.exec("nproc --all"))
-        return self._cores_available
+    # def cores_available(self) -> int:
+    #     if self._cores_available is None:
+    #         self._cores_available = int(self.server.exec("nproc --all"))
+    #     return self._cores_available
 
-    def in_cluster(self, cluster: int, offset: int, length: int = 1):
-        assert offset + length - 1 < rose_cluster_size # dont use this function, if the cpu range doesnt fit into a cluster
-        start = ((cluster * rose_cluster_size) + offset) % self.cores_available()
-        end = (start + length - 1) % self.cores_available()
-        return f"{start}-{end}"
+    # def in_cluster(self, cluster: int, offset: int, length: int = 1):
+    #     assert offset + length - 1 < rose_cluster_size # dont use this function, if the cpu range doesnt fit into a cluster
+    #     start = ((cluster * rose_cluster_size) + offset) % self.cores_available()
+    #     end = (start + length - 1) % self.cores_available()
+    #     return f"{start}-{end}"
 
     def qemu(self, vm_number: int) -> str:
-        vm_number = self._vm_number(vm_number)
-        return "4-10"
+        return ",".join([ str(i) for i in self.qemu_vcpus(vm_number) ])
         return self.in_cluster(vm_number, 0, length=rose_cluster_size)
 
-    def qemu_vcpus(self, vm_number: int) -> List[int]:
-        return list(range(4, 11)) # ranges are exclusive the last one!
+    def qemu_vcpus(self, vm_number: int, per_vm_cores: int) -> List[int]:
+        per_vm_cores = int(per_vm_cores)
+        vm_number = self._vm_number(vm_number)
+        base = 3
+        start = base + (vm_number * per_vm_cores)
+        end = start + per_vm_cores
+        return list(range(start, end)) # ranges are exclusive the last one!
 
     def pktgen(self):
-        return ("0,1,2,3", '1.0')
+        return ("0,1", '1.0') # core 0 for polling housekeeping threads, core 1 for vdev 0
 
-    def vmux_main(self):
-        return "0"
+    def vpp(self) -> str:
+        return "2"
 
-    def vmux_runner(self, vm_number: int):
-        vm_number = self._vm_number(vm_number)
-        overcommittment = int((vm_number) / (self.cores_available() / rose_hyperthreads / rose_cluster_size))
-        offset = (overcommittment * 2 + 2) % rose_cluster_size
-        return self.in_cluster(vm_number, offset)
+    # def vmux_main(self):
+    #     return "0"
 
-    def vmux_rx(self, vm_number: int):
-        vm_number = self._vm_number(vm_number)
-        overcommittment = int((vm_number) / (self.cores_available() / rose_hyperthreads / rose_cluster_size))
-        offset = (overcommittment * 2 + 3) % rose_cluster_size
-        return self.in_cluster(vm_number, offset)
+    # def vmux_runner(self, vm_number: int):
+    #     vm_number = self._vm_number(vm_number)
+    #     overcommittment = int((vm_number) / (self.cores_available() / rose_hyperthreads / rose_cluster_size))
+    #     offset = (overcommittment * 2 + 2) % rose_cluster_size
+    #     return self.in_cluster(vm_number, offset)
 
-    def redis_shards(self):
-        return int(self.cores_available() / wilfred_hyperthreads)
+    # def vmux_rx(self, vm_number: int):
+    #     vm_number = self._vm_number(vm_number)
+    #     overcommittment = int((vm_number) / (self.cores_available() / rose_hyperthreads / rose_cluster_size))
+    #     offset = (overcommittment * 2 + 3) % rose_cluster_size
+    #     return self.in_cluster(vm_number, offset)
+
+    # def redis_shards(self):
+    #     return int(self.cores_available() / wilfred_hyperthreads)
