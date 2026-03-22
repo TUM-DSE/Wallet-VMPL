@@ -23,7 +23,7 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --run-command "chmod 700 /etc/netplan/99_config.yaml"\
              --run-command "chown root:root /root/.ssh/*"\
              --run-command "netplan apply"\
-             --run-command "systemctl mask systemd-networkd-wait-online.service"\
+             --run-command "systemctl mask systemd-networkd-wait-online.service pollinate.service"\
              --run-command "systemctl mask network-online.target network-pre.target network.target cloud-final.service cloud-config.service open-iscsi.service iscsid.service networkd-dispatcher.service"\
              --run-command "apt autoremove --purge snapd open-iscsi -y"\
              --run-command "apt-mark hold snapd"\

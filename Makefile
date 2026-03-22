@@ -43,9 +43,13 @@ firmware/OVMF_VARS.fd: build_firmware
 
 .PHONY: build_firmware setup_guest_net del_guest_net
 
-VMPLkernel6.5.tar.gz: 
+VMPLkernel6.5.tar.gz:
 	-wget -nc https://github.com/TUM-DSE/svsm/releases/download/VMPL-guest-Image/VMPLkernel6.5.tar.gz
-	tar -xvzf VMPLkernel6.5.tar.gz
+	@if [ ! -f build/linux/linux-image-6.5.0-svsm.deb ]; then \
+		tar -xvzf VMPLkernel6.5.tar.gz; \
+	else \
+		echo "Skipping tarball extraction: locally-built debs already exist in build/linux/"; \
+	fi
 
 images.tar.gz:
 	-wget -nc https://github.com/TUM-DSE/Wallet-VMPL/releases/download/VMPL-Guest-Kernel/images.tar.gz
