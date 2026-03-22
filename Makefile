@@ -202,6 +202,7 @@ nix-builds:
 	nix build .#qemu-coconut-igvm -o ./.nix-builds/qemu-coconut-igvm
 	nix build .#pktgen-dpdk -o ./.nix-builds/pktgen-dpdk
 	nix build .#cvm-vfio -o ./.nix-builds/cvm-vfio
+	nix build .#vpp -o ./.nix-builds/vpp
 
 slick-tmux:
 	tmux -L vmux-${USER}.tmux.sock at

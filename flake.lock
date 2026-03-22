@@ -285,6 +285,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-newer": {
+      "locked": {
+        "lastModified": 1773821835,
+        "narHash": "sha256-TJ3lSQtW0E2JrznGVm8hOQGVpXjJyXY2guAxku2O9A4=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b40629efe5d6ec48dd1efba650c797ddbd39ace0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-pktgen": {
       "locked": {
         "lastModified": 1755704039,
@@ -364,6 +380,7 @@
         "nixpkgs-2305": "nixpkgs-2305",
         "nixpkgs-2311": "nixpkgs-2311",
         "nixpkgs-2505": "nixpkgs-2505",
+        "nixpkgs-newer": "nixpkgs-newer",
         "nixpkgs-pktgen": "nixpkgs-pktgen",
         "qemu-coconut-src": "qemu-coconut-src",
         "rust-overlay": "rust-overlay"

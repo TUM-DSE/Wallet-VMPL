@@ -8,6 +8,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-newer.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-2211.url = "github:NixOS/nixpkgs/nixos-22.11";
     nixpkgs-2111.url = "github:NixOS/nixpkgs/nixos-21.11";
     nixpkgs-2305.url = "github:NixOS/nixpkgs/nixos-23.05";
@@ -37,6 +38,7 @@
     (flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        pkgsnewer = args.nixpkgs-newer.legacyPackages.${system};
         pkgs2211 = args.nixpkgs-2211.legacyPackages.${system};
         pkgs2111 = args.nixpkgs-2111.legacyPackages.${system};
         pkgs2305 = args.nixpkgs-2305.legacyPackages.${system};
@@ -104,6 +106,7 @@
             });
             usePatchedDpdk = (pktgen: pktgen.override { dpdk = dpdk-for-pktgen; });
           in (usePatchedDpdk pktgenpkgs.pktgen).overrideAttrs (final: prev: {
+              # src = /scratch/okelmann/Pktgen-DPDK;
 		        postPatch = prev.postPatch + ''
               substituteInPlace lib/lua/lua_dpdk.c --replace "__rte_weak" "__my_weak"
             '';
@@ -151,6 +154,7 @@
 		        hardeningDisable = [ "all" ];
 		      };
           test = pkgs.callPackage ./node/pkg.nix { };
+          vpp = pkgsnewer.vpp;
         };
         pkgs = nixpkgs.legacyPackages.${system};
         devShells = let
