@@ -92,6 +92,13 @@ static inline uint64_t perf_disable_and_read(void) {
 
 #define WARMUP_ITERATIONS 50000
 
+// Set WORKLOAD_SIZE > 0 to touch packet data between alloc and free,
+// simulating cache pollution from real packet processing.
+// e.g. -DWORKLOAD_SIZE=64
+#ifndef WORKLOAD_SIZE
+#define WORKLOAD_SIZE 64
+#endif
+
 // ---------------------------------------------------------------------------
 // pool helpers
 // ---------------------------------------------------------------------------
@@ -159,6 +166,10 @@ bench(struct rte_mempool *mp, const char *name, unsigned cache_size)
         ret = rte_pktmbuf_alloc_bulk(mp, bufs, BURST_SIZE);
         if (unlikely(ret != 0))
             break;
+#if WORKLOAD_SIZE > 0
+        for (unsigned j = 0; j < BURST_SIZE; j++)
+            memset(rte_pktmbuf_mtod(bufs[j], void *), 0x42, WORKLOAD_SIZE);
+#endif
         rte_pktmbuf_free_bulk(bufs, BURST_SIZE);
     }
     uint64_t end = rte_rdtsc_precise();
@@ -195,8 +206,8 @@ int main(int argc, char **argv)
 
     perf_init();
 
-    printf("\nMempool alloc/free benchmark  (burst=%u, iters=%u, pool=%u)\n",
-           BURST_SIZE, NUM_ITERATIONS, NUM_MBUFS);
+    printf("\nMempool alloc/free benchmark  (burst=%u, iters=%u, pool=%u, workload=%u)\n",
+           BURST_SIZE, NUM_ITERATIONS, NUM_MBUFS, WORKLOAD_SIZE);
     printf("CPU: %.2f GHz\n\n", (double)rte_get_tsc_hz() / 1e9);
 
     if (argc > 1) {
