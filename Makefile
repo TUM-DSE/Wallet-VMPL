@@ -64,9 +64,19 @@ ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 #	mv config-5.15.0-89-generic config
 
 
-guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb container/99_config.yaml
+guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb
+	@make container/99_config.yaml # we always need to cleanbiuld the config because we change it elsewhere
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
 
+guest_qcows:
+	for i in $$(seq 1 8); do \
+		echo preparing guest$$i.qcow2; \
+		cp guest.qcow2 guest$$i.qcow2; \
+		cp ./container/99_config.yaml.in ./container/99_config.yaml; \
+		yq -i -y 'del(.network.ethernets.adminif.addresses[1])' ./container/99_config.yaml > /dev/null; \
+		yq -i -y ".network.ethernets.adminif.addresses[0] = \"192.168.56.$$((10+i))/21\"" ./container/99_config.yaml > /dev/null; \
+		virt-copy-in -a guest$$i.qcow2 container/99_config.yaml /etc/netplan/; \
+	done
 
 make update_guest:
 	bash ./scripts/update_image.sh guest linux
