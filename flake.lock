@@ -40,11 +40,11 @@
     "dpdk-cvms-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1771784859,
-        "narHash": "sha256-L7abOixY1OGMSxjLFyQhHv5kfqBPT75Yq5c5uJ36sSU=",
+        "lastModified": 1774123713,
+        "narHash": "sha256-WIrUZNlLt6eAR1itgjOi1DZgskW+ndXTLMcWS0cVjls=",
         "owner": "TUM-DSE",
         "repo": "dpdk-cvms",
-        "rev": "2a5bc59cfca5521c804b872011de535a10fe3186",
+        "rev": "064ff097be4782f57f2adf7776ca333a63e1b8db",
         "type": "github"
       },
       "original": {
