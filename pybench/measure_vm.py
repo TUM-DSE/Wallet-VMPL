@@ -106,15 +106,19 @@ class PktgenTest(AbstractBenchTest):
         # guest.tmux_new("workload", f"cd module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
 
+
+        # In our measurements, the default DPDK mempool has suboptimal performance. Use SIMPLE_POOL to use the same pool as Slick, or use DPDK's stack pool which has the same performance.
+        dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
+
         guest.exec("rm /tmp/.dpdk-running || true")
         if self.system == "mirror":
-            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa; sleep 999") # | tee {remote_mirror_output}")
+            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "insecure":
-            guest.tmux_new("workload", f"cd module/example-dpdk; ./insecure --no-huge -l 0-{self.chaining} --iova-mode=pa")
+            guest.tmux_new("workload", f"cd module/example-dpdk; ./insecure --no-huge -l 0-{self.chaining} --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999")
         else:
             raise ValueError(f"Unknown system {self.system}")
 

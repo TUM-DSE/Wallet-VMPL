@@ -28,6 +28,11 @@ DPDK_LIBS := -Wl,--whole-archive \
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
 WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned -Wl,--wrap=rte_memzone_reserve
 
+DPDK_MEMPOOL_LIBS := \
+	$(DPDK_PATH)/lib/librte_mempool_stack.a \
+	$(DPDK_PATH)/lib/librte_mempool_bucket.a \
+	$(DPDK_PATH)/lib/librte_stack.a
+
 NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
 ATOMIC_LIB := /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
 GLIBC_LIB := /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
@@ -35,7 +40,9 @@ BSD_INCLUDE := /nix/store/xiw9h3ssfsj1qnap4nzg2hzhq8zc54r5-libbsd-0.11.8-dev/inc
 DPDK_SRC := /scratch/okelmann/dpdk-cvms
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
+		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
+		$(DPDK_LIBS) $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -O3 -g -mssse3 -o $@ $< \
@@ -53,13 +60,12 @@ iomgr_trustlet: %: %.c
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
 
-DPDK_MEMPOOL_LIBS := \
-	$(DPDK_PATH)/lib/librte_mempool_stack.a \
-	$(DPDK_PATH)/lib/librte_mempool_bucket.a \
-	$(DPDK_PATH)/lib/librte_stack.a
-
+# TODO merge this with DPDK_EXAMPLES: and check if numbers are the same
 insecure: insecure.c
-	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
+	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ \
+		-lpthread -lnuma \
+		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
+		$(DPDK_LIBS) $(CFLAGS) $(DPDK_MEMPOOL_LIBS)
 
 
 mempool_comparison: mempool_comparison.c
