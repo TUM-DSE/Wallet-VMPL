@@ -28,7 +28,7 @@ class PktgenTest(AbstractBenchTest):
     pktsize: int
 
     def test_infix(self):
-        return f"userspace_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_{self.pktsize}b"
+        return f"vm_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
         return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here

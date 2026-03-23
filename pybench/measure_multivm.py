@@ -18,7 +18,7 @@ from util import safe_cast, deduplicate
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 
 @dataclass
-class PktgenTest(AbstractBenchTest):
+class PktgenMultiVMTest(AbstractBenchTest):
 
     batchsize: int
     workload: int # per packet per vnflet workload in ns
@@ -28,7 +28,7 @@ class PktgenTest(AbstractBenchTest):
     pktsize: int
 
     def test_infix(self):
-        return f"userspace_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_{self.pktsize}b"
+        return f"multivm_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
         return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
@@ -65,7 +65,8 @@ class PktgenTest(AbstractBenchTest):
             f"-DPACKET_SIZE={self.pktsize}",
             f"-DPER_VNFLET_WORKLOAD_NS={self.workload}",
             f"-DWORKLOAD_ACCESSES_B={self.memory_workload}",
-            f"-DCHAINING={self.chaining}",
+            f"-DCHAINING={1}", # we abuse mirror here. Since we have multiple mirror instances, each one must assume to handle only 1 VNFlet
+            # f"-DCHAINING={self.chaining}",
             # f"-DLLC_SIZE={LLC_SIZE}",
         ])
 
@@ -123,7 +124,7 @@ class PktgenTest(AbstractBenchTest):
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
         guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=180)
 
-    def measure(self, host: Server, guest: Server, repetition: int):
+    def measure(self, host: Server, repetition: int):
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
@@ -157,6 +158,7 @@ class PktgenTest(AbstractBenchTest):
                 "Mpps": foo/1e6
             }]
         df = DataFrame(data=data)
+        df["chaining"] = df["num_vms"] # we dont want to set them to equal in the text matrix already, because that would increse the test list generated from the matrix
         df.to_csv(local_output_file, index=False)
 
         # remote_output_file = "/tmp/output.log"
@@ -188,7 +190,7 @@ class PktgenTest(AbstractBenchTest):
 def main(measurement: Measurement, plan_only: bool = False) -> None:
     global LLC_SIZE
     host, loadgen = measurement.hosts()
-    tests : List[PktgenTest] = []
+    tests : List[PktgenMultiVMTest] = []
     G.DURATION_S = 15
     REPETITIONS = 2
     if measurement.args.extremes_only:
@@ -200,42 +202,44 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         batchsize = [1, 32],
         workload = [ 0 ],
         memory_workload = [ 0 ],
-        chaining = [2],
-        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        num_vms = [2],
+        system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
 
-        # legacy args
-        num_vms = [0],
+        # legacy args, chaining is now num_vms
+        chaining = [0],
     )
     workload_tests_64b = dict(
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
-        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        system = [ "mirror" ],
         pktsize = [ 64 ],
-        memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
-        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        system = [ "mirror" ],
         pktsize = [ 1500 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
+        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [0], num_vms = [2],
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
-        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
-        workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
+        workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
     )
     chaining_tests = dict(
-        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
-        chaining = [ 2, 3, 4 ],
-        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
+        num_vms = [2, 3, 4],
+        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32],
+        # legacy args, chaining is now num_vms
+        chaining = [0],
     )
-    tests = PktgenTest.list_tests(basic_tests) + \
-        PktgenTest.list_tests(workload_tests_64b) + \
-        PktgenTest.list_tests(workload_tests_1500b) + \
-        PktgenTest.list_tests(memory_workload_tests) + \
-        PktgenTest.list_tests(chaining_tests)
+    tests = PktgenMultiVMTest.list_tests(basic_tests) + \
+        PktgenMultiVMTest.list_tests(workload_tests_64b) + \
+        PktgenMultiVMTest.list_tests(workload_tests_1500b) + \
+        PktgenMultiVMTest.list_tests(memory_workload_tests) + \
+        PktgenMultiVMTest.list_tests(chaining_tests)
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -245,25 +249,24 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             batchsize = [32], # , 32],
             workload = [ 0 ], # , 100 ],
             memory_workload = [ 0 ],
-            chaining = [2],
+            num_vms = [2],
             system = [ "mirror" ],
             # system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
             # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
-
-            # legacy args
-            num_vms = [2],
+            # legacy args, chaining is now num_vms
+            chaining = [0],
         )
         test_matrix = measurement.apply_cmdline_overrides(test_matrix)
-        tests = PktgenTest.list_tests(test_matrix)
+        tests = PktgenMultiVMTest.list_tests(test_matrix)
 
 
     tests = deduplicate(tests)
     test_params = ["repetitions", "num_vms", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"] #  define iteration order
-    assert sorted(test_params) == sorted(PktgenTest.test_parameters())
+    assert sorted(test_params) == sorted(PktgenMultiVMTest.test_parameters())
     if measurement.args.extremes_only:
-        tests = PktgenTest.filter_extremes(tests, test_params)
-    PktgenTest.estimate_time2(tests, [])
+        tests = PktgenMultiVMTest.filter_extremes(tests, test_params)
+    PktgenMultiVMTest.estimate_time2(tests, [])
 
     if plan_only:
         return
@@ -275,20 +278,19 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, test_params):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
+            assert test.chaining == 0 # we've replaced chaining with num_vms
             info(f"Running {test}")
             test.compile(host)
             for repetition in range(test.repetitions):
                 test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
                 # sleep(1) # wait and pray for pktgen
                 with measurement.virtual_machines(Interface.VPP, num=test.num_vms) as guests:
-                    breakpoint()
 
                     # start pktgen after the VM because VPP is not the vhost server
                     host.start_pktgen_vhost(connect_to_vpp = True)
                     pktgen_pid = host.tmux_get_pid("pktgen")
                     with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
                         f.write(str(pktgen_pid))
-                    breakpoint()
 
                     qemu_pid = ""
                     for vm_number, guest in guests.items():
@@ -313,11 +315,10 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
                         test.start(host, guest, repetition)
                     end_foreach(guests, foreach_parallel)
 
-                    breakpoint()
 
-                    test.measure(host, guest, repetition)
+                    error("foo")
+                    test.measure(host, repetition)
 
-                    breakpoint()
                     pass
             bench.done(test)
 
@@ -330,8 +331,8 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
     df = pd.concat(dfs)
     del df['repetition']
     df = df.groupby([ col for col in df.columns if col != "Mpps" ]).describe()
-    df.to_csv(path_join(G.OUT_DIR, "vm_summary.csv"))
-    with open(path_join(G.OUT_DIR, "vm_summary.log"), 'w') as f:
+    df.to_csv(path_join(G.OUT_DIR, "multivm_summary.csv"))
+    with open(path_join(G.OUT_DIR, "multivm_summary.log"), 'w') as f:
         f.write(df.to_string())
 
 
@@ -339,5 +340,5 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    measurement = Measurement(test_type=PktgenTest, supports_boot_only=True)
+    measurement = Measurement(test_type=PktgenMultiVMTest, supports_boot_only=True)
     main(measurement)
