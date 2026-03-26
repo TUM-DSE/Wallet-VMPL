@@ -164,11 +164,13 @@ class Measurement:
     guests: Dict[int, Guest]  # for multihost VMs we start counting VMs at 1
 
 
-    def __init__(self, test_type: None|Type['AbstractBenchTest'] = None, supports_boot_only: bool = False):
+    def __init__(self, test_type: None|Type['AbstractBenchTest'] = None, supports_boot_only: bool = False, arg_lambda = None):
         parser: ArgumentParser = setup_parser()
         self.test_type = test_type
         if test_type is not None:
             add_test_arguments(parser, test_type)
+        if arg_lambda is not None:
+            arg_lambda(parser)
 
         self.supports_boot_only = supports_boot_only
         self.initialized_vms = dict()
