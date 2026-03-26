@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     int chains[] = {CHAINING};
     int chains_len = 1;
 
-    int iterations = 1e9;
+    uint64_t iterations = -1;
 
     int zygotes[CHAINING];
     int trustlets[CHAINING];
