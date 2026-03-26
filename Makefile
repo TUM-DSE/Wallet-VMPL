@@ -69,7 +69,7 @@ guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-sv
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
 
 guest_qcows:
-	for i in $$(seq 1 8); do \
+	for i in $$(seq 1 32); do \
 		echo preparing guest$$i.qcow2; \
 		cp guest.qcow2 guest$$i.qcow2; \
 		cp ./container/99_config.yaml.in ./container/99_config.yaml; \

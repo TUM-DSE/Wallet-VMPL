@@ -31,3 +31,172 @@ Hostname 192.168.56.17
 
 Host vm8.local
 Hostname 192.168.56.18
+
+Host vm9.local
+Hostname 192.168.56.19
+
+Host vm10.local
+Hostname 192.168.56.20
+
+Host vm11.local
+Hostname 192.168.56.21
+
+Host vm12.local
+Hostname 192.168.56.22
+
+Host vm13.local
+Hostname 192.168.56.23
+
+Host vm14.local
+Hostname 192.168.56.24
+
+Host vm15.local
+Hostname 192.168.56.25
+
+Host vm16.local
+Hostname 192.168.56.26
+
+Host vm17.local
+Hostname 192.168.56.27
+
+Host vm18.local
+Hostname 192.168.56.28
+
+Host vm19.local
+Hostname 192.168.56.29
+
+Host vm20.local
+Hostname 192.168.56.30
+
+Host vm21.local
+Hostname 192.168.56.31
+
+Host vm22.local
+Hostname 192.168.56.32
+
+Host vm23.local
+Hostname 192.168.56.33
+
+Host vm24.local
+Hostname 192.168.56.34
+
+Host vm25.local
+Hostname 192.168.56.35
+
+Host vm26.local
+Hostname 192.168.56.36
+
+Host vm27.local
+Hostname 192.168.56.37
+
+Host vm28.local
+Hostname 192.168.56.38
+
+Host vm29.local
+Hostname 192.168.56.39
+
+Host vm30.local
+Hostname 192.168.56.40
+
+Host vm31.local
+Hostname 192.168.56.41
+
+Host vm32.local
+Hostname 192.168.56.42
+
+Host vm33.local
+Hostname 192.168.56.43
+
+Host vm34.local
+Hostname 192.168.56.44
+
+Host vm35.local
+Hostname 192.168.56.45
+
+Host vm36.local
+Hostname 192.168.56.46
+
+Host vm37.local
+Hostname 192.168.56.47
+
+Host vm38.local
+Hostname 192.168.56.48
+
+Host vm39.local
+Hostname 192.168.56.49
+
+Host vm40.local
+Hostname 192.168.56.50
+
+Host vm41.local
+Hostname 192.168.56.51
+
+Host vm42.local
+Hostname 192.168.56.52
+
+Host vm43.local
+Hostname 192.168.56.53
+
+Host vm44.local
+Hostname 192.168.56.54
+
+Host vm45.local
+Hostname 192.168.56.55
+
+Host vm46.local
+Hostname 192.168.56.56
+
+Host vm47.local
+Hostname 192.168.56.57
+
+Host vm48.local
+Hostname 192.168.56.58
+
+Host vm49.local
+Hostname 192.168.56.59
+
+Host vm50.local
+Hostname 192.168.56.60
+
+Host vm51.local
+Hostname 192.168.56.61
+
+Host vm52.local
+Hostname 192.168.56.62
+
+Host vm53.local
+Hostname 192.168.56.63
+
+Host vm54.local
+Hostname 192.168.56.64
+
+Host vm55.local
+Hostname 192.168.56.65
+
+Host vm56.local
+Hostname 192.168.56.66
+
+Host vm57.local
+Hostname 192.168.56.67
+
+Host vm58.local
+Hostname 192.168.56.68
+
+Host vm59.local
+Hostname 192.168.56.69
+
+Host vm60.local
+Hostname 192.168.56.70
+
+Host vm61.local
+Hostname 192.168.56.71
+
+Host vm62.local
+Hostname 192.168.56.72
+
+Host vm63.local
+Hostname 192.168.56.73
+
+Host vm64.local
+Hostname 192.168.56.74
+
