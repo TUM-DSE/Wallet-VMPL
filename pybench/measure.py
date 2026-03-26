@@ -365,7 +365,7 @@ class Measurement:
 
 
     @contextmanager
-    def virtual_machines(self, interface: Interface, num: int = 1, batch: int = 32) -> Iterator[Dict[int, Guest]]:
+    def virtual_machines(self, interface: Interface, num: int = 1, batch: int = 8, run_guest_args = dict()) -> Iterator[Dict[int, Guest]]:
         # Batching is necessary cause if network setup takes to long, bringing up the interfaces times out, networking is permanently broken and systemds spiral into busy restarting
 
         # host: inital cleanup
@@ -426,7 +426,8 @@ class Measurement:
                 self.host.run_confidential_guest(
                         net_type=interface,
                         qemu_build_dir=self.config.get('host', 'qemu_path', fallback=None),
-                        vm_number=i
+                        vm_number=i,
+                        **run_guest_args
                         )
 
                 self.guests[i] = self.guest.multihost_clone(i)

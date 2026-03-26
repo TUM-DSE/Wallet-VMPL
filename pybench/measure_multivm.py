@@ -343,7 +343,8 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             for repetition in range(test.repetitions):
                 test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
                 # sleep(1) # wait and pray for pktgen
-                with measurement.virtual_machines(Interface.VPP, num=test.num_vms) as guests:
+                vm_args = { 'vcpus': 1 }
+                with measurement.virtual_machines(Interface.VPP, num=test.num_vms, run_guest_args=vm_args) as guests:
 
                     # start pktgen after the VM because VPP is not the vhost server
                     host.start_pktgen_vhost(connect_to_vpp = True)

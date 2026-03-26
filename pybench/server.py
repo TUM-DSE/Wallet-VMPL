@@ -1968,13 +1968,13 @@ class Host(Server):
             f' 2>/tmp/trace-vm{vm_number}.log; echo qemu done; sleep 999'
             )
 
-        self.pin_vcpus(vm_number, cpus)
+        self.pin_vcpus(vm_number, int(cpus))
 
     def pin_vcpus(self: 'Host', vm_number: int, cpus: int):
         json_line = self.wait_for_success("echo '{\"execute\": \"qmp_capabilities\"}\n{\"execute\": \"query-cpus-fast\"}' | sudo socat - unix-connect:" + MultiHost.qmp_path(vm_number) + " | grep return") # fail unless qmp actually responds with the return json and not only the capabilities
         qmp_response = json.loads(json_line.splitlines()[-1])
         vcpus = qmp_response["return"]
-        assert len(vcpus) != cpus, f"We told Qemu to start with {cpus} but now Qemu only knowns {len(vcpus)} vcpus."
+        assert len(vcpus) == cpus, f"We told Qemu to start with {cpus} but now Qemu only knowns {len(vcpus)} vcpus."
         cmds = []
         for vcpu, target_core in zip(vcpus, self.cpupinner.qemu_vcpus(vm_number, cpus) ):
             tid = vcpu["thread-id"]
