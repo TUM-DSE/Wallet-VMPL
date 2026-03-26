@@ -16,7 +16,7 @@ import getpass
 from util import safe_cast, deduplicate
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
-PREFIX = "vm"
+PREFIX = "emptyprefix"
 
 @dataclass
 class PktgenTest(AbstractBenchTest):
@@ -133,6 +133,8 @@ class PktgenTest(AbstractBenchTest):
             return self.measure_latency(host, guest, repetition)
         elif PREFIX == "vm":
             return self.measure_throughput(host, guest, repetition)
+        else:
+            assert False, f"Unknown prefix {PREFIX}"
 
     def measure_throughput(self, host: Server, guest: Server, repetition: int):
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))

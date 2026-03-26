@@ -16,6 +16,7 @@ import getpass
 from util import safe_cast, deduplicate
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
+PREFIX = "emptyprefix"
 
 @dataclass
 class PktgenMultiVMTest(AbstractBenchTest):
@@ -28,7 +29,7 @@ class PktgenMultiVMTest(AbstractBenchTest):
     pktsize: int
 
     def test_infix(self):
-        return f"multivm_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
+        return f"{PREFIX}_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
         return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
@@ -125,6 +126,14 @@ class PktgenMultiVMTest(AbstractBenchTest):
         guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=180)
 
     def measure(self, host: Server, repetition: int):
+        if PREFIX == "multivm_lat":
+            return self.measure_latency(host, repetition)
+        elif PREFIX == "multivm":
+            return self.measure_throughput(host, repetition)
+        else:
+            assert False, f"Unknown prefix {PREFIX}"
+
+    def measure_throughput(self, host: Server, repetition: int):
         # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
@@ -167,28 +176,78 @@ class PktgenMultiVMTest(AbstractBenchTest):
         # server.copy_from(remote_output_file, local_output_file)
         # pass
 
-
-    def parse_results(self, repetition):
+    def measure_latency(self, host: Server, repetition: int):
         local_output_file = self.output_filepath(repetition)
-        with open(local_output_file, 'r') as f:
-            lines = f.readlines()
-        lines = [ line for line in lines if "System throughput:" in line]
-        assert len(lines) == 1 # Our test prints this line only once
-        line = lines[0]
-        value = line.split("System throughput: ")[1].split("Mops/s")[0].strip()
-        value = float(value)
+        remote_csv_file = "/tmp/lat.csv"
+        local_csv_file = self.output_filepath(repetition, extension="csv")
+        host.exec(f"sudo rm {remote_csv_file} || true")
+        # host.tmux_new("perf", "sudo perf record -F 1000 -a -g -- sleep 20")
+        # host.tmux_new("perf", "sudo perf sched record -a -o perf_sched.data -- sleep 20")
 
-        return DataFrame(data=[{
-            **asdict(self),
-            "repetition": repetition,
-            "Mpps": value
-        }])
+        # print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+        # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "rate"))')
+        # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
+        # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
+        host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})') # 100mbit
+        host.exec_pktgen(f'pktgen.set("all", "rate", 0.1)')
+        host.exec_pktgen('pktgen.start(0)')
+        host.exec_pktgen(f'pktgen.latency("all", "enable")')
+        host.exec_pktgen(f'pktgen.latsampler_params(0, "simple", 10000, 1000, "{remote_csv_file}")') # 10k samples (whatever many we can get), 1000Hz
+        host.exec_pktgen(f'pktgen.latsampler("all", "enable")')
+        # host.exec_pktgen(f'pktgen.capture_latency("all", "enable")')
+        # host.exec_pktgen(f'pktgen.capture("all", "enable")')
+
+        sleep(3)
+        lat_us = []
+        for _ in range(G.DURATION_S):
+            lua = """
+                printf(pktgen.pktStats(0)[0].latency.avg_us)
+            """
+            result_string = host.exec_pktgen(lua)
+            lat_us += [ float(result_string) ]
+            sleep(1)
+
+        # host.exec_pktgen(f'pktgen.capture_latency("all", "disable")')
+        # host.exec_pktgen(f'pktgen.capture("all", "disable")')
+        # sleep(1)
+        # breakpoint()
+        host.exec_pktgen(f'pktgen.latsampler("all", "disable")')
+        host.exec_pktgen(f'pktgen.latency("all", "disable")')
+        host.exec_pktgen('pktgen.stop(0)')
+
+        pkt_counts = host.exec_pktgen('printf(pktgen.portStats("0", "port")[0].opackets .. "/" .. pktgen.portStats("0", "port")[0].ipackets)').split("/")
+
+        print(f"Mean latency: {np.mean(lat_us):.3f} us (stddev: {np.std(lat_us):.3f} us)")
+        print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
+
+
+        if np.mean(lat_us) > 2000:
+            print(host.exec("date"))
+            # breakpoint()
+
+        os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
+        host.copy_from(remote_csv_file, local_csv_file)
+        data = []
+        for foo in lat_us:
+            data += [{
+                **asdict(self),
+                "repetition": repetition,
+                "lat_us": foo
+            }]
+        df = DataFrame(data=data)
+        df.to_csv(local_output_file, index=False)
 
 
 
 
-def main(measurement: Measurement, plan_only: bool = False) -> None:
+def main(measurement: Measurement, plan_only: bool = False, mode: str = "throughput") -> None:
     global LLC_SIZE
+    global PREFIX
+    assert mode in ["throughput", "latency"], f"Unknown mode {mode}"
+    if mode == "latency":
+        PREFIX = "multivm_lat"
+    elif mode == "throughput":
+        PREFIX = "multivm"
     host, loadgen = measurement.hosts()
     tests : List[PktgenMultiVMTest] = []
     G.DURATION_S = 15
@@ -330,9 +389,12 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             dfs += [ pd.read_csv(test.output_filepath(repetition)) ]
     df = pd.concat(dfs)
     del df['repetition']
-    df = df.groupby([ col for col in df.columns if col != "Mpps" ]).describe()
-    df.to_csv(path_join(G.OUT_DIR, "multivm_summary.csv"))
-    with open(path_join(G.OUT_DIR, "multivm_summary.log"), 'w') as f:
+    if mode == "latency":
+        df = df.groupby([ col for col in df.columns if col != "lat_us" ]).describe()
+    elif mode == "throughput":
+        df = df.groupby([ col for col in df.columns if col != "Mpps" ]).describe()
+    df.to_csv(path_join(G.OUT_DIR, f"{PREFIX}_summary.csv"))
+    with open(path_join(G.OUT_DIR, f"{PREFIX}_summary.log"), 'w') as f:
         f.write(df.to_string())
 
 
@@ -340,5 +402,10 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    measurement = Measurement(test_type=PktgenMultiVMTest, supports_boot_only=True)
-    main(measurement)
+    def add_args(parser):
+        parser.add_argument('--latency',
+                            action='store_true',
+                            help='Measure latency instead of throughput.',
+                            )
+    measurement = Measurement(test_type=PktgenMultiVMTest, supports_boot_only=True, arg_lambda=add_args)
+    main(measurement, mode="latency" if measurement.args.latency else "throughput")
