@@ -808,19 +808,23 @@ class Bench(Generic[T], ContextDecorator):
 
 def main():
     import measure_vm
-    import measure_lat
+    import measure_multivm
 
     measurement = Measurement()
 
     # estimate runtimes
     info("")
     measure_vm.main(measurement, plan_only=True)
-    measure_lat.main(measurement, plan_only=True)
+    measure_multivm.main(measurement, plan_only=True)
+    measure_vm.main(measurement, mode="latency", plan_only=True)
+    measure_multivm.main(measurement, mode="latency", plan_only=True)
 
     info("Running benchmarks ...")
     info("")
     measure_vm.main(measurement)
-    measure_lat.main(measurement)
+    measure_multivm.main(measurement)
+    measure_vm.main(measurement, mode="latency")
+    measure_multivm.main(measurement, mode="latency")
     error("TODO")
 
 if __name__ == "__main__":
