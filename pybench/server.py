@@ -2206,7 +2206,7 @@ class Host(Server):
         vm_number = 0
         if connect_to_vpp:
             vhost_sock = MultiHost.vhost_user_sock('loadgen')
-            vdev = f"--vdev 'net_virtio_user0,path={vhost_sock}' --single-file-segments"
+            vdev = f"--vdev 'net_virtio_user0,path={vhost_sock},speed=100000' --single-file-segments"
         else:
             vhost_sock = MultiHost.vhost_user_sock(vm_number)
             vdev = f"--vdev 'eth_vhost0,iface={vhost_sock}'"

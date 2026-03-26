@@ -119,6 +119,15 @@
 
 		        mesonFlags = [ "-Denable_lua=true" ];
 		      });
+          vpp = let
+            vpppkgs = pkgsnewer;
+            dpdk-for-vpp = vpppkgs.dpdk.overrideAttrs (final: prev: {
+              postPatch = prev.postPatch + ''
+                substituteInPlace drivers/net/vhost/rte_eth_vhost.c --replace ".link_speed = 10000," ".link_speed = 100000,"
+              '';
+            });
+            usePatchedDpdk = (vpp: vpp.override { dpdk = dpdk-for-vpp; });
+          in (usePatchedDpdk pkgsnewer.vpp);
 		      # cvm-vfio = pkgs.linuxPackages.kernel.dev.stdenv.mkDerivation {
 		      cvm-vfio = pkgs.stdenv.mkDerivation {
 		        # doesnt seem to work: guest complains about invalid module format
@@ -154,7 +163,6 @@
 		        hardeningDisable = [ "all" ];
 		      };
           test = pkgs.callPackage ./node/pkg.nix { };
-          vpp = pkgsnewer.vpp;
         };
         pkgs = nixpkgs.legacyPackages.${system};
         devShells = let

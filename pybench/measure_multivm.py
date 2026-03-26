@@ -243,7 +243,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
-        G.DURATION_S = 5
+        G.DURATION_S = 30
         test_matrix = dict(
             repetitions=[1],
             batchsize = [32], # , 32],
