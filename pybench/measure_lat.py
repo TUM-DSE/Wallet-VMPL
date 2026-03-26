@@ -134,7 +134,16 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
         pktsize = [ 1500 ],
         memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
-    tests = PktgenLatencyTest.list_tests(basic_tests) + PktgenLatencyTest.list_tests(workload_tests_64b) + PktgenLatencyTest.list_tests(workload_tests_1500b)
+    memory_workload_tests = dict(
+        memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
+        system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
+        pktsize = [ 64, 1500 ],
+        workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
+    )
+    tests = PktgenTest.list_tests(basic_tests) + \
+        PktgenTest.list_tests(workload_tests_64b) + \
+        PktgenTest.list_tests(workload_tests_1500b) + \
+        PktgenTest.list_tests(memory_workload_tests)
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -145,7 +154,7 @@ def main(measurement: Measurement, plan_only: bool = False) -> None:
             memory_workload = [ 0 ],
             chaining = [2],
             # system = [ "mirror" ],
-            system = [ "noiomgr", "iomgr", "mirror" ],
+            system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
             # system = [ "mirror", "noiomgr" ],
             pktsize = [ 64 ],
 
