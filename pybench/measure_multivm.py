@@ -289,7 +289,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
     chaining_tests = dict(
         system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
-        num_vms = [2, 3, 4],
+        num_vms = [2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32],
         workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32],
         # legacy args, chaining is now num_vms
         chaining = [0],
