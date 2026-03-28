@@ -42,7 +42,7 @@
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
-#define NUM_MBUFS (CHAINING+2)*2*512
+#define NUM_MBUFS (CHAINING+2)*512 // should be 512
 /* #define NUM_MBUFS 2*512 */
 #define MBUF_CACHE_SIZE 250
 

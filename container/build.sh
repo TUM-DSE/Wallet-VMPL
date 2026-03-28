@@ -6,6 +6,8 @@ set -e
 cd /mount/$1
 make clean
 make olddefconfig
+scripts/config --enable CONFIG_CMA
+scripts/config --enable CONFIG_DMA_CMA
 scripts/config --disable SYSTEM_TRUSTED_KEYRING
 scripts/config --disable SYSTEM_TRUSTED_KEYS
 scripts/config --disable SYSTEM_REVOCATION_KEYS
