@@ -119,14 +119,20 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "iomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "insecure":
-            guest.tmux_new("workload", f"cd module/example-dpdk; ./insecure --no-huge -l 0-{self.chaining} --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999")
+            expected_usage_mb = (self.chaining + 2) * 12  # ~12MB per chain level for mbufs
+            assert 1024 > expected_usage_mb, "You probably have to raise the -m value"
+            cmd = "cd module/example-dpdk; "
+            # cmd += "/nix/store/5lqv1pfaacwg2w7nd0qpcx2b5c4cmk1v-gdb-14.2/bin/gdb --args "
+            cmd += f"./insecure -m 512M --no-huge -l 0-{self.chaining} --iova-mode=pa {dpdk_mbuf_pool_type}; "
+            cmd += "sleep 999"
+            guest.tmux_new("workload", cmd)
         else:
             raise ValueError(f"Unknown system {self.system}")
 
         # breakpoint()
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
-        guest.wait_for_success(f"test -f /tmp/.dpdk-running", timeout=180)
+        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=80*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
 
     def measure(self, host: Server, guest: Server, repetition: int):
         if PREFIX == "vm_lat":
