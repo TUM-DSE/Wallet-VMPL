@@ -333,6 +333,14 @@ lcore_mirror(void)
 
     uint32_t spi = 0x1000;  /* Security Parameters Index */
 
+#ifdef MEASURE_IPSEC
+    /* IPSec per-function cycle counters */
+    uint64_t cycles_esp_encap = 0;
+    uint64_t cycles_gcm_encrypt_auth = 0;
+    uint64_t cycles_ip_encap = 0;
+    uint64_t ipsec_packet_count = 0;
+#endif
+
     /*
      * Check that the port is on the same NUMA node as the polling thread
      * for best performance.
@@ -400,10 +408,33 @@ lcore_mirror(void)
             ndelay_accurate(sleep * CHAINING * nb_rx); // simulate per-packet processing time
 
             for (int i = 0; i < nb_rx; i++) {
-                // ipsec decap
+#ifdef MEASURE_IPSEC
+                unsigned int _aux;
+                uint64_t t0, t1;
+
+                t0 = __rdtscp(&_aux);
+#endif
                 ipsec_esp_encap(bufs[i], &sa, spi, 0);
+#ifdef MEASURE_IPSEC
+                t1 = __rdtscp(&_aux);
+                cycles_esp_encap += t1 - t0;
+
+                t0 = __rdtscp(&_aux);
+#endif
                 ipsec_chacha_encrypt_auth(bufs[i], &sa);
+#ifdef MEASURE_IPSEC
+                t1 = __rdtscp(&_aux);
+                cycles_gcm_encrypt_auth += t1 - t0;
+
+                t0 = __rdtscp(&_aux);
+#endif
                 ipsec_ip_encap(bufs[i], 50, 0x1, 0x2);
+#ifdef MEASURE_IPSEC
+                t1 = __rdtscp(&_aux);
+                cycles_ip_encap += t1 - t0;
+
+                ipsec_packet_count++;
+#endif
             }
 
             /* Send packets back out on the same port */
@@ -431,6 +462,48 @@ lcore_mirror(void)
         /* } */
     }
     vring_sampling_print(&sampler, port);
+#ifdef MEASURE_IPSEC
+    if (ipsec_packet_count > 0) {
+        double hz = (double)rte_get_tsc_hz();
+        printf("\n=== IPSec per-packet average timing (%lu packets) ===\n", ipsec_packet_count);
+        printf("  esp_encap:      %lu cycles  (%.3f us)\n",
+               cycles_esp_encap / ipsec_packet_count,
+               (double)cycles_esp_encap / ipsec_packet_count / hz * 1e6);
+        printf("  gcm_enc+auth:   %lu cycles  (%.3f us)\n",
+               cycles_gcm_encrypt_auth / ipsec_packet_count,
+               (double)cycles_gcm_encrypt_auth / ipsec_packet_count / hz * 1e6);
+        printf("  ip_encap:       %lu cycles  (%.3f us)\n",
+               cycles_ip_encap / ipsec_packet_count,
+               (double)cycles_ip_encap / ipsec_packet_count / hz * 1e6);
+        printf("  TOTAL:          %lu cycles  (%.3f us)\n",
+               (cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap) / ipsec_packet_count,
+               (double)(cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap) / ipsec_packet_count / hz * 1e6);
+
+        FILE *csv = fopen("/tmp/ipsec_timing.csv", "w");
+        if (csv) {
+            fprintf(csv, "stage,packets,total_cycles,avg_cycles,avg_us\n");
+            fprintf(csv, "esp_encap,%lu,%lu,%lu,%.3f\n",
+                    ipsec_packet_count, cycles_esp_encap,
+                    cycles_esp_encap / ipsec_packet_count,
+                    (double)cycles_esp_encap / ipsec_packet_count / hz * 1e6);
+            fprintf(csv, "chacha_enc+auth,%lu,%lu,%lu,%.3f\n",
+                    ipsec_packet_count, cycles_gcm_encrypt_auth,
+                    cycles_gcm_encrypt_auth / ipsec_packet_count,
+                    (double)cycles_gcm_encrypt_auth / ipsec_packet_count / hz * 1e6);
+            fprintf(csv, "ip_encap,%lu,%lu,%lu,%.3f\n",
+                    ipsec_packet_count, cycles_ip_encap,
+                    cycles_ip_encap / ipsec_packet_count,
+                    (double)cycles_ip_encap / ipsec_packet_count / hz * 1e6);
+            uint64_t total = cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap;
+            fprintf(csv, "total,%lu,%lu,%lu,%.3f\n",
+                    ipsec_packet_count, total,
+                    total / ipsec_packet_count,
+                    (double)total / ipsec_packet_count / hz * 1e6);
+            fclose(csv);
+            printf("  (wrote ipsec_timing.csv)\n");
+        }
+    }
+#endif
     ipsec_sa_free(&sa);
     printf("\nCore %u exiting. Total RX: %lu, Total TX: %lu, RX Errors: %lu, TX Errors: %lu\n",
             rte_lcore_id(), packet_count, tx_count, rx_err, tx_err);
