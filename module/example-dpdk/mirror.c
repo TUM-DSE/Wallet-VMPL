@@ -402,8 +402,7 @@ lcore_mirror(void)
             for (int i = 0; i < nb_rx; i++) {
                 // ipsec decap
                 ipsec_esp_encap(bufs[i], &sa, spi, 0);
-                ipsec_hmac_sha1_compute(bufs[i], &sa);
-                ipsec_aes_cbc_encrypt(bufs[i], &sa);
+                ipsec_chacha_encrypt_auth(bufs[i], &sa);
                 ipsec_ip_encap(bufs[i], 50, 0x1, 0x2);
             }
 

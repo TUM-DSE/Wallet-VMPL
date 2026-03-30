@@ -369,6 +369,59 @@ ipsec_aes_cbc_decrypt(struct rte_mbuf *m, struct ipsec_sa *sa)
 }
 
 /* ================================================================== */
+/*  ChaCha20-Poly1305 encrypt + authenticate (combined)                */
+/* ================================================================== */
+
+/*
+ * Combined ChaCha20-Poly1305 encrypt and authenticate (RFC 7905).
+ * AEAD cipher: encryption produces a 16-byte Poly1305 authentication tag,
+ * replacing the separate HMAC step.  Key is 256-bit, IV is 12 bytes.
+ *
+ * Appends the truncated tag (IPSEC_AUTH_DIGEST_LEN bytes) as the
+ * ESP integrity check value, matching the layout of the HMAC-based pipeline.
+ *
+ * Must be called AFTER ipsec_esp_encap() (replaces both hmac_compute + encrypt).
+ */
+static inline int
+ipsec_chacha_encrypt_auth(struct rte_mbuf *m, struct ipsec_sa *sa)
+{
+    uint8_t *data = rte_pktmbuf_mtod(m, uint8_t *);
+    struct ipsec_esp_hdr *esp = (struct ipsec_esp_hdr *)data;
+
+    uint8_t *idat = data + sizeof(struct ipsec_esp_hdr);
+    int plen = rte_pktmbuf_data_len(m)
+               - (int)sizeof(struct ipsec_esp_hdr);
+
+    /* 12-byte nonce: 8-byte ESP IV zero-padded */
+    uint8_t iv[12];
+    memcpy(iv, esp->iv, 8);
+    memset(iv + 8, 0, 4);
+
+    EVP_CIPHER_CTX *ctx = sa->evp_enc_ctx;
+    if (EVP_EncryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, iv) != 1)
+        return -1;
+
+    int outlen;
+    if (EVP_EncryptUpdate(ctx, idat, &outlen, idat, plen) != 1)
+        return -1;
+
+    int final_len;
+    if (EVP_EncryptFinal_ex(ctx, idat + outlen, &final_len) != 1)
+        return -1;
+
+    /* Extract Poly1305 tag and append as ESP integrity check value */
+    uint8_t tag[16];
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag) != 1)
+        return -1;
+
+    char *tail = rte_pktmbuf_append(m, IPSEC_AUTH_DIGEST_LEN);
+    if (!tail) return -1;
+    memcpy(tail, tag, IPSEC_AUTH_DIGEST_LEN);
+
+    return 0;
+}
+
+/* ================================================================== */
 /*  IPsecAuthHMACSHA1 -- compute or verify 12-byte HMAC-SHA1 digest    */
 /* ================================================================== */
 
