@@ -17,9 +17,13 @@ done
 virt-copy-in -a $2.qcow2 container/guestkeys/ /
 virt-copy-in -a $2.qcow2 container/sshd_config /etc/ssh/
 virt-copy-in -a $2.qcow2 container/fstab /etc/
+virt-copy-in -a $2.qcow2 container/mount-9p.sh /usr/local/bin/
+virt-copy-in -a $2.qcow2 container/mount-9p.service /etc/systemd/system/
 virt-copy-in -a $2.qcow2 container/nasm /bin/
 virt-copy-in -a $2.qcow2 scripts/grub /etc/default/
-virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable systemd-timesyncd"\
+virt-customize --format qcow2 -a $2.qcow2 --run-command "chmod +x /usr/local/bin/mount-9p.sh"\
+             --run-command "systemctl enable mount-9p.service"\
+             --run-command "systemctl disable systemd-timesyncd"\
              --run-command "chmod 700 /etc/netplan/99_config.yaml"\
              --run-command "chown root:root /root/.ssh/*"\
              --run-command "netplan apply"\
@@ -42,4 +46,7 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "systemctl disable syste
              --run-command "python3 -m pip install minio==7.2.16"\
 	     --run-command "python3 -m pip install pybind11 pytest fire" \
 	     --run-command "mkdir -p /nix/store" \
-	     --run-command "mkdir -p /root/home"
+	     --run-command "mkdir -p /root/home" \
+	     --run-command "mkdir -p /root/module" \
+	     --run-command "mkdir -p /root/Benchmarks" \
+	     --run-command "mkdir -p /root/gramine-svsm"
