@@ -432,6 +432,7 @@ lcore_mirror(void)
         /* } */
     }
     vring_sampling_print(&sampler, port);
+    ipsec_sa_free(&sa);
     printf("\nCore %u exiting. Total RX: %lu, Total TX: %lu, RX Errors: %lu, TX Errors: %lu\n",
             rte_lcore_id(), packet_count, tx_count, rx_err, tx_err);
 }

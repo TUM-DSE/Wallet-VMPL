@@ -80,6 +80,7 @@ struct ipsec_sa {
     uint8_t  ooo_window;    /* out-of-order window size */
     uint32_t bitmap;        /* replay bitmap */
     uint32_t lastseq;       /* last accepted sequence (host order) */
+    EVP_CIPHER_CTX *evp_enc_ctx; /* pre-allocated OpenSSL encrypt context */
 };
 
 static inline void
@@ -95,6 +96,16 @@ ipsec_sa_init(struct ipsec_sa *sa,
     sa->replay_start = replay_start;
     sa->cur_seq = replay_start;
     sa->ooo_window = ooo_window;
+    sa->evp_enc_ctx = EVP_CIPHER_CTX_new();
+}
+
+static inline void
+ipsec_sa_free(struct ipsec_sa *sa)
+{
+    if (sa->evp_enc_ctx) {
+        EVP_CIPHER_CTX_free(sa->evp_enc_ctx);
+        sa->evp_enc_ctx = NULL;
+    }
 }
 
 /* ================================================================== */
@@ -271,27 +282,21 @@ ipsec_aes_cbc_encrypt(struct rte_mbuf *m, struct ipsec_sa *sa)
     memcpy(iv, esp->iv, 8);
     memset(iv + 8, 0, 8);
 
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) return -1;
-
-    int ret = -1;
+    EVP_CIPHER_CTX *ctx = sa->evp_enc_ctx;
     if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, sa->enc_key, iv) != 1)
-        goto out;
+        return -1;
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
 
     int outlen;
     if (EVP_EncryptUpdate(ctx, idat, &outlen, idat, plen) != 1)
-        goto out;
+        return -1;
 
     int final_len;
     if (EVP_EncryptFinal_ex(ctx, idat + outlen, &final_len) != 1)
-        goto out;
+        return -1;
 
-    ret = 0;
-out:
-    EVP_CIPHER_CTX_free(ctx);
-    return ret;
+    return 0;
 #else
     uint8_t *data = rte_pktmbuf_mtod(m, uint8_t *);
     struct ipsec_esp_hdr *esp = (struct ipsec_esp_hdr *)data;
