@@ -81,6 +81,7 @@ struct ipsec_sa {
     uint32_t bitmap;        /* replay bitmap */
     uint32_t lastseq;       /* last accepted sequence (host order) */
     EVP_CIPHER_CTX *evp_enc_ctx; /* pre-allocated OpenSSL encrypt context */
+    EVP_CIPHER_CTX *evp_dec_ctx; /* pre-allocated OpenSSL decrypt context */
 };
 
 static inline void
@@ -97,6 +98,7 @@ ipsec_sa_init(struct ipsec_sa *sa,
     sa->cur_seq = replay_start;
     sa->ooo_window = ooo_window;
     sa->evp_enc_ctx = EVP_CIPHER_CTX_new();
+    sa->evp_dec_ctx = EVP_CIPHER_CTX_new();
 }
 
 static inline void
@@ -105,6 +107,10 @@ ipsec_sa_free(struct ipsec_sa *sa)
     if (sa->evp_enc_ctx) {
         EVP_CIPHER_CTX_free(sa->evp_enc_ctx);
         sa->evp_enc_ctx = NULL;
+    }
+    if (sa->evp_dec_ctx) {
+        EVP_CIPHER_CTX_free(sa->evp_dec_ctx);
+        sa->evp_dec_ctx = NULL;
     }
 }
 
@@ -417,6 +423,57 @@ ipsec_chacha_encrypt_auth(struct rte_mbuf *m, struct ipsec_sa *sa)
     char *tail = rte_pktmbuf_append(m, IPSEC_AUTH_DIGEST_LEN);
     if (!tail) return -1;
     memcpy(tail, tag, IPSEC_AUTH_DIGEST_LEN);
+
+    return 0;
+}
+
+/*
+ * Combined ChaCha20-Poly1305 decrypt and verify (RFC 7905).
+ * Verifies the trailing Poly1305 tag, strips it, and decrypts in-place.
+ *
+ * Must be called BEFORE ipsec_esp_decap() (replaces both decrypt + hmac_verify).
+ *
+ * @return 0 success, -1 authentication failure or decrypt error (drop packet).
+ */
+static inline int
+ipsec_chacha_decrypt_auth(struct rte_mbuf *m, struct ipsec_sa *sa)
+{
+    uint8_t *data = rte_pktmbuf_mtod(m, uint8_t *);
+    struct ipsec_esp_hdr *esp = (struct ipsec_esp_hdr *)data;
+
+    int dlen = rte_pktmbuf_data_len(m);
+    if (dlen < (int)sizeof(struct ipsec_esp_hdr) + IPSEC_AUTH_DIGEST_LEN)
+        return -1;
+
+    /* Extract and strip the trailing tag */
+    uint8_t tag[IPSEC_AUTH_DIGEST_LEN];
+    memcpy(tag, data + dlen - IPSEC_AUTH_DIGEST_LEN, IPSEC_AUTH_DIGEST_LEN);
+    rte_pktmbuf_trim(m, IPSEC_AUTH_DIGEST_LEN);
+
+    uint8_t *idat = data + sizeof(struct ipsec_esp_hdr);
+    int plen = rte_pktmbuf_data_len(m)
+               - (int)sizeof(struct ipsec_esp_hdr);
+
+    /* 12-byte nonce: 8-byte ESP IV zero-padded */
+    uint8_t iv[12];
+    memcpy(iv, esp->iv, 8);
+    memset(iv + 8, 0, 4);
+
+    EVP_CIPHER_CTX *ctx = sa->evp_dec_ctx;
+    if (EVP_DecryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, iv) != 1)
+        return -1;
+
+    int outlen;
+    if (EVP_DecryptUpdate(ctx, idat, &outlen, idat, plen) != 1)
+        return -1;
+
+    /* Set expected tag before finalizing — Final checks authentication */
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, IPSEC_AUTH_DIGEST_LEN, tag) != 1)
+        return -1;
+
+    int final_len;
+    if (EVP_DecryptFinal_ex(ctx, idat + outlen, &final_len) != 1)
+        return -1;  /* authentication failed */
 
     return 0;
 }
