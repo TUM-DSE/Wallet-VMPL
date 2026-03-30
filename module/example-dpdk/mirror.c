@@ -38,6 +38,7 @@
 
 #include "vring_trace.h"
 #include "workload.h"
+#include "ipsec.h"
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
@@ -315,6 +316,23 @@ lcore_mirror(void)
     volatile uint64_t tx_err = 0;
     struct workload* workload = workload_alloc();
 
+    /* test keys - replace with real keys for production */
+    static const uint8_t test_enc_key[16] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+        0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
+    };
+    static const uint8_t test_auth_key[16] = {
+        0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe,
+        0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01
+    };
+
+    struct ipsec_sa sa;
+    ipsec_sa_init(&sa, test_enc_key, test_auth_key,
+                    1,    /* replay_start: initial sequence number */
+                    32);  /* ooo_window: out-of-order replay window size */
+
+    uint32_t spi = 0x1000;  /* Security Parameters Index */
+
     /*
      * Check that the port is on the same NUMA node as the polling thread
      * for best performance.
@@ -380,6 +398,14 @@ lcore_mirror(void)
                 artificial_workload(workload, nb_rx);
             }
             ndelay_accurate(sleep * CHAINING * nb_rx); // simulate per-packet processing time
+
+            for (int i = 0; i < nb_rx; i++) {
+                // ipsec decap
+                ipsec_esp_encap(bufs[i], &sa, spi, 0);
+                ipsec_hmac_sha1_compute(bufs[i], &sa);
+                ipsec_aes_cbc_encrypt(bufs[i], &sa);
+                ipsec_ip_encap(bufs[i], 50, 0x1, 0x2);
+            }
 
             /* Send packets back out on the same port */
             const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
