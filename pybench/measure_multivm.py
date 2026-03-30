@@ -42,7 +42,8 @@ class PktgenMultiVMTest(AbstractBenchTest):
         except (FileNotFoundError, ValueError):
             return None
 
-    def pre_initial_cleanup(self, host: Host, qemu_pid, pktgen_pid):
+    @staticmethod
+    def pre_initial_cleanup(host: Host, qemu_pid, pktgen_pid):
         debug('Pre-Initial cleanup (pktgen-specific)')
         try:
             host.kill_guest()
@@ -52,9 +53,9 @@ class PktgenMultiVMTest(AbstractBenchTest):
         # sometimes qemu and pktgen refuse to die. Lets try not to kill other peoples processes though.
         username = getpass.getuser()
         if qemu_pid is None:
-            qemu_pid = self._read_pidfile(f"/tmp/pidfile.{username}.qemu")
+            qemu_pid = PktgenMultiVMTest._read_pidfile(f"/tmp/pidfile.{username}.qemu")
         if pktgen_pid is None:
-            pktgen_pid = self._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
+            pktgen_pid = PktgenMultiVMTest._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
         if qemu_pid is not None:
             host.exec(f"sudo kill {qemu_pid} || true")
         if pktgen_pid is not None:
@@ -341,7 +342,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             info(f"Running {test}")
             test.compile(host)
             for repetition in range(test.repetitions):
-                test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+                PktgenMultiVMTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
                 # sleep(1) # wait and pray for pktgen
                 vm_args = { 'vcpus': 1 }
                 with measurement.virtual_machines(Interface.VPP, num=test.num_vms, run_guest_args=vm_args) as guests:
@@ -382,7 +383,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     pass
             bench.done(test)
 
-    test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+    PktgenMultiVMTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
 
     dfs = []
     for test in tests:

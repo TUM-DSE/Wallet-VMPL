@@ -42,7 +42,8 @@ class PktgenTest(AbstractBenchTest):
         except (FileNotFoundError, ValueError):
             return None
 
-    def pre_initial_cleanup(self, host: Host, qemu_pid, pktgen_pid):
+    @staticmethod
+    def pre_initial_cleanup(host: Host, qemu_pid, pktgen_pid):
         debug('Pre-Initial cleanup (pktgen-specific)')
         try:
             host.kill_guest()
@@ -52,9 +53,9 @@ class PktgenTest(AbstractBenchTest):
         # sometimes qemu and pktgen refuse to die. Lets try not to kill other peoples processes though.
         username = getpass.getuser()
         if qemu_pid is None:
-            qemu_pid = self._read_pidfile(f"/tmp/pidfile.{username}.qemu")
+            qemu_pid = PktgenTest._read_pidfile(f"/tmp/pidfile.{username}.qemu")
         if pktgen_pid is None:
-            pktgen_pid = self._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
+            pktgen_pid = PktgenTest._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
         if qemu_pid is not None:
             host.exec(f"sudo kill {qemu_pid} || true")
         if pktgen_pid is not None:
@@ -295,7 +296,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
     chaining_tests = dict(
         system = [ "mirror", "iomgr", "noiomgr", "insecure" ],
         pktsize = [ 64, 1500 ],
-        chaining = [ 2, 3, 4 ],
+        chaining = [2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32],
         workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     tests = PktgenTest.list_tests(basic_tests) + \
@@ -345,7 +346,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             info(f"Running {test}")
             test.compile(host)
             for repetition in range(test.repetitions):
-                test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+                PktgenTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
                 host.start_pktgen_vhost()
                 pktgen_pid = host.tmux_get_pid("pktgen")
                 with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
@@ -370,7 +371,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     pass
             bench.done(test)
 
-    test.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+    PktgenTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
 
     dfs = []
     for test in tests:
