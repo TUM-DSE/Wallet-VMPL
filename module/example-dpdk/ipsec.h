@@ -283,7 +283,7 @@ ipsec_aes_cbc_encrypt(struct rte_mbuf *m, struct ipsec_sa *sa)
     memset(iv + 8, 0, 8);
 
     EVP_CIPHER_CTX *ctx = sa->evp_enc_ctx;
-    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, sa->enc_key, iv) != 1)
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, sa->enc_key, iv) != 1)
         return -1;
 
     EVP_CIPHER_CTX_set_padding(ctx, 0);
@@ -386,7 +386,7 @@ ipsec_hmac_sha1_compute(struct rte_mbuf *m, struct ipsec_sa *sa)
     unsigned int len = IPSEC_SHA_DIGEST_LEN;
 
 #ifdef USE_OPENSSL
-    digest_ptr = SHA1(rte_pktmbuf_mtod(m, unsigned char *), rte_pktmbuf_data_len(m), digest);
+    digest_ptr = SHA256(rte_pktmbuf_mtod(m, unsigned char *), rte_pktmbuf_data_len(m), digest);
 #else
     ipsec_hmac(sa->auth_key, IPSEC_KEY_SIZE,
                rte_pktmbuf_mtod(m, unsigned char *),
