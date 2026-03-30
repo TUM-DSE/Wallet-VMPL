@@ -65,7 +65,7 @@ ${SOURCE_IMAGE}.qcow2: VMPLkernel6.5.tar.gz
 
 
 guest.qcow2: tmp.qcow2 scripts/build_image.sh build/linux/linux-headers-6.5.0-svsm.deb
-	@make container/99_config.yaml # we always need to cleanbiuld the config because we change it elsewhere
+	@make -B container/99_config.yaml # we always need to cleanbiuld the config because we change it elsewhere
 	(test -s ./guest.qcow2 && ./scripts/update_image.sh ${IMAGE_NAME} linux ) || bash ./scripts/build_image.sh tmp ${IMAGE_NAME} linux ${IMAGE_SIZE}
 
 guest_qcows:
