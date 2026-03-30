@@ -36,11 +36,21 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 
+
 #include <rte_mbuf.h>
 #include <rte_ip.h>
 
 #include "ipsec_aes.h"
 #include "ipsec_sha1.h"
+
+
+
+#define USE_OPENSSL
+
+#ifdef USE_OPENSSL
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+#endif
 
 /* ------------------------------------------------------------------ */
 /* Constants                                                           */
@@ -237,6 +247,52 @@ ipsec_esp_decap(struct rte_mbuf *m, struct ipsec_sa *sa)
 static inline int
 ipsec_aes_cbc_encrypt(struct rte_mbuf *m, struct ipsec_sa *sa)
 {
+#ifdef USE_OPENSSL
+    /*
+    * AES-CBC encrypt the ESP payload in-place using OpenSSL EVP.
+    * Same interface as ipsec_aes_cbc_encrypt() but uses OpenSSL's AES-128-CBC.
+    * The 8-byte ESP IV is zero-padded to 16 bytes for standard AES-CBC.
+    *
+    * NOTE: Not bit-compatible with ipsec_aes_cbc_encrypt() which uses a
+    * non-standard 8-byte IV CBC from FastClick.
+    */
+    uint8_t *data = rte_pktmbuf_mtod(m, uint8_t *);
+    struct ipsec_esp_hdr *esp = (struct ipsec_esp_hdr *)data;
+
+    uint8_t *idat = data + sizeof(struct ipsec_esp_hdr);
+    int plen = rte_pktmbuf_data_len(m)
+               - (int)sizeof(struct ipsec_esp_hdr)
+               - IPSEC_AUTH_DIGEST_LEN;
+
+    if ((plen % 16) != 0) plen += 8;
+
+    /* 16-byte IV: 8-byte ESP IV zero-padded */
+    uint8_t iv[16];
+    memcpy(iv, esp->iv, 8);
+    memset(iv + 8, 0, 8);
+
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return -1;
+
+    int ret = -1;
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, sa->enc_key, iv) != 1)
+        goto out;
+
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    int outlen;
+    if (EVP_EncryptUpdate(ctx, idat, &outlen, idat, plen) != 1)
+        goto out;
+
+    int final_len;
+    if (EVP_EncryptFinal_ex(ctx, idat + outlen, &final_len) != 1)
+        goto out;
+
+    ret = 0;
+out:
+    EVP_CIPHER_CTX_free(ctx);
+    return ret;
+#else
     uint8_t *data = rte_pktmbuf_mtod(m, uint8_t *);
     struct ipsec_esp_hdr *esp = (struct ipsec_esp_hdr *)data;
     struct ipsec_aes_key key;
@@ -261,6 +317,7 @@ ipsec_aes_cbc_encrypt(struct rte_mbuf *m, struct ipsec_sa *sa)
         plen -= 16;
     }
     return 0;
+#endif
 }
 
 /*
@@ -320,12 +377,18 @@ static inline int
 ipsec_hmac_sha1_compute(struct rte_mbuf *m, struct ipsec_sa *sa)
 {
     unsigned char digest[IPSEC_SHA_DIGEST_LEN];
+    unsigned char *digest_ptr = digest;
     unsigned int len = IPSEC_SHA_DIGEST_LEN;
 
+#ifdef USE_OPENSSL
+    digest_ptr = SHA1(rte_pktmbuf_mtod(m, unsigned char *), rte_pktmbuf_data_len(m), digest);
+#else
     ipsec_hmac(sa->auth_key, IPSEC_KEY_SIZE,
                rte_pktmbuf_mtod(m, unsigned char *),
                rte_pktmbuf_data_len(m),
                digest, &len);
+#endif
+
 
     char *tail = rte_pktmbuf_append(m, IPSEC_AUTH_DIGEST_LEN);
     if (!tail) return -1;

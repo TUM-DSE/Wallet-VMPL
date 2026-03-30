@@ -6,6 +6,9 @@ CFLAGS :=
 all: $(DPDK_EXAMPLES) $(TRUSTLETS) $(RUNNERS) simple_slick_fs
 	@make -C ../../ gramine
 
+OPENSSL_CFLAGS := $(shell pkg-config --cflags openssl)
+OPENSSL_LIBS := $(shell pkg-config --libs openssl)
+
 DPDK_PATH := $(shell realpath ../../.nix-builds/dpdk)
 # DPDK_PATH := /scratch/okelmann/dpdk/build
 GLIBC_STATIC := /nix/store/24hs0bbh26w5zfvkv5ps2amfrbwnz8pd-glibc-2.40-66-static/lib
@@ -40,9 +43,9 @@ BSD_INCLUDE := /nix/store/xiw9h3ssfsj1qnap4nzg2hzhq8zc54r5-libbsd-0.11.8-dev/inc
 DPDK_SRC := /scratch/okelmann/dpdk-cvms
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $(OPENSSL_CFLAGS) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
 		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
-		$(DPDK_LIBS) $(CFLAGS)
+		$(DPDK_LIBS) $(OPENSSL_LIBS) $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -O3 -g -mssse3 -o $@ $< \

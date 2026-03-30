@@ -202,6 +202,7 @@
                 automake
                 libtool
                 openssl
+                openssl.dev
                 autoconf-archive
                 rust-bindgen
                 rust-cbindgen
