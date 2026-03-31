@@ -39,6 +39,9 @@
 #include "vring_trace.h"
 #include "workload.h"
 #include "ipsec.h"
+#include "ids.h"
+
+#define REAL_WORKLOAD
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
@@ -333,10 +336,13 @@ lcore_mirror(void)
 
     uint32_t spi = 0x1000;  /* Security Parameters Index */
 
+    ids_init();
+
 #ifdef MEASURE_IPSEC
     /* IPSec per-function cycle counters */
     uint64_t cycles_esp_encap = 0;
     uint64_t cycles_gcm_encrypt_auth = 0;
+    uint64_t cycles_ids_scan = 0;
     uint64_t cycles_ip_encap = 0;
     uint64_t ipsec_packet_count = 0;
 #endif
@@ -407,6 +413,7 @@ lcore_mirror(void)
             }
             ndelay_accurate(sleep * CHAINING * nb_rx); // simulate per-packet processing time
 
+#ifdef REAL_WORKLOAD
             for (int i = 0; i < nb_rx; i++) {
 #ifdef MEASURE_IPSEC
                 unsigned int _aux;
@@ -415,27 +422,33 @@ lcore_mirror(void)
                 t0 = __rdtscp(&_aux);
 #endif
                 ipsec_esp_encap(bufs[i], &sa, spi, 0);
+                ipsec_chacha_encrypt_auth(bufs[i], &sa);
+                ipsec_ip_encap(bufs[i], 50, 0x1, 0x2);
 #ifdef MEASURE_IPSEC
                 t1 = __rdtscp(&_aux);
                 cycles_esp_encap += t1 - t0;
 
                 t0 = __rdtscp(&_aux);
 #endif
-                ipsec_chacha_encrypt_auth(bufs[i], &sa);
+                ids_scan(rte_pktmbuf_mtod(bufs[i], const char *),
+                         rte_pktmbuf_data_len(bufs[i]));
+#ifdef MEASURE_IPSEC
+                t1 = __rdtscp(&_aux);
+                cycles_ids_scan += t1 - t0;
+
+                t0 = __rdtscp(&_aux);
+#endif
+                ipsec_ip_decap(bufs[i]);
+                ipsec_chacha_decrypt_auth(bufs[i], &sa);
+                ipsec_esp_decap(bufs[i], &sa);
 #ifdef MEASURE_IPSEC
                 t1 = __rdtscp(&_aux);
                 cycles_gcm_encrypt_auth += t1 - t0;
 
-                t0 = __rdtscp(&_aux);
-#endif
-                ipsec_ip_encap(bufs[i], 50, 0x1, 0x2);
-#ifdef MEASURE_IPSEC
-                t1 = __rdtscp(&_aux);
-                cycles_ip_encap += t1 - t0;
-
                 ipsec_packet_count++;
 #endif
             }
+#endif
 
             /* Send packets back out on the same port */
             const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
@@ -466,35 +479,35 @@ lcore_mirror(void)
     if (ipsec_packet_count > 0) {
         double hz = (double)rte_get_tsc_hz();
         printf("\n=== IPSec per-packet average timing (%lu packets) ===\n", ipsec_packet_count);
-        printf("  esp_encap:      %lu cycles  (%.3f us)\n",
+        printf("  encrypt:        %lu cycles  (%.3f us)\n",
                cycles_esp_encap / ipsec_packet_count,
                (double)cycles_esp_encap / ipsec_packet_count / hz * 1e6);
-        printf("  gcm_enc+auth:   %lu cycles  (%.3f us)\n",
+        printf("  ids_scan:       %lu cycles  (%.3f us)\n",
+               cycles_ids_scan / ipsec_packet_count,
+               (double)cycles_ids_scan / ipsec_packet_count / hz * 1e6);
+        printf("  decrypt:        %lu cycles  (%.3f us)\n",
                cycles_gcm_encrypt_auth / ipsec_packet_count,
                (double)cycles_gcm_encrypt_auth / ipsec_packet_count / hz * 1e6);
-        printf("  ip_encap:       %lu cycles  (%.3f us)\n",
-               cycles_ip_encap / ipsec_packet_count,
-               (double)cycles_ip_encap / ipsec_packet_count / hz * 1e6);
+        uint64_t total = cycles_esp_encap + cycles_ids_scan + cycles_gcm_encrypt_auth;
         printf("  TOTAL:          %lu cycles  (%.3f us)\n",
-               (cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap) / ipsec_packet_count,
-               (double)(cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap) / ipsec_packet_count / hz * 1e6);
+               total / ipsec_packet_count,
+               (double)total / ipsec_packet_count / hz * 1e6);
 
         FILE *csv = fopen("/tmp/ipsec_timing.csv", "w");
         if (csv) {
             fprintf(csv, "stage,packets,total_cycles,avg_cycles,avg_us\n");
-            fprintf(csv, "esp_encap,%lu,%lu,%lu,%.3f\n",
+            fprintf(csv, "encrypt,%lu,%lu,%lu,%.3f\n",
                     ipsec_packet_count, cycles_esp_encap,
                     cycles_esp_encap / ipsec_packet_count,
                     (double)cycles_esp_encap / ipsec_packet_count / hz * 1e6);
-            fprintf(csv, "chacha_enc+auth,%lu,%lu,%lu,%.3f\n",
+            fprintf(csv, "ids_scan,%lu,%lu,%lu,%.3f\n",
+                    ipsec_packet_count, cycles_ids_scan,
+                    cycles_ids_scan / ipsec_packet_count,
+                    (double)cycles_ids_scan / ipsec_packet_count / hz * 1e6);
+            fprintf(csv, "decrypt,%lu,%lu,%lu,%.3f\n",
                     ipsec_packet_count, cycles_gcm_encrypt_auth,
                     cycles_gcm_encrypt_auth / ipsec_packet_count,
                     (double)cycles_gcm_encrypt_auth / ipsec_packet_count / hz * 1e6);
-            fprintf(csv, "ip_encap,%lu,%lu,%lu,%.3f\n",
-                    ipsec_packet_count, cycles_ip_encap,
-                    cycles_ip_encap / ipsec_packet_count,
-                    (double)cycles_ip_encap / ipsec_packet_count / hz * 1e6);
-            uint64_t total = cycles_esp_encap + cycles_gcm_encrypt_auth + cycles_ip_encap;
             fprintf(csv, "total,%lu,%lu,%lu,%.3f\n",
                     ipsec_packet_count, total,
                     total / ipsec_packet_count,

@@ -47,9 +47,9 @@ HYPERSCAN_LIB :=  /nix/store/ysvcdd45grkw0qdn6climhd0365phm71-hyperscan-5.4.2/li
 DPDK_SRC := /scratch/okelmann/dpdk-cvms
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
-	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $(OPENSSL_CFLAGS) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
+	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $(OPENSSL_CFLAGS) $(HS_CFLAGS) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
 		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
-		$(DPDK_LIBS) $(OPENSSL_LIBS) $(CFLAGS)
+		$(DPDK_LIBS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include $(HS_CFLAGS) -O3 -g -mssse3 -o $@ $< \
