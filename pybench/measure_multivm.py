@@ -236,6 +236,7 @@ class PktgenMultiVMTest(AbstractBenchTest):
                 "lat_us": foo
             }]
         df = DataFrame(data=data)
+        df["chaining"] = df["num_vms"] # we dont want to set them to equal in the text matrix already, because that would increse the test list generated from the matrix
         df.to_csv(local_output_file, index=False)
 
 
