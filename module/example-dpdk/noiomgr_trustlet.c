@@ -16,6 +16,8 @@
 #include "../example-tests/util.h"
 #include "../example-tests/shm_mempool.h"
 #include "workload.h"
+#include "ipsec.h"
+#include "ids.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
@@ -29,6 +31,8 @@
 #ifndef PER_VNFLET_WORKLOAD_NS
 #define PER_VNFLET_WORKLOAD_NS 0
 #endif
+
+#define REAL_WORKLOAD
 
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 #define READ_ONCE(x) (*(volatile typeof(x) *)&(x))
@@ -169,6 +173,25 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     delay(1); // warm up CoW triggered by delay
     struct workload* workload = workload_alloc();
 
+    /* test keys - replace with real keys for production */
+    static const uint8_t test_enc_key[16] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+        0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
+    };
+    static const uint8_t test_auth_key[16] = {
+        0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe,
+        0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01
+    };
+
+    struct ipsec_sa sa;
+    ipsec_sa_init(&sa, test_enc_key, test_auth_key,
+                    1,    /* replay_start: initial sequence number */
+                    32);  /* ooo_window: out-of-order replay window size */
+
+    uint32_t spi = 0x1000;  /* Security Parameters Index */
+
+    ids_init();
+
     // Initialize DPDK EAL with --no-huge for environments without hugepages
     println("Initializing EAL...");
     /* char *eal_args[] = {"slick_vnflet", "--no-huge"}; */
@@ -281,6 +304,30 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
                     m->pkt_len = len;
                     memcpy(rte_pktmbuf_mtod(m, void *), local_bufs[i], len);
                 }
+
+#ifdef REAL_WORKLOAD
+                if (mode == MODE_FIRST_NODE) {
+                    for (size_t i = 0; i < num_deq; i++) {
+                        ipsec_esp_encap(enq_objs[i], &sa, spi, 0);
+                        ipsec_chacha_encrypt_auth(enq_objs[i], &sa);
+                        ipsec_ip_encap(enq_objs[i], 50, 0x1, 0x2);
+                    }
+                }
+                if (mode == MODE_MIDDLE_NODE) {
+                    for (size_t i = 0; i < num_deq; i++) {
+                        struct rte_mbuf *pkt = enq_objs[i];
+                        ids_scan(rte_pktmbuf_mtod(pkt, const char *),
+                                 rte_pktmbuf_data_len(pkt));
+                    }
+                }
+                if (mode == MODE_LAST_NODE) {
+                    for (size_t i = 0; i < num_deq; i++) {
+                        ipsec_ip_decap(enq_objs[i]);
+                        ipsec_chacha_decrypt_auth(enq_objs[i], &sa);
+                        ipsec_esp_decap(enq_objs[i], &sa);
+                    }
+                }
+#endif
 
                 // pass buffers to next VNFlet
                 num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, enq_objs, num_deq, NULL);
