@@ -19,7 +19,11 @@ for (( i=1; i<=MAX_RETRIES; i++ )); do
         if mountpoint -q "$mp" 2>/dev/null; then
             continue
         fi
-        mount "$mp" 2>/dev/null && echo "mount-9p: mounted $mp" || all_ok=false
+        if mount "$mp" 2>/dev/null && mountpoint -q "$mp" 2>/dev/null; then
+            echo "mount-9p: mounted $mp"
+        else
+            all_ok=false
+        fi
     done
     if $all_ok; then
         echo "mount-9p: all 9p filesystems mounted"
