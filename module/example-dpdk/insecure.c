@@ -47,6 +47,10 @@
 #define MBUF_CACHE_SIZE 250
 
 #include "workload.h"
+#include "ipsec.h"
+#include "ids.h"
+
+#define REAL_WORKLOAD
 
 /* #define SIMPLE_POOL */
 #ifdef SIMPLE_POOL
@@ -144,6 +148,25 @@ vnflet_thread(void *arg)
     struct workload *wl = workload_alloc();
     uint64_t workload_cycles = (uint64_t)((double)(PER_VNFLET_WORKLOAD_NS) / 1e9 * rte_get_tsc_hz());
 
+    /* test keys - replace with real keys for production */
+    static const uint8_t test_enc_key[16] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+        0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
+    };
+    static const uint8_t test_auth_key[16] = {
+        0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe,
+        0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01
+    };
+
+    struct ipsec_sa sa;
+    ipsec_sa_init(&sa, test_enc_key, test_auth_key, 1, 32);
+    uint32_t spi = 0x1000;
+
+    int is_first = (id == 0);
+    int is_last  = (id == CHAINING - 1);
+
+    ids_init();
+
     printf("VNFlet %d starting on lcore %u\n", id, rte_lcore_id());
 
     while (!__atomic_load_n(&driver_done, __ATOMIC_ACQUIRE)) {
@@ -154,6 +177,28 @@ vnflet_thread(void *arg)
         artificial_workload(wl, n);
         if (workload_cycles > 0)
             ndelay(workload_cycles * n);
+
+#ifdef REAL_WORKLOAD
+        if (is_first) {
+            for (unsigned i = 0; i < n; i++) {
+                ipsec_esp_encap(objs[i], &sa, spi, 0);
+                ipsec_chacha_encrypt_auth(objs[i], &sa);
+                ipsec_ip_encap(objs[i], 50, 0x1, 0x2);
+            }
+        } else if (is_last) {
+            for (unsigned i = 0; i < n; i++) {
+                ipsec_ip_decap(objs[i]);
+                ipsec_chacha_decrypt_auth(objs[i], &sa);
+                ipsec_esp_decap(objs[i], &sa);
+            }
+        } else {
+            for (unsigned i = 0; i < n; i++) {
+                struct rte_mbuf *pkt = objs[i];
+                ids_scan(rte_pktmbuf_mtod(pkt, const char *),
+                         rte_pktmbuf_data_len(pkt));
+            }
+        }
+#endif
 
         unsigned sent = rte_ring_sp_enqueue_bulk(out, objs, n, NULL);
         if (sent == 0) {
@@ -177,6 +222,7 @@ vnflet_thread(void *arg)
         }
     } while (n > 0);
 
+    ipsec_sa_free(&sa);
     printf("VNFlet %d done: %" PRIu64 " packets forwarded\n", id, total);
     return 0;
 }

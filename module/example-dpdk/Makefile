@@ -52,9 +52,9 @@ $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
 		$(DPDK_LIBS) $(OPENSSL_LIBS) $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
-	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -O3 -g -mssse3 -o $@ $< \
+	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include $(HS_CFLAGS) -O3 -g -mssse3 -o $@ $< \
 		$(WRAPPERS) \
-		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
+		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS) $(OPENSSL_CFLAGS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ -lm
 
 noiomgr_run: %: %.c ../../module/libwallet/libwallet.a
 	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
@@ -69,10 +69,10 @@ iomgr_trustlet: %: %.c
 
 # TODO merge this with DPDK_EXAMPLES: and check if numbers are the same
 insecure: insecure.c
-	gcc -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ \
+	gcc -include rte_config.h -I$(DPDK_PATH)/include $(OPENSSL_CFLAGS) $(HS_CFLAGS) $< -O3 -march=znver3 -g -o $@ \
 		-lpthread -lnuma \
 		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
-		$(DPDK_LIBS) $(CFLAGS) $(DPDK_MEMPOOL_LIBS)
+		$(DPDK_LIBS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ $(CFLAGS) $(DPDK_MEMPOOL_LIBS)
 
 
 mempool_comparison: mempool_comparison.c
