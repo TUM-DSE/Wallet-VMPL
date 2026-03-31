@@ -12,13 +12,12 @@
 #include <rte_memzone.h>
 #include <rte_mbuf.h>
 
-#include <hs/hs.h>
-
 #include "cpuid.c"
 #include "../example-tests/util.h"
 #include "../example-tests/shm_mempool.h"
 #include "workload.h"
 #include "ipsec.h"
+#include "ids.h"
 
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
@@ -49,56 +48,6 @@ void hexdump(const void *data, size_t size) {
 
 static void* next_tailq_buf = NULL;
 static void* next_memhdr_buf = NULL;
-
-/* Hyperscan database and scratch, initialized once */
-static hs_database_t *hs_db = NULL;
-static hs_scratch_t *hs_scratch = NULL;
-static uint64_t hs_match_count = 0;
-
-static int hs_match_handler(unsigned int id, unsigned long long from,
-                            unsigned long long to, unsigned int flags,
-                            void *ctx)
-{
-    (void)id; (void)from; (void)to; (void)flags; (void)ctx;
-    hs_match_count++;
-    return 0; /* continue scanning */
-}
-
-static void hs_init(void)
-{
-    /* example patterns — adjust as needed */
-    const char *patterns[] = {
-        "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}",  /* IPv4 address */
-        "[A-Fa-f0-9]{32}",                               /* hex token / hash */
-        "HTTP/[12]\\.[01]",                               /* HTTP version */
-    };
-    const unsigned int flags[] = {
-        HS_FLAG_DOTALL | HS_FLAG_SINGLEMATCH,
-        HS_FLAG_DOTALL | HS_FLAG_SINGLEMATCH,
-        HS_FLAG_DOTALL | HS_FLAG_SINGLEMATCH,
-    };
-    const unsigned int ids[] = { 1, 2, 3 };
-    hs_compile_error_t *compile_err = NULL;
-
-    if (hs_compile_multi(patterns, flags, ids,
-                         sizeof(patterns) / sizeof(patterns[0]),
-                         HS_MODE_BLOCK, NULL, &hs_db,
-                         &compile_err) != HS_SUCCESS) {
-        println("Hyperscan compile error: %s\n",
-                compile_err ? compile_err->message : "unknown");
-        if (compile_err) hs_free_compile_error(compile_err);
-        return;
-    }
-
-    if (hs_alloc_scratch(hs_db, &hs_scratch) != HS_SUCCESS) {
-        println("Hyperscan scratch alloc failed\n");
-        hs_free_database(hs_db);
-        hs_db = NULL;
-        return;
-    }
-    println("Hyperscan initialized (%lu patterns)\n",
-            sizeof(patterns) / sizeof(patterns[0]));
-}
 
 // when statically linking DPDK, we make DPDK use these wrappers via --wrap compile flag
 void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
@@ -460,7 +409,7 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
 
     delayed_ns = 0;
     delays = 0;
-    hs_init();
+    ids_init();
 
     trustlet_exit();
 
@@ -482,11 +431,8 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
         if (mode == MODE_MIDDLE_NODE) {
             for (int i = 0; i < num_deq; i++) {
                 struct rte_mbuf *pkt = deq_objs[i];
-                const char *pkt_data = rte_pktmbuf_mtod(pkt, const char *);
-                unsigned int pkt_len = rte_pktmbuf_data_len(pkt);
-                if (hs_db)
-                    hs_scan(hs_db, pkt_data, pkt_len, 0,
-                            hs_scratch, hs_match_handler, NULL);
+                ids_scan(rte_pktmbuf_mtod(pkt, const char *),
+                         rte_pktmbuf_data_len(pkt));
             }
         }
         if (mode == MODE_LAST_NODE) {
