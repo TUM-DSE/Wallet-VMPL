@@ -50,7 +50,7 @@
 #include "ipsec.h"
 #include "ids.h"
 
-#define REAL_WORKLOAD
+// #define REAL_WORKLOAD
 
 /* #define SIMPLE_POOL */
 #ifdef SIMPLE_POOL

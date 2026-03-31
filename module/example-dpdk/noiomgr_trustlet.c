@@ -32,7 +32,7 @@
 #define PER_VNFLET_WORKLOAD_NS 0
 #endif
 
-#define REAL_WORKLOAD
+// #define REAL_WORKLOAD
 
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
 #define READ_ONCE(x) (*(volatile typeof(x) *)&(x))

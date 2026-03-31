@@ -24,12 +24,13 @@ class PktgenMultiVMTest(AbstractBenchTest):
     batchsize: int
     workload: int # per packet per vnflet workload in ns
     memory_workload: int # per packet per vnflet memory workload in bytes
+    real_workload: str # synthetic or real
     chaining: int
     system: str # mirror, noiomgr, iomgr, insecure
     pktsize: int
 
     def test_infix(self):
-        return f"{PREFIX}_{self.system}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
+        return f"{PREFIX}_{self.system}_{self.real_workload}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
         return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
@@ -62,6 +63,8 @@ class PktgenMultiVMTest(AbstractBenchTest):
             host.exec(f"sudo kill {pktgen_pid} || true")
 
     def compile(self, server: Server):
+        assert self.real_workload in [ "synthetic", "real" ], f"Unknown real_workload value {self.real_workload}"
+
         cflags = " ".join([
             f"-DBURST_SIZE={self.batchsize}",
             f"-DPACKET_SIZE={self.pktsize}",
@@ -70,7 +73,9 @@ class PktgenMultiVMTest(AbstractBenchTest):
             f"-DCHAINING={1}", # we abuse mirror here. Since we have multiple mirror instances, each one must assume to handle only 1 VNFlet
             # f"-DCHAINING={self.chaining}",
             # f"-DLLC_SIZE={LLC_SIZE}",
-        ])
+        ] + (
+            [ "-DREAL_WORKLOAD=1" ] if self.real_workload == "real" else []
+        ))
 
         trustlets = []
         dpdk_examples = []
@@ -263,6 +268,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         batchsize = [1, 32],
         workload = [ 0 ],
         memory_workload = [ 0 ],
+        real_workload = [ "synthetic" ],
         num_vms = [2],
         system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
@@ -274,33 +280,44 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
         system = [ "mirror" ],
         pktsize = [ 64 ],
-        memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
+        real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
         system = [ "mirror" ],
         pktsize = [ 1500 ],
-        memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [0], num_vms = [2],
+        real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [0], num_vms = [2],
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
         system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
-        workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
+        real_workload = [ "synthetic" ], workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
     )
     chaining_tests = dict(
         system = [ "mirror" ],
         pktsize = [ 64, 1500 ],
         num_vms = [2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32],
+        real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32],
+        # legacy args, chaining is now num_vms
+        chaining = [0],
+    )
+    real_workload_tests = dict(
+        system = [ "mirror" ],
+        pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
+        num_vms = [ 3 ],
+        real_workload = [ "real" ],
         workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32],
         # legacy args, chaining is now num_vms
         chaining = [0],
     )
-    tests = PktgenMultiVMTest.list_tests(basic_tests) + \
+    tests = \
+        PktgenMultiVMTest.list_tests(basic_tests) + \
         PktgenMultiVMTest.list_tests(workload_tests_64b) + \
         PktgenMultiVMTest.list_tests(workload_tests_1500b) + \
         PktgenMultiVMTest.list_tests(memory_workload_tests) + \
-        PktgenMultiVMTest.list_tests(chaining_tests)
+        PktgenMultiVMTest.list_tests(chaining_tests) + \
+        (PktgenMultiVMTest.list_tests(real_workload_tests) if mode != "latency" else [])
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -310,6 +327,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             batchsize = [32], # , 32],
             workload = [ 0 ], # , 100 ],
             memory_workload = [ 0 ],
+            real_workload = [ "synthetic" ],
             num_vms = [2],
             system = [ "mirror" ],
             # system = [ "noiomgr", "iomgr", "mirror", "insecure" ],
@@ -323,7 +341,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
 
 
     tests = deduplicate(tests)
-    test_params = ["repetitions", "num_vms", "batchsize", "workload", "memory_workload", "chaining", "system", "pktsize"] #  define iteration order
+    test_params = ["repetitions", "num_vms", "batchsize", "workload", "memory_workload", "real_workload", "chaining", "system", "pktsize"] #  define iteration order
     assert sorted(test_params) == sorted(PktgenMultiVMTest.test_parameters())
     if measurement.args.extremes_only:
         tests = PktgenMultiVMTest.filter_extremes(tests, test_params)

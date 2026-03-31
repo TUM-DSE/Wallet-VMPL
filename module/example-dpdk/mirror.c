@@ -41,7 +41,7 @@
 #include "ipsec.h"
 #include "ids.h"
 
-#define REAL_WORKLOAD
+// #define REAL_WORKLOAD
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
