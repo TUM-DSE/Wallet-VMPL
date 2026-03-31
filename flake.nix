@@ -203,6 +203,7 @@
                 libtool
                 openssl
                 openssl.dev
+                hyperscan
                 autoconf-archive
                 rust-bindgen
                 rust-cbindgen
