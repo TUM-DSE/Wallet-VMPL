@@ -99,6 +99,9 @@ ipsec_sa_init(struct ipsec_sa *sa,
     sa->ooo_window = ooo_window;
     sa->evp_enc_ctx = EVP_CIPHER_CTX_new();
     sa->evp_dec_ctx = EVP_CIPHER_CTX_new();
+    /* Pre-init cipher+key so per-packet calls only update the IV */
+    EVP_EncryptInit_ex(sa->evp_enc_ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, NULL);
+    EVP_DecryptInit_ex(sa->evp_dec_ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, NULL);
 }
 
 static inline void
@@ -404,7 +407,7 @@ ipsec_chacha_encrypt_auth(struct rte_mbuf *m, struct ipsec_sa *sa)
     memset(iv + 8, 0, 4);
 
     EVP_CIPHER_CTX *ctx = sa->evp_enc_ctx;
-    if (EVP_EncryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, iv) != 1)
+    if (EVP_EncryptInit_ex(ctx, NULL, NULL, NULL, iv) != 1)
         return -1;
 
     int outlen;
@@ -460,7 +463,7 @@ ipsec_chacha_decrypt_auth(struct rte_mbuf *m, struct ipsec_sa *sa)
     memset(iv + 8, 0, 4);
 
     EVP_CIPHER_CTX *ctx = sa->evp_dec_ctx;
-    if (EVP_DecryptInit_ex(ctx, EVP_chacha20_poly1305(), NULL, sa->enc_key, iv) != 1)
+    if (EVP_DecryptInit_ex(ctx, NULL, NULL, NULL, iv) != 1)
         return -1;
 
     int outlen;
