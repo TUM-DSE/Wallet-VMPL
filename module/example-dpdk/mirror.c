@@ -42,6 +42,7 @@
 #include "ids.h"
 
 // #define REAL_WORKLOAD
+// #define MEASURE_IPSEC
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
