@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
 
         // Configure first-in-chain trustlet
         struct trustlet_configuration config;
-        config.mode[0] = MODE_MIDDLE_NODE;
+        config.mode[0] = MODE_FIRST_NODE;
         config.shm_addr_previous = CHANNEL_ADDR(2);
         config.shm_addr_next = CHANNEL_ADDR(0);
         invoke_trustlet_bin(trustlets[0], &config, sizeof(config), 0);

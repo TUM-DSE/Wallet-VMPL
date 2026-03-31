@@ -40,6 +40,7 @@ NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
 ATOMIC_LIB := /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
 GLIBC_LIB := /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
 BSD_INCLUDE := /nix/store/xiw9h3ssfsj1qnap4nzg2hzhq8zc54r5-libbsd-0.11.8-dev/include
+OPENSSL_LIB := /nix/store/9xgpmwqw0881kxa9sl498qfmzy7z2ndn-openssl-3.0.13/lib
 DPDK_SRC := /scratch/okelmann/dpdk-cvms
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
@@ -61,7 +62,7 @@ iomgr_run: %: %.c ../../module/libwallet/libwallet.a
 iomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include -O3 -g -mssse3 -o $@ $< \
 		$(WRAPPERS) \
-		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS)
+		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS) $(OPENSSL_CFLAGS) $(OPENSSL_LIBS)
 
 # TODO merge this with DPDK_EXAMPLES: and check if numbers are the same
 insecure: insecure.c
@@ -95,4 +96,7 @@ simple_slick_fs: $(TRUSTLETS)
 	cp -L $(ATOMIC_LIB)/libatomic.so.1 ../../runtime/filesystem/simple/fs/lib/
 	cp -L $(GLIBC_LIB)/libpthread.so.0 ../../runtime/filesystem/simple/fs/lib/
 	cp -L $(GLIBC_LIB)/libm.so.6 ../../runtime/filesystem/simple/fs/lib/
+	cp -L $(GLIBC_LIB)/libdl.so.2 ../../runtime/filesystem/simple/fs/lib/
+	cp -L $(OPENSSL_LIB)/libssl.so.3 ../../runtime/filesystem/simple/fs/lib/
+	cp -L $(OPENSSL_LIB)/libcrypto.so.3 ../../runtime/filesystem/simple/fs/lib/
 	cd ../../runtime/filesystem/simple/; ./create.sh
