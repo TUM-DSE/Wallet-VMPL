@@ -44,6 +44,33 @@ class PktgenTest(AbstractBenchTest):
             return None
 
     @staticmethod
+    def _get_child_pids(host: Host, pid: int):
+        """Return list of (child_pid, exe_name) for all children of pid."""
+        try:
+            output = host.exec(f"ps --ppid {pid} -o pid=,comm= 2>/dev/null || true").strip()
+        except Exception:
+            return []
+        children = []
+        for line in output.splitlines():
+            parts = line.split(None, 1)
+            if len(parts) == 2:
+                child_pid, exe_name = int(parts[0]), parts[1]
+                children.append((child_pid, exe_name))
+        return children
+
+    @staticmethod
+    def _check_survivors(host: Host, pids):
+        """Check which pids from the list are still alive and log them."""
+        survivors = []
+        for pid, exe_name in pids:
+            result = host.exec(f"kill -0 {pid} 2>/dev/null && echo alive || echo dead").strip()
+            if result == "alive":
+                survivors.append((pid, exe_name))
+        if survivors:
+            warning(f"Processes still alive after kill: {survivors}")
+        return survivors
+
+    @staticmethod
     def pre_initial_cleanup(host: Host, qemu_pid, pktgen_pid):
         debug('Pre-Initial cleanup (pktgen-specific)')
         try:
@@ -57,10 +84,25 @@ class PktgenTest(AbstractBenchTest):
             qemu_pid = PktgenTest._read_pidfile(f"/tmp/pidfile.{username}.qemu")
         if pktgen_pid is None:
             pktgen_pid = PktgenTest._read_pidfile(f"/tmp/pidfile.{username}.pktgen")
-        if qemu_pid is not None:
-            host.exec(f"sudo kill {qemu_pid} || true")
-        if pktgen_pid is not None:
-            host.exec(f"sudo kill {pktgen_pid} || true")
+
+        all_children = []
+        for pid, label in [(qemu_pid, "qemu"), (pktgen_pid, "pktgen")]:
+            if pid is not None:
+                children = PktgenTest._get_child_pids(host, pid)
+                if children:
+                    debug(f"Children of {label} (pid {pid}): {children}")
+                all_children.extend(children)
+                host.exec(f"sudo kill {pid} || true")
+
+        if all_children:
+            for attempt in range(6):
+                survivors = PktgenTest._check_survivors(host, all_children)
+                if not survivors:
+                    break
+                warning(f"Retry {attempt + 1}/3: killing {len(survivors)} surviving children")
+                for pid, _exe_name in survivors:
+                    host.exec(f"sudo kill -9 {pid} || true")
+                sleep(1)
 
     def compile(self, server: Server):
         assert self.real_workload in [ "synthetic", "real" ], f"Unknown real_workload value {self.real_workload}"
