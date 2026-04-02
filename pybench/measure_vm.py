@@ -33,7 +33,17 @@ class PktgenTest(AbstractBenchTest):
         return f"{PREFIX}_{self.system}_{self.real_workload}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
-        return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
+        measurement_time = G.DURATION_S + 3
+        c = max(self.chaining, 2)
+        if self.system == "iomgr":
+            boot_overhead = 95 + 6 * c
+        elif self.system == "noiomgr":
+            boot_overhead = 85 + 6 * c
+        elif self.system in ("insecure", "mirror"):
+            boot_overhead = 50 + 4 * c ** 1.5
+        else:
+            boot_overhead = 100
+        return (boot_overhead + measurement_time) * self.repetitions
 
     @staticmethod
     def _read_pidfile(path: str):

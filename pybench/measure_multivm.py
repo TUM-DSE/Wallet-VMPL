@@ -33,7 +33,10 @@ class PktgenMultiVMTest(AbstractBenchTest):
         return f"{PREFIX}_{self.system}_{self.real_workload}_b{self.batchsize}_{self.workload}ns_{self.memory_workload}b_c{self.chaining}_v{self.num_vms}_{self.pktsize}b"
 
     def estimated_runtime(self) -> float:
-        return 65 * self.repetitions # not very accurate, because every repetition requires a reboot which we don't consider accurately here
+        measurement_time = G.DURATION_S + 3
+        v = max(self.num_vms, 1)
+        boot_overhead = 30 + 9 * v
+        return (boot_overhead + measurement_time) * self.repetitions
 
     @staticmethod
     def _read_pidfile(path: str):
