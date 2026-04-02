@@ -11,8 +11,12 @@ from logging import (info, debug, error, warning,
 from colorlog import ColoredFormatter, StreamHandler, getLogger
 from sys import argv, stderr, modules
 from time import sleep
-from os import (access, R_OK, W_OK)
+from os import (access, R_OK, W_OK, makedirs)
 from os.path import abspath, realpath, dirname, basename, isdir, isfile, join as path_join
+import logging
+import subprocess
+import socket
+from datetime import datetime
 import readline
 from code import InteractiveConsole
 import getpass
@@ -445,7 +449,7 @@ def setup_logging(args: Namespace) -> None:
     >>> setup_logging(args)
     """
     logformat = '%(log_color)s%(levelname)-8s %(message)s'
-    # logformat = '%(log_color)s%(asctime)s %(levelname)-8s %(message)s'
+    # logformat_wihttime = '%(log_color)s%(asctime)s %(levelname)-8s %(message)s'
     formatter = ColoredFormatter(
         logformat,
         datefmt=None,
@@ -462,9 +466,42 @@ def setup_logging(args: Namespace) -> None:
     )
     handler = StreamHandler()
     handler.setFormatter(formatter)
+    handler.setLevel(LOG_LEVELS[args.verbosity])
     logger = getLogger()
     logger.addHandler(handler)
-    logger.setLevel(LOG_LEVELS[args.verbosity])
+    logger.setLevel(DEBUG)
+
+    # Also log to a file if outdir is available
+    outdir = getattr(args, 'outdir', None)
+    if outdir:
+        makedirs(outdir, exist_ok=True)
+        logfile = path_join(outdir, 'console.log')
+        file_formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+        file_handler = logging.FileHandler(logfile, mode='a')
+        file_handler.setFormatter(file_formatter)
+        file_handler.setLevel(DEBUG)
+        logger.addHandler(file_handler)
+
+        # Write opening message
+        git_commit = subprocess.run(
+            ['git', 'log', '--oneline', '-1'],
+            capture_output=True, text=True
+        ).stdout.strip()
+        git_diff_stat = subprocess.run(
+            ['git', 'diff', '--stat'],
+            capture_output=True, text=True
+        ).stdout.strip()
+        separator = '=' * 72
+        opening = (
+            f'\n{separator}\n'
+            f'Date:       {datetime.now().isoformat()}\n'
+            f'Host:       {socket.gethostname()}\n'
+            f'Args:       {" ".join(argv)}\n'
+            f'Git commit: {git_commit}\n'
+            f'Git diff:   {git_diff_stat}\n'
+            f'{separator}'
+        )
+        info(opening)
 
 
 def create_servers(conf: ConfigParser,
