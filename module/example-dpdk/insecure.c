@@ -292,6 +292,22 @@ int main(int argc, char **argv)
     printf("CHAINING=%d, PER_VNFLET_WORKLOAD_NS=%d, BURST_SIZE=%d, RUNTIME_S=%d\n",
            CHAINING, PER_VNFLET_WORKLOAD_NS, BURST_SIZE, RUNTIME_S);
 
+    // Delay ring: RX -> copy to delay_pool -> delay_ring(512) -> copy to cvmio_pool -> TX
+    #define DELAY_RING_SIZE 64 // 32 and 64 are fast; with 128 it starts getting slower
+    struct rte_mempool *delay_pool = rte_pktmbuf_pool_create("DELAY_POOL",
+            DELAY_RING_SIZE, 0, 0, RTE_MBUF_DEFAULT_BUF_SIZE, SOCKET_ID_ANY);
+    if (!delay_pool) {
+        printf("Failed to create delay pool: %s\n", rte_strerror(rte_errno));
+        return -1;
+    }
+    struct rte_ring *delay_ring = rte_ring_create("DELAY_RING",
+            1024, /* next power of 2 >= DELAY_RING_SIZE + margin */
+            SOCKET_ID_ANY, RING_F_SP_ENQ | RING_F_SC_DEQ);
+    if (!delay_ring) {
+        printf("Failed to create delay ring: %s\n", rte_strerror(rte_errno));
+        return -1;
+    }
+
     // Launch VNFlet threads on worker lcores
     static struct vnflet_args vargs[CHAINING];
     unsigned lcore_id;
@@ -313,8 +329,26 @@ int main(int argc, char **argv)
     struct rte_ring *to_chain   = rings[0];
     struct rte_ring *from_chain = rings[CHAINING];
     struct rte_mbuf *bufs[BURST_SIZE];
+    struct rte_mbuf *enq_objs[BURST_SIZE];
     void *objs[BURST_SIZE];
     uint64_t total_rx = 0, total_tx = 0;
+
+    // printf("Delay ring created, pre-filling with %d packets...\n", DELAY_RING_SIZE);
+    // // Pre-fill: accumulate DELAY_RING_SIZE packets before starting TX
+    // size_t prefilled = 0;
+    // while (prefilled < DELAY_RING_SIZE) {
+    //     const uint16_t nb_rx = rte_eth_rx_burst(port, 0, bufs, BURST_SIZE);
+    //     if (nb_rx == 0)
+    //         continue;
+    //     for (size_t k = 0; k < nb_rx && prefilled < DELAY_RING_SIZE; k++) {
+    //         struct rte_mbuf *cp = rte_pktmbuf_copy(bufs[k], delay_pool, 0, UINT32_MAX);
+    //         rte_pktmbuf_free(bufs[k]);
+    //         if (cp && rte_ring_sp_enqueue(delay_ring, cp) == 0)
+    //             prefilled++;
+    //         else if (cp)
+    //             rte_pktmbuf_free(cp);
+    //     }
+    // }
 
     uint64_t start_cycles = get_cycles();
     uint64_t deadline = start_cycles + (uint64_t)((double)RUNTIME_S * rte_get_tsc_hz());
@@ -322,21 +356,44 @@ int main(int argc, char **argv)
     while (get_cycles() < deadline) {
         // RX from NIC -> enqueue to first VNFlet
         uint16_t nb_rx = rte_eth_rx_burst(port, 0, bufs, BURST_SIZE);
-        if (nb_rx > 0) {
-            unsigned enq = rte_ring_sp_enqueue_bulk(to_chain, (void **)bufs, nb_rx, NULL);
+
+        // Copy received packets into delay pool and enqueue into delay ring
+        // (previously: copy into shm pool and enqueue into shared->ingress.ring for VNFlets)
+        size_t nb_copied = 0;
+        for (size_t i = 0; i < nb_rx; i++) {
+            enq_objs[nb_copied] = rte_pktmbuf_copy(bufs[i], delay_pool, 0, UINT32_MAX);
+            rte_pktmbuf_free(bufs[i]); // return to cvmio_pool
+            if (enq_objs[nb_copied] != NULL)
+                nb_copied++;
+        }
+
+        if (nb_copied > 0) {
+            unsigned enq = rte_ring_sp_enqueue_bulk(to_chain, (void **)enq_objs, nb_copied, NULL);
+            /* unsigned enq = rte_ring_sp_enqueue_bulk(delay_ring, (void **)enq_objs, nb_copied, NULL); */
             if (enq == 0)
-                rte_pktmbuf_free_bulk(bufs, nb_rx);
+                rte_pktmbuf_free_bulk(enq_objs, nb_copied);
             else
                 total_rx += enq;
         }
 
         // Dequeue from last VNFlet -> TX to NIC
         unsigned nb_out = rte_ring_sc_dequeue_burst(from_chain, objs, BURST_SIZE, NULL);
-        if (nb_out > 0) {
-            uint16_t nb_tx = rte_eth_tx_burst(port, 0, (struct rte_mbuf **)objs, nb_out);
-            if (unlikely(nb_tx < nb_out)) {
-                for (uint16_t i = nb_tx; i < nb_out; i++)
-                    rte_pktmbuf_free((struct rte_mbuf *)objs[i]);
+        /* unsigned nb_out = rte_ring_sc_dequeue_burst(delay_ring, objs, BURST_SIZE, NULL); */
+
+        size_t nb_copied2 = 0;
+        for (size_t i = 0; i < nb_out; i++) {
+            enq_objs[nb_copied2] = rte_pktmbuf_copy(objs[i], mbuf_pool, 0, UINT32_MAX);
+            /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
+            if (enq_objs[nb_copied2] != NULL)
+                nb_copied2++;
+            rte_pktmbuf_free(objs[i]); // return to delay_pool
+        }
+
+        if (nb_copied2 > 0) {
+            uint16_t nb_tx = rte_eth_tx_burst(port, 0, (struct rte_mbuf **)enq_objs, nb_copied2);
+            if (unlikely(nb_tx < nb_copied2)) {
+                for (uint16_t i = nb_tx; i < nb_copied2; i++)
+                    rte_pktmbuf_free((struct rte_mbuf *)enq_objs[i]);
             }
             total_tx += nb_tx;
         }
