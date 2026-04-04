@@ -22,6 +22,8 @@
 //
 //  NIC -rx-> Driver -[ring0]-> VNFlet0 -[ring1]-> ... -[ringN]-> Driver -tx-> NIC
 
+#define OPTIMIZE_TIMING
+
 #ifndef PER_VNFLET_WORKLOAD_NS
 #define PER_VNFLET_WORKLOAD_NS 0
 #endif
@@ -292,6 +294,7 @@ int main(int argc, char **argv)
     printf("CHAINING=%d, PER_VNFLET_WORKLOAD_NS=%d, BURST_SIZE=%d, RUNTIME_S=%d\n",
            CHAINING, PER_VNFLET_WORKLOAD_NS, BURST_SIZE, RUNTIME_S);
 
+#ifdef OPTIMIZE_TIMING
     // Delay ring: RX -> copy to delay_pool -> delay_ring(512) -> copy to cvmio_pool -> TX
     #define DELAY_RING_SIZE 64 // 32 and 64 are fast; with 128 it starts getting slower
     struct rte_mempool *delay_pool = rte_pktmbuf_pool_create("DELAY_POOL",
@@ -307,6 +310,7 @@ int main(int argc, char **argv)
         printf("Failed to create delay ring: %s\n", rte_strerror(rte_errno));
         return -1;
     }
+#endif
 
     // Launch VNFlet threads on worker lcores
     static struct vnflet_args vargs[CHAINING];
@@ -356,7 +360,15 @@ int main(int argc, char **argv)
     while (get_cycles() < deadline) {
         // RX from NIC -> enqueue to first VNFlet
         uint16_t nb_rx = rte_eth_rx_burst(port, 0, bufs, BURST_SIZE);
-
+#ifndef OPTIMIZE_TIMING
+        if (nb_rx > 0) {
+            unsigned enq = rte_ring_sp_enqueue_bulk(to_chain, (void **)bufs, nb_rx, NULL);
+            if (enq == 0)
+                rte_pktmbuf_free_bulk(bufs, nb_rx);
+            else
+                total_rx += enq;
+        }
+#else
         // Copy received packets into delay pool and enqueue into delay ring
         // (previously: copy into shm pool and enqueue into shared->ingress.ring for VNFlets)
         size_t nb_copied = 0;
@@ -375,11 +387,21 @@ int main(int argc, char **argv)
             else
                 total_rx += enq;
         }
+#endif
 
         // Dequeue from last VNFlet -> TX to NIC
         unsigned nb_out = rte_ring_sc_dequeue_burst(from_chain, objs, BURST_SIZE, NULL);
         /* unsigned nb_out = rte_ring_sc_dequeue_burst(delay_ring, objs, BURST_SIZE, NULL); */
-
+#ifndef OPTIMIZE_TIMING
+        if (nb_out > 0) {
+            uint16_t nb_tx = rte_eth_tx_burst(port, 0, (struct rte_mbuf **)objs, nb_out);
+            if (unlikely(nb_tx < nb_out)) {
+                for (uint16_t i = nb_tx; i < nb_out; i++)
+                    rte_pktmbuf_free((struct rte_mbuf *)objs[i]);
+            }
+            total_tx += nb_tx;
+        }
+#else
         size_t nb_copied2 = 0;
         for (size_t i = 0; i < nb_out; i++) {
             enq_objs[nb_copied2] = rte_pktmbuf_copy(objs[i], mbuf_pool, 0, UINT32_MAX);
@@ -397,6 +419,8 @@ int main(int argc, char **argv)
             }
             total_tx += nb_tx;
         }
+#endif
+
     }
 
     uint64_t end_cycles = get_cycles();
