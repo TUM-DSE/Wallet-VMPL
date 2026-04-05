@@ -190,7 +190,7 @@ class PktgenTest(AbstractBenchTest):
         # breakpoint()
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
-        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=80*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
+        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
 
     def measure(self, host: Server, guest: Server, repetition: int):
         if PREFIX == "vm_lat":

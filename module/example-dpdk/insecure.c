@@ -22,7 +22,10 @@
 //
 //  NIC -rx-> Driver -[ring0]-> VNFlet0 -[ring1]-> ... -[ringN]-> Driver -tx-> NIC
 
+#if REAL_WORKLOAD == 0 && CHAINING <= 3 && PACKET_SIZE >= 1024 && PER_VNFLET_WORKLOAD_NS == 0 && WORKLOAD_ACCESSES_B == 0
+// in these cases we actually gain some performance by doing more stuff (~0.2Mpps)
 #define OPTIMIZE_TIMING
+#endif
 
 #ifndef PER_VNFLET_WORKLOAD_NS
 #define PER_VNFLET_WORKLOAD_NS 0
