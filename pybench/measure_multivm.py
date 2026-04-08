@@ -302,7 +302,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         PREFIX = "multivm"
     host, loadgen = measurement.hosts()
     tests : List[PktgenMultiVMTest] = []
-    G.DURATION_S = 15
+    G.DURATION_S = 60
     REPETITIONS = 2
     if measurement.args.extremes_only:
         G.DURATION_S = 5
