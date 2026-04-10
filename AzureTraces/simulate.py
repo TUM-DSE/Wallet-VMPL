@@ -1,402 +1,263 @@
 import csv
 import numpy as np
 from tqdm import tqdm
-import time
-import random
+import heapq
 import argparse
 import sys
-
-# my scripts
-from scheduler import SimpleScheduler
-
-class Function:
-    arrival_time: float
-    start_time: float
-    duration: float
-    end_time: float
-    application_hash: str
-    func_hash: str
-
-class Node:
-    node_id: int
-    max_functions: int
-    functions_registered: []
-    function_slots_free: []
-    function_last_call_time: []
-    max_execution_slots: []
-    execution_slots: []
-
-file = open("simulation_log.txt", "w")
-log_active = True 
-max_logs = 10000
-cur_logs = 0
-
-# Globals for simulation
-max_cache_util  = 0
-cur_cache_util = 0
-
-def log(msg):
-    #print(msg)
-    #time.sleep(1)
-
-    global file
-    global log_active
-    global cur_logs
-    if not log_active or (cur_logs >= max_logs):
-        return
-    file.write(msg + '\n')
-    cur_logs = cur_logs + 1
+from dataclasses import dataclass, field
 
 
+@dataclass
+class Chain:
+    app_hash: str
+    active_requests: int = 0
+    last_active_time: float = 0.0
 
 
-def update_cached_functions(nodes, simulation_increment, caching_time):
-    global cur_cache_util
-    for node in nodes:
-        for i in range(node.max_functions):
-            if node.function_slots_free[i] == False:
-                node.function_last_call_time[i] = node.function_last_call_time[i] + simulation_increment
-                if node.function_last_call_time[i] > caching_time:
-                    #log(f'Evicting stale function {node.functions_registered[i]} from cache slot {i} on node {node.node_id}')
-                    node.function_slots_free[i] = True
-                    cur_cache_util = cur_cache_util - 1
+def main_sim(total_cores, cold_start_time, cold_start_std,
+             reschedule_time, reschedule_std,
+             concurrent_per_vnf, cores_per_chain, max_vms,
+             pbar_position, input_file):
 
+    # Derived limits
+    max_chains = total_cores // cores_per_chain
+    if max_vms > 0:
+        max_chains = min(max_chains, max_vms // cores_per_chain)
 
-def get_earliest_func_finish(nodes):
-    func_earliest = None
-    node_earliest = None
-    slot_earliest = 0
+    # Cluster state: app_hash -> list of Chain objects
+    app_chains: dict[str, list[Chain]] = {}
+    all_chains: list[Chain] = []
+    used_cores = 0
 
-    for node in nodes:
-        for i in range(node.max_execution_slots):
-            if node.execution_slots[i] != None:
-                if func_earliest == None:
-                    func_earliest = node.execution_slots[i]
-                    node_earliest = node
-                    slot_earliest = i
-                else:
-                    if node.execution_slots[i].end_time < func_earliest.end_time:
-                        func_earliest = node.execution_slots[i]
+    # Event heap: (end_time, chain_index_in_all_chains)
+    event_heap: list[tuple[float, int]] = []
 
-                        node_earliest = node
-                        slot_earliest = i
+    # Statistics
+    cold_starts = 0
+    reschedules = 0
+    total_requests = 0
 
-    return node_earliest, slot_earliest, func_earliest
-
-
-
-
-def update_simulation(nodes, next_function_time, simulation_time, caching_time,
-                      run_until_node_free):
-
-    # increase time until either a function finished executing
-    # or until the next function arrives
-    old_simulation_time = simulation_time
-
-    node_earliest, slot_earliest, func_earliest = get_earliest_func_finish(nodes)
-
-    if run_until_node_free:
-        # don't look at when to start next function since we don't have free nodes
-        # rather, run unil a free node appears
-        if(func_earliest.end_time < simulation_time):
-            print("Error: going back in time!")
-            printf()
-            exit(-1)
-        simulation_time = func_earliest.end_time
-        new_func = False
-        simulation_increment = simulation_time - old_simulation_time
-        log(f'[{simulation_time}] Function {node_earliest.execution_slots[slot_earliest].func_hash} has finished executing on node {node_earliest.node_id} slot {slot_earliest}')
-        node_earliest.execution_slots[slot_earliest] = None
-        update_cached_functions(nodes, simulation_increment, caching_time)
-        return simulation_increment, simulation_time, new_func
-
-
-    # check if we have a function that finished first or if we have a
-    # function that arrives first
-
-
-    if node_earliest != None and func_earliest.end_time <= next_function_time:
-        # mark the function as finished
-        if(func_earliest.end_time < simulation_time):
-            print("Error: going back in time!")
-            printf()
-            exit(-1)
-        simulation_time = func_earliest.end_time
-        new_func = False
-        simulation_increment = simulation_time - old_simulation_time
-        log(f'[{simulation_time}] Function {node_earliest.execution_slots[slot_earliest].func_hash} has finished executing on node {node_earliest.node_id} slot {slot_earliest}')
-        node_earliest.execution_slots[slot_earliest] = None
-        update_cached_functions(nodes, simulation_increment, caching_time)
-        return simulation_increment, simulation_time, new_func
-    else:
-        if(next_function_time < simulation_time):
-            print("Error: going back in time!")
-            printf()
-            exit(-1)
-        simulation_time = next_function_time
-        new_func = True;
-        simulation_increment = simulation_time - old_simulation_time
-        update_cached_functions(nodes,simulation_increment, caching_time)
-        log(f'[{simulation_time}] New function at {next_function_time} can start executing')
-        return simulation_increment, simulation_time, new_func
-
-def cache_function(node, f):
-    global cur_cache_util
-    global max_cache_util
-    f_id = f.application_hash + '-' + f.func_hash
-
-    # check if function is already cached
-    for i in range(node.max_functions):
-        if node.function_slots_free[i] == False and node.functions_registered[i] == f_id:
-            # reset last used
-            node.function_last_call_time[i] = 0
-            return i
-
-    # try to find a free spot in the cache
-    for i in range(node.max_functions):
-        if node.function_slots_free[i] == True:
-            node.function_slots_free[i] = False
-            node.functions_registered[i] = f_id
-            node.function_last_call_time[i] = 0
-            cur_cache_util = cur_cache_util + 1
-            if cur_cache_util > max_cache_util:
-                max_cache_util = cur_cache_util
-            return i
-
-    # if no free slot available, replace the least recently used
-
-    max_time = 0
-    max_slot = 0
-    for i in range(node.max_functions):
-        if node.function_last_call_time[i] > max_time:
-            max_time = node.function_last_call_time[i]
-            max_slot = i
-    log(f'Function {f_id} is replacing cached function {node.functions_registered[max_slot]} in slot {max_slot} on node {node.node_id}')
-    node.functions_registered[max_slot] = f_id
-    node.function_last_call_time[max_slot] = 0
-    return max_slot
-
-def is_any_active(nodes):
-    for node in nodes:
-        for f in node.execution_slots:
-            if f != None:
-                return True
-    return False
-
-def main_sim(num_nodes, cold_boot_time, cold_std, warm_boot_time, warm_std, soft_warm_time, soft_warm_std, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, pbar_position, input_file, enable_dynamic_sw):
-
-    # index into the csv
-    app_hash = 0
-    func_hash = 1
-    duration = 3
-    arrival_time = 4
-
-
-    #statistics
-    sim_time = 0
-    total_delay = 0
-    cold_boots = 0
-    soft_warm_boots = 0
-    warm_boots = 0
-    total_cache_slots = 0
-
-    #initialize rng
-    random.seed()
-
-    # read csv
-    # input_file = 'AzureFunctionsInvocationTraceForTwoWeeksJan2021_preprocessed.csv'
-    # input_file = 'resampled_preprocessed.csv'
+    # Read CSV
     with open(input_file, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
-        header = np.array(next(reader), dtype=object)  # Read the header row
-        rows = [np.array(row, dtype=object) for row in reader]
+        next(reader)  # skip header
+        rows = []
+        for row in reader:
+            # app, func, end_timestamp, duration, memory
+            end_ts = float(row[2])
+            duration = float(row[3])
+            arrival = end_ts - duration
+            rows.append((arrival, duration, row[0]))  # (arrival_time, duration, app_hash)
 
-    # create array of nodes
-    nodes = [Node() for i in range(num_nodes)];
-    for i in range(len(nodes)):
-        # max functions cached per node
-        nodes[i].max_functions = max_functions_per_node
-        total_cache_slots = total_cache_slots + nodes[i].max_functions
+    # Sort by arrival time
+    rows.sort(key=lambda r: r[0])
+    total_requests = len(rows)
 
-        nodes[i].function_slots_free = [True for j in range(nodes[i].max_functions)]
-        nodes[i].node_id = i;
-        nodes[i].functions_registered = ['' for j in range(nodes[i].max_functions)]
-        nodes[i].function_last_call_time = [0 for j in range(nodes[i].max_functions)]
-        nodes[i].max_execution_slots = max_execution_slots
-        nodes[i].execution_slots = [None for j in range(nodes[i].max_execution_slots)]
-        #print(nodes[i].function_slots_free)
-        #print(nodes[i].functions_registered)
+    delays = np.empty(total_requests)
+    sim_time = 0.0
+    max_concurrent_chains = 0
 
+    pbar = tqdm(total=total_requests, position=pbar_position, leave=True)
 
-    scheduler = SimpleScheduler()
-    delays = np.empty(len(rows))
-    per_func_delays = dict()
-    per_func_slowdowns = dict()
-    pbar = tqdm(total=len(rows), position=0)
-    cur_func = 0
-    while cur_func < len(rows):
+    def drain_completed(up_to_time):
+        """Pop all events that complete by up_to_time, update chain state."""
+        while event_heap and event_heap[0][0] <= up_to_time:
+            end_t, chain_idx = heapq.heappop(event_heap)
+            chain = all_chains[chain_idx]
+            chain.active_requests -= 1
+            chain.last_active_time = end_t
 
-        row = rows[cur_func]
+    def find_lru_idle_chain():
+        """Find the idle chain (active_requests == 0) with earliest last_active_time."""
+        best = None
+        best_time = float('inf')
+        for i, chain in enumerate(all_chains):
+            if chain.active_requests == 0 and chain.last_active_time < best_time:
+                best = i
+                best_time = chain.last_active_time
+        return best
 
-        # create function
-        f = Function()
-        f.arrival_time = float(row[arrival_time])
-        f.duration = float(row[duration])
-        f.application_hash = row[app_hash]
-        f.func_hash = row[func_hash]
-        curr_f_id = f.application_hash + "-" + f.func_hash
-        if not (curr_f_id in per_func_delays):
-            per_func_delays[curr_f_id] = []
-            per_func_slowdowns[curr_f_id] = []
+    for req_idx in range(total_requests):
+        arrival_time, duration, app_hash = rows[req_idx]
 
-        # get possible node for next function
-        f_delay = 0;
-        assigned_node, _, _, _ = scheduler.pick_next_node(nodes, f)
-        # if there are no free node, run until a new node can be selected
-        f_sched_time = max(sim_time, f.arrival_time)
-        while(assigned_node == None):
-            log(f'[{sim_time}] No free nodes available')
-            _, sim_time, _  = update_simulation(nodes, f_sched_time, sim_time, caching_time, True)
-            assigned_node, _ , _, _ = scheduler.pick_next_node(nodes, f)
+        # Advance sim_time to at least arrival
+        sim_time = max(sim_time, arrival_time)
+        drain_completed(sim_time)
 
-        # we now have a canditate node, simulate until this function can run
-        # take into account any delays
-        f_sched_time = max(sim_time, f.arrival_time)
-        _, sim_time, func_scheduled = update_simulation(nodes, f_sched_time, sim_time, caching_time, False)
-        while func_scheduled == False:
-            f_sched_time = max(sim_time, f.arrival_time)
-            _, sim_time, func_scheduled = update_simulation(nodes, f_sched_time, sim_time, caching_time,  False)
+        # Try to find an existing chain for this app with capacity
+        assigned_chain = None
+        assigned_cold = False
 
-        # finally time to schedule function
-        f.start_time = sim_time
+        if app_hash in app_chains:
+            for chain in app_chains[app_hash]:
+                if chain.active_requests < concurrent_per_vnf:
+                    assigned_chain = chain
+                    break
 
-        #look for nodes again, just in case there is a better one than the previous candidate
-        assigned_node, assigned_slot, cold_boot, soft_warm = scheduler.pick_next_node(nodes, f)
-
-        # if we're not computing soft warm rate from the traces, keep the old system with the flat rate
-        if not enable_dynamic_sw:
-            soft_warm = False
-
-        f_initial_duration = f.duration
-        f_boot_time = 0
-        if cold_boot == True:
-            if ((not enable_dynamic_sw) and random.random() < percentage_soft_warm) or (enable_dynamic_sw and soft_warm):
-                f_boot_time = np.random.normal(soft_warm_time, soft_warm_std) 
-                f.duration = f.duration + f_boot_time
-                soft_warm = True
+        if assigned_chain is not None:
+            # Re-scheduling: existing chain has capacity
+            boot_time = max(0.0, np.random.normal(reschedule_time, reschedule_std))
+            reschedules += 1
+        else:
+            # Need a new chain - either free cores or evict
+            if used_cores + cores_per_chain <= total_cores and \
+               (max_vms <= 0 or len(all_chains) < max_vms // cores_per_chain):
+                # Free cores available - create new chain
+                new_chain = Chain(app_hash=app_hash)
+                all_chains.append(new_chain)
+                if app_hash not in app_chains:
+                    app_chains[app_hash] = []
+                app_chains[app_hash].append(new_chain)
+                used_cores += cores_per_chain
+                assigned_chain = new_chain
+                assigned_cold = True
             else:
-                f_boot_time = np.random.normal(cold_boot_time, cold_std)
-                f.duration = f.duration + f_boot_time
-        else:
-            f_boot_time = np.random.normal(warm_boot_time, warm_std)
-            f.duration = f.duration + f_boot_time
+                # Try to evict an idle chain (LRU)
+                idle_idx = find_lru_idle_chain()
+                if idle_idx is not None:
+                    # Evict
+                    old_chain = all_chains[idle_idx]
+                    old_app = old_chain.app_hash
+                    app_chains[old_app].remove(old_chain)
+                    if not app_chains[old_app]:
+                        del app_chains[old_app]
 
-        f.end_time = f.start_time + f.duration
+                    # Replace with new chain
+                    new_chain = Chain(app_hash=app_hash)
+                    all_chains[idle_idx] = new_chain
+                    if app_hash not in app_chains:
+                        app_chains[app_hash] = []
+                    app_chains[app_hash].append(new_chain)
+                    assigned_chain = new_chain
+                    assigned_cold = True
+                else:
+                    # No idle chains - wait for earliest event to complete
+                    while assigned_chain is None:
+                        if not event_heap:
+                            # Should not happen if model is consistent
+                            print("ERROR: No events in heap but no idle chains", file=sys.stderr)
+                            break
 
-        if assigned_node == None:
-            # this should never happen
-            print("ERROR: No free node found even though there should be a candidate!")
-            exit(-1);
+                        # Advance to next event
+                        next_end = event_heap[0][0]
+                        sim_time = max(sim_time, next_end)
+                        drain_completed(sim_time)
 
-        # assign function to node
-        assigned_node.execution_slots[assigned_slot] = f
-        cache_slot = cache_function(assigned_node, f)
-        log(f'[{sim_time} ]Function {f.application_hash + f.func_hash} has been cached in slot {cache_slot} on node {assigned_node.node_id}')
+                        # Retry: check existing chain with capacity
+                        if app_hash in app_chains:
+                            for chain in app_chains[app_hash]:
+                                if chain.active_requests < concurrent_per_vnf:
+                                    assigned_chain = chain
+                                    break
 
-        f_delay = f.start_time - f.arrival_time + f_boot_time
-        f_end_to_end = f.end_time - f.arrival_time
-        f_slowdown = f_end_to_end / f_initial_duration
-        total_delay = total_delay + f_delay
-        delays[cur_func] = f_delay
-        per_func_delays[curr_f_id].append(f_delay)
-        per_func_slowdowns[curr_f_id].append(f_slowdown)
+                        if assigned_chain is not None:
+                            # Found capacity via re-scheduling
+                            break
 
-        if soft_warm == True:
-            soft_warm_boots = soft_warm_boots + 1
-        elif cold_boot == True:
-            cold_boots = cold_boots + 1
-        else:
-            warm_boots = warm_boots + 1
+                        # Try eviction again
+                        idle_idx = find_lru_idle_chain()
+                        if idle_idx is not None:
+                            old_chain = all_chains[idle_idx]
+                            old_app = old_chain.app_hash
+                            app_chains[old_app].remove(old_chain)
+                            if not app_chains[old_app]:
+                                del app_chains[old_app]
 
-        log(f'[{sim_time}] Function {f.func_hash} starts executing on node {assigned_node.node_id} slot {assigned_slot} after a delay of {f_delay}. Execution duration: {f.duration}, Cold boot: {cold_boot}, Soft warm boot: {soft_warm}')
+                            new_chain = Chain(app_hash=app_hash)
+                            all_chains[idle_idx] = new_chain
+                            if app_hash not in app_chains:
+                                app_chains[app_hash] = []
+                            app_chains[app_hash].append(new_chain)
+                            assigned_chain = new_chain
+                            assigned_cold = True
 
-        cur_func = cur_func + 1
+                    if assigned_chain is not None and not assigned_cold:
+                        # Re-scheduling from wait loop
+                        boot_time = max(0.0, np.random.normal(reschedule_time, reschedule_std))
+                        reschedules += 1
+
+            if assigned_cold:
+                boot_time = max(0.0, np.random.normal(cold_start_time, cold_start_std))
+                cold_starts += 1
+
+        if assigned_chain is None:
+            print("ERROR: Could not assign chain for request", file=sys.stderr)
+            continue
+
+        # Schedule the request
+        start_time = sim_time
+        end_time = start_time + boot_time + duration
+        assigned_chain.active_requests += 1
+
+        chain_idx = all_chains.index(assigned_chain)
+        heapq.heappush(event_heap, (end_time, chain_idx))
+
+        # Track max concurrent chains
+        active_count = sum(1 for c in all_chains if c.active_requests > 0)
+        if active_count > max_concurrent_chains:
+            max_concurrent_chains = active_count
+
+        # Record delay: (time request actually starts - arrival) + boot time
+        delay = (start_time - arrival_time) + boot_time
+        delays[req_idx] = delay
+
         pbar.update(1)
 
-    # TODO: Finish executing currently running functions
-    while is_any_active(nodes):
-        _, sim_time, _ = update_simulation(nodes, 0, sim_time, caching_time, True)
-
+    # Drain remaining events
+    while event_heap:
+        end_t, chain_idx = heapq.heappop(event_heap)
+        chain = all_chains[chain_idx]
+        chain.active_requests -= 1
+        chain.last_active_time = end_t
+        sim_time = max(sim_time, end_t)
 
     pbar.close()
-    #output = '------------------------------------------------\nStatistics:\n'
-    #output = output + f'Total simulation time: {sim_time}\n'
-    #output = output + f'Cold boot rate: {cold_boots / len(rows)}\n'
-    #output = output + '------------------------------------------------\n'
-    #return output
+
+    cold_start_rate = cold_starts / total_requests if total_requests > 0 else 0
+    reschedule_rate = reschedules / total_requests if total_requests > 0 else 0
+
     print('------------------------------------------------')
     print(f'Statistics:')
-    print(f'Delays:')
-    func_ids = list(per_func_delays.keys())
-    for id in func_ids:
-        print(f"     {id} : {per_func_delays[id]}")
-
-    print(f'Slowdowns:')
-    for id in func_ids:
-        print(f'    {id} : {per_func_slowdowns[id]}')
-
+    print(f'Total requests: {total_requests}')
     print(f'Total simulation time: {sim_time}')
-    print(f'Cold boot rate: {cold_boots / len(rows)} ({cold_boots})')
-    print(f'Soft warm boot rate: {soft_warm_boots / len(rows)} ({soft_warm_boots})')
-    print(f'Warm boot rate: {warm_boots / len(rows)} ({warm_boots})')
-    print(f'Function delay:')
+    print(f'Cold start rate: {cold_start_rate} ({cold_starts})')
+    print(f'Reschedule rate: {reschedule_rate} ({reschedules})')
+    print(f'Request delay:')
     print(f'    Avg: {np.average(delays)}')
     print(f'    Median: {np.median(delays)}')
     print(f'    Std: {np.std(delays)}')
-    print(f'Max cache utilization: {max_cache_util/total_cache_slots}, ({max_cache_util}/{total_cache_slots})')
-
+    print(f'Max concurrent chains: {max_concurrent_chains}')
     print(f'')
     print(f'Configuration:')
-    print(f'num_nodes: {num_nodes}')
-    print(f'cold_boot_time: {cold_boot_time}')
-    print(f'warm_boot_time: {warm_boot_time}')
-    print(f'soft_warm_time: {soft_warm_time}')
-    print(f'max_functions_cached_per_node: {max_functions_per_node}')
-    print(f'caching_time: {caching_time}')
-    print(f'max_executions_slots: {max_execution_slots}')
-    if enable_dynamic_sw:
-        print(f'percentage_soft_warm: {soft_warm_boots / len(rows)}')
-    else:
-        print(f'percentage_soft_warm: {percentage_soft_warm}')
+    print(f'total_cores: {total_cores}')
+    print(f'cold_start_time: {cold_start_time}')
+    print(f'cold_start_std: {cold_start_std}')
+    print(f'reschedule_time: {reschedule_time}')
+    print(f'reschedule_std: {reschedule_std}')
+    print(f'concurrent_per_vnf: {concurrent_per_vnf}')
+    print(f'cores_per_chain: {cores_per_chain}')
+    print(f'max_vms: {max_vms}')
     print('------------------------------------------------')
 
-    return [sim_time, cold_boots/len(rows), soft_warm_boots / len(rows), warm_boots / len(rows), np.average(delays), np.median(delays), np.std(delays)]
+    return [sim_time, cold_start_rate, reschedule_rate,
+            np.average(delays), np.median(delays), np.std(delays),
+            max_concurrent_chains]
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Simulate the azure traces.')
-    parser.add_argument('-num_nodes', type=int, default=5, help='Number of nodes in the simulation.')
-    parser.add_argument('-cold_penalty', type=float, help='Penalty incurred by a function during a cold start (in seconds).', required=True)
-    parser.add_argument('-warm_penalty', type=float, help='Penalty incurred by a function during a warm start (in seconds).', required=True)
-    parser.add_argument('-soft_warm_penalty', type=float, default=0, help='Penalty incurred by a function during a soft warm start (in seconds). In the normal case, this would be equal to the cold boot penalty. In Wallet\'s case, this is the latency of starting a function that isn\'t cached, but whose zygote is already loaded.')
-    parser.add_argument('-cache_size', type=int, default=10, help='Number of functions that can be cached on a node concurrently.')
-    parser.add_argument('-caching_time', type=float, default= 300, help='The time (in seconds) after which an unused cached function will be automatically evicted.')
-    parser.add_argument('-execution_slots', type=int, default=3, help='The number of functions that can be executed concurrently on a node.')
-    parser.add_argument('-percentage_soft_warm', type=float, default=0, help='The percentage of cold boots that get turned into soft warm boots.')
-    parser.add_argument('-input_file', type=str, default='', required=True, help='The input file that contains the trace')
+    parser = argparse.ArgumentParser(description='VNF chain simulation on Azure traces.')
+    parser.add_argument('-total_cores', type=int, default=64, help='Total CPU cores available.')
+    parser.add_argument('-cold_start', type=float, required=True, help='Eviction + cold start time (seconds).')
+    parser.add_argument('-cold_start_std', type=float, default=0.0, help='Std dev for cold start time.')
+    parser.add_argument('-reschedule', type=float, required=True, help='Re-scheduling time (seconds).')
+    parser.add_argument('-reschedule_std', type=float, default=0.0, help='Std dev for re-scheduling time.')
+    parser.add_argument('-concurrent_per_vnf', type=int, default=32, help='Max concurrent requests per VNF in a chain.')
+    parser.add_argument('-cores_per_chain', type=int, default=3, help='CPU cores per VNF chain.')
+    parser.add_argument('-max_vms', type=int, default=0, help='Max concurrent VMs (0 = unlimited).')
+    parser.add_argument('-input_file', type=str, required=True, help='Input trace CSV file.')
     args = parser.parse_args()
 
-    # default parameter values
-    num_nodes = args.num_nodes
-    cold_boot_time = args.cold_penalty
-    warm_boot_time = args.warm_penalty
-    soft_warm_time = args.soft_warm_penalty
-    max_functions_per_node = args.cache_size
-    caching_time = args.caching_time
-    max_execution_slots = args.execution_slots
-    percentage_soft_warm = args.percentage_soft_warm
-    input_file = args.input_file
-    out = main_sim(num_nodes, cold_boot_time, 0, warm_boot_time, 0, soft_warm_time, 0, max_functions_per_node, caching_time, max_execution_slots, percentage_soft_warm, 1, input_file, False)
-    print(out)
-
-
-
+    main_sim(args.total_cores, args.cold_start, args.cold_start_std,
+             args.reschedule, args.reschedule_std,
+             args.concurrent_per_vnf, args.cores_per_chain, args.max_vms,
+             0, args.input_file)
