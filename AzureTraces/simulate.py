@@ -7,9 +7,10 @@ import sys
 from dataclasses import dataclass, field
 
 
-@dataclass
+@dataclass(eq=False)
 class Chain:
     app_hash: str
+    idx: int = -1
     active_requests: int = 0
     last_active_time: float = 0.0
 
@@ -47,13 +48,15 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
             end_ts = float(row[2])
             duration = float(row[3])
             arrival = end_ts - duration
-            rows.append((arrival, duration, row[0]))  # (arrival_time, duration, app_hash)
+            rows.append((arrival, duration, row[0], row[1]))  # (arrival_time, duration, app_hash, func_hash)
 
     # Sort by arrival time
     rows.sort(key=lambda r: r[0])
     total_requests = len(rows)
 
     delays = np.empty(total_requests)
+    per_app_delays = dict()
+    per_app_slowdowns = dict()
     sim_time = 0.0
     max_concurrent_chains = 0
 
@@ -78,7 +81,7 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
         return best
 
     for req_idx in range(total_requests):
-        arrival_time, duration, app_hash = rows[req_idx]
+        arrival_time, duration, app_hash, func_hash = rows[req_idx]
 
         # Advance sim_time to at least arrival
         sim_time = max(sim_time, arrival_time)
@@ -103,7 +106,7 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
             if used_cores + cores_per_chain <= total_cores and \
                (max_vms <= 0 or len(all_chains) < max_vms // cores_per_chain):
                 # Free cores available - create new chain
-                new_chain = Chain(app_hash=app_hash)
+                new_chain = Chain(app_hash=app_hash, idx=len(all_chains))
                 all_chains.append(new_chain)
                 if app_hash not in app_chains:
                     app_chains[app_hash] = []
@@ -123,7 +126,7 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
                         del app_chains[old_app]
 
                     # Replace with new chain
-                    new_chain = Chain(app_hash=app_hash)
+                    new_chain = Chain(app_hash=app_hash, idx=idle_idx)
                     all_chains[idle_idx] = new_chain
                     if app_hash not in app_chains:
                         app_chains[app_hash] = []
@@ -163,7 +166,7 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
                             if not app_chains[old_app]:
                                 del app_chains[old_app]
 
-                            new_chain = Chain(app_hash=app_hash)
+                            new_chain = Chain(app_hash=app_hash, idx=idle_idx)
                             all_chains[idle_idx] = new_chain
                             if app_hash not in app_chains:
                                 app_chains[app_hash] = []
@@ -189,8 +192,7 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
         end_time = start_time + boot_time + duration
         assigned_chain.active_requests += 1
 
-        chain_idx = all_chains.index(assigned_chain)
-        heapq.heappush(event_heap, (end_time, chain_idx))
+        heapq.heappush(event_heap, (end_time, assigned_chain.idx))
 
         # Track max concurrent chains
         active_count = sum(1 for c in all_chains if c.active_requests > 0)
@@ -200,6 +202,14 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
         # Record delay: (time request actually starts - arrival) + boot time
         delay = (start_time - arrival_time) + boot_time
         delays[req_idx] = delay
+        f_end_to_end = end_time - arrival_time
+        f_slowdown = f_end_to_end / duration if duration > 0 else 1.0
+        func_id = app_hash + '-' + func_hash
+        if func_id not in per_app_delays:
+            per_app_delays[func_id] = []
+            per_app_slowdowns[func_id] = []
+        per_app_delays[func_id].append(delay)
+        per_app_slowdowns[func_id].append(f_slowdown)
 
         pbar.update(1)
 
@@ -218,23 +228,34 @@ def main_sim(total_cores, cold_start_time, cold_start_std,
 
     print('------------------------------------------------')
     print(f'Statistics:')
-    print(f'Total requests: {total_requests}')
+    print(f'Delays:')
+    for app_id in per_app_delays:
+        print(f"     {app_id} : {per_app_delays[app_id]}")
+    print(f'Slowdowns:')
+    for app_id in per_app_slowdowns:
+        print(f'    {app_id} : {per_app_slowdowns[app_id]}')
+    max_chains_possible = total_cores // cores_per_chain
+    if max_vms > 0:
+        max_chains_possible = min(max_chains_possible, max_vms // cores_per_chain)
+    cache_util = max_concurrent_chains / max_chains_possible if max_chains_possible > 0 else 0
+
     print(f'Total simulation time: {sim_time}')
-    print(f'Cold start rate: {cold_start_rate} ({cold_starts})')
+    print(f'Cold boot rate: {cold_start_rate} ({cold_starts})')
     print(f'Reschedule rate: {reschedule_rate} ({reschedules})')
-    print(f'Request delay:')
+    print(f'Function delay:')
     print(f'    Avg: {np.average(delays)}')
     print(f'    Median: {np.median(delays)}')
     print(f'    Std: {np.std(delays)}')
-    print(f'Max concurrent chains: {max_concurrent_chains}')
+    print(f'Max cache utilization: {cache_util}, ({max_concurrent_chains}/{max_chains_possible})')
     print(f'')
     print(f'Configuration:')
-    print(f'total_cores: {total_cores}')
-    print(f'cold_start_time: {cold_start_time}')
-    print(f'cold_start_std: {cold_start_std}')
+    print(f'num_nodes: {total_cores}')
+    print(f'cold_boot_time: {cold_start_time}')
     print(f'reschedule_time: {reschedule_time}')
-    print(f'reschedule_std: {reschedule_std}')
-    print(f'concurrent_per_vnf: {concurrent_per_vnf}')
+    print(f'max_functions_cached_per_node: {concurrent_per_vnf}')
+    print(f'caching_time: 0')
+    print(f'max_executions_slots: {max_chains_possible}')
+    print(f'percentage_soft_warm: 0')
     print(f'cores_per_chain: {cores_per_chain}')
     print(f'max_vms: {max_vms}')
     print('------------------------------------------------')

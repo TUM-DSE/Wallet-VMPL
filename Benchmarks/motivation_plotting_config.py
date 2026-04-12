@@ -501,9 +501,9 @@ LABEL_MAPPINGS_SIMULATIONS_MOTIVATION = {
 
 LABEL_MAPPINGS_SIMULATIONS_EVALUATION = {
     'VM'                : 'VM',
-    'KATA'              : 'Containers',
+    'CONTAINERS'        : 'Containers',
     'CVM'               : 'CVM',
-    'WALLET'            : 'Wallet',
+    'SLICK'             : 'Slick',
 }
 
 

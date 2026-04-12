@@ -216,7 +216,7 @@ def setup_axis_formatters(ax):
                   return f'{int(x)}'
               # Otherwise show one decimal place
               else:
-                  return f'{x:.1f}'
+                  return f'{x:.2f}'
 
     # Apply the formatter for both axes
     x_formatter = PowersOf10Formatter()
@@ -368,7 +368,7 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
     ax.set_xticklabels([str(size) for size in unique_node_sizes])
         
     title = "(c) Invocation Latency Percentiles"
-    x_label = "Number of nodes"
+    x_label = "Number of CPUs"
     y_label = "Invocation latency (ms)"
     # Apply consistent styling from the configuration
     apply_consistent_style(ax, 
@@ -525,6 +525,7 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
         style_idx = i % len(line_styles)
         color_idx = i % len(colors)
         # Main plot
+        # breakpoint()
         ax.plot(sorted_data, y_values, 
                 linestyle=line_styles[style_idx], 
                 color=colors[color_idx], 
@@ -588,22 +589,24 @@ def generate_cdf_plot(configs, output_dir, output_name, title,  value_type, ylim
         unit = "(ms)" if value_type == "delays" else "    "
         
         # Create header
-        header = f"{'Variant':<15} | {'P50 '+unit:>15} | {'P90 '+unit:>15} | {'P99 '+unit:>15}"
+        header = f"{'Variant':<15} | {'Min '+unit:>15} | {'P50 '+unit:>15} | {'P90 '+unit:>15} | {'P99 '+unit:>15} | {'Max '+unit:>15}"
         print(header)
         print("-" * 120)
-        
+
         # Print percentiles for each variant
         for config in sorted_configs:
             variant = config['variant']
             display_variant = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
-            
+
             if value_type in config and config[value_type]:
                 values = np.array(config[value_type])
+                vmin = np.min(values)
                 p50 = np.percentile(values, 50)
                 p90 = np.percentile(values, 90)
                 p99 = np.percentile(values, 99)
-                
-                line = f"{display_variant:<15} | {p50:15.2f} | {p90:15.2f} | {p99:15.2f}"
+                vmax = np.max(values)
+
+                line = f"{display_variant:<15} | {vmin:15.2f} | {p50:15.2f} | {p90:15.2f} | {p99:15.2f} | {vmax:15.2f}"
                 print(line)
         
         print("=" * 120)
@@ -618,9 +621,9 @@ def parallel_plot_node_size(args):
     
     # Generate plot
     if (value_type == "delays"): 
-      title = f"(a) Invocation Latency CDF ({node_size} Nodes)"
+      title = f"(a) Invocation Latency CDF ({node_size} CPUs)"
     elif (value_type == "slowdowns"):
-      title = f"(b) Per function slowdown CDF ({node_size} Nodes)"
+      title = f"(b) Per function slowdown CDF ({node_size} CPUs)"
     linear_plot = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type)
     log_plot    = generate_cdf_plot(node_configs, output_dir, f"{TRACE_NAME}_node_size_{node_size}_{value_type}", title, value_type, use_log_scale=True)
     return [linear_plot, log_plot]
