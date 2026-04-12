@@ -246,7 +246,14 @@
                 python311Packages.seaborn
                 python311Packages.pandas
                 python311Packages.bottle
-		python311Packages.igraph
+		            python311Packages.numpy
+		            python311Packages.pandas
+		            python311Packages.tqdm
+		            python311Packages.python-lsp-server
+		            python311Packages.matplotlib
+		            python311Packages.scikit-learn
+		            python311Packages.seaborn
+		            python311Packages.igraph
 		            python311Packages.netaddr
 		            python311Packages.colorlog
 		            python311Packages.argcomplete
