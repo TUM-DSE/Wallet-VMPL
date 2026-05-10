@@ -1868,6 +1868,7 @@ class Host(Server):
                   tx_queue_size: int = 256,
                   vm_number: int = 0,
                   extkern: Optional[str] = None,
+                  confidential: bool = True,
                   ) -> None:
         # TODO this function should get a Guest object as argument
         # TODO this command should be build by the Guest object
@@ -1923,8 +1924,8 @@ class Host(Server):
             f"sudo {nix_shell} {numactl} " +
             # "gdb -q -ex 'set pagination off' -ex 'handle all nostop' -ex run --args " +
             qemu_bin_path +
-            f' -machine q35,confidential-guest-support=sev0,memory-backend=ram1' +
-            f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={self.project_root}/svsm/bin/coconut-qemu.igvm' +
+            (f' -machine q35,confidential-guest-support=sev0,memory-backend=ram1' if confidential else f' -machine q35,memory-backend=ram1') +
+            (f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={self.project_root}/svsm/bin/coconut-qemu.igvm' if confidential else '') +
             ' -cpu EPYC-v4,host-phys-bits=true' +
             f' -smp {cpus}' +
 

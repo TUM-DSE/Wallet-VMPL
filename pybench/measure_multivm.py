@@ -14,6 +14,7 @@ from time import sleep
 import os
 import getpass
 from util import safe_cast, deduplicate
+from datetime import datetime
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 PREFIX = "emptyprefix"
@@ -407,8 +408,9 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             test.compile(host)
             for repetition in range(test.repetitions):
                 PktgenMultiVMTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
+                time_start = datetime.now()
                 # sleep(1) # wait and pray for pktgen
-                vm_args = { 'vcpus': 1 }
+                vm_args = { 'vcpus': 1, 'confidential': True }
                 with measurement.virtual_machines(Interface.VPP, num=test.num_vms, run_guest_args=vm_args) as guests:
 
                     # start pktgen after the VM because VPP is not the vhost server
@@ -436,10 +438,14 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     for vm_number, guest in guests.items():
                         measurement.mark_vm_initialized(vm_number)
 
+                    time_start_dpdk = datetime.now()
                     def foreach_parallel(i, guest): # pyright: ignore[reportGeneralTypeIssues]
                         test.start(host, guest, repetition)
                     end_foreach(guests, foreach_parallel)
 
+                    time_end = datetime.now()
+                    print(f"DPDK start time: {(time_end - time_start_dpdk).total_seconds():.2f} seconds")
+                    print(f"CVM+DPDK start time: {(time_end - time_start).total_seconds():.2f} seconds")
 
                     error("foo")
                     test.measure(host, repetition)

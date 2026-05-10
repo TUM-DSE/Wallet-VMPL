@@ -14,6 +14,7 @@ from time import sleep
 import os
 import getpass
 from util import safe_cast, deduplicate
+from datetime import datetime
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 PREFIX = "emptyprefix"
@@ -170,6 +171,7 @@ class PktgenTest(AbstractBenchTest):
         dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
 
         guest.exec("rm /tmp/.dpdk-running || true")
+        time_start = datetime.now()
         if self.system == "mirror":
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
@@ -191,6 +193,9 @@ class PktgenTest(AbstractBenchTest):
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
         guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
+        time_end = datetime.now()
+        print(f"Slick start time: {(time_end - time_start).total_seconds():.2f} seconds")
+
 
     def measure(self, host: Server, guest: Server, repetition: int):
         if PREFIX == "vm_lat":
