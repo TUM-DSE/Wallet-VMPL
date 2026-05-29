@@ -27,3 +27,9 @@ The scirpt generates a result file called  `simulation_results_parallel.txt` whi
 The plotting script can be found on the `dimstav23/update_plots` branch at `Benchmarks/Simulation_analysis/plot_simulation_CDF.py`.
 
 The results file generated in the previous step can the be given to the script. The plots will be saved to a newly generated `output` directory.
+
+
+# Peter
+
+ 1798  python3 simulate.py -total_cores 2048 -cold_start 3.5 -reschedule 0.000016 -concurrent_per_vnf 512 -input_file invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
+ 1799  python3 sim_node_scalability.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv

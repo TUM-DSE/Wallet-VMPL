@@ -39,6 +39,8 @@ def main():
     total_cores_list = [ 512, 1024, 2048, 4096 ] # for 4000
     # total_cores_list = [ 256 ] # for 4000
     cores_per_chain = 3
+    cores_per_server = 64
+    cvm_max_vms_per_server = 512
 
     # Containers
     container_cold_start = 11.0          # 11.0s
@@ -64,7 +66,6 @@ def main():
     cvm_reschedule = 0.000007           # 7us
     cvm_reschedule_std = 0.1 * cvm_reschedule
     cvm_concurrent = 16 * 16
-    cvm_max_vms = 512
     cvm_header = "************* CVM ****************\n"
 
     # Slick
@@ -99,6 +100,8 @@ def main():
         tmp_file_num += 1
 
         # CVMs
+        num_servers = total_cores // cores_per_server
+        cvm_max_vms = num_servers * cvm_max_vms_per_server
         pool.apply_async(proc, args=(
             f'tmp_file_{tmp_file_num}.txt', cvm_header,
             total_cores, cvm_cold_start, cvm_cold_std,

@@ -253,7 +253,7 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
         str: Path to the generated plot
     """
     # Create standardized plot using config
-    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3)
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3, left_margin = 0.42)
 
     # Set x-axis to log scale if requested
     if use_log_scale:
@@ -381,7 +381,7 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
     #     setup_log_formatter(ax)
     # Apply the improved axis formatter
     setup_axis_formatters(ax)
-    
+
     # bring y-label a bit closer to fit
     ax.yaxis.labelpad = 1.5
     
