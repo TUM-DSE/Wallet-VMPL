@@ -394,6 +394,8 @@ lcore_mirror(void)
                 continue;
             }
 
+            packet_count += nb_rx;
+
 #ifndef QUIET
             /* Process received packets */
             for (int i = 0; i < nb_rx; i++) {
@@ -401,7 +403,7 @@ lcore_mirror(void)
                 void *pkt_data = rte_pktmbuf_mtod(pkt, void*);
 
                 printf("\n=== Packet #%lu at %p (Port %u) ===\n",
-                       ++packet_count, pkt_data, port);
+                       packet_count, pkt_data, port);
                 printf("Length: %u bytes\n", pkt->pkt_len);
                 printf("Data length: %u bytes\n", pkt->data_len);
 
