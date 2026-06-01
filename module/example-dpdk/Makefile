@@ -29,6 +29,7 @@ DPDK_LIBS := -Wl,--whole-archive \
 	$(DPDK_PATH)/lib/librte_pci.a \
 	$(DPDK_PATH)/lib/librte_bus_vdev.a \
 	$(DPDK_PATH)/lib/librte_net_virtio.a \
+	$(DPDK_PATH)/lib/librte_net_af_packet.a \
 	-Wl,--no-whole-archive -lm
 STATIC_LIBS := -Wl,--whole-archive $(GLIBC_STATIC)/libpthread.a $(GLIBC_STATIC)/libdl.a -Wl,--no-whole-archive
 WRAPPERS := -Wl,--wrap=rte_zmalloc -Wl,--wrap=rte_memzone_reserve_aligned -Wl,--wrap=rte_memzone_reserve

@@ -132,7 +132,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system == "mirror":
+        if self.system == "mirror" or self.system == "containers":
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -174,6 +174,10 @@ class PktgenTest(AbstractBenchTest):
         time_start = datetime.now()
         if self.system == "mirror":
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
+        elif self.system == "containers":
+            kni = "enp0s9"
+            tap_vdev = f"--vdev=net_af_packet0,iface={kni}"
+            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
@@ -332,7 +336,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         memory_workload = [ 0 ],
         real_workload = [ "synthetic" ],
         chaining = [2],
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
@@ -442,7 +446,12 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     guest.exec("modprobe vfio-pci")
                     guest.exec("insmod module/vmpl.ko")
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
-                    guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+                    if test.system == "containers":
+                        linux_driver = Interface.PKTGEN_DPDK.guest_driver()
+                        guest.exec(f"modprobe virtio-net")
+                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {linux_driver} {guest.test_iface_addr}")
+                    else:
+                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
 
                     measurement.mark_vm_initialized(0)
 
