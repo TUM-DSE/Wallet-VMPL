@@ -99,7 +99,7 @@ class Interface(Enum):
         if self in [ Interface.BRIDGE_E1000, Interface.VMUX_EMU, Interface.VMUX_DPDK ]:
             return "e1000"
         if self in [ Interface.BRIDGE, Interface.BRIDGE_VHOST, Interface.MACVTAP, Interface.VPP, Interface.PKTGEN_DPDK ]:
-            return "virtio-pci"
+            return "virtio-net"
         raise Exception(f"Dont know which guest driver is used with {self}")
 
     @staticmethod

@@ -215,6 +215,13 @@ class PktgenTest(AbstractBenchTest):
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
         # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
         host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})')
+        if self.system == "containers":
+            # container throughput collapses at excessive offered traffic rates
+            # host.exec_pktgen(f'pktgen.set("all", "rate", 2)') # @1500B: 164kpps offered -> 95kpps
+            # host.exec_pktgen(f'pktgen.set("all", "rate", 0.12)') # @64B: 178kpps offered -> 96kpps
+            target_pps = 164000
+            rate_pct = target_pps * (self.pktsize + 20) * 8 / 10e9 * 10
+            host.exec_pktgen(f'pktgen.set("all", "rate", {rate_pct:.2f})')
         host.exec_pktgen('pktgen.start(0)')
         sleep(3)
         pps = []
@@ -447,9 +454,9 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     guest.exec("insmod module/vmpl.ko")
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                     if test.system == "containers":
-                        linux_driver = Interface.PKTGEN_DPDK.guest_driver()
-                        guest.exec(f"modprobe virtio-net")
-                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {linux_driver} {guest.test_iface_addr}")
+                        guest.exec(f"modprobe {Interface.PKTGEN_DPDK.guest_driver()}")
+                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {guest.test_iface_driv} {guest.test_iface_addr}")
+                        guest.exec(f"ip link set {guest.test_iface} up")
                     else:
                         guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
 
