@@ -177,7 +177,14 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "containers":
             kni = "enp0s9"
             tap_vdev = f"--vdev=net_af_packet0,iface={kni}"
-            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
+            container_cmd = f"""
+            docker run --rm \
+                --network=host \
+                --privileged \
+                -v /:/host \
+                busybox chroot /host
+            """
+            guest.tmux_new("workload", f"{container_cmd} ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
