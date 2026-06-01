@@ -175,7 +175,8 @@ class PktgenTest(AbstractBenchTest):
         if self.system == "mirror":
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "containers":
-            kni = "enp0s9"
+            self.containers_kni_setup(guest)
+            kni = guest.test_iface
             tap_vdev = f"--vdev=net_af_packet0,iface={kni}"
             container_cmd = f"""
             docker run --rm \
