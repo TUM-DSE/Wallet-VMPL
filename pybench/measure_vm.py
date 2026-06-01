@@ -212,7 +212,7 @@ class PktgenTest(AbstractBenchTest):
                     f"docker run --rm --name mirror{i} "
                     f"--network=host --privileged -v /:/host "
                     f"busybox chroot /host "
-                    f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
+                    f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
                 )
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
