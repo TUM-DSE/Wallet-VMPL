@@ -214,6 +214,19 @@ class PktgenTest(AbstractBenchTest):
                     f"busybox chroot /host "
                     f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
                 )
+        elif self.system == "kata":
+            # TODO: i think this needs lots of work
+            self.containers_cleanup(guest)
+            self.containers_kni_setup(guest)
+            for i in range(self.chaining):
+            # for i in range(1):
+                tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=veth{i}b"
+                guest.tmux_new(f"workload{i}",
+                    f"docker run --rm --name mirror{i} "
+                    f"--network=host --privileged -v /:/host "
+                    f"busybox chroot /host "
+                    f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
+                )
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
@@ -379,7 +392,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         memory_workload = [ 0 ],
         real_workload = [ "synthetic" ],
         chaining = [2],
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
@@ -471,38 +484,44 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                 with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
                     f.write(str(pktgen_pid))
                 # sleep(1) # wait and pray for pktgen
-                with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
-                    qemu_pid = host.tmux_get_pid("qemu")
-                    with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
-                        f.write(str(qemu_pid))
-
-                    # guest.exec("rmmod vfio-pci || true;")
-                    # guest.exec("rmmod vfio-pci-core || true;")
-                    # guest.exec("rmmod vfio_iommu_type1 || true")
-                    # guest.exec("rmmod vfio || true")
-                    # guest.exec("modprobe irqbypass || true")
-                    # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/vfio.ko")
-                    # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/vfio_iommu_type1.ko")
-                    # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/pci/vfio-pci-core.ko")
-                    # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/pci/vfio-pci.ko")
-
-                    guest.exec("modprobe vfio-pci")
-                    guest.exec("insmod module/vmpl.ko")
-                    remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
-                    if test.system == "containers":
-                        guest.exec(f"modprobe {Interface.PKTGEN_DPDK.guest_driver()}")
-                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {guest.test_iface_driv} {guest.test_iface_addr}")
-                        guest.exec(f"ip link set {guest.test_iface} up")
-                    else:
-                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
-
-                    measurement.mark_vm_initialized(0)
-
-                    test.start(host, guest, repetition)
-                    test.measure(host, guest, repetition)
-
+                if test.system == "kata":
+                    test.start(host, host, repetition) # what is usually the guest, is now the host
+                    test.measure(host, host, repetition) # what is usually the guest, is now the host
                     # breakpoint()
                     pass
+                else:
+                    with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
+                        qemu_pid = host.tmux_get_pid("qemu")
+                        with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
+                            f.write(str(qemu_pid))
+
+                        # guest.exec("rmmod vfio-pci || true;")
+                        # guest.exec("rmmod vfio-pci-core || true;")
+                        # guest.exec("rmmod vfio_iommu_type1 || true")
+                        # guest.exec("rmmod vfio || true")
+                        # guest.exec("modprobe irqbypass || true")
+                        # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/vfio.ko")
+                        # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/vfio_iommu_type1.ko")
+                        # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/pci/vfio-pci-core.ko")
+                        # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/pci/vfio-pci.ko")
+
+                        guest.exec("modprobe vfio-pci")
+                        guest.exec("insmod module/vmpl.ko")
+                        remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
+                        if test.system == "containers":
+                            guest.exec(f"modprobe {Interface.PKTGEN_DPDK.guest_driver()}")
+                            guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {guest.test_iface_driv} {guest.test_iface_addr}")
+                            guest.exec(f"ip link set {guest.test_iface} up")
+                        else:
+                            guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+
+                        measurement.mark_vm_initialized(0)
+
+                        test.start(host, guest, repetition)
+                        test.measure(host, guest, repetition)
+
+                        # breakpoint()
+                        pass
             bench.done(test)
 
     PktgenTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
