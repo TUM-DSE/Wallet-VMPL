@@ -135,17 +135,36 @@ class PktgenTest(AbstractBenchTest):
         guest.exec(f"sudo tc filter add dev veth{n-1}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev {nic}")
 
     def kata_kni_setup(self, guest: Guest):
-        """Like containers_kni_setup but also creates a bridge + docker network per veth pair.
+        """Sets up veth chain with bridges for kata containers, plus a pktgen veth pair.
         Kata containers run in VMs, so they can't use AF_PACKET directly. Instead,
         each veth{i}b is attached to a bridge, and a docker network is created for
-        that bridge. The kata VM gets a virtio-net NIC connected to the bridge."""
-        self.containers_kni_setup(guest)
+        that bridge. The kata VM gets a virtio-net NIC connected to the bridge.
+        Returns the pktgen interface name (for af_packet)."""
         n = self.chaining
+        # Pktgen veth pair: pktgen sends/receives on pktgen_out, TC chain attaches to pktgen_in
+        guest.exec(f"sudo ip link add pktgen_in type veth peer name pktgen_out")
+        guest.exec(f"sudo ip link set pktgen_in up")
+        guest.exec(f"sudo ip link set pktgen_out up")
+        # Create chain veth pairs + bridges
         for i in range(n):
+            guest.exec(f"sudo ip link add veth{i}a type veth peer name veth{i}b")
+            guest.exec(f"sudo ip link set veth{i}a up")
+            guest.exec(f"sudo ip link set veth{i}b up")
             guest.exec(f"docker network create --driver=bridge "
                        f"--opt com.docker.network.bridge.name=br-vnf{i} "
                        f"vnf{i}-net")
             guest.exec(f"sudo brctl addif br-vnf{i} veth{i}b")
+        # TC: pktgen_in ingress → first veth pair
+        guest.exec(f"sudo tc qdisc add dev pktgen_in ingress")
+        guest.exec(f"sudo tc filter add dev pktgen_in ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth0a")
+        # Chain: veth_i_a ingress → veth_(i+1)_a egress
+        for i in range(n - 1):
+            guest.exec(f"sudo tc qdisc add dev veth{i}a ingress")
+            guest.exec(f"sudo tc filter add dev veth{i}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth{i+1}a")
+        # Last veth ingress → pktgen_in (completes the loop)
+        guest.exec(f"sudo tc qdisc add dev veth{n-1}a ingress")
+        guest.exec(f"sudo tc filter add dev veth{n-1}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev pktgen_in")
+        return "pktgen_out"
 
     def containers_cleanup(self, guest: Guest):
         nic = guest.test_iface
@@ -155,6 +174,8 @@ class PktgenTest(AbstractBenchTest):
         guest.tmux_kill(f"workload*") # i dont think this wildcard is actually applied by the underlying grep
         # Remove docker networks and bridges created for kata
         guest.exec("for i in $(seq 0 63); do docker network rm vnf${i}-net 2>/dev/null; done; true")
+        # Delete pktgen veth pair
+        guest.exec("sudo ip link del pktgen_in 2>/dev/null || true")
         # Delete all possible veth pairs (deleting the a-side removes both ends)
         guest.exec("for i in $(seq 0 63); do sudo ip link del veth${i}a 2>/dev/null; done; true")
         guest.exec(f"sudo tc qdisc del dev {nic} ingress 2>/dev/null || true")
@@ -231,8 +252,7 @@ class PktgenTest(AbstractBenchTest):
                     f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
                 )
         elif self.system == "kata":
-            self.containers_cleanup(guest)
-            self.kata_kni_setup(guest)
+            # linux networking has already been set up previously for pktgen to connect
             for i in range(self.chaining):
                 tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=eth0"
                 guest.tmux_new(f"workload{i}",
@@ -500,7 +520,13 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             test.compile(host)
             for repetition in range(test.repetitions):
                 PktgenTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
-                host.start_pktgen_vhost()
+                if test.system == "kata":
+                    test.containers_cleanup(host)
+                    test.kata_kni_setup(host)
+                if test.system in ["containers", "kata"]:
+                    host.start_pktgen_kni("pktgen_out")
+                else:
+                    host.start_pktgen_vhost()
                 pktgen_pid = host.tmux_get_pid("pktgen")
                 with open(f"/tmp/pidfile.{getpass.getuser()}.pktgen", "w") as f:
                     f.write(str(pktgen_pid))

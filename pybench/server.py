@@ -2224,6 +2224,11 @@ class Host(Server):
         #     vdevs += [f"--vdev 'eth_vhost{vm_number},iface={vhost_sock}'"]
         # self.tmux_new("pktgen", f"sudo pktgen --vdev 'eth_vhost0,iface={vhost_sock}' -l{cpus} -- -m '{mapping}' -G")
 
+    def start_pktgen_kni(self: 'Host', kni_name: str) -> None:
+        vdev = f"--no-pci --vdev=net_af_packet0,iface={kni_name}"
+        cpus, mapping = self.cpupinner.pktgen()
+        self.tmux_new("pktgen", f"sudo pktgen {vdev} -l{cpus} -- -m '{mapping}' -G; sleep 999")
+
     def stop_pktgen_vhost(self: 'Host') -> None:
         self.tmux_kill("pktgen")
 
