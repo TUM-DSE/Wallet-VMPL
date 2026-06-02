@@ -387,30 +387,30 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
     )
     workload_tests_64b = dict(
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 64 ],
         real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 1500 ],
         real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 64, 1500 ],
         real_workload = [ "synthetic" ], workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     chaining_tests = dict(
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 64, 1500 ],
         chaining = [2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32],
         real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     real_workload_tests = dict(
-        system = [ "iomgr", "noiomgr", "insecure" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
         pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
         real_workload = [ "real" ],
         chaining = [ 3 ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
