@@ -235,7 +235,7 @@ class PktgenTest(AbstractBenchTest):
         # In our measurements, the default DPDK mempool has suboptimal performance. Use SIMPLE_POOL to use the same pool as Slick, or use DPDK's stack pool which has the same performance.
         dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
 
-        guest.exec("rm /tmp/.dpdk-running || true")
+        guest.exec("rm -f /tmp/.dpdk-running || true")
         time_start = datetime.now()
         if self.system == "mirror":
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
@@ -305,7 +305,7 @@ class PktgenTest(AbstractBenchTest):
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
         # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
         host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})')
-        if self.system == "containers":
+        if self.system in [ "containers", "kata" ]:
             # container throughput collapses at excessive offered traffic rates
             # host.exec_pktgen(f'pktgen.set("all", "rate", 2)') # @1500B: 164kpps offered -> 95kpps
             # host.exec_pktgen(f'pktgen.set("all", "rate", 0.12)') # @64B: 178kpps offered -> 96kpps
@@ -313,6 +313,7 @@ class PktgenTest(AbstractBenchTest):
             rate_pct = target_pps * (self.pktsize + 20) * 8 / 10e9 * 10
             host.exec_pktgen(f'pktgen.set("all", "rate", {rate_pct:.2f})')
         host.exec_pktgen('pktgen.start(0)')
+        time_start = datetime.now()
         sleep(3)
         pps = []
         for _ in range(G.DURATION_S):
@@ -322,8 +323,14 @@ class PktgenTest(AbstractBenchTest):
             pps += [ int(host.exec_pktgen(lua)) ]
             sleep(1)
         host.exec_pktgen('pktgen.stop(0)')
+        time_stop = datetime.now()
 
         pkt_counts = host.exec_pktgen('printf(pktgen.portStats("0", "port")[0].opackets .. "/" .. pktgen.portStats("0", "port")[0].ipackets)').split("/")
+
+        # if self.system == "kata": # pktgen rate report is broken with kernel interfaces
+        #     measurement_duration = (time_stop - time_start).total_seconds()
+        #     avg_pps = float(pkt_counts[1]) / measurement_duration
+        #     pps = [ avg_pps for _ in pps ]
 
         print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
         print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
@@ -441,30 +448,30 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
     )
     workload_tests_64b = dict(
         workload = [ 0, 1, 5, 10, 20, 40, 80, 160, 320, 640, 1280 ],
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64 ],
         real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     workload_tests_1500b = dict(
         workload = [ int(i) for i in np.linspace(0, 2000, 10) ],
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 1500 ],
         real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [2], num_vms = [0],
     )
     memory_workload_tests = dict(
         memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64, 1500 ],
         real_workload = [ "synthetic" ], workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [2], num_vms = [0],
     )
     chaining_tests = dict(
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64, 1500 ],
         chaining = [2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32],
         real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     real_workload_tests = dict(
-        system = [ "iomgr", "noiomgr", "insecure", "containers" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
         real_workload = [ "real" ],
         chaining = [ 3 ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
