@@ -150,8 +150,8 @@ class PktgenTest(AbstractBenchTest):
     def containers_cleanup(self, guest: Guest):
         nic = guest.test_iface
         # Stop all possible mirror containers from previous runs
-        guest.exec("docker kill mirror{0...64} 2>/dev/null || true")
-        guest.exec("docker rm -f $(docker ps -aq --filter name=mirror{0...64}) 2>/dev/null || true")
+        guest.exec("docker kill mirror{0..64} 2>/dev/null || true")
+        guest.exec("docker rm -f $(docker ps -aq --filter name=mirror{0..64}) 2>/dev/null || true")
         guest.tmux_kill(f"workload*") # i dont think this wildcard is actually applied by the underlying grep
         # Remove docker networks and bridges created for kata
         guest.exec("for i in $(seq 0 63); do docker network rm vnf${i}-net 2>/dev/null; done; true")
@@ -234,18 +234,19 @@ class PktgenTest(AbstractBenchTest):
             self.containers_cleanup(guest)
             self.kata_kni_setup(guest)
             for i in range(self.chaining):
-                breakpoint()
                 tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=eth0"
                 guest.tmux_new(f"workload{i}",
                     f"docker run --rm --name mirror{i} "
                     f"--runtime kata-qemu-slick "
                     f"--network=vnf{i}-net "
                     # f"--privileged" # faults with EEXIST: File exists on kata
+                    f"--cap-add=NET_ADMIN --cap-add=NET_RAW "
                     f"-v /nix:/nix "
+                    f"-v /tmp:/tmp "
                     f"-v {host.project_root}:{host.project_root} "
                     f"busybox sh -c '"
                     f"mkdir -p /var/run && "
-                    f"{host.project_root}/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999'" # TODO : cpu pinning
+                    f"{host.project_root}/module/example-dpdk/mirror -l 0 --no-huge --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999'" # --iova-mode=pa is unavailable in kata container # TODO : cpu pinning
                 )
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
