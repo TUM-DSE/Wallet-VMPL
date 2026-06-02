@@ -120,28 +120,44 @@ class PktgenTest(AbstractBenchTest):
         n = self.chaining
         # Create veth pairs: veth{i}a (host-side, for TC chaining) <-> veth{i}b (container-side, for AF_PACKET)
         for i in range(n):
-            guest.exec(f"ip link add veth{i}a type veth peer name veth{i}b")
-            guest.exec(f"ip link set veth{i}a up")
-            guest.exec(f"ip link set veth{i}b up")
+            guest.exec(f"sudo ip link add veth{i}a type veth peer name veth{i}b")
+            guest.exec(f"sudo ip link set veth{i}a up")
+            guest.exec(f"sudo ip link set veth{i}b up")
         # NIC ingress → first veth pair
-        guest.exec(f"tc qdisc add dev {nic} ingress")
-        guest.exec(f"tc filter add dev {nic} ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth0a")
+        guest.exec(f"sudo tc qdisc add dev {nic} ingress")
+        guest.exec(f"sudo tc filter add dev {nic} ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth0a")
         # Chain: veth_i_a ingress → veth_(i+1)_a egress
         for i in range(n - 1):
-            guest.exec(f"tc qdisc add dev veth{i}a ingress")
-            guest.exec(f"tc filter add dev veth{i}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth{i+1}a")
+            guest.exec(f"sudo tc qdisc add dev veth{i}a ingress")
+            guest.exec(f"sudo tc filter add dev veth{i}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev veth{i+1}a")
         # Last veth ingress → NIC TX
-        guest.exec(f"tc qdisc add dev veth{n-1}a ingress")
-        guest.exec(f"tc filter add dev veth{n-1}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev {nic}")
+        guest.exec(f"sudo tc qdisc add dev veth{n-1}a ingress")
+        guest.exec(f"sudo tc filter add dev veth{n-1}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev {nic}")
+
+    def kata_kni_setup(self, guest: Guest):
+        """Like containers_kni_setup but also creates a bridge + docker network per veth pair.
+        Kata containers run in VMs, so they can't use AF_PACKET directly. Instead,
+        each veth{i}b is attached to a bridge, and a docker network is created for
+        that bridge. The kata VM gets a virtio-net NIC connected to the bridge."""
+        self.containers_kni_setup(guest)
+        n = self.chaining
+        for i in range(n):
+            guest.exec(f"docker network create --driver=bridge "
+                       f"--opt com.docker.network.bridge.name=br-vnf{i} "
+                       f"vnf{i}-net")
+            guest.exec(f"sudo brctl addif br-vnf{i} veth{i}b")
 
     def containers_cleanup(self, guest: Guest):
         nic = guest.test_iface
         # Stop all possible mirror containers from previous runs
+        guest.exec("docker kill mirror{0...64} 2>/dev/null || true")
         guest.exec("docker rm -f $(docker ps -aq --filter name=mirror{0...64}) 2>/dev/null || true")
         guest.tmux_kill(f"workload*") # i dont think this wildcard is actually applied by the underlying grep
+        # Remove docker networks and bridges created for kata
+        guest.exec("for i in $(seq 0 63); do docker network rm vnf${i}-net 2>/dev/null; done; true")
         # Delete all possible veth pairs (deleting the a-side removes both ends)
-        guest.exec("for i in $(seq 0 63); do ip link del veth${i}a 2>/dev/null; done; true")
-        guest.exec(f"tc qdisc del dev {nic} ingress 2>/dev/null || true")
+        guest.exec("for i in $(seq 0 63); do sudo ip link del veth${i}a 2>/dev/null; done; true")
+        guest.exec(f"sudo tc qdisc del dev {nic} ingress 2>/dev/null || true")
 
     def compile(self, server: Server):
         assert self.real_workload in [ "synthetic", "real" ], f"Unknown real_workload value {self.real_workload}"
@@ -160,7 +176,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system == "mirror" or self.system == "containers":
+        if self.system in [ "mirror", "containers", "kata" ]:
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -215,17 +231,21 @@ class PktgenTest(AbstractBenchTest):
                     f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
                 )
         elif self.system == "kata":
-            # TODO: i think this needs lots of work
             self.containers_cleanup(guest)
-            self.containers_kni_setup(guest)
+            self.kata_kni_setup(guest)
             for i in range(self.chaining):
-            # for i in range(1):
-                tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=veth{i}b"
+                breakpoint()
+                tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=eth0"
                 guest.tmux_new(f"workload{i}",
                     f"docker run --rm --name mirror{i} "
-                    f"--network=host --privileged -v /:/host "
-                    f"busybox chroot /host "
-                    f"/root/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999" # TODO : cpu pinning
+                    f"--runtime kata-qemu-slick "
+                    f"--network=vnf{i}-net "
+                    # f"--privileged" # faults with EEXIST: File exists on kata
+                    f"-v /nix:/nix "
+                    f"-v {host.project_root}:{host.project_root} "
+                    f"busybox sh -c '"
+                    f"mkdir -p /var/run && "
+                    f"{host.project_root}/module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa --file-prefix=mirror{i} {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999'" # TODO : cpu pinning
                 )
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
