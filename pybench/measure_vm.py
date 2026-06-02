@@ -286,6 +286,14 @@ class PktgenTest(AbstractBenchTest):
         # breakpoint()
         # sleep(30)
         # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
+        if self.system == "kata":
+            # Docker enables hairpin on its bridge ports, causing mirror responses
+            # to loop back to the same mirror infinitely. Wait for kata veths to
+            # appear (bridge gets 2+ ports), then disable hairpin on all ports.
+            # Must happen before mirror starts processing packets.
+            for i in range(self.chaining):
+                guest.wait_for_success(f"test $(ls /sys/class/net/br-vnf{i}/brif/ | wc -l) -ge 2", timeout=60)
+                guest.exec(f"for port in $(ls /sys/class/net/br-vnf{i}/brif/); do sudo sh -c 'echo 0 > /sys/class/net/br-vnf{i}/brif/'$port'/hairpin_mode'; done")
         guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
         time_end = datetime.now()
         print(f"Slick start time: {(time_end - time_start).total_seconds():.2f} seconds")
@@ -309,7 +317,7 @@ class PktgenTest(AbstractBenchTest):
             # container throughput collapses at excessive offered traffic rates
             # host.exec_pktgen(f'pktgen.set("all", "rate", 2)') # @1500B: 164kpps offered -> 95kpps
             # host.exec_pktgen(f'pktgen.set("all", "rate", 0.12)') # @64B: 178kpps offered -> 96kpps
-            target_pps = 164000
+            target_pps = 164000 if self.system == "containers" else 1000000
             rate_pct = target_pps * (self.pktsize + 20) * 8 / 10e9 * 10
             host.exec_pktgen(f'pktgen.set("all", "rate", {rate_pct:.2f})')
         host.exec_pktgen('pktgen.start(0)')
