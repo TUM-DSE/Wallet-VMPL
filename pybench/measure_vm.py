@@ -198,7 +198,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential" ]:
+        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential", "mirrorKni" ]:
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -240,6 +240,9 @@ class PktgenTest(AbstractBenchTest):
         time_start = datetime.now()
         if self.system in [ "mirror", "mirrorUnconfidential" ]:
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
+        elif self.system == "mirrorKni":
+            tap_vdev = f"--no-pci --vdev=net_af_packet0,iface={guest.test_iface}"
+            guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "containers":
             self.containers_cleanup(guest)
             self.containers_kni_setup(guest)
@@ -314,11 +317,11 @@ class PktgenTest(AbstractBenchTest):
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
         # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
         host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})')
-        if self.system in [ "containers", "kata" ]:
+        if self.system in [ "containers", "kata", "mirrorKni" ]:
             # container throughput collapses at excessive offered traffic rates
             # host.exec_pktgen(f'pktgen.set("all", "rate", 2)') # @1500B: 164kpps offered -> 95kpps
             # host.exec_pktgen(f'pktgen.set("all", "rate", 0.12)') # @64B: 178kpps offered -> 96kpps
-            target_pps = 164000 if self.system == "containers" else 1000000
+            target_pps = 164000 if self.system in [ "containers", "mirrorKni" ] else 1000000
             rate_pct = target_pps * (self.pktsize + 20) * 8 / 10e9 * 10
             host.exec_pktgen(f'pktgen.set("all", "rate", {rate_pct:.2f})')
         host.exec_pktgen('pktgen.start(0)')
@@ -449,7 +452,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         memory_workload = [ 0 ],
         real_workload = [ "synthetic" ],
         chaining = [2],
-        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata", "mirrorUnconfidential" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
@@ -485,13 +488,20 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         real_workload = [ "real" ],
         chaining = [ 3 ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
+    ioengine_tests = dict(
+        system = [ "iomgr", "containers", "kata", "mirrorUnconfidential", "mirrorKni" ],
+        pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
+        chaining = [ 1 ],
+        real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
+    )
     tests = \
         PktgenTest.list_tests(basic_tests) + \
         PktgenTest.list_tests(workload_tests_64b) + \
         PktgenTest.list_tests(workload_tests_1500b) + \
         PktgenTest.list_tests(memory_workload_tests) + \
         PktgenTest.list_tests(chaining_tests) + \
-        (PktgenTest.list_tests(real_workload_tests) if mode != "latency" else [])
+        (PktgenTest.list_tests(real_workload_tests) if mode != "latency" else []) + \
+        PktgenTest.list_tests(ioengine_tests)
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -572,7 +582,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                         guest.exec("modprobe vfio-pci")
                         guest.exec("insmod module/vmpl.ko")
                         remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
-                        if test.system == "containers":
+                        if test.system in [ "containers", "mirrorKni" ]:
                             guest.exec(f"modprobe {Interface.PKTGEN_DPDK.guest_driver()}")
                             guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b {guest.test_iface_driv} {guest.test_iface_addr}")
                             guest.exec(f"ip link set {guest.test_iface} up")
