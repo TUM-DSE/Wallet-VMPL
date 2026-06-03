@@ -198,7 +198,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system in [ "mirror", "containers", "kata" ]:
+        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential" ]:
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -219,7 +219,7 @@ class PktgenTest(AbstractBenchTest):
             server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def start(self, host: Server, guest: Server, repetition: int):
-        if self.chaining == 1:
+        if self.chaining == 1 and "mirror" not in self.system:
             raise NotImplementedError("Chaining == 1 not implemented")
 
         sleep(1) # for good measure
@@ -238,7 +238,7 @@ class PktgenTest(AbstractBenchTest):
 
         guest.exec("rm -f /tmp/.dpdk-running || true")
         time_start = datetime.now()
-        if self.system == "mirror":
+        if self.system in [ "mirror", "mirrorUnconfidential" ]:
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "containers":
             self.containers_cleanup(guest)
@@ -449,7 +449,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         memory_workload = [ 0 ],
         real_workload = [ "synthetic" ],
         chaining = [2],
-        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata" ],
+        system = [ "iomgr", "noiomgr", "insecure", "containers", "kata", "mirrorUnconfidential" ],
         pktsize = [ 64, 1500 ],
 
         # legacy args
@@ -553,7 +553,8 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     # breakpoint()
                     pass
                 else:
-                    with measurement.virtual_machine(Interface.PKTGEN_DPDK) as guest:
+                    confidential = test.system not in [ "mirrorUnconfidential"]
+                    with measurement.virtual_machine(Interface.PKTGEN_DPDK, run_guest_args=dict(confidential=confidential)) as guest:
                         qemu_pid = host.tmux_get_pid("qemu")
                         with open(f"/tmp/pidfile.{getpass.getuser()}.qemu", "w") as f:
                             f.write(str(qemu_pid))
