@@ -152,6 +152,7 @@ class PktgenTest(AbstractBenchTest):
             guest.exec(f"sudo ip link set veth{i}b up")
             guest.exec(f"docker network create --driver=bridge "
                        f"--opt com.docker.network.bridge.name=br-vnf{i} "
+                       f"--subnet=172.30.{i}.0/30 "
                        f"vnf{i}-net")
             guest.exec(f"sudo brctl addif br-vnf{i} veth{i}b")
         # TC: pktgen_in ingress → first veth pair
