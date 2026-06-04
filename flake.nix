@@ -162,6 +162,12 @@
 		        dontStrip = true;
 		        hardeningDisable = [ "all" ];
 		      };
+          perf = let
+            kernel = pkgs.callPackage ./nix/linux.nix {
+              # kernelVariantName = "coconut_svsm";
+              kernelVariantName = "version_for_vfio";
+            };
+          in (pkgs.linuxPackagesFor kernel).perf;
           test = pkgs.callPackage ./node/pkg.nix { };
         };
         pkgs = nixpkgs.legacyPackages.${system};

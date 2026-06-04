@@ -100,6 +100,17 @@ build-linux:
 	@make .buildcontainer
 	@make build/kernel/linux
 
+build-guest-vfio:
+	echo checkout linux git@github.com:TUM-DSE/slick-linux.git branch wallet-vfio-snp
+	nix develop --inputs-from . nixpkgs#linux.dev
+	make olddefconfig
+	scripts/config --module VFIO
+	scripts/config --module VFIO_PCI
+	scripts/config --enable VFIO_CONTAINER
+	scripts/config --enable VFIO_NOIOMMU
+	make olddefconfig
+	make -j$(nproc) KCFLAGS="-Wno-error"
+
 setup_guest_net: #131.159.254.1
 	sudo ip tuntap add tap0_${USER} mode tap
 	sudo ip addr add 192.168.${USERADDR}.1/24 dev tap0_${USER}
@@ -195,6 +206,16 @@ run:
 srun:
 	@make run CORES=2
 
+pin_vcpus:
+	sudo taskset -cp 4 $(shell ps -eLo pid,lwp,comm | grep dpdk-worker1 | awk '{print $$2}') || true
+	sudo taskset -cp 3 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 0) | ."thread-id"')
+	sudo taskset -cp 5 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 1) | ."thread-id"')
+	sudo taskset -cp 6 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 2) | ."thread-id"')
+	sudo taskset -cp 7 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 3) | ."thread-id"')
+	sudo taskset -cp 8 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 4) | ."thread-id"')
+	sudo taskset -cp 9 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 5) | ."thread-id"')
+	sudo taskset -cp 10 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 6) | ."thread-id"')
+	sudo taskset -cp 11 $(shell echo '{"execute": "qmp_capabilities"}\n{"execute": "query-cpus-fast"}' | sudo socat - unix-connect:/tmp/okelmann.qmp | jq -r 'select(.return) | .return[] | select(.props."core-id" == 7) | ."thread-id"')
 
 nix-builds:
 	nix build .#dpdk -o ./.nix-builds/dpdk
@@ -251,8 +272,8 @@ _boot_and_test:
 kill:
 	sudo pkill -9 qemu-system || true
 
-# SSH_ARGS ?= -F ./pybench/ssh_conf_doctor vm.local
-SSH_ARGS ?= -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
+SSH_ARGS ?= -F ./pybench/ssh_conf_doctor vm.local
+# SSH_ARGS ?= -i ./container/key -o StrictHostKeychecking=no root@192.168.${USERADDR}.10
 
 ssh:
 	SSH_AUTH_SOCK="" ssh ${SSH_ARGS}

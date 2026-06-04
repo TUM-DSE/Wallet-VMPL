@@ -50,3 +50,4 @@ runtime/python*
 pybench/__pycache__/
 report_generation_measurements*
 *.so
+data/

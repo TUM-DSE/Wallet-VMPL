@@ -84,6 +84,7 @@ class PktgenTest(AbstractBenchTest):
     @staticmethod
     def pre_initial_cleanup(host: Host, qemu_pid, pktgen_pid):
         debug('Pre-Initial cleanup (pktgen-specific)')
+        PktgenTest.containers_cleanup(host)
         try:
             host.kill_guest()
         except Exception:
@@ -167,7 +168,8 @@ class PktgenTest(AbstractBenchTest):
         guest.exec(f"sudo tc filter add dev veth{n-1}a ingress protocol all u32 match u32 0 0 action mirred egress redirect dev pktgen_in")
         return "pktgen_out"
 
-    def containers_cleanup(self, guest: Guest):
+    @staticmethod
+    def containers_cleanup(guest: Guest):
         nic = guest.test_iface
         # Stop all possible mirror containers from previous runs
         guest.exec("docker kill mirror{0..64} 2>/dev/null || true")
@@ -219,8 +221,8 @@ class PktgenTest(AbstractBenchTest):
             server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def start(self, host: Server, guest: Server, repetition: int):
-        if self.chaining == 1 and "mirror" not in self.system:
-            raise NotImplementedError("Chaining == 1 not implemented")
+        # if self.chaining == 1 and "mirror" not in self.system:
+        #     raise NotImplementedError("Chaining == 1 not implemented")
 
         sleep(1) # for good measure
         remote_mirror_output = "/tmp/mirror_output.log"
@@ -244,7 +246,7 @@ class PktgenTest(AbstractBenchTest):
             tap_vdev = f"--no-pci --vdev=net_af_packet0,iface={guest.test_iface}"
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "containers":
-            self.containers_cleanup(guest)
+            PktgenTest.containers_cleanup(guest)
             self.containers_kni_setup(guest)
             for i in range(self.chaining):
             # for i in range(1):
@@ -547,9 +549,8 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
             for repetition in range(test.repetitions):
                 PktgenTest.pre_initial_cleanup(host, qemu_pid, pktgen_pid)
                 if test.system == "kata":
-                    test.containers_cleanup(host)
+                    PktgenTest.containers_cleanup(host)
                     test.kata_kni_setup(host)
-                if test.system in ["containers", "kata"]:
                     host.start_pktgen_kni("pktgen_out")
                 else:
                     host.start_pktgen_vhost()
