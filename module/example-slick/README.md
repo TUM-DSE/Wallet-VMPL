@@ -16,6 +16,8 @@ make gramine
 make build_svsm
 ```
 This step will fetch and build the dependecies to run a simple Trustlet.
+After every host reboot you will have to run `make after_reboot`.
+
 In the next step we run the VM with Wallet's Monitor.
 ```bash
 make run

@@ -145,6 +145,11 @@ submodules:
 	git submodule update --init --recursive gramine-svsm;
 	git submodule update --init --recursive Benchmarks/SeBS;
 
+after_reboot:
+	make unload_kvm
+	make load_kvm
+	make setup_guest_net
+
 prepare_all: submodules build_svsm gramine guest.qcow2 setup_guest_net
 
 initialize:
