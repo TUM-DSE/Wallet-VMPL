@@ -262,10 +262,15 @@ int main(int argc, char *argv[]) {
         }
         // trustlets[i - 1].invoke_trustlet(b"s", 0)
         // End node - use shm mode
-        config.mode[0] = MODE_LAST_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(i+1);
-        config.shm_addr_next = CHANNEL_ADDR(0);
-        invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
+        // (with chaining == 1, trustlet 0 is both first and last node. It is already
+        // configured above; a second config invocation would resume its processing
+        // loop on this thread and deadlock.)
+        if (i > 1) {
+            config.mode[0] = MODE_LAST_NODE;
+            config.shm_addr_previous = CHANNEL_ADDR(i+1);
+            config.shm_addr_next = CHANNEL_ADDR(0);
+            invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
+        }
 
         // Setup IoMgr
         config.mode[0] = MODE_IOMGR_NODE;
@@ -273,18 +278,15 @@ int main(int argc, char *argv[]) {
         config.shm_addr_next = CHANNEL_ADDR(1);
         invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
 
-        // start long-running trustlet
+        // start long-running trustlets (each trustlet exactly once; with
+        // chaining == 1, trustlet 0 is the single first==last node)
         /* invoke_trustlet(trustlets[1], "s", 0); */
-        printf("Starting trustlet 0 on core 1\n");
-        handles[0] = threaded_invoke(trustlets[0], 1, "", 0);
-        for (int t = 1; t < i - 1; t++) {
-            printf("Starting trustlet %d on core %d\n", t, t+1);
+        for (int t = 0; t < i; t++) {
+            printf("Starting trustlet %d on core %d\n", t, t + 1);
             handles[t] = threaded_invoke(trustlets[t], t + 1, "", 0);
         }
-            printf("Starting trustlet %d on core %d\n", i - 1, i - 1 + 1);
-        handles[i-1] = threaded_invoke(trustlets[i - 1], i - 1 + 1, "", 0);
-            printf("Starting IoMgr on core %d\n", i - 1 + 1);
-        iomgr_handle = threaded_invoke(iomgr_trustlet, i - 1 + 2, "", 0);
+        printf("Starting IoMgr on core %d\n", i + 1);
+        iomgr_handle = threaded_invoke(iomgr_trustlet, i + 1, "", 0);
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
