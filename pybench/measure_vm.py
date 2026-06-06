@@ -206,7 +206,7 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
             runners = ["noiomgr_run"]
-        elif self.system == "iomgr":
+        elif self.system in [ "iomgr", "iomgrMicrobenchmark" ]:
             trustlets = ["iomgr_trustlet"]
             runners = ["iomgr_run"]
         elif self.system == "insecure":
@@ -293,6 +293,30 @@ class PktgenTest(AbstractBenchTest):
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+        elif self.system == "iomgrMicrobenchmark":
+            guest.exec("rm /tmp/iomgr_microbenchmark.out || true")
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa --loadgen; sleep 999") # | tee {remote_mirror_output}")
+            time.sleep(DURATION_S)
+            guest.wait_for_success("test -f /tmp/iomgr_microbenchmark.out", timeout=30)
+
+            # TODO read pps and pkt_counts from the .out file
+
+            print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
+            print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
+
+            # breakpoint()
+
+            local_output_file = self.output_filepath(repetition)
+            os.makedirs(os.path.dirname(local_output_file), exist_ok=True)
+            data = []
+            for foo in pps:
+                data += [{
+                    **asdict(self),
+                    "repetition": repetition,
+                    "Mpps": foo/1e6
+                }]
+            df = DataFrame(data=data)
+            df.to_csv(local_output_file, index=False)
         elif self.system == "insecure":
             expected_usage_mb = (self.chaining + 2) * 12  # ~12MB per chain level for mbufs
             assert 1024 > expected_usage_mb, "You probably have to raise the -m value"
@@ -321,6 +345,8 @@ class PktgenTest(AbstractBenchTest):
 
 
     def measure(self, host: Server, guest: Server, repetition: int):
+        if self.system == "iomgrMicrobenchmark":
+            return None
         if PREFIX == "vm_lat":
             return self.measure_latency(host, guest, repetition)
         elif PREFIX == "vm":
@@ -511,6 +537,8 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         chaining = [ 1 ],
         real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
+    if mode != "latency":
+        ioengine_tests["system"] += [ "iomgrMicrobenchmark" ]
     tests = \
         PktgenTest.list_tests(basic_tests) + \
         PktgenTest.list_tests(workload_tests_64b) + \
