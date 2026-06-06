@@ -506,7 +506,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         chaining = [ 3 ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     ioengine_tests = dict(
-        system = [ "iomgr", "containers", "kata", "mirrorUnconfidential", "mirrorKni" ],
+        system = [ "iomgr", "containers", "kata", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark" ],
         pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
         chaining = [ 1 ],
         real_workload = [ "synthetic" ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
