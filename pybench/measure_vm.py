@@ -15,6 +15,7 @@ import os
 import getpass
 from util import safe_cast, deduplicate
 from datetime import datetime
+from subprocess import CalledProcessError
 
 LLC_SIZE = 512*1024*1024 # 512 MB last level cache
 PREFIX = "emptyprefix"
@@ -200,7 +201,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential", "mirrorKni" ]:
+        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark" ]:
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -245,6 +246,20 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "mirrorKni":
             tap_vdev = f"--no-pci --vdev=net_af_packet0,iface={guest.test_iface}"
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
+        elif self.system == "mirrorMicrobenchmark":
+            guest.tmux_new("workload", "sudo ./module/example-dpdk/mirror -l 2 --no-huge --iova-mode=pa --mbuf-pool-ops-name='stack' --no-pci --vdev 'eth_vhost0,iface=/tmp/vhost-user-okelmann.loadgen' --file-prefix 'foo'")
+            guest.exec("echo 1024 | sudo tee /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages")
+            pktgen_bin = f"{guest.project_root}/.nix-builds/pktgen-dpdk/bin"
+            guest.tmux_new("workload2", f"sudo {pktgen_bin}/pktgen --vdev 'net_virtio_user0,path=/tmp/vhost-user-okelmann.loadgen,speed=100000' --single-file-segments -l0,1 --no-pci -- -m '1.0' -G")
+            for i in range(10):
+                try:
+                    if guest.exec_pktgen('printf("PKTGEN_UP")') == "PKTGEN_UP":
+                        break
+                except CalledProcessError:
+                    pass
+                if i >= 9:
+                    raise RuntimeError("Pktgen did not start in time")
+                sleep(1)
         elif self.system == "containers":
             PktgenTest.containers_cleanup(guest)
             self.containers_kni_setup(guest)
@@ -593,7 +608,10 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                         measurement.mark_vm_initialized(0)
 
                         test.start(host, guest, repetition)
-                        test.measure(host, guest, repetition)
+                        if test.system == "mirrorMicrobenchmark":
+                            test.measure(guest, guest, repetition)
+                        else:
+                            test.measure(host, guest, repetition)
 
                         # breakpoint()
                         pass

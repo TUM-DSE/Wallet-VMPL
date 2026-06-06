@@ -2232,17 +2232,20 @@ class Host(Server):
     def stop_pktgen_vhost(self: 'Host') -> None:
         self.tmux_kill("pktgen")
 
-    def exec_pktgen(self: 'Host', lua_command: str) -> str:
+    def exec_pktgen(self: 'Host', lua_command: str, workdir: str = None) -> str:
         """
         call like: print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
         Take care to escape single quotes and backslashes for the shell this will travel thorugh.
         """
+        workdir = workdir if workdir else self.project_root
         script = f"""
-            package.path = package.path .. ";{self.project_root}/pybench/Pktgen.lua;"
+            package.path = package.path .. ";{workdir}/pybench/Pktgen.lua;"
             require "Pktgen"
             {lua_command}
         """
-        output = self.exec(f"echo '{script}' | socat - TCP4:localhost:22022")
+        # socat_bin = "/nix/store/b3gm6nv28zw2jr0xkbf31xj5mkm56axl-socat-1.8.0.3/bin/socat1"
+        socat_bin = "socat"
+        output = self.exec(f"echo '{script}' | {socat_bin} - TCP4:localhost:22022")
         return output
 
     def cleanup_network(self: 'Host', number_vms: int = MAX_VMS) -> None:
@@ -2406,6 +2409,27 @@ class Guest(Server):
         """
         self.tmux_kill("iperf3-server")
 
+    # def exec_pktgen(self: 'Guest', lua_command: str) -> str:
+    #     Host.exec_pktgen(self, lua_command, workdir=self.project_root)
+    def exec_pktgen(self: 'Host', lua_command: str, workdir: str = None) -> str:
+        """
+        call like: print(host.exec_pktgen('printf("asdfasdfasdf\\n")'))
+        Take care to escape single quotes and backslashes for the shell this will travel thorugh.
+        """
+        workdir = workdir if workdir else self.project_root
+        lua_command = lua_command.replace('"', '\\"')
+        # socat_bin = "/nix/store/b3gm6nv28zw2jr0xkbf31xj5mkm56axl-socat-1.8.0.3/bin/socat1"
+        socat_bin = "socat"
+        script = f"""
+            {{
+            echo "package.path = package.path .. \\";{workdir}/pybench/Pktgen.lua;\\""
+            echo "require \\"Pktgen\\""
+            echo "{lua_command}"
+            }} | {socat_bin} - TCP4:localhost:22022
+        """
+        output = self.exec(script)
+        # output = self.exec(f"echo '{script}' | {socat_bin} - TCP4:localhost:22022")
+        return output
 
 class LoadGen(Server):
     """

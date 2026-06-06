@@ -39,6 +39,16 @@ DPDK_MEMPOOL_LIBS := \
 	$(DPDK_PATH)/lib/librte_mempool_bucket.a \
 	$(DPDK_PATH)/lib/librte_stack.a
 
+# net_vhost PMD (eth_vhost vdev: vhost-user server backend, e.g. for pktgen's
+# net_virtio_user frontend) plus the librte_vhost deps not already in DPDK_LIBS
+VHOST_LIBS := \
+	$(DPDK_PATH)/lib/librte_net_vhost.a \
+	$(DPDK_PATH)/lib/librte_vhost.a \
+	$(DPDK_PATH)/lib/librte_cryptodev.a \
+	$(DPDK_PATH)/lib/librte_hash.a \
+	$(DPDK_PATH)/lib/librte_dmadev.a \
+	$(DPDK_PATH)/lib/librte_rcu.a
+
 NUMA_LIB := /nix/store/557rbsz8mbv0w97gw8v2ni7x9d40x509-numactl-2.0.18/lib
 ATOMIC_LIB := /nix/store/f1ii69v7p27z1r5zybmlbld3bdzm6a5f-gcc-13.2.0-lib/lib
 GLIBC_LIB := /nix/store/35pq4hr29c3sl79lgfwgsvd9nwzyp4am-glibc-2.39-5/lib
@@ -49,7 +59,7 @@ DPDK_SRC := /scratch/okelmann/dpdk-cvms
 
 $(DPDK_EXAMPLES): %: %.c ../../module/libwallet/libwallet.a
 	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include -I$(DPDK_SRC)/lib/ethdev -I$(DPDK_SRC)/lib/eal/include -I$(BSD_INCLUDE) $(OPENSSL_CFLAGS) $(HS_CFLAGS) $< -O3 -march=znver3 -mssse3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma \
-		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) -Wl,--no-whole-archive \
+		-Wl,--whole-archive $(DPDK_MEMPOOL_LIBS) $(VHOST_LIBS) -Wl,--no-whole-archive \
 		$(DPDK_LIBS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ $(CFLAGS)
 
 noiomgr_trustlet: %: %.c
