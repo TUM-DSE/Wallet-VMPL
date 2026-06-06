@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdatomic.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <rte_tailq.h>
 #include <rte_ring.h>
@@ -62,9 +63,16 @@ struct trustlet_configuration {
 #define MODE_MIDDLE_NODE '2'
 #define MODE_LAST_NODE '3'
 #define MODE_IOMGR_NODE '4'
+#define MODE_IOMGR_LOADGEN '5'
   char mode[1];
   void* shm_addr_previous; // previous VNFlets or driver
   void* shm_addr_next; // next VNFlet or driver
+};
+
+// written by the iomgr loadgen (MODE_IOMGR_LOADGEN), read by the driver
+struct loadgen_results {
+  uint64_t packets;
+  uint64_t elapsed_ns;
 };
 
 struct buffer {
@@ -97,6 +105,8 @@ struct shm {
 #define POOL_PRIV_SIZE (((sizeof(struct rte_pktmbuf_pool_private) + RTE_MEMPOOL_HEADER_SIZE((struct rte_mempool*)0x1, 0))+ RTE_MEMPOOL_ALIGN_MASK) & (~RTE_MEMPOOL_ALIGN_MASK))
   char pool_priv[POOL_PRIV_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
   struct rte_mempool_memhdr pool_memhdr;
+
+  struct loadgen_results loadgen_results;
 };
 
 // Trustlet side: wait until we own the buffer, return data length

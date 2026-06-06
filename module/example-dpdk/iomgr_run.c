@@ -37,6 +37,10 @@
 #define CHAINING 2
 #endif
 
+#ifndef RUNTIME_S
+#define RUNTIME_S 15 // measurement duration in --loadgen mode
+#endif
+
 /* static void* DATA_SHARED = NULL; */
 static __thread bool use_shm_alloc = false;
 
@@ -86,6 +90,14 @@ static __thread bool use_shm_alloc = false;
 
 
 int main(int argc, char *argv[]) {
+    // --loadgen: no NIC; the iomgr trustlet acts as load generator and
+    // measures VNFlet 0 (MODE_IOMGR_LOADGEN). Note that all other arguments
+    // are ignored (EAL args below are hardcoded).
+    bool loadgen = false;
+    for (int a = 1; a < argc; a++)
+        if (strcmp(argv[a], "--loadgen") == 0)
+            loadgen = true;
+
     // with wallet.Wallet() as w:
     monitor_connect();
 
@@ -105,8 +117,12 @@ int main(int argc, char *argv[]) {
         CPU_SET(i, &cpuset);
     sched_setaffinity(0, sizeof(cpuset), &cpuset);
 
-    struct rte_mempool *cvmio_pool = cvmio_init();
-    uint16_t port = rte_eth_find_next(0);
+    struct rte_mempool *cvmio_pool = NULL;
+    uint16_t port = 0;
+    if (!loadgen) {
+        cvmio_pool = cvmio_init();
+        port = rte_eth_find_next(0);
+    }
 
     // Ring already initialized. We just cast the shm buffer to a ring.
     // // Initialize DPDK ring
@@ -273,7 +289,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Setup IoMgr
-        config.mode[0] = MODE_IOMGR_NODE;
+        config.mode[0] = loadgen ? MODE_IOMGR_LOADGEN : MODE_IOMGR_NODE;
         config.shm_addr_previous = CHANNEL_ADDR(0);
         config.shm_addr_next = CHANNEL_ADDR(1);
         invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
@@ -307,8 +323,11 @@ int main(int argc, char *argv[]) {
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
+        if (loadgen)
+            sleep(RUNTIME_S); // the iomgr drives VNFlet 0 internally; we only control the duration
+
         // for _ in range(iterations):
-        for (int iter = 0; iter < iterations; iter++) {
+        for (int iter = 0; iter < iterations && !loadgen; iter++) {
 
             const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
                     bufs, BURST_SIZE); // bufs in cvmio pool
@@ -393,10 +412,19 @@ int main(int argc, char *argv[]) {
         char* _res = threaded_join(iomgr_handle);
         threaded_free(iomgr_handle);
 
-        printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
-        printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);
-        printf("Successfully enqueued %lu objects\n", num_enqed);
-        printf("Successfully dequeued %lu objects\n", num_deqed);
+        if (loadgen) {
+            // written by the iomgr trustlet before it exits (joined above)
+            struct loadgen_results *res = &shared2->loadgen_results;
+            printf("Loadgen measured VNFlet 0: %lu packets in %.3f s\n",
+                   res->packets, res->elapsed_ns / 1e9);
+            printf("Mpps: %.3f\n",
+                   res->elapsed_ns ? res->packets / (res->elapsed_ns / 1e9) / 1e6 : 0.0);
+        } else {
+            printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
+            printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);
+            printf("Successfully enqueued %lu objects\n", num_enqed);
+            printf("Successfully dequeued %lu objects\n", num_deqed);
+        }
     }
 
     return 0;

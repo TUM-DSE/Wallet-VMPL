@@ -36,6 +36,16 @@
 #define CHAINING 2
 #endif
 
+#ifndef PACKET_SIZE
+#define PACKET_SIZE 64
+#endif
+
+// number of mbufs the loadgen keeps in flight towards VNFlet 0 (must be < RING_SIZE
+// so re-enqueueing into the ingress ring can never fail)
+#ifndef LOADGEN_INFLIGHT
+#define LOADGEN_INFLIGHT 512
+#endif
+
 // #define REAL_WORKLOAD
 
 #define println(...) do { fprintf(stdout, __VA_ARGS__); fflush(stdout); } while(0)
@@ -606,6 +616,78 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
     notify_monitor();
 }
 
+// Acts as load generator and sink for VNFlet 0 and measures its throughput.
+// Pure ring ping: no rmpadjust/PTE ops on the measured packets.
+// mbufs are taken once from the driver-created pool in data_shared_previous --
+// popped raw off the shm_stack, because the rte_mempool ops_index the driver
+// stored is not valid in this process -- and recirculated forever, so the hot
+// loop does no alloc/free. Results go to data_shared_next->loadgen_results.
+void main_iomgr_loadgen(struct shm *data_shared_previous, struct shm *data_shared_next) {
+    void *deq_objs[BURST_SIZE];
+    struct rte_mbuf *bufs[LOADGEN_INFLIGHT];
+    delay(1); // warm up CoW triggered by delay
+
+    // VNFlet 0's ring pair (rings created by VNFlet 0 during its config invocation)
+    struct shm* vnflet0 = (struct shm*)CHANNEL_ADDR(2);
+
+    struct shm_stack *stack = &data_shared_previous->pool_stack;
+    if (stack->top < LOADGEN_INFLIGHT) {
+        println("loadgen: pool has only %u mbufs, need %d", stack->top, LOADGEN_INFLIGHT);
+        return;
+    }
+    for (int i = 0; i < LOADGEN_INFLIGHT; i++) {
+        struct rte_mbuf *m = (struct rte_mbuf *)stack->objs[--stack->top];
+        m->data_off = RTE_PKTMBUF_HEADROOM;
+        m->data_len = PACKET_SIZE;
+        m->pkt_len = PACKET_SIZE;
+        m->nb_segs = 1;
+        m->next = NULL;
+        memset(rte_pktmbuf_mtod(m, void *), 0xab, PACKET_SIZE);
+        bufs[i] = m;
+    }
+    println("loadgen: %d mbufs of %d bytes in flight to VNFlet 0", LOADGEN_INFLIGHT, PACKET_SIZE);
+
+    trustlet_exit();
+
+    uint64_t start_ns = clock_monotonic_get();
+    uint64_t total = 0, lost = 0;
+
+    // prime: hand all mbufs to VNFlet 0
+    if (rte_ring_sp_enqueue_bulk(&vnflet0->ingress.ring, (void **)bufs, LOADGEN_INFLIGHT, NULL) == 0) {
+        println("loadgen: failed to prime VNFlet 0 ingress ring");
+        notify_monitor();
+        return;
+    }
+
+    while (likely(atomic_load(&data_shared_previous->keep_running))) {
+        size_t num_deq = rte_ring_sc_dequeue_burst(&vnflet0->egress.ring, deq_objs, BURST_SIZE, NULL);
+        if (num_deq == 0)
+            continue;
+        total += num_deq;
+#ifdef REAL_WORKLOAD
+        // first-node encap grows the packets each round trip; reset before recirculating
+        for (size_t i = 0; i < num_deq; i++) {
+            struct rte_mbuf *m = (struct rte_mbuf *)deq_objs[i];
+            m->data_off = RTE_PKTMBUF_HEADROOM;
+            m->data_len = PACKET_SIZE;
+            m->pkt_len = PACKET_SIZE;
+        }
+#endif
+        // cannot fail: at most LOADGEN_INFLIGHT mbufs are in flight, which fits the ring
+        if (rte_ring_sp_enqueue_bulk(&vnflet0->ingress.ring, deq_objs, num_deq, NULL) == 0)
+            lost += num_deq;
+    }
+    uint64_t elapsed_ns = clock_monotonic_get() - start_ns;
+
+    data_shared_next->loadgen_results.packets = total;
+    data_shared_next->loadgen_results.elapsed_ns = elapsed_ns;
+
+    println("loadgen finished: %lu packets in %.1f s = %.3f Mpps (lost: %lu)",
+            total, elapsed_ns / 1e9, elapsed_ns ? total / (elapsed_ns / 1e9) / 1e6 : 0.0, lost);
+    delay(1*1e9); // try to mitigate print interleaving
+    notify_monitor();
+}
+
 void main_default(bool suppress_output) {
     char* input = (char*)DATA_IN;
     char* output = (char*)DATA_OUT;
@@ -650,6 +732,8 @@ int main(int argc, char** argv) {
         main_shm(config->mode[0], config->shm_addr_previous, config->shm_addr_next);
     } else if(config->mode[0] == MODE_IOMGR_NODE) {
         main_iomgr(config->shm_addr_previous, config->shm_addr_next);
+    } else if(config->mode[0] == MODE_IOMGR_LOADGEN) {
+        main_iomgr_loadgen(config->shm_addr_previous, config->shm_addr_next);
     } else if(config->mode[0] == 'x'){
         bool suppress_output = false;
         main_default(suppress_output);
