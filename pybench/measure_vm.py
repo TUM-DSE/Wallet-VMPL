@@ -196,6 +196,9 @@ class PktgenTest(AbstractBenchTest):
             # f"-DLLC_SIZE={LLC_SIZE}",
         ] + (
             [ "-DREAL_WORKLOAD=1" ] if self.real_workload == "real" else []
+        ) + (
+            # tie the loadgen measurement duration to the framework's
+            [ f"-DRUNTIME_S={int(G.DURATION_S)}" ] if self.system == "iomgrMicrobenchmark" else []
         ))
 
         trustlets = []
@@ -294,12 +297,26 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "iomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgrMicrobenchmark":
-            guest.exec("rm /tmp/iomgr_microbenchmark.out || true")
+            remote_out = "/tmp/iomgr_microbenchmark.out"
+            guest.exec(f"rm {remote_out} || true")
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa --loadgen; sleep 999") # | tee {remote_mirror_output}")
-            time.sleep(DURATION_S)
-            guest.wait_for_success("test -f /tmp/iomgr_microbenchmark.out", timeout=30)
+            # trustlet setup takes up to ~80s; /tmp/.dpdk-running marks the measurement start
+            guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining))
+            # iomgr_run measures for RUNTIME_S (== G.DURATION_S, injected at compile time), then writes the result
+            guest.wait_for_success(f"test -f {remote_out}", timeout=G.DURATION_S + 60)
 
-            # TODO read pps and pkt_counts from the .out file
+            pps = []
+            pkt_counts = [0, 0]
+            for line in guest.exec(f"cat {remote_out}").splitlines():
+                parts = line.split()
+                if len(parts) != 2:
+                    continue
+                if parts[0] == "pps":
+                    pps += [ float(parts[1]) ]
+                elif parts[0] == "tx_packets":
+                    pkt_counts[0] = int(parts[1])
+                elif parts[0] == "rx_packets":
+                    pkt_counts[1] = int(parts[1])
 
             print(f"Mean Mpps: {np.mean(pps)/1e6:.3f} (stddev: {np.std(pps)/1e6:.3f})")
             print(f"Total pktgen packets: {pkt_counts[0]} tx, {pkt_counts[1]} rx")
