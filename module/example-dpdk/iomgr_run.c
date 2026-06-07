@@ -415,10 +415,22 @@ int main(int argc, char *argv[]) {
         if (loadgen) {
             // written by the iomgr trustlet before it exits (joined above)
             struct loadgen_results *res = &shared2->loadgen_results;
+            double pps = res->elapsed_ns ? res->packets / (res->elapsed_ns / 1e9) : 0.0;
             printf("Loadgen measured VNFlet 0: %lu packets in %.3f s\n",
                    res->packets, res->elapsed_ns / 1e9);
-            printf("Mpps: %.3f\n",
-                   res->elapsed_ns ? res->packets / (res->elapsed_ns / 1e9) / 1e6 : 0.0);
+            printf("Mpps: %.3f\n", pps / 1e6);
+
+            // result file for pybench/measure_vm.py (write + rename so it appears atomically)
+            FILE *f = fopen("/tmp/iomgr_microbenchmark.out.tmp", "w");
+            if (!f) {
+                printf("Failed to write /tmp/iomgr_microbenchmark.out.tmp: %s\n", strerror(errno));
+                return 1;
+            }
+            fprintf(f, "pps %f\n", pps);
+            fprintf(f, "tx_packets %lu\n", res->packets);
+            fprintf(f, "rx_packets %lu\n", res->packets);
+            fclose(f);
+            rename("/tmp/iomgr_microbenchmark.out.tmp", "/tmp/iomgr_microbenchmark.out");
         } else {
             printf("%d iterations took %.3f s\n", iterations, 1.0 * (end - start) / 1e9);
             printf("Mpps: %.3f\n", num_deqed / ((end - start) / 1e9) / 1e6);
