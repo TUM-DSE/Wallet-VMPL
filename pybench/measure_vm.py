@@ -204,7 +204,7 @@ class PktgenTest(AbstractBenchTest):
         trustlets = []
         dpdk_examples = []
         runners = []
-        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark" ]:
+        if self.system in [ "mirror", "containers", "kata", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark", "mirrorKniMicrobenchmark" ]:
             dpdk_examples = ["mirror"]
         elif self.system == "noiomgr":
             trustlets = ["noiomgr_trustlet"]
@@ -254,6 +254,26 @@ class PktgenTest(AbstractBenchTest):
             guest.exec("echo 1024 | sudo tee /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages")
             pktgen_bin = f"{guest.project_root}/.nix-builds/pktgen-dpdk/bin"
             guest.tmux_new("workload2", f"sudo {pktgen_bin}/pktgen --vdev 'net_virtio_user0,path=/tmp/vhost-user-okelmann.loadgen,speed=100000' --single-file-segments -l0,1 --no-pci -- -m '1.0' -G")
+            for i in range(10):
+                try:
+                    if guest.exec_pktgen('printf("PKTGEN_UP")') == "PKTGEN_UP":
+                        break
+                except CalledProcessError:
+                    pass
+                if i >= 9:
+                    raise RuntimeError("Pktgen did not start in time")
+                sleep(1)
+        elif self.system == "mirrorKniMicrobenchmark":
+            # like mirrorMicrobenchmark, but pktgen and mirror are connected
+            # through linux networking (veth pair + AF_PACKET) instead of vhost-user
+            guest.exec("sudo ip link del mb_kni_a 2>/dev/null || true")
+            guest.exec("sudo ip link add mb_kni_a type veth peer name mb_kni_b")
+            guest.exec("sudo ip link set mb_kni_a up")
+            guest.exec("sudo ip link set mb_kni_b up")
+            guest.tmux_new("workload", "sudo ./module/example-dpdk/mirror -l 2 --no-huge --iova-mode=pa --mbuf-pool-ops-name='stack' --no-pci --vdev=net_af_packet0,iface=mb_kni_b --file-prefix 'foo'")
+            guest.exec("echo 1024 | sudo tee /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages")
+            pktgen_bin = f"{guest.project_root}/.nix-builds/pktgen-dpdk/bin"
+            guest.tmux_new("workload2", f"sudo {pktgen_bin}/pktgen --no-pci --vdev=net_af_packet0,iface=mb_kni_a -l0,1 -- -m '1.0' -G")
             for i in range(10):
                 try:
                     if guest.exec_pktgen('printf("PKTGEN_UP")') == "PKTGEN_UP":
@@ -377,11 +397,11 @@ class PktgenTest(AbstractBenchTest):
         # host.exec_pktgen('prints("portStats", pktgen.portStats("0", "port"))')
         # host.exec_pktgen('prints("pktStats", pktgen.portStats("0", "rate"))')
         host.exec_pktgen(f'pktgen.set("all", "size", {self.pktsize})')
-        if self.system in [ "containers", "kata", "mirrorKni" ]:
+        if self.system in [ "containers", "kata", "mirrorKni", "mirrorKniMicrobenchmark" ]:
             # container throughput collapses at excessive offered traffic rates
             # host.exec_pktgen(f'pktgen.set("all", "rate", 2)') # @1500B: 164kpps offered -> 95kpps
             # host.exec_pktgen(f'pktgen.set("all", "rate", 0.12)') # @64B: 178kpps offered -> 96kpps
-            target_pps = 164000 if self.system in [ "containers", "mirrorKni" ] else 1000000
+            target_pps = 164000 if self.system in [ "containers", "mirrorKni", "mirrorKniMicrobenchmark" ] else 1000000
             rate_pct = target_pps * (self.pktsize + 20) * 8 / 10e9 * 10
             host.exec_pktgen(f'pktgen.set("all", "rate", {rate_pct:.2f})')
         host.exec_pktgen('pktgen.start(0)')
@@ -549,14 +569,22 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         chaining = [ 3 ], workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
     ioengine_tests = dict(
-        system = [ "iomgr", "containers", "kata", "mirror", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark" ],
+        system = [ "iomgr", "containers", "kata", "mirror", "mirrorUnconfidential", "mirrorKni", "mirrorMicrobenchmark", "mirrorKniMicrobenchmark" ],
         pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
         chaining = [ 1 ],
         real_workload = [ "synthetic", "real" ],
         workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], num_vms = [0],
     )
+    vnfletio_tests = dict(
+        system = [ "mirrorMicrobenchmark", "mirrorKniMicrobenchmark" ],
+        pktsize = [ 64, 128, 256, 512, 1024, 1500 ],
+        chaining = [ 1 ],
+        real_workload = [ "synthetic", "real" ],
+        batchsize = [ 1, 32 ],
+        workload = [ 0 ], memory_workload = [ 0 ], repetitions=[REPETITIONS], num_vms = [0],
+    )
     if mode != "latency":
-        ioengine_tests["system"] += [ "iomgrMicrobenchmark" ]
+        vnfletio_tests["system"] += [ "iomgrMicrobenchmark" ]
     tests = \
         PktgenTest.list_tests(basic_tests) + \
         PktgenTest.list_tests(workload_tests_64b) + \
@@ -564,7 +592,9 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         PktgenTest.list_tests(memory_workload_tests) + \
         PktgenTest.list_tests(chaining_tests) + \
         (PktgenTest.list_tests(real_workload_tests) if mode != "latency" else []) + \
-        PktgenTest.list_tests(ioengine_tests)
+        PktgenTest.list_tests(ioengine_tests) + \
+        PktgenTest.list_tests(vnfletio_tests)
+
 
     if G.BRIEF:
         LLC_SIZE = 512*1024 # reduce memory consumption for laptops
@@ -654,7 +684,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                         measurement.mark_vm_initialized(0)
 
                         test.start(host, guest, repetition)
-                        if test.system == "mirrorMicrobenchmark":
+                        if test.system in [ "mirrorMicrobenchmark", "mirrorKniMicrobenchmark" ]:
                             test.measure(guest, guest, repetition)
                         else:
                             test.measure(host, guest, repetition)
