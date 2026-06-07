@@ -6,6 +6,7 @@
   * noiomgr: Naive polling design with dpdk (multithreaded)
   * insecure: all VNFs in a single CVM process (multithreaded)
   * kata: kata containers on the host spawn VMs and run container workload in there (uses linux networking)
+  * containers: VNFs deployed into containers on a shared CVM
   * mirrorUnconfidential: like mirror, but in an unconfidential VM
   * mirrorKni: like mirror but with linux kernel networking on the host and in the VM
   * mirrorMicrobenchmark: like mirror, but instead of placing pktgen outside the CVM, we place it inside and connect it directly to the mirror instance (via vhost-user)
