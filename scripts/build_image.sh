@@ -43,6 +43,7 @@ virt-customize --format qcow2 -a $2.qcow2 --run-command "chmod +x /usr/local/bin
              --install "jq" \
              --install "dpdk" \
              --install "socat" \
+             --install "iperf3" \
              --run-command "grub-mkconfig -o /boot/grub/grub.cfg"\
              --run-command "python3 -m pip install minio==7.2.16"\
 	     --run-command "python3 -m pip install pybind11 pytest fire" \

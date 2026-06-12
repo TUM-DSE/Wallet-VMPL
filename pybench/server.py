@@ -2621,7 +2621,7 @@ class LoadGen(Server):
         self.exec(f'sudo ip address add {self.test_iface_ip_net} dev {self.test_iface}')
 
 
-    def run_iperf_client(self, ipt: "IPerfTest", runtime: int, server_hostname: str, output_path: str, tmp_out_path: str, proto: str = "tcp", length: int = -1, vm_num = ""):
+    def run_iperf_client(self, runtime: int, server_hostname: str, output_path: str, tmp_out_path: str, direction: str = "forward", proto: str = "tcp", length: int = -1, vm_num = ""):
         """
         Starts iperf client
         length: default if -1
@@ -2629,15 +2629,14 @@ class LoadGen(Server):
 
         options = ""
 
-        if ipt.output_json:
-            options += "-J"
+        options += "-J"
 
-        if ipt.direction  == "reverse":
+        if direction  == "reverse":
             options += " -R"
-        elif ipt.direction == "bidirectional":
+        elif direction == "bidirectional":
             options += " --bidir"
-        elif ipt.direction != "forward":
-            warning(f"Unknown direction \"{ipt.direction}\". Using forward direction")
+        elif direction != "forward":
+            warning(f"Unknown direction \"{direction}\". Using forward direction")
 
         if length != -1:
             options += f" -l {length}"
