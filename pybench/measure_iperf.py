@@ -20,6 +20,7 @@ import traceback
 import json
 from os.path import dirname as path_dirname
 from types import SimpleNamespace
+import shlex
 
 @dataclass
 class IperfTest(AbstractBenchTest):
@@ -148,10 +149,14 @@ def main(measurement, plan_only: bool = False):
         return
 
     systems = dict(
-        vm = SimpleNamespace(confidential=False, interface=Interface.BRIDGE),
-        snp = SimpleNamespace(confidential=True, interface=Interface.BRIDGE),
-        vhost = SimpleNamespace(confidential=False, interface=Interface.BRIDGE_VHOST),
-        snp_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST),
+        vm = SimpleNamespace(confidential=False, interface=Interface.BRIDGE, cmdline=""),
+        swiotlb = SimpleNamespace(confidential=False, interface=Interface.BRIDGE, cmdline=' --virtio-iommu --extra-cmdline "swiotlb=524288,force"'),
+        vhost = SimpleNamespace(confidential=False, interface=Interface.BRIDGE_VHOST, cmdline=""),
+
+        snp = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, cmdline=""),
+        snp_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST, cmdline=""),
+        poll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, cmdline=' --virtio-iommu --extra-cmdline "idle=poll" --name-extra -poll'),
+        haltpoll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, cmdline=' --virtio-iommu --extra-cmdline "cpuidle_haltpoll.force=Y" --name-extra -haltpoll'),
     )
 
 
@@ -162,10 +167,19 @@ def main(measurement, plan_only: bool = False):
             info(f"Running {test}")
             for repetition in range(test.repetitions):
                 system_params = systems[test.system]
+
+                # foobar
+                # host.exec('virt-copy-in -a $2.qcow2 scripts/grub /etc/default/')
+                extra_linux_cmdline = "foobar"
+                grub_sed = f'sed -i \'s|GRUB_CMDLINE_LINUX_EXTRA=.*|GRUB_CMDLINE_LINUX_EXTRA="{extra_linux_cmdline}"|\' /etc/default/grub'
+                host.exec(f'virt-customize --format qcow2 -a {host.guest_root_disk_path} --run-command {shlex.quote(grub_sed)} --run-command "grub-mkconfig -o /boot/grub/grub.cfg"')
+
                 with measurement.virtual_machine(system_params.interface, run_guest_args=dict(confidential=system_params.confidential)) as guest:
                     guest.modprobe_test_iface_drivers(interface=system_params.interface)
                     guest.setup_test_iface_ip_net()
                     test.run(repetition, guest, host, host)
+                    breakpoint()
+                    pass
             bench.done(test)
 
 if __name__ == "__main__":
