@@ -89,20 +89,15 @@ class IperfTest(AbstractBenchTest):
         LoadGen.stop_iperf_client(loadgen)
 
         # summarize results of VM
-        with open(local_output_file, 'w') as file:
-            dfs = []
-            try:
-                dfs += [ self.summarize(repetition) ]
-            except Exception as e:
-                warning(f"Can't process result of VM repetition {repetition}. Did the benchmark fail?")
-                _ignore = traceback.format_exc()
-                print(_ignore)
-            # to_string preserves all cols
-            if len(dfs) > 0:
-                summary = pd.concat(dfs).to_string()
-            else:
-                summary = "no results"
-            file.write(summary)
+        dfs = []
+        try:
+            dfs += [ self.summarize(repetition) ]
+        except Exception as e:
+            warning(f"Can't process result of VM repetition {repetition}. Did the benchmark fail?")
+            _ignore = traceback.format_exc()
+            print(_ignore)
+        # to_string preserves all cols
+        pd.concat(dfs).to_csv(local_output_file, index=False)
 
     def pre_initial_cleanup(self, host):
         try:
@@ -189,6 +184,17 @@ def main(measurement, plan_only: bool = False):
                     guest.setup_test_iface_ip_net()
                     test.run(repetition, guest, host, host)
             bench.done(test)
+
+    dfs = []
+    for test in tests:
+        for repetition in range(test.repetitions):
+            dfs += [ pd.read_csv(test.output_filepath(repetition)) ]
+    df = pd.concat(dfs)
+    del df['repetition']
+    df = df.groupby([ col for col in df.columns if col != "GBit/s" ]).describe()
+    df.to_csv(path_join(G.OUT_DIR, f"iperf_summary.csv"))
+    with open(path_join(G.OUT_DIR, f"iperf_summary.log"), 'w') as f:
+        f.write(df.to_string())
 
 if __name__ == "__main__":
     measurement = Measurement(test_type=IperfTest)
