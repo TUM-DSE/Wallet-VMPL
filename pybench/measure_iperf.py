@@ -19,6 +19,7 @@ from subprocess import CalledProcessError
 import traceback
 import json
 from os.path import dirname as path_dirname
+from types import SimpleNamespace
 
 @dataclass
 class IperfTest(AbstractBenchTest):
@@ -116,7 +117,7 @@ def main(measurement, plan_only: bool = False):
 
     basic_tests = dict(
         repetitions=[REPETITIONS],
-        system=[ "linux" ],
+        system=[ "snp", "vm", "vhost", "snp_vhost" ],
         direction=[ "forward" ],
         num_vms = [ 0 ], # legacy arg
     )
@@ -127,7 +128,7 @@ def main(measurement, plan_only: bool = False):
         REPETITIONS = 1
         test_matrix = dict(
             repetitions=[REPETITIONS],
-            system=[ "linux" ],
+            system=[ "snp" ],
             direction=[ "forward" ],
             num_vms = [ 0 ], # legacy arg
         )
@@ -146,16 +147,23 @@ def main(measurement, plan_only: bool = False):
     if plan_only:
         return
 
+    systems = dict(
+        vm = SimpleNamespace(confidential=False, interface=Interface.BRIDGE),
+        snp = SimpleNamespace(confidential=True, interface=Interface.BRIDGE),
+        vhost = SimpleNamespace(confidential=False, interface=Interface.BRIDGE_VHOST),
+        snp_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST),
+    )
+
+
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
         for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, test_params):
             assert len(a_tests) == 1 # we have looped through all variables now, right?
             test = a_tests[0]
             info(f"Running {test}")
             for repetition in range(test.repetitions):
-                confidential = True
-                interface = Interface.BRIDGE
-                with measurement.virtual_machine(interface, run_guest_args=dict(confidential=confidential)) as guest:
-                    guest.modprobe_test_iface_drivers(interface=interface)
+                system_params = systems[test.system]
+                with measurement.virtual_machine(system_params.interface, run_guest_args=dict(confidential=system_params.confidential)) as guest:
+                    guest.modprobe_test_iface_drivers(interface=system_params.interface)
                     guest.setup_test_iface_ip_net()
                     test.run(repetition, guest, host, host)
             bench.done(test)
