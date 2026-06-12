@@ -79,7 +79,7 @@ class IperfTest(AbstractBenchTest):
         loadgen.exec(f"rm {remote_output_file} {tmp_remote_output_file} | true")
 
         guest.start_iperf_server(strip_subnet_mask(guest.test_iface_ip_net))
-        # sleep(10)
+        sleep(10) # without this sleep all systems are at ~10Gbitps
         LoadGen.run_iperf_client(host, G.DURATION_S, strip_subnet_mask(guest.test_iface_ip_net), remote_output_file, tmp_remote_output_file)
         sleep(G.DURATION_S)
         loadgen.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
