@@ -59,6 +59,8 @@ class IperfTest(AbstractBenchTest):
 
         gbitps = received_bits_per_second / 1024 / 1024 / 1024
 
+        print(f"{gbitps:.2f} GBit/s")
+
         data = [{
             **asdict(self), # put selfs member variables and values into this dict
             "repetition": repetition,
@@ -119,7 +121,7 @@ def main(measurement, plan_only: bool = False):
 
     basic_tests = dict(
         repetitions=[REPETITIONS],
-        system=[ "vm", "swiotlb", "vhost", "snp", "snp_vhost", "poll", "haltpoll" ],
+        system=[ "vm", "swiotlb", "vhost", "snp", "snp_vhost", "poll", "poll_vhost", "haltpoll" ],
         direction=[ "forward" ],
         num_vms = [ 0 ], # legacy arg
     )
@@ -158,6 +160,7 @@ def main(measurement, plan_only: bool = False):
         snp = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=False, linux_cmdline=""),
         snp_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST, iommu_hack=False, linux_cmdline=""),
         poll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="idle=poll"),
+        poll_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST, iommu_hack=True, linux_cmdline="idle=poll"),
         haltpoll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
     )
 
