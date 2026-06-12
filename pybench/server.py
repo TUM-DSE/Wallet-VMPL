@@ -1869,6 +1869,7 @@ class Host(Server):
                   vm_number: int = 0,
                   extkern: Optional[str] = None,
                   confidential: bool = True,
+                  iommu_hack: bool = False,
                   ) -> None:
         # TODO this function should get a Guest object as argument
         # TODO this command should be build by the Guest object
@@ -1902,7 +1903,7 @@ class Host(Server):
                 )
 
         # Build test network parameters
-        test_net_config = self._test_network_qemu_args(net_type, ioregionfd, vhost, dev_type, vm_number, rx_queue_size, tx_queue_size)
+        test_net_config = self._test_network_qemu_args(net_type, ioregionfd, vhost, dev_type, vm_number, rx_queue_size, tx_queue_size, iommu_hack=iommu_hack)
 
         # Actually start qemu in tmux
         project_root = str(Path(self.project_root) / "../..") # nix wants nicely formatted paths
@@ -2013,8 +2014,13 @@ class Host(Server):
 
         return memory_backend
 
-    def _test_network_qemu_args(self: 'Host', net_type, ioregionfd, vhost, dev_type, vm_number, rx_queue_size, tx_queue_size) -> str:
+    def _test_network_qemu_args(self: 'Host', net_type, ioregionfd, vhost, dev_type, vm_number, rx_queue_size, tx_queue_size, iommu_hack=False) -> str:
         # Build test network parameters
+
+        if iommu_hack:
+            iommu = ",iommu_platform=on,disable-modern=off,disable-legacy=on"
+        else:
+            iommu = ""
 
         test_net_config = ''
         if net_type == Interface.BRIDGE or net_type == Interface.BRIDGE_VHOST:
@@ -2036,7 +2042,8 @@ class Host(Server):
                 f'netdev=test0,mac={MultiHost.mac(self.guest_test_iface_mac, vm_number)}' +
                 multi_queue +
                 (',use-ioregionfd=true' if ioregionfd else '') +
-                (f',rx_queue_size={rx_queue_size},tx_queue_size={tx_queue_size}' if rx_queue_size != -1 and tx_queue_size != -1 else '')
+                (f',rx_queue_size={rx_queue_size},tx_queue_size={tx_queue_size}' if rx_queue_size != -1 and tx_queue_size != -1 else '') +
+                iommu
             )
         if net_type == Interface.BRIDGE_E1000:
             test_net_config = (
@@ -2044,7 +2051,8 @@ class Host(Server):
                 f'id=test0,ifname={MultiHost.iface_name(self.test_tap, vm_number)},script=no,' +
                 'downscript=no' +
                 f' -device e1000,' +
-                f'netdev=test0,mac={MultiHost.mac(self.guest_test_iface_mac, vm_number)}'
+                f'netdev=test0,mac={MultiHost.mac(self.guest_test_iface_mac, vm_number)}' +
+                iommu
             )
         elif net_type == Interface.MACVTAP:
             test_net_config = (
@@ -2055,7 +2063,8 @@ class Host(Server):
                 'netdev=test0,mac=$(cat ' +
                 f'/sys/class/net/{self.test_macvtap}/address)' +
                 (',use-ioregionfd=true' if ioregionfd else '') +
-                (f',rx_queue_size={rx_queue_size},tx_queue_size={tx_queue_size}' if rx_queue_size != -1 and tx_queue_size != -1 else '')
+                (f',rx_queue_size={rx_queue_size},tx_queue_size={tx_queue_size}' if rx_queue_size != -1 and tx_queue_size != -1 else '') +
+                    iommu
             )
         elif net_type == Interface.VFIO:
             test_net_config = f' -device vfio-pci,host={self.test_iface_addr}'
