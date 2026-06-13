@@ -1324,6 +1324,20 @@ class Server(ABC):
         cmd = f"{pipefail_prefix}echo '{cmd}' | sudo socat - UNIX-CONNECT:{remote_vpp_sock} | strings"
         return cmd
 
+    def start_fstack_iperf(self: 'Server', fstack_config: str, options: str, server: bool = False, vm_number: int = 0):
+        binary = f"{self.project_root}/.nix-builds/iperf-fstack/bin/iperf3"
+
+        # f-stack's eth_vhost backend serves the same socket QEMU connects to as a vhost-user client
+        vhost_sock = MultiHost.vhost_user_sock(vm_number)
+        self.exec(f"sed -i 's|iface=.*|iface={vhost_sock}|' {fstack_config}")
+        # eth_vhost refuses to bind if a stale socket file is in the way
+        self.exec(f"sudo rm -f {vhost_sock}")
+
+        self.tmux_new("iperf-fstack", f"sudo FF_CONF={fstack_config} {binary} {options}")
+
+    def stop_fstack_iperf(self: 'Server'):
+        self.tmux_kill("iperf-fstack")
+
 
 class BatchExec:
     """

@@ -229,6 +229,7 @@ nix-builds:
 	nix build .#pktgen-dpdk -o ./.nix-builds/pktgen-dpdk
 	nix build .#cvm-vfio -o ./.nix-builds/cvm-vfio
 	nix build .#vpp -o ./.nix-builds/vpp
+	nix build .#iperf-fstack -o .nix-builds/iperf-fstack
 
 slick-tmux:
 	tmux -L vmux-${USER}.tmux.sock at

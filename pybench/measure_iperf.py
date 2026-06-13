@@ -101,6 +101,42 @@ class IperfTest(AbstractBenchTest):
         # to_string preserves all cols
         pd.concat(dfs).to_csv(local_output_file, index=False)
 
+    def run_fstack(self, repetition: int, guest, loadgen, host):
+        remote_output_file = "/tmp/iperf.log"
+        local_output_file = self.output_filepath(repetition)
+        local_output_json = self.output_filepath(repetition, extension="json")
+        guest.exec(f"rm {remote_output_file} | true")
+
+        guest.exec("echo 1024 | sudo tee /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages")
+        config_name = "config-vhost-c.ini"
+        fstack_base_config = f"{host.project_root}/pybench/hosts/{config_name}"
+        fstack_config = "/tmp/fstack.conf"
+        guest.copy_to(fstack_base_config, fstack_config)
+
+        guest.stop_fstack_iperf()
+        guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -l 1M -J | tee {remote_output_file}; echo FINISHED >> {remote_output_file}")
+
+        sleep(G.DURATION_S + 3)
+        # guest.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
+        guest.wait_for_success(f'grep "FINISHED" {remote_output_file}', timeout=30)
+        # sed_str = shlex.quote("'1,/^{$/{/^{$/!d;}'")
+        sed_str = "'1,/^{$/{/^{$/!d;}'"
+        guest.exec(f"sed -i {sed_str} {remote_output_file}") # remote all lines before the first line starting with {, which is the start of the json output of iperf
+        guest.exec(f"sed -i '$d' {remote_output_file}") # remove the last line with FNISHED
+        guest.copy_from(remote_output_file, local_output_json)
+
+        # summarize results of VM
+        dfs = []
+        try:
+            dfs += [ self.summarize(repetition) ]
+        except Exception as e:
+            warning(f"Can't process result of VM repetition {repetition}. Did the benchmark fail?")
+            _ignore = traceback.format_exc()
+            print(_ignore)
+        # to_string preserves all cols
+        pd.concat(dfs).to_csv(local_output_file, index=False)
+
+
     def pre_initial_cleanup(self, host):
         try:
             host.kill_guest()
@@ -121,7 +157,7 @@ def main(measurement, plan_only: bool = False):
 
     basic_tests = dict(
         repetitions=[REPETITIONS],
-        system=[ "vm", "swiotlb", "vhost", "snp", "snp_vhost", "poll", "poll_vhost", "haltpoll" ],
+        system=[ "vm", "swiotlb", "vhost", "snp", "snp_vhost", "poll", "poll_vhost", "haltpoll", "vhost_user" ],
         direction=[ "forward" ],
         num_vms = [ 0 ], # legacy arg
     )
@@ -162,6 +198,8 @@ def main(measurement, plan_only: bool = False):
         poll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="idle=poll"),
         poll_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST, iommu_hack=True, linux_cmdline="idle=poll"),
         haltpoll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
+
+        vhost_user = SimpleNamespace(confidential=False, interface=Interface.PKTGEN_DPDK, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
     )
 
 
@@ -182,10 +220,34 @@ def main(measurement, plan_only: bool = False):
                 sed_cmd = f"sed -i {shlex.quote(f's|GRUB_CMDLINE_LINUX_EXTRA=.*|{sed_replacement}|')} /etc/default/grub"
                 host.exec(f"virt-customize --format qcow2 -a {host.guest_root_disk_path} --run-command {shlex.quote(sed_cmd)} --run-command 'grub-mkconfig -o /boot/grub/grub.cfg'")
 
+                if system_params.interface.is_vhost_user():
+                    config_name = "config-vhost-a.ini"
+                    fstack_base_config = f"{host.project_root}/pybench/hosts/{config_name}"
+                    fstack_config = "/tmp/fstack.conf"
+                    host.copy_to(fstack_base_config, fstack_config)
+
+
+                    host.stop_fstack_iperf()
+                    host.start_fstack_iperf(fstack_config, "-s -B 192.168.31.1")
+
                 with measurement.virtual_machine(system_params.interface, run_guest_args=dict(confidential=system_params.confidential,iommu_hack=system_params.iommu_hack)) as guest:
-                    guest.modprobe_test_iface_drivers(interface=system_params.interface)
-                    guest.setup_test_iface_ip_net()
-                    test.run(repetition, guest, host, host)
+
+                    guest.exec("modprobe vfio-pci")
+                    remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
+                    if not system_params.interface.is_vhost_user():
+                        guest.modprobe_test_iface_drivers(interface=system_params.interface)
+                        guest.setup_test_iface_ip_net()
+                    else:
+                        guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
+
+                    measurement.mark_vm_initialized(0)
+
+                    if system_params.interface.is_vhost_user():
+                        test.run_fstack(repetition, guest, host, host)
+                    else:
+                        test.run(repetition, guest, host, host)
+
+
             bench.done(test)
 
     dfs = []
@@ -200,5 +262,5 @@ def main(measurement, plan_only: bool = False):
         f.write(df.to_string())
 
 if __name__ == "__main__":
-    measurement = Measurement(test_type=IperfTest)
+    measurement = Measurement(test_type=IperfTest, supports_boot_only=True)
     main(measurement)

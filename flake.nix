@@ -31,6 +31,7 @@
       url = "github:TUM-DSE/dpdk-cvms/wallet-vfio-snp";
       flake = false;
     };
+    fstack-playground.url = "github:pogoba/fstack-playground";
   };
 
   outputs = { self, nixpkgs, flake-utils, nixos-generators, rust-overlay
@@ -169,6 +170,7 @@
             };
           in (pkgs.linuxPackagesFor kernel).perf;
           test = pkgs.callPackage ./node/pkg.nix { };
+          iperf-fstack = args.fstack-playground.packages.${system}.iperf-fstack-native;
         };
         pkgs = nixpkgs.legacyPackages.${system};
         devShells = let
