@@ -101,7 +101,7 @@ class IperfTest(AbstractBenchTest):
         # to_string preserves all cols
         pd.concat(dfs).to_csv(local_output_file, index=False)
 
-    def run_fstack(self, repetition: int, guest, loadgen, host):
+    def run_fstack(self, repetition: int, guest, loadgen, host, confidential: bool):
         remote_output_file = "/tmp/iperf.log"
         local_output_file = self.output_filepath(repetition)
         local_output_json = self.output_filepath(repetition, extension="json")
@@ -114,7 +114,7 @@ class IperfTest(AbstractBenchTest):
         guest.copy_to(fstack_base_config, fstack_config)
 
         guest.stop_fstack_iperf()
-        guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -l 1M -J | tee {remote_output_file}; echo FINISHED >> {remote_output_file}")
+        guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -l 1M -J | tee {remote_output_file}; echo FINISHED >> {remote_output_file}", confidential=confidential)
 
         sleep(G.DURATION_S + 3)
         # guest.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
@@ -200,6 +200,7 @@ def main(measurement, plan_only: bool = False):
         haltpoll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
 
         vhost_user = SimpleNamespace(confidential=False, interface=Interface.PKTGEN_DPDK, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
+        vhost_user_slick = SimpleNamespace(confidential=True, interface=Interface.PKTGEN_DPDK, iommu_hack=False, linux_cmdline=""), # broken! Currently crashes the guest kernel
     )
 
 
@@ -243,7 +244,7 @@ def main(measurement, plan_only: bool = False):
                     measurement.mark_vm_initialized(0)
 
                     if system_params.interface.is_vhost_user():
-                        test.run_fstack(repetition, guest, host, host)
+                        test.run_fstack(repetition, guest, host, host, system_params.confidential)
                     else:
                         test.run(repetition, guest, host, host)
 

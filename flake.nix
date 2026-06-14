@@ -32,6 +32,7 @@
       flake = false;
     };
     fstack-playground.url = "github:pogoba/fstack-playground";
+    fstack-playground.inputs.dpdk-cvms-src.follows = "dpdk-cvms-src";
   };
 
   outputs = { self, nixpkgs, flake-utils, nixos-generators, rust-overlay
@@ -171,6 +172,7 @@
           in (pkgs.linuxPackagesFor kernel).perf;
           test = pkgs.callPackage ./node/pkg.nix { };
           iperf-fstack = args.fstack-playground.packages.${system}.iperf-fstack-native;
+          iperf-fstack-cvms = args.fstack-playground.packages.${system}.iperf-fstack-native-cvms;
         };
         pkgs = nixpkgs.legacyPackages.${system};
         devShells = let

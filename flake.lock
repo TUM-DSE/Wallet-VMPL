@@ -160,17 +160,20 @@
     },
     "fstack-playground": {
       "inputs": {
+        "dpdk-cvms-src": [
+          "dpdk-cvms-src"
+        ],
         "f-stack": "f-stack",
         "fstack-iperf-bad-src": "fstack-iperf-bad-src",
         "iperf-fstack-src": "iperf-fstack-src",
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1781378971,
-        "narHash": "sha256-AwgHpXDoSjUZ58s8BK0dKtxzD70HfLrVtNhCoh9zsQk=",
+        "lastModified": 1781392288,
+        "narHash": "sha256-o/OGGHsFdXVfavL1UU46BHyXqT0PRjclafv7zhEZqh4=",
         "owner": "pogoba",
         "repo": "fstack-playground",
-        "rev": "4e4d956ac255cc76c410f2908a3c65de68759098",
+        "rev": "6c781b5ac47b47ef8fb9437ff9ce7b4efd00e9f5",
         "type": "github"
       },
       "original": {

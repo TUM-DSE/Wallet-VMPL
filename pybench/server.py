@@ -1324,8 +1324,11 @@ class Server(ABC):
         cmd = f"{pipefail_prefix}echo '{cmd}' | sudo socat - UNIX-CONNECT:{remote_vpp_sock} | strings"
         return cmd
 
-    def start_fstack_iperf(self: 'Server', fstack_config: str, options: str, server: bool = False, vm_number: int = 0):
-        binary = f"{self.project_root}/.nix-builds/iperf-fstack/bin/iperf3"
+    def start_fstack_iperf(self: 'Server', fstack_config: str, options: str, server: bool = False, vm_number: int = 0, confidential: bool = False):
+        if not confidential:
+            binary = f"{self.project_root}/.nix-builds/iperf-fstack/bin/iperf3"
+        else:
+            binary = f"{self.project_root}/.nix-builds/iperf-fstack-cvms/bin/iperf3"
 
         # f-stack's eth_vhost backend serves the same socket QEMU connects to as a vhost-user client
         vhost_sock = MultiHost.vhost_user_sock(vm_number)

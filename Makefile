@@ -230,6 +230,7 @@ nix-builds:
 	nix build .#cvm-vfio -o ./.nix-builds/cvm-vfio
 	nix build .#vpp -o ./.nix-builds/vpp
 	nix build .#iperf-fstack -o .nix-builds/iperf-fstack
+	nix build .#iperf-fstack-cvms -o .nix-builds/iperf-fstack-cvms
 
 slick-tmux:
 	tmux -L vmux-${USER}.tmux.sock at
