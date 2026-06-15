@@ -221,14 +221,13 @@ def main(measurement, plan_only: bool = False):
                 sed_cmd = f"sed -i {shlex.quote(f's|GRUB_CMDLINE_LINUX_EXTRA=.*|{sed_replacement}|')} /etc/default/grub"
                 host.exec(f"virt-customize --format qcow2 -a {host.guest_root_disk_path} --run-command {shlex.quote(sed_cmd)} --run-command 'grub-mkconfig -o /boot/grub/grub.cfg'")
 
+                host.stop_fstack_iperf()
                 if system_params.interface.is_vhost_user():
                     config_name = "config-vhost-a.ini"
                     fstack_base_config = f"{host.project_root}/pybench/hosts/{config_name}"
                     fstack_config = "/tmp/fstack.conf"
                     host.copy_to(fstack_base_config, fstack_config)
 
-
-                    host.stop_fstack_iperf()
                     host.start_fstack_iperf(fstack_config, "-s -B 192.168.31.1")
 
                 with measurement.virtual_machine(system_params.interface, run_guest_args=dict(confidential=system_params.confidential,iommu_hack=system_params.iommu_hack)) as guest:
