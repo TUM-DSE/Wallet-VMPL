@@ -11,7 +11,7 @@ do
     PID=$!
     sleep 5
     start_time=$(date +%s%N)
-    end_time=$(docker run --runtime kata-qemu ubuntu:24.04 date +%s%N)
+    end_time=$(docker run --runtime kata-qemu-slick ubuntu:24.04 date +%s%N)
     sudo journalctl -n50 -t kata > result/log-${i}.txt
     sudo kill ${PID}
     sleep 5
