@@ -38,6 +38,8 @@ class MemoryTest(AbstractBenchTest):
         host.exec(f'mkdir -p {path_dirname(self.output_filepath(repetition))} || true')
         if self.system == "vm":
             self.run_vm(host, repetition)
+        elif self.system == "cvm":
+            self.run_vm(host, repetition, confidential=True)
         elif self.system == "kata":
             self.run_docker(host, "kata-qemu-slick", repetition)
         else:
@@ -68,7 +70,6 @@ class MemoryTest(AbstractBenchTest):
                 sleep(grace_boottime)
 
             if i+1 in INSTANCES:
-                breakpoint()
                 # collect measurement
                 mem_usages = []
                 for j in range(i+1):
@@ -91,7 +92,7 @@ class MemoryTest(AbstractBenchTest):
         print(df)
         pd.concat(dfs).to_csv(self.output_filepath(repetition), index=False)
 
-    def run_vm(self, host, repetition):
+    def run_vm(self, host, repetition, confidential=False):
         batch = 10
         grace_boottime = 30
 
@@ -102,11 +103,15 @@ class MemoryTest(AbstractBenchTest):
                 'sudo', 'cgexec', '--sticky', '-g', f'memory:vm_scale_{i}',
                 # '/scratch/okelmann/Wallet-VMPL4/Benchmarks/CVM_eval/build/qemu-amd-sev-snp/bin/qemu-system-x86_64',
                 f'{PROJECT_ROOT}/.nix-builds/qemu-coconut-igvm/bin/qemu-system-x86_64',
+
+                # '-machine', 'q35,mem-merge=on',
+                (f' -machine q35,confidential-guest-support=sev0' if confidential else f' -machine q35,mem-merge=on'), # not sure if this merging actually works (especially giving our memory scopes)
+                (f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={PROJECT_ROOT}/svsm/bin/coconut-qemu.igvm' if confidential else ''),
+
                 '-cpu', 'host',
                 '-enable-kvm',
                 '-smp', '1',
                 '-m', '0.5G',
-                '-machine', 'q35,mem-merge=on',
 	            f'-drive file={PROJECT_ROOT}/guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=on',
 	            '-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on',
 	            '-device scsi-hd,drive=disk0,bootindex=0',
@@ -130,7 +135,7 @@ class MemoryTest(AbstractBenchTest):
             host.tmux_new(f"qemu-{i}", " ".join(cmd))
 
             if (i % batch) == 0 or i+1 in INSTANCES: # give each batch ample startup time
-                print(f"Wait for VM {i} to come up")
+                print(f"Wait for {'CVM' if confidential else 'VM'} {i} to come up")
                 sleep(grace_boottime)
 
             if i+1 in INSTANCES:
@@ -169,7 +174,7 @@ def main(measurement):
     host, loadgen = measurement.hosts()
     tests : List[MemoryTest] = []
     matrix = dict(
-        system = [ "vm", "kata" ],
+        system = [ "vm", "cvm", "kata" ],
         num_vms = [ 20 ],
         repetitions = [ 1 ],
     )
