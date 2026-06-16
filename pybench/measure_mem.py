@@ -32,7 +32,29 @@ class MemoryTest(AbstractBenchTest):
         return f"mem_{self.system}_{self.num_vms}"
 
     def estimated_runtime(self):
-        return 20
+        # Runtime is dominated by grace_boottime sleeps that fire when
+        # (i % batch) == 0 OR (i+1) in INSTANCES. See run_vm / run_docker.
+        if self.system == "kata":
+            batch, grace, per_iter = 25, 15, 0.3  # docker run + pgrep
+        else:  # vm / cvm
+            batch, grace, per_iter = 10, 30, 0.3  # cgroup mkdir + tmux_new
+
+        sleep_iters = sum(
+            1 for i in range(self.num_vms)
+            if (i % batch) == 0 or (i + 1) in INSTANCES
+        )
+        sleep_s = sleep_iters * grace
+
+        # Per-i SSH overhead (docker run / tmux_new / etc.)
+        spawn_s = self.num_vms * per_iter
+
+        # Memory read-out at each INSTANCES checkpoint: ~one exec per j
+        measure_s = sum(i for i in INSTANCES if i <= self.num_vms) * 0.05
+
+        # cleanup() runs before and after, each sleeps 2s plus a few execs
+        cleanup_s = 2 * (2 + 1)
+
+        return (sleep_s + spawn_s + measure_s + cleanup_s) * self.repetitions
 
     def run(self, host, repetition):
         host.exec(f'mkdir -p {path_dirname(self.output_filepath(repetition))} || true')
@@ -48,7 +70,7 @@ class MemoryTest(AbstractBenchTest):
 
 
     def run_docker(self, host, runtime, repetition):
-        batch = 10
+        batch = 20
         grace_boottime = 15
 
         dfs = []
@@ -57,7 +79,7 @@ class MemoryTest(AbstractBenchTest):
             docker_cidfile = f"/tmp/docker-cid-{i}"
             # docker_run_log = f"/tmp/docker-run-log-{i}"
             # host.exec(f"sudo rm {docker_run_log} || true")
-            cid = host.exec(f'docker run --rm --runtime {runtime} -d ubuntu:24.04 sleep 999').strip()
+            cid = host.exec(f'docker run --rm --runtime {runtime} -d ubuntu:24.04 sleep 99999').strip()
             host.exec(f"echo {cid} > {docker_cidfile}")
             # host.wait_for_success(f"grep ok {docker_run_log}", timeout=30)
             # cid = host.exec(f"cat {docker_cidfile}").strip()
@@ -66,7 +88,7 @@ class MemoryTest(AbstractBenchTest):
             qemu_pids += [ qemu_pid ]
 
             if (i % batch) == 0 or i+1 in INSTANCES: # give each batch ample startup time
-                print(f"Wait for VM {i} to come up")
+                print(f"Wait for docker ({runtime}) {i} to come up")
                 sleep(grace_boottime)
 
             if i+1 in INSTANCES:
@@ -175,18 +197,24 @@ def main(measurement):
     tests : List[MemoryTest] = []
     matrix = dict(
         system = [ "vm", "cvm", "kata" ],
-        num_vms = [ 20 ],
+        num_vms = [ 700 ],
         repetitions = [ 1 ],
     )
     matrix = measurement.apply_cmdline_overrides(matrix)
     tests = MemoryTest.list_tests(matrix)
+    MemoryTest.estimate_time2(tests, [])
 
-    for test in tests:
-        for repetition in range(test.repetitions):
-            test.cleanup(host)
-            repetition = 0
-            test.run(host, repetition)
-            test.cleanup(host)
+    with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
+        for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, [ "system", "num_vms" ]):
+            assert len(a_tests) == 1 # we have looped through all variables now, right?
+            test = a_tests[0]
+            info(f"Running {test}")
+            for repetition in range(test.repetitions):
+                test.cleanup(host)
+                repetition = 0
+                test.run(host, repetition)
+                test.cleanup(host)
+            bench.done(test)
 
 if __name__ == "__main__":
     measurement = Measurement(test_type=MemoryTest)

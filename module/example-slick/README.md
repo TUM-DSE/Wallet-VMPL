@@ -56,6 +56,27 @@ make run
 This will exectue `module/example-slick/com.c` in VMPL2 as a Trustlet.
 
 
+# Boot, Attestation, and Memory usage measurements
+
+```
+make boottime_setup # TODO check and replace!
+
+make run_boottime_native
+make run_boottime_gramine
+make run_boottime_kata
+
+python3 boottime_parser.py
+
+
+# clean up tmp builds
+make build_svsm
+make gramine
+
+
+git submodule update --init Benchmarks/CVM_eval
+make run_scale_vm
+```
+
 ### TODOs
 
 - add clangd-lsp plugin

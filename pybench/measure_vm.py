@@ -672,6 +672,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                         # guest.exec("insmod ./home/Wallet-VMPL4/linux/drivers/vfio/pci/vfio-pci.ko")
 
                         guest.exec("modprobe vfio-pci")
+                        guest.exec("rmmod module/vmpl.ko || true")
                         guest.exec("insmod module/vmpl.ko")
                         remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                         if test.system in [ "containers", "mirrorKni" ]:

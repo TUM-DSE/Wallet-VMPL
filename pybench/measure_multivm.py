@@ -431,6 +431,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                     def foreach_parallel(i, guest): # pyright: ignore[reportGeneralTypeIssues]
                         guest.exec("modprobe vfio-pci")
+                        guest.exec("rmmod module/vmpl.ko || true")
                         guest.exec("insmod module/vmpl.ko")
                         guest.exec(f"{remote_dpdk_path}/bin/dpdk-devbind.py -b vfio-pci {guest.test_iface_addr} --noiommu-mode")
                     end_foreach(guests, foreach_parallel)
