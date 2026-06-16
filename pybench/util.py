@@ -2,6 +2,7 @@ from subprocess import check_output, STDOUT
 from typing import cast, Any, TypeVar, Iterator, cast, List, Dict, Callable, Tuple, Any
 import random
 import string
+from root import PROJECT_ROOT
 
 def run(command: str) -> str:
     return check_output(command, stderr=STDOUT, shell=True).decode('utf-8')
@@ -71,3 +72,51 @@ def strip_subnet_mask(ip_addr: str):
 def randomword(length):
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(length))
+
+def _kvm_loaded_build_id(server) -> str:
+    # /sys/module/kvm/notes/.note.gnu.build-id is the raw ELF note
+    # (header + "GNU\0" + 20-byte SHA1). The last 40 hex chars are the id.
+    return server.exec(
+        "od -An -tx1 /sys/module/kvm/notes/.note.gnu.build-id "
+        "| tr -d ' \\n' | tail -c 40"
+    ).strip()
+
+
+def _kvm_file_build_id(server, path: str) -> str:
+    if path.endswith(".xz"):
+        # readelf can't seek a pipe, so stage to a temp file.
+        cmd = (
+            f"TMP=$(mktemp --suffix=.ko) && "
+            f"xzcat {path} > $TMP && "
+            f"readelf -n $TMP | awk '/Build ID:/ {{print $3; exit}}'; "
+            f"rm -f $TMP"
+        )
+    else:
+        cmd = f"readelf -n {path} | awk '/Build ID:/ {{print $3; exit}}'"
+    return server.exec(cmd).strip()
+
+
+def is_kvm_version(server, of_system=False, of_wallet=False) -> bool:
+    """
+    Check which kvm.ko is currently loaded by comparing GNU build-ids
+    (linker-stamped, unique per build).
+
+    Symbol-name probes don't work here: the NixOS stock kernel already
+    carries the SVSM/VMPL symbols, so symbol presence can't distinguish
+    it from host/kvm/kvm.ko. coresize is also unreliable (loader padding,
+    per-cpu replication, kallsyms retention all inflate it).
+
+    of_system: stock kvm in /run/booted-system/kernel-modules/...
+    of_wallet: project kvm at host/kvm/kvm.ko
+    """
+    assert of_system ^ of_wallet, "Exactly one of of_system / of_wallet must be set"
+
+    if of_system:
+        kernel = server.exec("uname -r").strip()
+        path = f"/run/booted-system/kernel-modules/lib/modules/{kernel}/kernel/arch/x86/kvm/kvm.ko.xz"
+    else:
+        path = f"{PROJECT_ROOT}/host/kvm/kvm.ko"
+
+    return _kvm_loaded_build_id(server) == _kvm_file_build_id(server, path)
+
+

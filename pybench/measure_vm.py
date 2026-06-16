@@ -13,7 +13,7 @@ from enums import Interface
 from time import sleep
 import os
 import getpass
-from util import safe_cast, deduplicate
+from util import safe_cast, deduplicate, is_kvm_version
 from datetime import datetime
 from subprocess import CalledProcessError
 
@@ -627,6 +627,11 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
 
     if plan_only:
         return
+
+    if not is_kvm_version(host, of_wallet=True):
+        warning("Incorrect KVM version (system). Reloading to wallet module. ")
+        host.exec("sudo rmmod kvm_amd && sudo rmmod kvm")
+        host.exec(f"sudo insmod {PROJECT_ROOT}/host/kvm/kvm.ko && {PROJECT_ROOT}/host/kvm/kvm_amd.ko")
 
     qemu_pid = None
     pktgen_pid = None

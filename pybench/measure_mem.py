@@ -13,7 +13,7 @@ from enums import Interface
 from time import sleep
 import os
 import getpass
-from util import safe_cast, deduplicate, strip_subnet_mask
+from util import safe_cast, deduplicate, strip_subnet_mask, is_kvm_version
 from datetime import datetime
 from subprocess import CalledProcessError
 import traceback
@@ -203,6 +203,11 @@ def main(measurement):
     matrix = measurement.apply_cmdline_overrides(matrix)
     tests = MemoryTest.list_tests(matrix)
     MemoryTest.estimate_time2(tests, [])
+
+    if not is_kvm_version(host, of_system=True):
+        warning("Incorrect KVM version (wallet). Reloading to system module. ")
+        host.exec("sudo rmmod kvm_amd && sudo rmmod kvm")
+        host.exec("sudo modprobe kvm_amd")
 
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
         for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, [ "system", "num_vms" ]):
