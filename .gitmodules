@@ -30,3 +30,6 @@
 [submodule "AzureTraces/invitro"]
 	path = AzureTraces/invitro
 	url = git@github.com:dimstav23/invitro.git
+[submodule "svsm-vanilla"]
+	path = svsm-vanilla
+	url = https://github.com/TUM-DSE/svsm.git
