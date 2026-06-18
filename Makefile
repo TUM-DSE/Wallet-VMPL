@@ -131,6 +131,10 @@ node/bin/node:
 	cd node; make
 	cp node/bin/node module/
 
+
+build_svsm_vanilla:
+	cd svsm-vanilla; LDFLAGS="-L$$GLIBC_STATIC" FW_FILE="${PWD}/firmware/OVMF.fd" make
+
 clean:
 	git submodule foreach --recursive git clean -xfd
 	cd node; make clean
@@ -155,8 +159,10 @@ prepare_all: submodules build_svsm gramine guest.qcow2 setup_guest_net
 initialize:
 	git submodule update --init --recursive Benchmarks/SeBS
 	git submodule update --init --recursive svsm
+	git submodule update --init --recursive svsm-vanilla
 	cd svsm/kernel/src/my_crypto/; ./build.sh
 	make build_svsm
+	make build_svsm_vanilla
 	git submodule update --init --recursive gramine-svsm
 	cd gramine-svsm; docker build -t gramine-build-container .
 	make gramine
