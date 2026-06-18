@@ -19,10 +19,12 @@ virt-copy-in -a $2.qcow2 container/sshd_config /etc/ssh/
 virt-copy-in -a $2.qcow2 container/fstab /etc/
 virt-copy-in -a $2.qcow2 container/mount-9p.sh /usr/local/bin/
 virt-copy-in -a $2.qcow2 container/mount-9p.service /etc/systemd/system/
+virt-copy-in -a $2.qcow2 Benchmarks/Boottime/wallet/service/outb.service /etc/systemd/system/
 virt-copy-in -a $2.qcow2 container/nasm /bin/
 virt-copy-in -a $2.qcow2 scripts/grub /etc/default/
 virt-customize --format qcow2 -a $2.qcow2 --run-command "chmod +x /usr/local/bin/mount-9p.sh"\
              --run-command "systemctl enable mount-9p.service"\
+             --run-command "systemctl enable outb.service"\
              --run-command "systemctl disable systemd-timesyncd"\
              --run-command "chmod 700 /etc/netplan/99_config.yaml"\
              --run-command "chown root:root /root/.ssh/*"\

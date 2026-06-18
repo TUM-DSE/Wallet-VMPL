@@ -31,11 +31,18 @@ BEGIN {
     @EVENT[214] = "Monitor: invoke end";
     @EVENT[220] = "Monitor: invoke_result_copy";
     @EVENT[221] = "Monitor: invoke_result_copy end";
+    @entry = 0;
+    printf("INITED\n")
 }
 
 // QEMU entry point
-u:qemu-system-x86_64:main {
-    printf("%llu: QEMU: main\n", nsecs);
+u:/scratch/okelmann/Wallet-VMPL4/.nix-builds/qemu-coconut-igvm/bin/qemu-system-x86_64:main {
+    printf("%llu: QEMU: main\n", nsecs(tai));
+}
+
+tracepoint:kvm:kvm_entry / @entry == 0 / {
+    printf("%llu: KVM Entry: main\n", nsecs(tai));
+    @entry = 1;
 }
 
 tracepoint:kvm:kvm_pio {
