@@ -127,13 +127,14 @@ class MemoryTest(AbstractBenchTest):
                 f'{PROJECT_ROOT}/.nix-builds/qemu-coconut-igvm/bin/qemu-system-x86_64',
 
                 # '-machine', 'q35,mem-merge=on',
-                (f' -machine q35,confidential-guest-support=sev0' if confidential else f' -machine q35,mem-merge=on'), # not sure if this merging actually works (especially giving our memory scopes)
-                (f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={PROJECT_ROOT}/svsm/bin/coconut-qemu.igvm' if confidential else ''),
+                (f' -machine q35,confidential-guest-support=sev0,memory-backend=ram1' if confidential else f' -machine q35,mem-merge=on') +# not sure if this merging actually works (especially giving our memory scopes)
+                (f' -object sev-snp-guest,id=sev0,cbitpos=51,reduced-phys-bits=1,init-flags=4,igvm-file={PROJECT_ROOT}/svsm-vanilla/bin/coconut-qemu.igvm' if confidential else ''),
+                (f' -object memory-backend-memfd,id=ram1,size=4G,share=on ' if confidential else "") +
 
-                '-cpu', 'host',
+                '-cpu EPYC-v4,host-phys-bits=true',
                 '-enable-kvm',
                 '-smp', '1',
-                '-m', '0.5G',
+                '-m', ( '4G' if confidential else '0.5G' ),
 	            f'-drive file={PROJECT_ROOT}/guest.qcow2,if=none,id=disk0,format=qcow2,snapshot=on',
 	            '-device virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=on',
 	            '-device scsi-hd,drive=disk0,bootindex=0',
@@ -216,7 +217,6 @@ def main(measurement):
             info(f"Running {test}")
             for repetition in range(test.repetitions):
                 test.cleanup(host)
-                repetition = 0
                 test.run(host, repetition)
                 test.cleanup(host)
             bench.done(test)
