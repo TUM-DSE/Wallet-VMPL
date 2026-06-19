@@ -215,18 +215,158 @@ def _parse_kata(root):
     return rows, warnings
 
 
+# ---------- measure_startup (pybench/measure_startup.py) ---------------------
+
+def _parse_bpftrace_events(text):
+    """Yield (ts_ns, event_id_or_None, event_name) from a boot_time_eval.bt log."""
+    for line in text:
+        line = line.strip()
+        if not line or line.startswith("Attaching") or line == "INITED":
+            continue
+        if ":" not in line:
+            continue
+        ts_str, rest = line.split(":", 1)
+        try:
+            ts = int(ts_str)
+        except ValueError:
+            continue
+        rest = rest.strip()
+        parts = rest.split(None, 1)
+        if parts and parts[0].isdigit():
+            yield ts, int(parts[0]), parts[1] if len(parts) > 1 else ""
+        else:
+            yield ts, None, rest
+
+
+def _first_by_id(events, target_id):
+    for ts, eid, _ in events:
+        if eid == target_id:
+            return ts
+    return None
+
+
+def _first_by_name(events, target_name):
+    for ts, _, name in events:
+        if name == target_name:
+            return ts
+    return None
+
+
+def _pick_valid(*candidates, lo, hi):
+    """Return the first candidate timestamp in [lo, hi] (and non-zero)."""
+    for ts in candidates:
+        if ts is not None and ts != 0 and lo <= ts <= hi:
+            return ts
+    return None
+
+
+def _parse_measure_startup_sample(text):
+    events = list(_parse_bpftrace_events(text))
+    qemu_start = _first_by_name(events, "QEMU: main")
+    if qemu_start is None:
+        raise ValueError("missing 'QEMU: main' marker")
+    systemd_end = _first_by_id(events, 100)
+    if systemd_end is None:
+        raise ValueError("missing event 100 (Linux: systemd init end)")
+    if not (qemu_start <= systemd_end):
+        raise ValueError(
+            f"timestamps not monotonic: qemu={qemu_start} systemd={systemd_end}")
+
+    # OVMF boundaries: prefer the SVSM-specific port-0xf4 markers (CVM); fall
+    # back to KVM Entry (first guest entry ≈ OVMF start) and the OVMF uprobe
+    # "last POST" marker (≈ ExitBootServices) for stock-OVMF VM runs.
+    kvm_entry = _first_by_name(events, "KVM Entry: main")
+    ovmf_post = _first_by_name(
+        events, "OVMF: last POST (ExitBootServices proxy)")
+    port_50 = _first_by_id(events, 50)
+    port_52 = _first_by_id(events, 52)
+
+    ovmf_start = _pick_valid(port_50, kvm_entry, lo=qemu_start, hi=systemd_end)
+    ovmf_end = _pick_valid(ovmf_post, port_52, lo=qemu_start, hi=systemd_end)
+
+    steps = {}
+    if ovmf_start is not None and ovmf_end is not None and ovmf_start <= ovmf_end:
+        steps[STEP_QEMU] = (ovmf_start - qemu_start) / 1e6
+        steps[STEP_OVMF] = (ovmf_end - ovmf_start) / 1e6
+        steps[STEP_LINUX] = (systemd_end - ovmf_end) / 1e6
+        mode = "full"
+    else:
+        steps[STEP_BOOT_COMBINED] = (systemd_end - qemu_start) / 1e6
+        mode = "coarse"
+
+    invoke_start = _first_by_id(events, 107)
+    invoke_end = _first_by_id(events, 108)
+    if invoke_start is not None and invoke_end is not None \
+            and systemd_end <= invoke_start <= invoke_end:
+        steps[STEP_RUNTIME] = (invoke_start - systemd_end) / 1e6
+        steps[STEP_INVOKE] = (invoke_end - invoke_start) / 1e6
+    return steps, mode
+
+
+def _parse_measure_startup(results_dir):
+    rows, warnings = [], []
+    d = Path(results_dir)
+    if not d.is_dir():
+        warnings.append(f"measure-startup: missing dir {d}")
+        return rows, warnings
+    for system in ("vm", "cvm"):
+        files = sorted(d.glob(f"startup_{system}_rep*.log"))
+        if not files:
+            warnings.append(
+                f"measure-startup: no startup_{system}_rep*.log files in {d}")
+            continue
+        modes, no_invoke = [], 0
+        for path in files:
+            m = re.search(rf"startup_{system}_rep(\d+)\.log$", path.name)
+            sample = int(m.group(1)) if m else -1
+            try:
+                steps, mode = _parse_measure_startup_sample(_read_lines(path))
+            except Exception as e:
+                warnings.append(f"measure-startup {system} {path.name}: {e}")
+                continue
+            modes.append(mode)
+            if STEP_INVOKE not in steps:
+                no_invoke += 1
+            for step, ms in steps.items():
+                rows.append({"system": system, "sample": sample,
+                             "step": step, "time_ms": ms})
+        if modes and all(m == "coarse" for m in modes):
+            warnings.append(
+                f"measure-startup {system}: OVMF port 50/52 markers absent in "
+                f"every sample — fell back to {STEP_BOOT_COMBINED} breakdown")
+        elif "coarse" in modes:
+            n = sum(1 for m in modes if m == "coarse")
+            warnings.append(
+                f"measure-startup {system}: {n} sample(s) fell back to "
+                f"{STEP_BOOT_COMBINED} (no OVMF markers)")
+        if no_invoke:
+            warnings.append(
+                f"measure-startup {system}: {no_invoke} sample(s) lack events "
+                f"107/108 — {STEP_RUNTIME}/{STEP_INVOKE} omitted "
+                f"(measure_startup.py kills QEMU on systemd init end)")
+    return rows, warnings
+
+
 # ---------- public api -------------------------------------------------------
 
-def parse(root: os.PathLike = DEFAULT_ROOT, *, verbose: bool = True) -> pd.DataFrame:
+def parse(root: os.PathLike = DEFAULT_ROOT, *, verbose: bool = True,
+          measure_startup: os.PathLike = None) -> pd.DataFrame:
     """Return a long-form DataFrame with columns: system, sample, step, time_ms.
 
     One row per duration sample. Missing/broken inputs produce warnings on
     stderr (when verbose) and are silently dropped from the frame.
+
+    If `measure_startup` is provided, also parse vm/cvm variants of
+    pybench/measure_startup.py output (e.g. /tmp/out1/startup_{vm,cvm}_rep*.log).
     """
     root = Path(root)
     all_rows, all_warnings = [], []
     for fn in (_parse_native, _parse_gramine, _parse_kata):
         rows, warnings = fn(root)
+        all_rows.extend(rows)
+        all_warnings.extend(warnings)
+    if measure_startup is not None:
+        rows, warnings = _parse_measure_startup(measure_startup)
         all_rows.extend(rows)
         all_warnings.extend(warnings)
     if verbose and all_warnings:
@@ -237,9 +377,20 @@ def parse(root: os.PathLike = DEFAULT_ROOT, *, verbose: bool = True) -> pd.DataF
 
 
 if __name__ == "__main__":
-    df = parse()
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--measure-startup", metavar="DIR",
+                    help="Results dir from pybench/measure_startup.py "
+                         "(e.g. /tmp/out1) with startup_{vm,cvm}_rep*.log files")
+    ap.add_argument("-o", "--output", metavar="CSV",
+                    help="Write the long-form DataFrame to this CSV path")
+    args = ap.parse_args()
+    df = parse(measure_startup=args.measure_startup)
     print(df)
     if not df.empty:
         print()
         print(df.groupby(["system", "step"])["time_ms"]
                 .agg(["count", "mean", "std"]))
+    if args.output:
+        df.to_csv(args.output, index=False)
+        print(f"\nwrote {len(df)} rows to {args.output}", file=sys.stderr)
