@@ -2647,7 +2647,7 @@ class LoadGen(Server):
         self.exec(f'sudo ip address add {self.test_iface_ip_net} dev {self.test_iface}')
 
 
-    def run_iperf_client(self, runtime: int, server_hostname: str, output_path: str, tmp_out_path: str, direction: str = "forward", proto: str = "tcp", length: int = -1, vm_num = ""):
+    def run_iperf_client(self, runtime: int, server_hostname: str, output_path: str, tmp_out_path: str, direction: str = "forward", proto: str = "tcp", length: int = -1, vm_num = "", extra_options: str = ""):
         """
         Starts iperf client
         length: default if -1
@@ -2671,6 +2671,8 @@ class LoadGen(Server):
             options += " -u -b 0"
         elif proto != "tcp":
             warning(f"Unknown protocol {proto}. Using tcp.")
+
+        options += extra_options
 
         info("Starting iperf client on " + server_hostname)
         self.tmux_new(f"iperf3-client{vm_num}", f"iperf3 -c {server_hostname} -t {runtime} {options} | tee {tmp_out_path}; cp {tmp_out_path} {output_path}; sleep 999")

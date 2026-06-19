@@ -56,8 +56,9 @@ class IperfTest(AbstractBenchTest):
         sent_bits_per_second = end['sum_sent']['bits_per_second']
         received_bytes = end['sum_received']['bytes']
         received_bits_per_second = end['sum_received']['bits_per_second']
+        sent_bits_per_second = end['sum_sent']['bits_per_second']
 
-        gbitps = received_bits_per_second / 1024 / 1024 / 1024
+        gbitps = max(received_bits_per_second, sent_bits_per_second) / 1024 / 1024 / 1024
 
         print(f"{gbitps:.2f} GBit/s")
 
@@ -80,7 +81,8 @@ class IperfTest(AbstractBenchTest):
 
         guest.start_iperf_server(strip_subnet_mask(guest.test_iface_ip_net))
         sleep(10) # without this sleep all systems are at ~10Gbitps
-        LoadGen.run_iperf_client(host, G.DURATION_S, strip_subnet_mask(guest.test_iface_ip_net), remote_output_file, tmp_remote_output_file)
+        extra_options = " -u -P 8 -l 1440 -b 0"
+        LoadGen.run_iperf_client(host, G.DURATION_S, strip_subnet_mask(guest.test_iface_ip_net), remote_output_file, tmp_remote_output_file, extra_options=extra_options)
         sleep(G.DURATION_S)
         loadgen.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
         loadgen.exec(f'mkdir -p {path_dirname(local_output_file)} || true')
@@ -114,7 +116,9 @@ class IperfTest(AbstractBenchTest):
         guest.copy_to(fstack_base_config, fstack_config)
 
         guest.stop_fstack_iperf()
-        guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -l 1M -J | tee {remote_output_file}; echo FINISHED >> {remote_output_file}", confidential=confidential)
+        extra_options = "-u -P 8 -l 1440 -b 0"
+        extra_options = "-l 1M"
+        guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -J {extra_options} | tee {remote_output_file}; echo FINISHED >> {remote_output_file}", confidential=confidential)
 
         sleep(G.DURATION_S + 3)
         # guest.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
