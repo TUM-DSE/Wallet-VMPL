@@ -86,10 +86,10 @@ class StartupTest(AbstractBenchTest):
         host.tmux_new("qemu-bpftrace", f"sudo bpftrace {PROJECT_ROOT}/boot_time_eval.bt | tee {output}")
         host.wait_for_success(f'grep "INITED" {output}', timeout=30)
         host.tmux_new(f"qemu", " ".join(cmd))
-        host.wait_for_success(f'grep "systemd init end" {output}', timeout=60)
+        # host.wait_for_success(f'grep "systemd init end" {output}', timeout=60)
+        host.wait_for_success(f'grep "Trustlet Invocation End" {output}', timeout=60)
         host.tmux_kill("qemu")
         host.exec(f"cp {output} {self.output_filepath(repetition)}")
-        breakpoint()
 
     def cleanup(self, host):
         host.tmux_kill("qemu")
@@ -99,18 +99,26 @@ def main(measurement):
     host, loadgen = measurement.hosts()
     tests : List[StartupTest] = []
     matrix = dict(
-        system = [ "vm", "cvm", "kata" ],
-        repetitions = [ 1 ],
+        system = [ "vm", "cvm" ],
+        repetitions = [ 10 ],
         num_vms = [ 1 ],
     )
+    if G.BRIEF:
+        matrix = dict(
+            system = [ "vm", "cvm" ],
+            repetitions = [ 1 ],
+            num_vms = [ 1 ],
+        )
+        matrix = measurement.apply_cmdline_overrides(matrix)
+        tests = StartupTest.list_tests(matrix)
     matrix = measurement.apply_cmdline_overrides(matrix)
     tests = StartupTest.list_tests(matrix)
     StartupTest.estimate_time2(tests, [])
 
-    # if not is_kvm_version(host, of_system=True):
-    #     warning("Incorrect KVM version (wallet). Reloading to system module. ")
-    #     host.exec("sudo rmmod kvm_amd && sudo rmmod kvm")
-    #     host.exec("sudo modprobe kvm_amd")
+    if not is_kvm_version(host, of_system=True):
+        warning("Incorrect KVM version (wallet). Reloading to system module. ")
+        host.exec("sudo rmmod kvm_amd && sudo rmmod kvm")
+        host.exec("sudo modprobe kvm_amd")
 
     with Bench(tests=tests, args_reboot=[], brief = G.BRIEF) as (bench, bench_tests):
         for _param_dict, a_tests in bench.multi_iterator_dict(bench_tests, [ "system", "num_vms" ]):

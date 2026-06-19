@@ -45,13 +45,20 @@ tracepoint:kvm:kvm_entry / @entry == 0 / {
     @entry = 1;
 }
 
-tracepoint:kvm:kvm_pio {
-    if (args->port == BENCHMARK_PORT) {
-        printf("%llu: %d %s\n", nsecs(tai), args->val, @EVENT[args->val]);
+tracepoint:kvm:kvm_pio / args->port == BENCHMARK_PORT / {
+    if (args->val == 100) {
+        printf("%llu: OVMF: last POST (ExitBootServices proxy)\n", @ovmf_last_post);
     }
+    printf("%llu: %d %s\n", nsecs(tai), args->val, @EVENT[args->val]);
 }
 
+tracepoint:kvm:kvm_pio /args->port == 0x80/ {
+    @ovmf_last_post = nsecs(tai);
+}
+
+
 END {
+    clear(@ovmf_last_post);
     clear(@);
     clear(@EVENT);
 }
