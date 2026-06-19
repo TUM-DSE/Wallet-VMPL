@@ -120,6 +120,15 @@ class MemoryTest(AbstractBenchTest):
 
         dfs = []
         for i in range(self.num_vms):
+            # check memory availability before continuing
+            mem = host.exec("cat /proc/meminfo | head -n 3")
+            mem_available = int(mem.split("\n")[2].split(" ")[-2]) # kB
+            mem_total = int(mem.split("\n")[0].split(" ")[-2]) # kB
+            available_frac = mem_available / mem_total
+            if available_frac < 0.05:
+                error("Stopping test because we reached 95% memory utilization")
+                break
+
             host.exec(f"sudo mkdir /sys/fs/cgroup/vm_scale_{i}")
             cmd = [
                 'sudo', 'cgexec', '--sticky', '-g', f'memory:vm_scale_{i}',
