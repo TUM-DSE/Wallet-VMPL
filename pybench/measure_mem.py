@@ -117,17 +117,10 @@ class MemoryTest(AbstractBenchTest):
     def run_vm(self, host, repetition, confidential=False):
         batch = 10
         grace_boottime = 30
+        out_of_memory = False
 
         dfs = []
         for i in range(self.num_vms):
-            # check memory availability before continuing
-            mem = host.exec("cat /proc/meminfo | head -n 3")
-            mem_available = int(mem.split("\n")[2].split(" ")[-2]) # kB
-            mem_total = int(mem.split("\n")[0].split(" ")[-2]) # kB
-            available_frac = mem_available / mem_total
-            if available_frac < 0.05:
-                error("Stopping test because we reached 95% memory utilization")
-                break
 
             host.exec(f"sudo mkdir /sys/fs/cgroup/vm_scale_{i}")
             cmd = [
@@ -170,7 +163,16 @@ class MemoryTest(AbstractBenchTest):
                 print(f"Wait for {'CVM' if confidential else 'VM'} {i} to come up")
                 sleep(grace_boottime)
 
-            if i+1 in INSTANCES:
+            # check memory availability before continuing
+            mem = host.exec("cat /proc/meminfo | head -n 3")
+            mem_available = int(mem.split("\n")[2].split(" ")[-2]) # kB
+            mem_total = int(mem.split("\n")[0].split(" ")[-2]) # kB
+            available_frac = mem_available / mem_total
+            if available_frac < 0.05:
+                error("Stopping test because we reached 95% memory utilization")
+                out_of_memory = True
+
+            if (i+1 in INSTANCES) or out_of_memory:
                 # collect measurement
                 mem_usages = []
                 for j in range(i+1):
@@ -186,6 +188,9 @@ class MemoryTest(AbstractBenchTest):
                 df = DataFrame(data=data)
                 print(df.to_string())
                 dfs += [ df ]
+
+            if out_of_memory:
+                break
 
         df = pd.concat(dfs)
         print(df)
