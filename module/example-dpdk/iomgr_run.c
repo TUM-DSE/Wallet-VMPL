@@ -90,6 +90,9 @@ static __thread bool use_shm_alloc = false;
 
 
 int main(int argc, char *argv[]) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t startup_dpdk = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
     // --loadgen: no NIC; the iomgr trustlet acts as load generator and
     // measures VNFlet 0 (MODE_IOMGR_LOADGEN). Note that all other arguments
     // are ignored (EAL args below are hardcoded).
@@ -134,6 +137,8 @@ int main(int argc, char *argv[]) {
     // }
     // printf("Ring created: %s, count=%u\n", ring->name, rte_ring_count(ring));
 
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t startup_zygote = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
     int input_size = 16;
 
@@ -157,12 +162,18 @@ int main(int argc, char *argv[]) {
     }
     iomgr_zygote = create_zygote_privileged("../libpal.so", "iomgr_manifest", "../libsysdb.so");
 
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t startup_trustlet = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
     // for i in range(chain_len):
     //     trustlets.append(zygotes[i].create_trustlet("./empty.py"))
     for (int i = 0; i < chain_len; i++) {
         trustlets[i] = create_trustlet(zygotes[i], "./empty.py");
     }
     iomgr_trustlet = create_trustlet(iomgr_zygote, "./empty.py");
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t startup_iomgr_shm = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
     // Allocate shared memory at the same VA the trustlet uses (DATA_SHARED),
     // so pointers within shm (e.g. mbuf buf_addr) are valid in both address spaces.
@@ -221,6 +232,9 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t startup_init_trustlets = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
     // We do the following in the first trustlet now, because we are missing the allocator wrappers here that are present in the trustlet. I dont want to add them here, because it would pollute our cvmio external setup maybe?
     // // Create mbuf pool backed by shared memory
     // printf("create_shm_mbuf_pool(%s, %p)\n", "SHM2_MBUF_POOL", shared2);
@@ -250,6 +264,9 @@ int main(int argc, char *argv[]) {
     for (int idx = 0; idx < chains_len; idx++) {
         int i = chains[idx];
 
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t startup_trustlet_shm = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
         // #Create chains
         // for c in range(chained,i - 1):
         //     trustlets[c].create_channel(trustlets[c+1])
@@ -257,6 +274,9 @@ int main(int argc, char *argv[]) {
             // create_channel(trustlets[c], trustlets[c+1]);
             create_channel_at(iomgr_trustlet, trustlets[c], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
         }
+
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t startup_init_trustlets2 = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
         // Configure first-in-chain trustlet
         struct trustlet_configuration config;
@@ -294,6 +314,9 @@ int main(int argc, char *argv[]) {
         config.shm_addr_next = CHANNEL_ADDR(1);
         invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
 
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t startup_launch_trustlets = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
         // start long-running trustlets (each trustlet exactly once; with
         // chaining == 1, trustlet 0 is the single first==last node)
         /* invoke_trustlet(trustlets[1], "s", 0); */
@@ -309,6 +332,20 @@ int main(int argc, char *argv[]) {
         void *deq_objs[BURST_SIZE];
         struct rte_mbuf *bufs[BURST_SIZE];
 
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t startup_data_loop = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+
+        printf("STARTUP name duration_s\n");
+        printf("STARTUP dpdk %.6f\n",             (startup_zygote           - startup_dpdk)            / 1e9);
+        printf("STARTUP zygote %.6f\n",           (startup_trustlet         - startup_zygote)          / 1e9);
+        printf("STARTUP trustlet %.6f\n",         (startup_iomgr_shm        - startup_trustlet)        / 1e9);
+        printf("STARTUP iomgr_shm %.6f\n",        (startup_init_trustlets   - startup_iomgr_shm)       / 1e9);
+        printf("STARTUP init_trustlets %.6f\n",   (startup_trustlet_shm     - startup_init_trustlets)  / 1e9);
+        printf("STARTUP trustlet_shm %.6f\n",     (startup_init_trustlets2  - startup_trustlet_shm)    / 1e9);
+        printf("STARTUP init_trustlets2 %.6f\n",  (startup_launch_trustlets - startup_init_trustlets2) / 1e9);
+        printf("STARTUP launch_trustlets %.6f\n", (startup_data_loop        - startup_launch_trustlets)/ 1e9);
+        printf("STARTUP total %.6f\n",            (startup_data_loop        - startup_dpdk)            / 1e9);
+        fflush(stdout);
 
         printf("Starting %d iterations...\n", iterations);
         // create file /tmp/.dpdk-running to signal that the program is running (for external scripts)
@@ -319,7 +356,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         close(fd);
-        struct timespec ts;
+
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t start = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
