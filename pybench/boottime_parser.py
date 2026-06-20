@@ -16,15 +16,24 @@ from pathlib import Path
 
 import pandas as pd
 
-DEFAULT_ROOT = Path(__file__).resolve().parent.resolve().parent / "Benchmarks" / "Boottime"
+_PROJECT_ROOT = Path(__file__).resolve().parent.resolve().parent
+DEFAULT_ROOT = _PROJECT_ROOT / "Benchmarks" / "Boottime"
+ATTESTATION_CSV = _PROJECT_ROOT / "Benchmarks" / "Attestation" / "results.csv"
+ATTESTATION_BREAKDOWN_CVM_CSV = (
+    _PROJECT_ROOT / "Benchmarks" / "Attestation" / "breakdown" / "cvm" / "result.csv")
 
 STEP_EARLY = "Early runtime"
 STEP_QEMU = "VMM (QEMU)"
 STEP_OVMF = "Firmware (OVMF)"
 STEP_LINUX = "OS/Guest-OS"
 STEP_BOOT_COMBINED = "VMM+OVMF+OS"  # fallback when OVMF markers absent
+STEP_ATTESTATION = "Attestation"    # SVSM Monitor cold attestation (Wallet only)
 STEP_RUNTIME = "Runtime"
 STEP_INVOKE = "Invoke"
+
+# Wallet systems (in measure_startup output) that get the Attestation step
+# from Benchmarks/Attestation/results.csv attached. Extend as slick/trustlet land.
+WALLET_ATTEST_SYSTEMS = ("cvm",)
 
 
 def _read_lines(path):
@@ -303,6 +312,30 @@ def _parse_measure_startup_sample(text):
     return steps, mode
 
 
+def _parse_iomgr_mirror_sample(text):
+    """STARTUP lines from a *.mirror file (one task per line).
+
+    Format: 'STARTUP <name> <duration_seconds>'. The header row (name='name')
+    and the aggregate 'total' row are skipped so steps don't double-count.
+    """
+    steps = {}
+    for line in text:
+        line = line.strip()
+        if not line.startswith("STARTUP "):
+            continue
+        parts = line.split(None, 2)
+        if len(parts) < 3:
+            continue
+        name = parts[1]
+        if name in ("name", "total"):
+            continue
+        try:
+            steps[name] = float(parts[2]) * 1000.0
+        except ValueError:
+            continue
+    return steps
+
+
 def _parse_measure_startup(results_dir):
     rows, warnings = [], []
     d = Path(results_dir)
@@ -344,6 +377,86 @@ def _parse_measure_startup(results_dir):
                 f"measure-startup {system}: {no_invoke} sample(s) lack events "
                 f"107/108 — {STEP_RUNTIME}/{STEP_INVOKE} omitted "
                 f"(measure_startup.py kills QEMU on systemd init end)")
+
+    # iomgr per-task startup breakdown from measure_vm.py *.mirror files
+    iomgr_files = sorted(d.glob("vm_iomgr_*_rep*.mirror"))
+    for path in iomgr_files:
+        m = re.search(r"_rep(\d+)\.mirror$", path.name)
+        sample = int(m.group(1)) if m else -1
+        steps = _parse_iomgr_mirror_sample(_read_lines(path))
+        if not steps:
+            warnings.append(
+                f"measure-startup iomgr {path.name}: no STARTUP rows")
+            continue
+        for step, ms in steps.items():
+            rows.append({"system": "iomgr", "sample": sample,
+                         "step": step, "time_ms": ms})
+    return rows, warnings
+
+
+# ---------- attestation (Benchmarks/Attestation/results.csv) -----------------
+
+def _attestation_monitor_cold_ms(csv_path):
+    """Return (mean_ms, warning_or_None) for measure_monitor_cold."""
+    p = Path(csv_path)
+    if not p.exists():
+        return None, f"attestation: missing {p}"
+    try:
+        df = pd.read_csv(p)
+    except Exception as e:
+        return None, f"attestation: failed to read {p}: {e}"
+    sel = df[df["Measurement"] == "measure_monitor_cold"]
+    if sel.empty:
+        return None, f"attestation: 'measure_monitor_cold' not in {p}"
+    try:
+        return float(sel["Average (ns)"].iloc[0]) / 1e6, None
+    except (ValueError, TypeError) as e:
+        return None, f"attestation: bad 'measure_monitor_cold' value: {e}"
+
+
+def _attestation_kernel_mean_ms(csv_path):
+    """Return (mean_ms, warning_or_None) for the kernel-hash microbenchmark."""
+    p = Path(csv_path)
+    if not p.exists():
+        return None, f"attestation: missing {p}"
+    try:
+        df = pd.read_csv(p)
+    except Exception as e:
+        return None, f"attestation: failed to read {p}: {e}"
+    sel = df[df["file"] == "kernel"]["time"]
+    if sel.empty:
+        return None, f"attestation: no 'kernel' rows in {p}"
+    return float(sel.mean()) / 1e6, None
+
+
+def _parse_attestation(csv_path=ATTESTATION_CSV,
+                       breakdown_cvm_csv=ATTESTATION_BREAKDOWN_CVM_CSV):
+    """Attach the SVSM Attestation cost to Wallet systems.
+
+    The Attestation step sums:
+      - measure_monitor_cold (SNP attestation report for the SVSM Monitor),
+        from Benchmarks/Attestation/results.csv
+      - kernel-hash time (~61 MB guest kernel image, SHA-via-libmy_crypto),
+        averaged over breakdown/cvm/result.csv
+
+    Emitted as a single aggregate row (sample=0) per system in
+    WALLET_ATTEST_SYSTEMS, since both inputs are means with different sample
+    counts.
+    """
+    rows, warnings = [], []
+    monitor_ms, w = _attestation_monitor_cold_ms(csv_path)
+    if w:
+        warnings.append(w)
+    kernel_ms, w = _attestation_kernel_mean_ms(breakdown_cvm_csv)
+    if w:
+        warnings.append(w)
+    if monitor_ms is None and kernel_ms is None:
+        return rows, warnings
+
+    total_ms = (monitor_ms or 0.0) + (kernel_ms or 0.0)
+    for system in WALLET_ATTEST_SYSTEMS:
+        rows.append({"system": system, "sample": 0,
+                     "step": STEP_ATTESTATION, "time_ms": total_ms})
     return rows, warnings
 
 
@@ -358,6 +471,8 @@ def parse(root: os.PathLike = DEFAULT_ROOT, *, verbose: bool = True,
 
     If `measure_startup` is provided, also parse vm/cvm variants of
     pybench/measure_startup.py output (e.g. /tmp/out1/startup_{vm,cvm}_rep*.log).
+    Benchmarks/Attestation/results.csv is always read to attach the SVSM
+    Attestation cost (monitor cold) to Wallet systems (currently: cvm).
     """
     root = Path(root)
     all_rows, all_warnings = [], []
@@ -369,6 +484,9 @@ def parse(root: os.PathLike = DEFAULT_ROOT, *, verbose: bool = True,
         rows, warnings = _parse_measure_startup(measure_startup)
         all_rows.extend(rows)
         all_warnings.extend(warnings)
+    rows, warnings = _parse_attestation()
+    all_rows.extend(rows)
+    all_warnings.extend(warnings)
     if verbose and all_warnings:
         print("[boottime_parser] warnings:", file=sys.stderr)
         for w in all_warnings:

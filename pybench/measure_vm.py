@@ -229,6 +229,7 @@ class PktgenTest(AbstractBenchTest):
         #     raise NotImplementedError("Chaining == 1 not implemented")
 
         sleep(1) # for good measure
+        local_mirror_output = self.output_filepath(repetition, extension="mirror")
         remote_mirror_output = "/tmp/mirror_output.log"
         guest.exec(f"rm {remote_mirror_output} || true")
         # print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
@@ -315,7 +316,7 @@ class PktgenTest(AbstractBenchTest):
         elif self.system == "noiomgr":
             guest.tmux_new("workload", f"cd ./module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
         elif self.system == "iomgr":
-            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa 2>&1 | tee {remote_mirror_output}")
         elif self.system == "iomgrMicrobenchmark":
             remote_out = "/tmp/iomgr_microbenchmark.out"
             guest.exec(f"rm {remote_out} || true")
@@ -379,6 +380,9 @@ class PktgenTest(AbstractBenchTest):
         guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
         time_end = datetime.now()
         print(f"Slick start time: {(time_end - time_start).total_seconds():.2f} seconds")
+
+        if self.system == "iomgr":
+            guest.copy_from(remote_mirror_output, local_mirror_output)
 
 
     def measure(self, host: Server, guest: Server, repetition: int):
@@ -630,6 +634,7 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
 
     if not is_kvm_version(host, of_wallet=True):
         warning("Incorrect KVM version (system). Reloading to wallet module. ")
+        breakpoint()
         host.exec("sudo rmmod kvm_amd && sudo rmmod kvm")
         host.exec(f"sudo insmod {PROJECT_ROOT}/host/kvm/kvm.ko && {PROJECT_ROOT}/host/kvm/kvm_amd.ko")
 
