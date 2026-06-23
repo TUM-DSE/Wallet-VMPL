@@ -161,7 +161,7 @@ def main(measurement, plan_only: bool = False):
 
     basic_tests = dict(
         repetitions=[REPETITIONS],
-        system=[ "vm", "swiotlb", "vhost", "snp", "snp_vhost", "poll", "poll_vhost", "haltpoll", "vhost_user" ],
+        system=[ "vm", "swiotlb", "vhost", "vhost_swiotlb", "snp", "snp_vhost", "poll", "poll_vhost", "haltpoll", "vhost_user" ],
         direction=[ "forward" ],
         num_vms = [ 0 ], # legacy arg
     )
@@ -196,6 +196,7 @@ def main(measurement, plan_only: bool = False):
         vm = SimpleNamespace(confidential=False, interface=Interface.BRIDGE, iommu_hack=False, linux_cmdline=""),
         swiotlb = SimpleNamespace(confidential=False, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="swiotlb=524288,force"),
         vhost = SimpleNamespace(confidential=False, interface=Interface.BRIDGE_VHOST, iommu_hack=False, linux_cmdline=""),
+        vhost_swiotlb = SimpleNamespace(confidential=False, interface=Interface.BRIDGE_VHOST, iommu_hack=True, linux_cmdline="swiotlb=524288,force"),
 
         snp = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=False, linux_cmdline=""),
         snp_vhost = SimpleNamespace(confidential=True, interface=Interface.BRIDGE_VHOST, iommu_hack=False, linux_cmdline=""),
