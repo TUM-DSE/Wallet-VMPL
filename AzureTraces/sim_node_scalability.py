@@ -36,44 +36,44 @@ def main():
     input_file = sys.argv[1]
 
     # total_cores_list = [128+64] # for 500
-    total_cores_list = [ 512, 1024, 2048, 4096 ] # for 4000
+    total_cores_list = [ 1024, 1024+256, 1024+512, 1024+768, 2048 ] # for 4000
     # total_cores_list = [ 256 ] # for 4000
     cores_per_chain = 3
     cores_per_server = 64
     cvm_max_vms_per_server = 512
 
     # Containers
-    container_cold_start = 11.0          # 11.0s
+    container_cold_start = 2.0          # 11.0s
     container_cold_std = 0.1 * container_cold_start
     container_reschedule = 0.000004     # 4us
     container_reschedule_std = 0.1 * container_reschedule
-    container_concurrent = 32 * 128 # In wallet we expect 16 requests per trustlet on average
+    container_concurrent = 4* 256 # In wallet we expect 16 requests per trustlet on average
     container_max_vms = 0
     container_header = "************* CONTAINERS ****************\n"
 
     # VMs
-    vm_cold_start = 37.9
+    vm_cold_start = 8.5
     vm_cold_std = 0.1 * vm_cold_start
     vm_reschedule = 0.000005            # 5us
     vm_reschedule_std = 0.1 * vm_reschedule
-    vm_concurrent = 16 * 20
+    vm_concurrent = 4* 256
     vm_max_vms = 0
     vm_header = "************* VM ****************\n"
 
     # CVMs
-    cvm_cold_start = 11.0
+    cvm_cold_start = 16.4
     cvm_cold_std = 0.1 * cvm_cold_start
     cvm_reschedule = 0.000007           # 7us
     cvm_reschedule_std = 0.1 * cvm_reschedule
-    cvm_concurrent = 16 * 16
+    cvm_concurrent = 4* 256
     cvm_header = "************* CVM ****************\n"
 
     # Slick
-    slick_cold_start = 31.5
+    slick_cold_start = 2.5
     slick_cold_std = 0.1 * slick_cold_start
     slick_reschedule = 0.000073         # 16us
     slick_reschedule_std = 0.1 * slick_reschedule
-    slick_concurrent = 128 * 80000
+    slick_concurrent = 4* 256
     slick_max_vms = 0
     slick_header = "************* SLICK ****************\n"
 
