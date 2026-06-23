@@ -81,7 +81,8 @@ class IperfTest(AbstractBenchTest):
 
         guest.start_iperf_server(strip_subnet_mask(guest.test_iface_ip_net))
         sleep(10) # without this sleep all systems are at ~10Gbitps
-        extra_options = " -u -P 8 -l 1440 -b 0"
+        extra_options = ""
+        # extra_options = " -u -P 8 -l 1440 -b 0"
         LoadGen.run_iperf_client(host, G.DURATION_S, strip_subnet_mask(guest.test_iface_ip_net), remote_output_file, tmp_remote_output_file, extra_options=extra_options)
         sleep(G.DURATION_S)
         loadgen.wait_for_success(f'[[ -e {remote_output_file} ]]', timeout=30)
@@ -116,8 +117,8 @@ class IperfTest(AbstractBenchTest):
         guest.copy_to(fstack_base_config, fstack_config)
 
         guest.stop_fstack_iperf()
-        extra_options = "-u -P 8 -l 1440 -b 0"
         extra_options = "-l 1M"
+        # extra_options = "-u -P 8 -l 1440 -b 0"
         guest.start_fstack_iperf(fstack_config, f"-c 192.168.31.1 -t {G.DURATION_S} -J {extra_options} | tee {remote_output_file}; echo FINISHED >> {remote_output_file}", confidential=confidential)
 
         sleep(G.DURATION_S + 3)
