@@ -39,11 +39,23 @@ class StartupTest(AbstractBenchTest):
             self.run_vm(host, repetition)
         elif self.system == "cvm":
             self.run_vm(host, repetition, confidential=True)
-        # elif self.system == "kata":
-        #     self.run_docker(host, "kata-qemu-slick", repetition)
+        elif self.system == "kata":
+            self.run_docker(host, "kata-qemu-slick", repetition)
+        elif self.system == "host_container":
+            self.run_docker(host, "kata-qemu-slick", repetition)
         else:
             raise Exception(f"Unkown system {self.system}")
         pass
+
+    def run_docker(self, host, runtime, repetition):
+        date_absolute = host.exec("which date").strip()
+        assert "/nix/store" in date_absolute, "This will only work on NixOS."
+        cmd = f"{date_absolute} +%s.%N; docker run --rm --runtime {runtime} -v /nix/store:/nix/store -it busybox:latest {date_absolute} +%s.%N"
+        result = host.exec(cmd)
+        vals = [float(ns) for ns in result.strip().split("\n")]
+        startup_secs = vals[1] - vals[0]
+        host.exec(f"echo startup_secs {startup_secs} > {self.output_filepath(repetition)}")
+
 
     def run_vm(self, host, repetition, confidential=False):
         cmd = [
@@ -99,7 +111,7 @@ def main(measurement):
     host, loadgen = measurement.hosts()
     tests : List[StartupTest] = []
     matrix = dict(
-        system = [ "vm", "cvm" ],
+        system = [ "vm", "cvm", "kata", "host_container" ],
         repetitions = [ 10 ],
         num_vms = [ 1 ],
     )
