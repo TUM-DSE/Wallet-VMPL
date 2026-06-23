@@ -616,8 +616,8 @@ class Server(ABC):
         else:
             self.__scp_from(source, destination)
 
-    def wait_for_success(self: 'Server', command: str, timeout: int = 10
-                         ) -> str:
+    def wait_for_success(self: 'Server', command: str, timeout: int = 10,
+                         backoff_sec: float = 1) -> str:
         """
         Wait for a command to succeed.
 
@@ -640,7 +640,7 @@ class Server(ABC):
             try:
                 return self.exec(command)
             except Exception:
-                sleep(1)
+                sleep(backoff_sec)
 
         raise TimeoutError(f'Execution on {self.log_name()} of command ' +
                            f'{command} timed out after {timeout} seconds')

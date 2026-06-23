@@ -244,6 +244,7 @@ class PktgenTest(AbstractBenchTest):
         dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
 
         guest.exec("rm -f /tmp/.dpdk-running || true")
+        print("start timer")
         time_start = datetime.now()
         if self.system in [ "mirror", "mirrorUnconfidential" ]:
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
@@ -285,8 +286,12 @@ class PktgenTest(AbstractBenchTest):
                     raise RuntimeError("Pktgen did not start in time")
                 sleep(1)
         elif self.system == "containers":
+            if not guest.test("docker images | grep busybox"):
+                raise Exception("Docker image busybox:latest not available in guest. Run `make kill && make setup_guest_net && make run` and then in `make ssh` pull the image. ")
             PktgenTest.containers_cleanup(guest)
             self.containers_kni_setup(guest)
+            print("start timer")
+            time_start = datetime.now() # kata also doesnt include network setup in this time measurement
             for i in range(self.chaining):
             # for i in range(1):
                 tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=veth{i}b"
@@ -300,7 +305,7 @@ class PktgenTest(AbstractBenchTest):
             # linux networking has already been set up previously for pktgen to connect
             for i in range(self.chaining):
                 tap_vdev = f"--no-pci --vdev=net_af_packet0,iface=eth0"
-                guest.tmux_new(f"workload{i}",
+                guest.tmux_new(f"workload{i}", # the guest variable actually contains the host in this case
                     f"docker run --rm --name mirror{i} "
                     f"--runtime kata-qemu-slick "
                     f"--network=vnf{i}-net "
@@ -377,9 +382,10 @@ class PktgenTest(AbstractBenchTest):
             for i in range(self.chaining):
                 guest.wait_for_success(f"test $(ls /sys/class/net/br-vnf{i}/brif/ | wc -l) -ge 2", timeout=60)
                 guest.exec(f"for port in $(ls /sys/class/net/br-vnf{i}/brif/); do sudo sh -c 'echo 0 > /sys/class/net/br-vnf{i}/brif/'$port'/hairpin_mode'; done")
-        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining)) # with long chains, we have to expect up to 80s per VNFlet
+        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=90*max(self.num_vms, self.chaining), backoff_sec=0) # with long chains, we have to expect up to 80s per VNFlet
         time_end = datetime.now()
-        print(f"Slick start time: {(time_end - time_start).total_seconds():.2f} seconds")
+        print("timer stop")
+        print(f"{self.system} start time: {(time_end - time_start).total_seconds():.2f} seconds")
 
         if self.system == "iomgr":
             guest.copy_from(remote_mirror_output, local_mirror_output)
