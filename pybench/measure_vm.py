@@ -445,6 +445,10 @@ class PktgenTest(AbstractBenchTest):
         df = DataFrame(data=data)
         df.to_csv(local_output_file, index=False)
 
+        if self.system == "iomgr":
+            local_memory_output = self.output_filepath(repetition, extension="memory")
+            host.exec(f'strings /tmp/serial.log | grep "TRUSTLET_" > {local_memory_output}')
+
         # remote_output_file = "/tmp/output.log"
         # local_output_file = self.output_filepath(repetition)
         # server.exec(f"sudo {PROJECT_ROOT}/{TARGET[self.system]} -l 0,6-12 > {remote_output_file} 2>&1")
