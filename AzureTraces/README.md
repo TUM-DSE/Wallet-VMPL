@@ -29,7 +29,13 @@ The plotting script can be found on the `dimstav23/update_plots` branch at `Benc
 The results file generated in the previous step can the be given to the script. The plots will be saved to a newly generated `output` directory.
 
 
-# Peter
+# Slick simulation:
 
- 1798  python3 simulate.py -total_cores 2048 -cold_start 3.5 -reschedule 0.000016 -concurrent_per_vnf 512 -input_file invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
- 1799  python3 sim_node_scalability.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
+```
+cd AzureTraces
+python3 simulate.py -total_cores 2048 -cold_start 3.5 -reschedule 0.000016 -concurrent_per_vnf 512 -input_file invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
+python3 sim_node_scalability.py invitro/wallet_traces/wallet_traces_4000/function_invocations.csv
+
+cd ../Benchmarks/Simulation_analysis
+python3 plot_simulation_CDF.py ../../AzureTraces/simulation_results_parallel.txt
+```
