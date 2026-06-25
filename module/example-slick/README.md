@@ -59,13 +59,19 @@ This will exectue `module/example-slick/com.c` in VMPL2 as a Trustlet.
 # Boot, Attestation, and Memory usage measurements
 
 ```
-make boottime_setup # TODO check and replace!
+# make boottime_setup # TODO check and replace!
+LOG_LEVEL="no_print" FEATURE="boottime" make build_svsm # actually this should be fine as a global build instruction
+# run inside guest: cd ${BOOT_PATH}/wallet/; make run
 
 make run_boottime_native
 make run_boottime_gramine
 make run_boottime_kata
 
-python3 boottime_parser.py
+
+# run boottime measurements for VMs and CVMs:
+python3 ./pybench/measure_startup.py -vvv -o /tmp/foobar
+
+python3 boottime_parser.py --measure-startup /tmp/foobar -o /tmp/foobar/startup.csv
 
 
 # clean up tmp builds
@@ -73,11 +79,11 @@ make build_svsm
 make gramine
 
 
-git submodule update --init Benchmarks/CVM_eval
-make run_scale_vm
+# this got replaced by measure_mem.py:
+# git submodule update --init Benchmarks/CVM_eval
+# make run_scale_vm
 ```
 
 ### TODOs
 
 - add clangd-lsp plugin
-- Implement low-latency polling using shared memory: The shared memory feature can be used for continuous communication between guest and trustlet without invoke overhead. Use polling with volatile flags for synchronization.
