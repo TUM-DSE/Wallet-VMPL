@@ -255,7 +255,7 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
         str: Path to the generated plot
     """
     # Create standardized plot using config
-    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3, left_margin = 0.42)
+    fig, ax = create_standardized_plot(ax_height = 0.95, top_margin = 0.2, bottom_margin = 0.3, left_margin = 0.50)
 
     # Set x-axis to log scale if requested
     if use_log_scale:
@@ -266,9 +266,8 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
     markers = ['o', 's', '^', 'D', 'v']
     colors = PALETTE_REGULAR
 
-    # Get unique node sizes
+    # Get unique node sizes (in CPU units, matching config['num_nodes'])
     unique_node_sizes = sorted(set(config['num_nodes'] for config in configs))
-    unique_node_sizes = [ int(size/PER_SERVER_CPUS) for size in unique_node_sizes ]
 
 
     # Prepare to store plot data
@@ -335,8 +334,6 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
             node_sizes = plot_data[percentile][variant]['node_sizes']
             delays = plot_data[percentile][variant]['delays']
 
-            node_sizes = [ int(size/PER_SERVER_CPUS) for size in node_sizes ]
-
             # # Get data for this variant and percentile
             # node_sizes_ = plot_data[percentile][variant]['node_sizes']
             # delays_ = plot_data[percentile][variant]['delays']
@@ -370,8 +367,11 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
             # Map the variant name if it exists in mapping dict
             display_variant = LABEL_MAPPINGS_SIMULATIONS_EVALUATION[variant]
 
+            # Convert to server units for plotting (data was kept in CPUs for filtering above)
+            node_sizes_servers = [size / PER_SERVER_CPUS for size in node_sizes]
+
             # Plot with a label that includes the percentile
-            plt.plot(node_sizes, delays,
+            plt.plot(node_sizes_servers, delays,
                      marker=marker,
                      markersize=MARKER_SIZE,
                      linestyle=linestyle,
@@ -379,10 +379,10 @@ def plot_percentile_delay_latency(configs, output_dir, use_log_scale=False):
                      label=f'{display_variant}-{percentile.lower()}',
                      linewidth=1)
 
-    # You can explicitly set the tick positions and labels
-    tick_positions = np.linspace(min(unique_node_sizes), max(unique_node_sizes), len(unique_node_sizes))
-    ax.set_xticks(tick_positions)
-    ax.set_xticklabels([str(size) for size in unique_node_sizes])
+    # Ticks in server units (matching the plotted data)
+    unique_server_sizes = [size // PER_SERVER_CPUS for size in unique_node_sizes]
+    ax.set_xticks(unique_server_sizes)
+    ax.set_xticklabels([str(s) for s in unique_server_sizes])
 
     title = "(c) VNF orchestration latency percentiles"
     x_label = "Number of servers"
