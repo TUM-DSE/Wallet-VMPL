@@ -252,7 +252,7 @@ class PktgenTest(AbstractBenchTest):
             tap_vdev = f"--no-pci --vdev=net_af_packet0,iface={guest.test_iface}"
             guest.tmux_new("workload", f"./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa {tap_vdev} {dpdk_mbuf_pool_type}; sleep 999") # | tee {remote_mirror_output}")
         elif self.system == "mirrorMicrobenchmark":
-            guest.tmux_new("workload", "sudo ./module/example-dpdk/mirror -l 2 --no-huge --iova-mode=pa --mbuf-pool-ops-name='stack' --no-pci --vdev 'eth_vhost0,iface=/tmp/vhost-user-okelmann.loadgen' --file-prefix 'foo'")
+            guest.tmux_new("workload", "sudo ./module/example-dpdk/mirror -l 2 --no-huge --iova-mode=pa --mbuf-pool-ops-name='stack' --no-pci --vdev 'eth_vhost0,iface=/tmp/vhost-user-okelmann.loadgen' --file-prefix 'foo'; sleep 999")
             guest.exec("echo 1024 | sudo tee /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages")
             pktgen_bin = f"{guest.project_root}/.nix-builds/pktgen-dpdk/bin"
             guest.tmux_new("workload2", f"sudo {pktgen_bin}/pktgen --vdev 'net_virtio_user0,path=/tmp/vhost-user-okelmann.loadgen,speed=100000' --single-file-segments -l0,1 --no-pci -- -m '1.0' -G")
