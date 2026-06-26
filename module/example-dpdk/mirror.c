@@ -104,6 +104,16 @@ static void __attribute__((noinline)) ndelay_accurate(int cycles) {
     }
 }
 
+static inline uint64_t clock_monotonic_get(void) {
+    unsigned int _aux;
+    uint64_t now = __rdtscp(&_aux);
+    /* return (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000); */
+    /* uint64_t cycles = (uint64_t)((double)PER_VNFLET_WORKLOAD_NS * rte_get_tsc_hz() / 1e9); */
+    /* cycles = (nanosecs * rte_get_tsc_hz() / 1e9); */
+    /* uint64_t nanosecs = (uint64_t)((double)now) * 1e9.0 / rte_get_tsc_hz()); */
+    return (uint64_t)(((double)now) * 1e9 / rte_get_tsc_hz());
+}
+
 /* Port initialization function */
 static inline int
 port_init(uint16_t port, struct rte_mempool *mbuf_pool)
@@ -373,12 +383,17 @@ lcore_mirror(void)
     }
     close(fd);
 
+    uint64_t time_counter = 0;
+
     RTE_ETH_FOREACH_DEV(port) {
     /* Run until the application is quit or killed. */
     struct rte_mbuf *bufs[BURST_SIZE];
     struct vring_sampling sampler;
     vring_sampling_init(&sampler, port);
     for (;;) {
+#ifdef MEASURE_PER_PACKET
+        uint64_t start_timer = clock_monotonic_get();
+#endif
         /* Check if we should exit */
         if (force_quit)
             break;
@@ -475,6 +490,9 @@ lcore_mirror(void)
                 for (buf = nb_tx; buf < nb_rx; buf++)
                     rte_pktmbuf_free(bufs[buf]);
             }
+#ifdef MEASURE_PER_PACKET
+        time_counter += clock_monotonic_get() - start_timer;
+#endif
         /* } */
     }
     vring_sampling_print(&sampler, port);
@@ -519,6 +537,9 @@ lcore_mirror(void)
             printf("  (wrote ipsec_timing.csv)\n");
         }
     }
+#endif
+#ifdef MEASURE_PER_PACKET
+    println("Time per packet %.2f ns", packet_count > 0 ? (double) time_counter / (double) packet_count: 0);
 #endif
     ipsec_sa_free(&sa);
     printf("\nCore %u exiting. Total RX: %lu, Total TX: %lu, RX Errors: %lu, TX Errors: %lu\n",

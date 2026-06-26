@@ -423,7 +423,14 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
 
     trustlet_exit();
 
+    uint64_t time_counter = 0;
+    uint64_t pkt_counter = 0;
+
     while (likely(atomic_load(&data_shared_pool->keep_running))) {
+#ifdef MEASURE_PER_PACKET
+        uint64_t start_timer = clock_monotonic_get();
+#endif
+
         num_deq = rte_ring_sc_dequeue_burst(ingress, deq_objs, BURST_SIZE, NULL);
         if (num_deq == 0) {
             continue;
@@ -458,7 +465,15 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
         if (num_deq != num_enq) {
             // TODO: slitently drops mbuf right now, leaking it and never returning it to the pool.
         }
+#ifdef MEASURE_PER_PACKET
+        time_counter += clock_monotonic_get() - start_timer;
+        pkt_counter += num_deq;
+#endif
     }
+
+#ifdef MEASURE_PER_PACKET
+    println("Time per packet ! %.2f ns", pkt_counter > 0 ? (double) time_counter / (double) pkt_counter : 0);
+#endif
 
     println("Average per vnflet workload delay: %.2f ns (total delayed ns: %lu over %lu iterations)", delays > 0 ? (double)delayed_ns / (double)delays : 0, delayed_ns, delays);
 
