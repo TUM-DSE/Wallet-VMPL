@@ -28,6 +28,7 @@
 #include "../example-tests/util_run.h"
 #include "../example-tests/shm_mempool.h"
 #include "cvmio.h"
+#include "lib.h"
 
 // like test12, but with real CVM IO
 
@@ -346,6 +347,12 @@ int main(int argc, char *argv[]) {
         printf("STARTUP launch_trustlets %.6f\n", (startup_data_loop        - startup_launch_trustlets)/ 1e9);
         printf("STARTUP total %.6f\n",            (startup_data_loop        - startup_dpdk)            / 1e9);
         fflush(stdout);
+
+        // dump SVSM page-count stats before the hot loop starts
+        // (requires SVSM built with FEATURE="stat"; trustlets must trigger mem_stat via notify_monitor)
+        printf("MEM_STAT pre-hot-loop\n");
+        fflush(stdout);
+        stat_get();
 
         printf("Starting %d iterations...\n", iterations);
         // create file /tmp/.dpdk-running to signal that the program is running (for external scripts)
