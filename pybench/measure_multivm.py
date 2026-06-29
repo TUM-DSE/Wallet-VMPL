@@ -335,9 +335,9 @@ def main(measurement: Measurement, plan_only: bool = False, mode: str = "through
         real_workload = [ "synthetic" ], memory_workload = [ 0 ], repetitions=[2], batchsize = [32], chaining = [0], num_vms = [2],
     )
     memory_workload_tests = dict(
-        memory_workload = [ int(i) for i in np.linspace(0, 0x1000, 10) ],
+        memory_workload = [ int(i) for i in np.linspace(0, 2048, 10) ],
         system = [ "mirror" ],
-        pktsize = [ 64, 1500 ],
+        pktsize = [ 1500 ],
         real_workload = [ "synthetic" ], workload = [ 0 ], repetitions=[REPETITIONS], batchsize = [32], chaining = [0], num_vms = [2],
     )
     chaining_tests = dict(
