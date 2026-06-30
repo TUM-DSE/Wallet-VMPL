@@ -185,7 +185,7 @@ class PktgenTest(AbstractBenchTest):
         guest.exec(f"sudo tc qdisc del dev {nic} ingress 2>/dev/null || true")
 
     def compile(self, server: Server):
-        assert self.real_workload in [ "synthetic", "real" ], f"Unknown real_workload value {self.real_workload}"
+        assert self.real_workload in [ "synthetic", "real", "realProfiled" ], f"Unknown real_workload value {self.real_workload}"
 
         cflags = " ".join([
             f"-DBURST_SIZE={self.batchsize}",
@@ -195,7 +195,9 @@ class PktgenTest(AbstractBenchTest):
             f"-DCHAINING={self.chaining}",
             # f"-DLLC_SIZE={LLC_SIZE}",
         ] + (
-            [ "-DREAL_WORKLOAD=1" ] if self.real_workload == "real" else []
+            ["-DMEASURE_IPSEC=1"] if self.real_workload == "realProfiled" else []
+        ) + (
+            [ "-DREAL_WORKLOAD=1" ] if self.real_workload in ["real", "realProfiled"] else []
         ) + (
             # tie the loadgen measurement duration to the framework's
             [ f"-DRUNTIME_S={int(G.DURATION_S)}" ] if self.system == "iomgrMicrobenchmark" else []
@@ -244,6 +246,7 @@ class PktgenTest(AbstractBenchTest):
         dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
 
         guest.exec("rm -f /tmp/.dpdk-running || true")
+        guest.exec("rm /tmp/ipsec_timing.csv || true")
         print("start timer")
         time_start = datetime.now()
         if self.system in [ "mirror", "mirrorUnconfidential" ]:
@@ -387,7 +390,7 @@ class PktgenTest(AbstractBenchTest):
         print("timer stop")
         print(f"{self.system} start time: {(time_end - time_start).total_seconds():.2f} seconds")
 
-        if self.system == "iomgr":
+        if self.system in [ "iomgr"]:
             guest.copy_from(remote_mirror_output, local_mirror_output)
 
 
@@ -454,6 +457,13 @@ class PktgenTest(AbstractBenchTest):
         if self.system == "iomgr":
             local_memory_output = self.output_filepath(repetition, extension="memory")
             host.exec(f'strings /tmp/serial.log | grep "TRUSTLET_" > {local_memory_output}')
+        if self.real_workload == "realProfiled":
+            # guest.tmux_kill("workload")
+            assert self.system == "mirror", "the next kill command only works for mirror"
+            guest.exec("pkill mirror")
+            guest.wait_for_success("test -f /tmp/ipsec_timing.csv", timeout=40)
+            local_ipsec_output = self.output_filepath(repetition, extension="ipsec")
+            guest.copy_from("/tmp/ipsec_timing.csv", local_ipsec_output)
 
         # remote_output_file = "/tmp/output.log"
         # local_output_file = self.output_filepath(repetition)
