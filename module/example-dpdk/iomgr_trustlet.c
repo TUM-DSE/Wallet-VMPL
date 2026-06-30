@@ -36,6 +36,8 @@
 #define CHAINING 2
 #endif
 
+#include "iomgr_seg.h"
+
 #ifndef PACKET_SIZE
 #define PACKET_SIZE 64
 #endif
@@ -480,7 +482,13 @@ void main_shm(char mode, struct shm *data_shared_iomgr, struct shm *data_shared_
     notify_monitor();
 }
 
-void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) {
+// Handles VNFlets [seg_start, seg_end) of the chain. seg_start == 0 marks the
+// first iomgr (revokes guest access on chain entry), seg_end == CHAINING marks
+// the last iomgr (restores guest access on chain exit). Intermediate iomgrs
+// receive from / send to a neighbouring iomgr via a handoff channel.
+void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, int seg_start, int seg_end) {
+    bool is_first = (seg_start == 0);
+    bool is_last  = (seg_end == CHAINING);
     init_pt();
 
     struct shm* buf = data_shared_previous;
@@ -564,7 +572,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
         /* buf->data[3] += 1; */
         /* trustlet_tx(buf, buf_used); */
 
-        // driver -> iomgr -> VNFlet 0
+        // input (driver or previous iomgr) -> first VNFlet of this segment
         num_deq = rte_ring_sc_dequeue_burst(&data_shared_previous->ingress.ring, deq_objs, BURST_SIZE, NULL); // pool1 bufs
         debug println("%lu = rte_ring_sc_dequeue_burst(%p, ...)", num_deq, &data_shared_previous->ingress.ring);
 
@@ -575,10 +583,11 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
             /* nop_delay(100); // RMPADJUST */
-            rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access
+            if (is_first)
+                rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access at chain entry
 
-            // pass buffers to first VNFlet
-            num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[0]->ingress.ring, deq_objs, num_deq, NULL);
+            // pass buffers to first VNFlet of this segment
+            num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[seg_start]->ingress.ring, deq_objs, num_deq, NULL);
             if (num_enq == 0) {
                 /* rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, num_deq); */
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
@@ -588,8 +597,8 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             }
         }
 
-        // VNFlet n -> iomgr -> VNFlet n+1
-        for (int i = 0; i < CHAINING-1; i++) {
+        // VNFlet n -> iomgr -> VNFlet n+1 (only within this segment)
+        for (int i = seg_start; i < seg_end-1; i++) {
             num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[i]->egress.ring, deq_objs, BURST_SIZE, NULL);
             if (num_deq == 0) {
                 continue;
@@ -604,12 +613,13 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next) 
             }
         }
 
-        // VNFlet CHAINING-1 -> iomgr -> driver
-        num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[CHAINING-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
+        // last VNFlet of this segment -> iomgr -> output (next iomgr or driver)
+        num_deq = rte_ring_sc_dequeue_burst(&shm_trustlet[seg_end-1]->egress.ring, deq_objs, BURST_SIZE, NULL);
         if (num_deq == 0) {
         } else {
             /* nop_delay(100); // RMPADJUST */
-            rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access
+            if (is_last)
+                rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // restore guest access at chain exit
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
@@ -746,7 +756,8 @@ int main(int argc, char** argv) {
     if(config->mode[0] == MODE_FIRST_NODE || config->mode[0] == MODE_MIDDLE_NODE || config->mode[0] == MODE_LAST_NODE){
         main_shm(config->mode[0], config->shm_addr_previous, config->shm_addr_next);
     } else if(config->mode[0] == MODE_IOMGR_NODE) {
-        main_iomgr(config->shm_addr_previous, config->shm_addr_next);
+        struct iomgr_config *icfg = (struct iomgr_config *)input;
+        main_iomgr(icfg->base.shm_addr_previous, icfg->base.shm_addr_next, icfg->seg_start, icfg->seg_end);
     } else if(config->mode[0] == MODE_IOMGR_LOADGEN) {
         main_iomgr_loadgen(config->shm_addr_previous, config->shm_addr_next);
     } else if(config->mode[0] == 'x'){

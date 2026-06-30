@@ -38,6 +38,8 @@
 #define CHAINING 2
 #endif
 
+#include "iomgr_seg.h"
+
 #ifndef RUNTIME_S
 #define RUNTIME_S 15 // measurement duration in --loadgen mode
 #endif
@@ -149,19 +151,25 @@ int main(int argc, char *argv[]) {
 
     uint64_t iterations = -1;
 
+    // One iomgr core per VNFLETS_PER_IOMGR VNFlets (NUM_IOMGR). loadgen drives only
+    // VNFlet 0 directly, so it always uses a single iomgr.
+    int num_iomgr = loadgen ? 1 : NUM_IOMGR;
+
     int zygotes[CHAINING];
     int trustlets[CHAINING];
-    int iomgr_zygote;
-    int iomgr_trustlet;
+    int iomgr_zygotes[NUM_IOMGR];
+    int iomgr_trustlets[NUM_IOMGR];
     struct threaded_invoke_handle* handles[CHAINING];
-    struct threaded_invoke_handle* iomgr_handle;
+    struct threaded_invoke_handle* iomgr_handles[NUM_IOMGR];
 
     // for i in range(chain_len):
     //     zygotes.append(w.create_zygote("../libpal.so", "test4_manifest", "../libsysdb.so"))
     for (int i = 0; i < chain_len; i++) {
         zygotes[i] = create_zygote("../libpal.so", "iomgr_manifest", "../libsysdb.so");
     }
-    iomgr_zygote = create_zygote_privileged("../libpal.so", "iomgr_manifest", "../libsysdb.so");
+    for (int k = 0; k < num_iomgr; k++) {
+        iomgr_zygotes[k] = create_zygote_privileged("../libpal.so", "iomgr_manifest", "../libsysdb.so");
+    }
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t startup_trustlet = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
@@ -171,7 +179,9 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < chain_len; i++) {
         trustlets[i] = create_trustlet(zygotes[i], "./empty.py");
     }
-    iomgr_trustlet = create_trustlet(iomgr_zygote, "./empty.py");
+    for (int k = 0; k < num_iomgr; k++) {
+        iomgr_trustlets[k] = create_trustlet(iomgr_zygotes[k], "./empty.py");
+    }
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t startup_iomgr_shm = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
@@ -199,9 +209,13 @@ int main(int argc, char *argv[]) {
             return -1;
         }
     }
-    if (!create_shared_memory(iomgr_trustlet, shared, SHARED_SIZE)) {
-        printf("Failed to create shared memory\n");
-        return -1;
+    // every iomgr needs CHANNEL_ADDR(0) mapped: it holds the mbuf pool and every
+    // iomgr dereferences mbuf headers (for rmpadjust / PTE adjustment).
+    for (int k = 0; k < num_iomgr; k++) {
+        if (!create_shared_memory(iomgr_trustlets[k], shared, SHARED_SIZE)) {
+            printf("Failed to create shared memory to iomgr %d\n", k);
+            return -1;
+        }
     }
     printf("Shared memory registered\n");
 
@@ -228,7 +242,9 @@ int main(int argc, char *argv[]) {
     memset(shared2, 0, SHARED_SIZE);
     shared2->legacy_buffer.data[0] = 'I';
     shared2->keep_running = true;
-    if (!create_shared_memory(iomgr_trustlet, shared2, SHARED_SIZE)) {
+    // CHANNEL_ADDR(1) is the chain exit: only the last iomgr writes packets (and
+    // loadgen results) back to the driver through it.
+    if (!create_shared_memory(iomgr_trustlets[num_iomgr - 1], shared2, SHARED_SIZE)) {
         printf("Failed to create shared memory\n");
         return -1;
     }
@@ -259,7 +275,9 @@ int main(int argc, char *argv[]) {
         printf("152:invoke_trustlet()\n");
         invoke_trustlet(trustlets[t], input_data, input_size);
     }
-    invoke_trustlet(iomgr_trustlet, input_data, input_size);
+    for (int k = 0; k < num_iomgr; k++) {
+        invoke_trustlet(iomgr_trustlets[k], input_data, input_size);
+    }
 
     // for i in chains:
     for (int idx = 0; idx < chains_len; idx++) {
@@ -269,11 +287,19 @@ int main(int argc, char *argv[]) {
         uint64_t startup_trustlet_shm = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
         // #Create chains
+        // Each VNFlet's ring-pair channel is shared with the iomgr that owns its
+        // segment (loadgen always uses iomgr 0).
         // for c in range(chained,i - 1):
         //     trustlets[c].create_channel(trustlets[c+1])
         for (int c = 0; c < i; c++) {
             // create_channel(trustlets[c], trustlets[c+1]);
-            create_channel_at(iomgr_trustlet, trustlets[c], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
+            int owner = loadgen ? 0 : (c / VNFLETS_PER_IOMGR);
+            create_channel_at(iomgr_trustlets[owner], trustlets[c], (uint64_t)CHANNEL_ADDR(2+c), SHARED_SIZE);
+        }
+
+        // Handoff channels connecting consecutive iomgrs in the pipeline.
+        for (int k = 0; k < num_iomgr - 1; k++) {
+            create_channel_at(iomgr_trustlets[k], iomgr_trustlets[k+1], (uint64_t)IOMGR_HANDOFF_ADDR(k), SHARED_SIZE);
         }
 
         clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -309,11 +335,22 @@ int main(int argc, char *argv[]) {
             invoke_trustlet_bin(trustlets[i - 1], &config, sizeof(config), 0);
         }
 
-        // Setup IoMgr
-        config.mode[0] = loadgen ? MODE_IOMGR_LOADGEN : MODE_IOMGR_NODE;
-        config.shm_addr_previous = CHANNEL_ADDR(0);
-        config.shm_addr_next = CHANNEL_ADDR(1);
-        invoke_trustlet_bin(iomgr_trustlet, &config, sizeof(config), 0);
+        // Setup IoMgrs. Configure in increasing order so that iomgr k's input
+        // channel (a handoff created/pooled by iomgr k-1) is ready before iomgr k
+        // reads it.
+        for (int k = 0; k < num_iomgr; k++) {
+            struct iomgr_config iocfg;
+            iocfg.base.mode[0] = loadgen ? MODE_IOMGR_LOADGEN : MODE_IOMGR_NODE;
+            // input: driver (iomgr 0) or the previous iomgr's handoff channel
+            iocfg.base.shm_addr_previous = (k == 0) ? CHANNEL_ADDR(0) : IOMGR_HANDOFF_ADDR(k - 1);
+            // output: driver (last iomgr) or the next iomgr's handoff channel
+            iocfg.base.shm_addr_next = (k == num_iomgr - 1) ? CHANNEL_ADDR(1) : IOMGR_HANDOFF_ADDR(k);
+            iocfg.seg_start = IOMGR_SEG_START(k);
+            iocfg.seg_end = IOMGR_SEG_END(k);
+            printf("Configuring iomgr %d: VNFlets [%d, %d), prev=%p, next=%p\n",
+                   k, iocfg.seg_start, iocfg.seg_end, iocfg.base.shm_addr_previous, iocfg.base.shm_addr_next);
+            invoke_trustlet_bin(iomgr_trustlets[k], &iocfg, sizeof(iocfg), 0);
+        }
 
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t startup_launch_trustlets = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
@@ -321,12 +358,30 @@ int main(int argc, char *argv[]) {
         // start long-running trustlets (each trustlet exactly once; with
         // chaining == 1, trustlet 0 is the single first==last node)
         /* invoke_trustlet(trustlets[1], "s", 0); */
-        for (int t = 0; t < i; t++) {
-            printf("Starting trustlet %d on core %d\n", t, t + 1);
-            handles[t] = threaded_invoke(trustlets[t], t + 1, "", 0);
+        // Interleave CPU pinning so each iomgr sits on the core right after the
+        // VNFlet cores of the segment it serves: v0..v8, iomgr0, v9..v17, iomgr1, ...
+        // (the iomgr follows its VNFlets, as in the previous single-iomgr layout).
+        int vnflet_core[CHAINING];
+        int iomgr_core[NUM_IOMGR];
+        {
+            int core = 1; // core 0 is reserved for the driver
+            for (int k = 0; k < num_iomgr; k++) {
+                int seg_lo = loadgen ? 0 : IOMGR_SEG_START(k);
+                int seg_hi = loadgen ? i : IOMGR_SEG_END(k);
+                for (int t = seg_lo; t < seg_hi; t++)
+                    vnflet_core[t] = core++;
+                iomgr_core[k] = core++;
+            }
         }
-        printf("Starting IoMgr on core %d\n", i + 1);
-        iomgr_handle = threaded_invoke(iomgr_trustlet, i + 1, "", 0);
+
+        for (int t = 0; t < i; t++) {
+            printf("Starting trustlet %d on core %d\n", t, vnflet_core[t]);
+            handles[t] = threaded_invoke(trustlets[t], vnflet_core[t], "", 0);
+        }
+        for (int k = 0; k < num_iomgr; k++) {
+            printf("Starting IoMgr %d on core %d\n", k, iomgr_core[k]);
+            iomgr_handles[k] = threaded_invoke(iomgr_trustlets[k], iomgr_core[k], "", 0);
+        }
 
         size_t enq_num = 0, num_enqed = 0, deq_num = 0, num_deqed = 0;
         void *enq_objs[BURST_SIZE];
@@ -453,8 +508,12 @@ int main(int argc, char *argv[]) {
                 threaded_free(handles[t]);
             }
         }
-        char* _res = threaded_join(iomgr_handle);
-        threaded_free(iomgr_handle);
+        // join iomgrs in order: the driver stops iomgr 0 (via CHANNEL_ADDR(0)
+        // keep_running), which cascades the stop signal down the pipeline.
+        for (int k = 0; k < num_iomgr; k++) {
+            char* _res = threaded_join(iomgr_handles[k]);
+            threaded_free(iomgr_handles[k]);
+        }
 
         if (loadgen) {
             // written by the iomgr trustlet before it exits (joined above)
