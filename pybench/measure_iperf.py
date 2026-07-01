@@ -69,6 +69,32 @@ class IperfTest(AbstractBenchTest):
         }]
         return DataFrame(data=data)
 
+    def compile(self, server: Server):
+        cflags = " ".join([
+            "-DBURST_SIZE=32",
+            "-DPACKET_SIZE=1522",
+            "-DPER_VNFLET_WORKLOAD_NS=0",
+            "-DWORKLOAD_ACCESSES_B=0",
+            "-DCHAINING=1",
+            "-DIPERF_WORKLOAD=1",
+            # f"-DLLC_SIZE={LLC_SIZE}",
+        ])
+
+        trustlets = []
+        dpdk_examples = []
+        runners = []
+        if self.system == "iomgr":
+            trustlets = ["iomgr_trustlet"]
+            runners = ["iomgr_run"]
+        else:
+            raise ValueError(f"Unknown system {self.system}")
+
+        if len(trustlets) > 0:
+            # limit what "all" target refers to with TRUSTLETS and DPDK_EXAMPLES
+            server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk all -B TRUSTLETS=\"{' '.join(trustlets)}\" DPDK_EXAMPLES=\"{' '.join(dpdk_examples)}\" RUNNERS=\"{' '.join(runners)}\" CFLAGS=\"{cflags}\"")
+        else:
+            # without trustlets, make all will fail (more specifically building the fs)
+            server.exec(f"make -C {PROJECT_ROOT}/module/example-dpdk {' '.join(dpdk_examples)} -B CFLAGS=\"{cflags}\"")
 
     def run(self, repetition: int, guest, loadgen, host):
         remote_output_file = "/tmp/iperf.json"
@@ -141,8 +167,46 @@ class IperfTest(AbstractBenchTest):
         # to_string preserves all cols
         pd.concat(dfs).to_csv(local_output_file, index=False)
 
+    def run_vnflet(self, host: Server, guest: Server, repetition: int):
+        # if self.chaining == 1 and "mirror" not in self.system:
+        #     raise NotImplementedError("Chaining == 1 not implemented")
+
+        sleep(1) # for good measure
+        local_mirror_output = self.output_filepath(repetition, extension="mirror")
+        remote_mirror_output = "/tmp/mirror_output.log"
+        guest.exec(f"rm {remote_mirror_output} || true")
+        # print("Manually run in guest and wait for 'Core 0 receiving packets': gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa")
+        # print("cd module/example-dpdk; gdb --ex run --args ./noiomgr_run -l 0 --no-huge --iova-mode=pa")
+        # breakpoint()
+        # guest.tmux_new("workload", f"gdb --ex run --args ./module/example-dpdk/mirror -l 0 --no-huge --iova-mode=pa") # | tee {remote_mirror_output}")
+        # guest.tmux_new("workload", f"cd module/example-dpdk; ./noiomgr_run -l 0 --no-huge --iova-mode=pa | tee {remote_mirror_output}")
+        # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
+
+
+        # In our measurements, the default DPDK mempool has suboptimal performance. Use SIMPLE_POOL to use the same pool as Slick, or use DPDK's stack pool which has the same performance.
+        dpdk_mbuf_pool_type = "--mbuf-pool-ops-name='stack'"
+
+        guest.exec("rm -f /tmp/.dpdk-running || true")
+        guest.exec("rm /tmp/ipsec_timing.csv || true")
+        print("start timer")
+        time_start = datetime.now()
+        if self.system == "iomgr":
+            guest.tmux_new("workload", f"cd ./module/example-dpdk; ./iomgr_run -l 0 --no-huge --iova-mode=pa 2>&1 | tee {remote_mirror_output}")
+        else:
+            raise ValueError(f"Unknown system {self.system}")
+
+        # breakpoint()
+        # sleep(30)
+        # guest.wait_for_success(f"grep 'Core 0 receiving packets.' {remote_mirror_output}", timeout=30)
+        guest.wait_for_success("test -f /tmp/.dpdk-running", timeout=300, backoff_sec=0) # with long chains, we have to expect up to 80s per VNFlet
+
+        if self.system in [ "iomgr"]:
+            guest.copy_from(remote_mirror_output, local_mirror_output)
+
 
     def pre_initial_cleanup(self, host):
+        host.exec("sudo pkill iperf || true")
+        host.exec("make kill")
         try:
             host.kill_guest()
         except Exception:
@@ -206,6 +270,7 @@ def main(measurement, plan_only: bool = False):
         haltpoll = SimpleNamespace(confidential=True, interface=Interface.BRIDGE, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
 
         vhost_user = SimpleNamespace(confidential=False, interface=Interface.PKTGEN_DPDK, iommu_hack=True, linux_cmdline="cpuidle_haltpoll.force=Y"),
+        iomgr = SimpleNamespace(confidential=True, interface=Interface.PKTGEN_DPDK, iommu_hack=False, linux_cmdline=""),
         vhost_user_slick = SimpleNamespace(confidential=True, interface=Interface.PKTGEN_DPDK, iommu_hack=False, linux_cmdline=""), # broken! Currently crashes the guest kernel
     )
 
@@ -236,9 +301,13 @@ def main(measurement, plan_only: bool = False):
 
                     host.start_fstack_iperf(fstack_config, "-s -B 192.168.31.1")
 
+                test.compile(host) if test.system == "iomgr" else None
+
                 with measurement.virtual_machine(system_params.interface, run_guest_args=dict(confidential=system_params.confidential,iommu_hack=system_params.iommu_hack)) as guest:
 
                     guest.exec("modprobe vfio-pci")
+                    guest.exec("rmmod module/vmpl.ko || true")
+                    guest.exec("insmod module/vmpl.ko")
                     remote_dpdk_path = host.exec(f"realpath {PROJECT_ROOT}/.nix-builds/dpdk").strip()
                     if not system_params.interface.is_vhost_user():
                         guest.modprobe_test_iface_drivers(interface=system_params.interface)
@@ -248,7 +317,9 @@ def main(measurement, plan_only: bool = False):
 
                     measurement.mark_vm_initialized(0)
 
-                    if system_params.interface.is_vhost_user():
+                    if test.system == "iomgr":
+                        test.run_vnflet(host, guest, repetition)
+                    elif system_params.interface.is_vhost_user():
                         test.run_fstack(repetition, guest, host, host, system_params.confidential)
                     else:
                         test.run(repetition, guest, host, host)
