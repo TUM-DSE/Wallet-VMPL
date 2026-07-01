@@ -22,9 +22,9 @@
 #error "CHAINING must be defined before including iomgr_seg.h"
 #endif
 
-// One extra iomgr core is spawned for every VNFLETS_PER_IOMGR VNFlets.
+// One extra iomgr core is spawned for every VNFLETS_PER_IOMGR VNFlets. I think one iomgr per chiplet is optimal.
 #ifndef VNFLETS_PER_IOMGR
-#define VNFLETS_PER_IOMGR 9
+#define VNFLETS_PER_IOMGR 7
 #endif
 
 // Number of iomgr cores for a chain of CHAINING VNFlets (ceil division).
