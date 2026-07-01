@@ -37,7 +37,16 @@
 
 #define RX_RING_SIZE 1024
 #define TX_RING_SIZE 1024
-#define NUM_MBUFS 2*512
+// cvmio_pool must supply mbufs for the NIC RX ring (up to RX_RING_SIZE), the
+// per-packet TX copies (rte_pktmbuf_copy in the iomgr driver), and the TX ring
+// (up to TX_RING_SIZE) all at once. 2*512 = 1024 is barely one ring's worth, so
+// under sustained bulk TX the pool drains, rte_pktmbuf_copy() returns NULL and
+// packets are silently dropped -> the iperf VNFlet transfer collapses after its
+// initial burst. Size it well above RX_RING+TX_RING+in-flight, but not so large
+// it exceeds DPDK's --no-huge default memory (the driver runs --no-huge, and a
+// ~40MB pool from 16*1024 mbufs fails EAL pool creation). 4*1024 (~10MB) clears
+// RX_RING(1024)+TX_RING(1024)+cache+burst with headroom.
+#define NUM_MBUFS (4*1024)
 #define MBUF_CACHE_SIZE 250
 
 #ifndef BURST_SIZE

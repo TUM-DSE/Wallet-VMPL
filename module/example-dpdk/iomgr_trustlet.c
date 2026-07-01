@@ -240,6 +240,15 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
     uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
     if (n)
         g_iperf_rx_pkts += n;
+    // DIAG: ff_pump() calls this every poll, so it keeps ticking even when TX has
+    // stalled -- use it to watch the shared pool's free count. If it drains toward
+    // 0 at the stall, F-Stack's tcp_output can't allocate mbufs (pool too small),
+    // which stalls the sender with no ring-enqueue drop.
+    static uint64_t rx_polls = 0;
+    if ((++rx_polls % 8000000ULL) == 0 && g_iperf_pool)
+        println("FF POOL: avail=%u/%u (tx=%lu rx=%lu tx_drop=%lu)",
+                rte_mempool_avail_count(g_iperf_pool), rte_mempool_in_use_count(g_iperf_pool) + rte_mempool_avail_count(g_iperf_pool),
+                (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts, (unsigned long)g_iperf_tx_drop);
     return n;
 }
 
@@ -1062,6 +1071,19 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "hz=100\n"
         "fd_reserve=128\n"
         "kern.ipc.maxsockets=262144\n"
+        // TCP socket-buffer auto-tuning up to 16MB. Without these F-Stack uses a
+        // tiny fixed send buffer (~32KB default) that cannot grow, so only a few
+        // segments are ever in flight -> the transfer is delayed-ACK-clocked at a
+        // ~few-Mbit trickle (pool healthy, zero drops). Matches config-vhost-c.ini.
+        "kern.ipc.maxsockbuf=16777216\n"
+        "net.inet.tcp.sendspace=16384\n"
+        "net.inet.tcp.recvspace=8192\n"
+        "net.inet.tcp.sendbuf_max=16777216\n"
+        "net.inet.tcp.recvbuf_max=16777216\n"
+        "net.inet.tcp.sendbuf_auto=1\n"
+        "net.inet.tcp.recvbuf_auto=1\n"
+        "net.inet.tcp.sendbuf_inc=16384\n"
+        "net.inet.tcp.delayed_ack=1\n"
         "net.inet.tcp.syncache.hashsize=4096\n"
         "net.inet.tcp.syncache.bucketlimit=100\n"
         "net.inet.tcp.tcbhashsize=65536\n"

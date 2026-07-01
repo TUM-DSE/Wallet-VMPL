@@ -425,8 +425,19 @@ int main(int argc, char *argv[]) {
         if (loadgen)
             sleep(RUNTIME_S); // the iomgr drives VNFlet 0 internally; we only control the duration
 
+        // DIAG: silent drops here (pool exhausted -> copy NULL, or ring full)
+        // collapse the iperf VNFlet transfer; count them and print rarely.
+        uint64_t drop_rx_copy = 0, drop_rx_ring = 0, drop_tx_copy = 0, drop_tx_ring = 0;
+        uint64_t diag_next = 20000000;
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations && !loadgen; iter++) {
+            if ((uint64_t)iter >= diag_next) {
+                diag_next = (uint64_t)iter + 20000000;
+                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu\n",
+                       iter, (unsigned long)drop_rx_copy, (unsigned long)drop_rx_ring,
+                       (unsigned long)drop_tx_copy, (unsigned long)drop_tx_ring);
+                fflush(stdout);
+            }
 
             const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
                     bufs, BURST_SIZE); // bufs in cvmio pool
@@ -441,12 +452,16 @@ int main(int argc, char *argv[]) {
                     rte_pktmbuf_free(bufs[i]); // return to cvmio_pool
                     if (enq_objs[nb_copied] != NULL)
                         nb_copied++;
+                    else
+                        drop_rx_copy++; // shared pool exhausted -> RX (ACK) dropped
                 }
 
                 if (nb_copied > 0) {
                     enq_num = rte_ring_sp_enqueue_bulk(&shared->ingress.ring, enq_objs, nb_copied, NULL);
-                    if (enq_num == 0)
+                    if (enq_num == 0) {
+                        drop_rx_ring += nb_copied; // VNFlet-bound ingress ring full
                         rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, nb_copied); // return to pool
+                    }
                     else
                         num_enqed += enq_num;
                 }
@@ -468,8 +483,10 @@ int main(int argc, char *argv[]) {
                 for (size_t i = 0; i < deq_num; i++) {
                     bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
                     /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
-                    if (bufs[nb_copied2] != NULL) 
+                    if (bufs[nb_copied2] != NULL)
                         nb_copied2++;
+                    else
+                        drop_tx_copy++; // cvmio (NIC) pool exhausted -> client TX dropped
                     rte_pktmbuf_free(deq_objs[i]); // return to pool1
                 }
 
@@ -480,6 +497,7 @@ int main(int argc, char *argv[]) {
                     /* Free any unsent packets */
                     if (unlikely(nb_tx < nb_copied2)) {
                         uint16_t buf;
+                        drop_tx_ring += (nb_copied2 - nb_tx); // NIC TX ring full
                         for (buf = nb_tx; buf < nb_copied2; buf++)
                             rte_pktmbuf_free(bufs[buf]); // return to cvmio_pool
                     }
