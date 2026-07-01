@@ -73,10 +73,37 @@ noiomgr_run: %: %.c ../../module/libwallet/libwallet.a
 iomgr_run: %: %.c ../../module/libwallet/libwallet.a
 	gcc -I../libwallet/src/ -include rte_config.h -I$(DPDK_PATH)/include $< -O3 -march=znver3 -g -o $@ -L../libwallet/ -l:libwallet.a -lpthread -lnuma $(DPDK_LIBS) $(CFLAGS)
 
+# iperf/F-Stack VNFlet variant: when built with -DIPERF_WORKLOAD, iomgr_trustlet
+# embeds iperf-over-F-Stack (from .nix-builds/iperf-fstack) and drives its NIC I/O
+# through the shared rings via extra --wrap symbols. libfstack.a must link against
+# the SAME DPDK it was built with (the one shipped inside the iperf-fstack output),
+# not ../../.nix-builds/dpdk, or the DPDK ABIs mismatch.
+IPERF_BASE := $(shell realpath ../../.nix-builds/iperf-fstack)
+IPERF_DPDK := $(IPERF_BASE)/dpdk
+IPERF_WRAPS := -Wl,--wrap=rte_eth_rx_burst -Wl,--wrap=rte_eth_tx_burst -Wl,--wrap=rte_pktmbuf_pool_create
+# DPDK drivers register via constructors, so their archives must be
+# whole-archived (nothing references them by symbol) — but only the ones F-Stack
+# actually uses. Whole-archiving *all* librte_*.a would drag in unrelated PMDs
+# (net_sfc -> libatomic, net_pcap -> libpcap, ...). The rest go in a start-group
+# so only referenced objects are pulled.
+IPERF_DPDK_REGLIBS := librte_net_null.a librte_bus_vdev.a librte_bus_pci.a librte_mempool_ring.a librte_mempool_stack.a
+IPERF_DPDK_WHOLE := $(addprefix $(IPERF_DPDK)/lib/,$(IPERF_DPDK_REGLIBS))
+
+ifneq (,$(findstring IPERF_WORKLOAD,$(CFLAGS)))
+iomgr_trustlet: %: %.c
+	gcc -I../../runtime/client/ -include rte_config.h -I$(IPERF_DPDK)/include -I$(IPERF_BASE)/include $(HS_CFLAGS) -O3 -g -mssse3 -o $@ $< \
+		$(WRAPPERS) $(IPERF_WRAPS) \
+		$(IPERF_BASE)/lib/iperf_main.o $(IPERF_BASE)/lib/libiperf.a \
+		-Wl,--whole-archive $(IPERF_BASE)/lib/libfstack.a $(IPERF_DPDK_WHOLE) -Wl,--no-whole-archive \
+		-Wl,--start-group $(IPERF_DPDK)/lib/librte_*.a -Wl,--end-group \
+		$(STATIC_LIBS) -lnuma $(CFLAGS) $(OPENSSL_CFLAGS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ -lm \
+		-lssl -lcrypto -lrt
+else
 iomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include $(HS_CFLAGS) -O3 -g -mssse3 -o $@ $< \
 		$(WRAPPERS) \
 		$(DPDK_LIBS) $(STATIC_LIBS) -lnuma $(CFLAGS) $(OPENSSL_CFLAGS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ -lm
+endif
 
 # TODO merge this with DPDK_EXAMPLES: and check if numbers are the same
 insecure: insecure.c

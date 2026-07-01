@@ -31,7 +31,7 @@
       url = "github:TUM-DSE/dpdk-cvms/wallet-vfio-snp";
       flake = false;
     };
-    fstack-playground.url = "github:pogoba/fstack-playground";
+    fstack-playground.url = "git+file:///home/okelmann/fstack-development";
     fstack-playground.inputs.dpdk-cvms-src.follows = "dpdk-cvms-src";
   };
 

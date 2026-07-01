@@ -19,6 +19,15 @@
 #include "ipsec.h"
 #include "ids.h"
 
+#ifdef IPERF_WORKLOAD
+#include <rte_ethdev.h>
+#include <ff_api.h>
+// iperf-over-F-Stack entry point (iperf's main() renamed to iperf_main so the
+// trustlet, which has its own main(), can embed it). Provided by
+// .nix-builds/iperf-fstack/lib/{iperf_main.o,libiperf.a,libfstack.a}.
+extern int iperf_main(int argc, char **argv);
+#endif
+
 #define PORT 0xF4
 #define DATA_IN 0x28000000000
 #define DATA_OUT 0x30000000000
@@ -98,6 +107,43 @@ const struct rte_memzone *__wrap_rte_memzone_reserve(const char *name,
 	assert(((len + RTE_MEMPOOL_ALIGN_MASK) & (~RTE_MEMPOOL_ALIGN_MASK)) == POOL_PRIV_SIZE);
 	return __wrap_rte_memzone_reserve_aligned(name, len, socket_id, flags, -1);
 }
+
+#ifdef IPERF_WORKLOAD
+// Shared-memory rings/pool that back F-Stack's NIC I/O inside the trustlet.
+// Set by main_iperf() before ff_init(); read by the rte_eth_*_burst wraps.
+static struct rte_ring    *g_iperf_ingress = NULL; // driver -> trustlet (RX)
+static struct rte_ring    *g_iperf_egress  = NULL; // trustlet -> driver (TX)
+static struct rte_mempool *g_iperf_pool    = NULL; // driver-visible mbuf pool
+
+// F-Stack (ff_pump) polls rte_eth_rx_burst()/tx_burst() on its net_null port;
+// route those to the iomgr shared rings so packets reach the driver's real NIC.
+uint16_t __wrap_rte_eth_rx_burst(uint16_t port_id, uint16_t queue_id,
+                                 struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
+    (void)port_id; (void)queue_id;
+    if (!g_iperf_ingress)
+        return 0;
+    return (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
+}
+
+uint16_t __wrap_rte_eth_tx_burst(uint16_t port_id, uint16_t queue_id,
+                                 struct rte_mbuf **tx_pkts, uint16_t nb_pkts) {
+    (void)port_id; (void)queue_id;
+    if (!g_iperf_egress)
+        return 0;
+    // DPDK contract: caller owns/frees anything we don't accept.
+    return (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
+}
+
+// F-Stack creates its packet pool via rte_pktmbuf_pool_create(); hand back the
+// driver-allocated shared pool so TX mbufs are visible to iomgr_run.
+struct rte_mempool *__wrap_rte_pktmbuf_pool_create(const char *name, unsigned n,
+        unsigned cache_size, uint16_t priv_size, uint16_t data_room_size,
+        int socket_id) {
+    (void)name; (void)n; (void)cache_size; (void)priv_size;
+    (void)data_room_size; (void)socket_id;
+    return g_iperf_pool;
+}
+#endif
 
 
 // CPU frequency in GHz - used to correct clock_gettime which returns TSC cycles
@@ -713,6 +759,35 @@ void main_iomgr_loadgen(struct shm *data_shared_previous, struct shm *data_share
     notify_monitor();
 }
 
+#ifdef IPERF_WORKLOAD
+// VNFlet workload: run the F-Stack TCP/IP stack + iperf3 client inside the
+// trustlet. Packet I/O flows over the iomgr shared rings (via the rte_eth_*
+// wraps) instead of a real NIC. The host runs the F-Stack iperf server.
+void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
+    println("Starting iperf VNFlet");
+
+    // ingress/egress rings shared with the iomgr (same layout as main_shm)
+    if (!ring_pair_create(data_shared_iomgr))
+        return;
+    g_iperf_ingress = &data_shared_iomgr->ingress.ring;
+    g_iperf_egress  = &data_shared_iomgr->egress.ring;
+    g_iperf_pool    = data_shared_pool->mbuf_pool;
+    assert(g_iperf_pool != NULL && "pool need to be allocated by driver");
+
+    trustlet_exit();
+
+    // F-Stack reads its DPDK/port config from FF_CONF; net_null vdev stands in
+    // for the (absent) NIC so ff_init()'s port setup succeeds.
+    setenv("FF_CONF", "/root/module/example-dpdk/iperf_trustlet.ini", 1);
+    char *argv[] = { "iperf3", "-c", "192.168.31.1", "-t", "15", "-J", NULL };
+    println("Calling iperf_main");
+    int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
+    println("iperf_main returned %d", rc);
+
+    notify_monitor();
+}
+#endif
+
 void main_default(bool suppress_output) {
     char* input = (char*)DATA_IN;
     char* output = (char*)DATA_OUT;
@@ -754,7 +829,13 @@ int main(int argc, char** argv) {
     struct trustlet_configuration *config = (struct trustlet_configuration *)input;
 
     if(config->mode[0] == MODE_FIRST_NODE || config->mode[0] == MODE_MIDDLE_NODE || config->mode[0] == MODE_LAST_NODE){
+#ifdef IPERF_WORKLOAD
+        // With CHAINING==1 the single VNFlet is MODE_FIRST_NODE; run iperf/F-Stack
+        // instead of the synthetic main_shm workload.
+        main_iperf(config->shm_addr_previous, config->shm_addr_next);
+#else
         main_shm(config->mode[0], config->shm_addr_previous, config->shm_addr_next);
+#endif
     } else if(config->mode[0] == MODE_IOMGR_NODE) {
         struct iomgr_config *icfg = (struct iomgr_config *)input;
         main_iomgr(icfg->base.shm_addr_previous, icfg->base.shm_addr_next, icfg->seg_start, icfg->seg_end);
