@@ -899,8 +899,19 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         return;
     g_iperf_ingress = &data_shared_iomgr->ingress.ring;
     g_iperf_egress  = &data_shared_iomgr->egress.ring;
-    g_iperf_pool    = data_shared_pool->mbuf_pool;
-    assert(g_iperf_pool != NULL && "pool need to be allocated by driver");
+    // F-Stack dereferences the mbuf pool struct (rte_pktmbuf_alloc/free, net_null
+    // rx setup) and every mbuf carries mbuf->pool. The driver's SHM1 pool struct
+    // lives in the driver's *private* DPDK heap (main_shm only ever passes mbufs
+    // through opaquely, so it never faulted). Re-create the pool here via the
+    // wrapped allocators so the struct lands in shared pool_priv -- the same vaddr
+    // in driver and trustlet -- and re-stamps each mbuf->pool to it. shm_stack_alloc
+    // resets the shared object stack, so re-populating over the driver's SHM1 pool
+    // is clean and both sides keep coordinating through shared->pool_stack.
+    g_iperf_pool    = mbuf_pool_create(data_shared_pool);
+    assert(g_iperf_pool != NULL && "failed to create shared mbuf pool");
+    println("IPERF regions: ingress=%p egress=%p pool=%p shm_iomgr=%p shm_pool=%p",
+            (void *)g_iperf_ingress, (void *)g_iperf_egress, (void *)g_iperf_pool,
+            (void *)data_shared_iomgr, (void *)data_shared_pool);
 
     trustlet_exit();
 
