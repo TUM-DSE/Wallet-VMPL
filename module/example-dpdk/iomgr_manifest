@@ -15,3 +15,8 @@ root.type = "tmpfs"
 mounts = [
   { type = "pseudo", path = "/lib", uri = "lib" },
 ]
+
+[sys]
+# DPDK's fbarray (memzone/malloc heap bookkeeping) flock()s its backing files;
+# without this the iperf VNFlet's EAL init fails with "Cannot allocate memzone list".
+experimental__enable_flock = true

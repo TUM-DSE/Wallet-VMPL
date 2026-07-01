@@ -80,7 +80,11 @@ iomgr_run: %: %.c ../../module/libwallet/libwallet.a
 # not ../../.nix-builds/dpdk, or the DPDK ABIs mismatch.
 IPERF_BASE := $(shell realpath ../../.nix-builds/iperf-fstack)
 IPERF_DPDK := $(IPERF_BASE)/dpdk
-IPERF_WRAPS := -Wl,--wrap=rte_eth_rx_burst -Wl,--wrap=rte_eth_tx_burst -Wl,--wrap=rte_pktmbuf_pool_create
+IPERF_WRAPS := -Wl,--wrap=rte_eal_init -Wl,--wrap=rte_eth_rx_burst -Wl,--wrap=rte_eth_tx_burst -Wl,--wrap=rte_pktmbuf_pool_create \
+	-Wl,--wrap=eal_cpu_detected -Wl,--wrap=eal_cpu_socket_id -Wl,--wrap=eal_cpu_core_id \
+	-Wl,--wrap=rte_thread_set_affinity -Wl,--wrap=rte_thread_set_affinity_by_id \
+	-Wl,--wrap=rte_mp_channel_init -Wl,--wrap=rte_thread_create_internal_control \
+	-Wl,--wrap=timerfd_create -Wl,--wrap=rte_eal_check_module -Wl,--wrap=nanosleep
 # DPDK drivers register via constructors, so their archives must be
 # whole-archived (nothing references them by symbol) — but only the ones F-Stack
 # actually uses. Whole-archiving *all* librte_*.a would drag in unrelated PMDs
@@ -97,7 +101,13 @@ iomgr_trustlet: %: %.c
 		-Wl,--whole-archive $(IPERF_BASE)/lib/libfstack.a $(IPERF_DPDK_WHOLE) -Wl,--no-whole-archive \
 		-Wl,--start-group $(IPERF_DPDK)/lib/librte_*.a -Wl,--end-group \
 		$(STATIC_LIBS) -lnuma $(CFLAGS) $(OPENSSL_CFLAGS) $(OPENSSL_LIBS) $(HS_LIBS) -lstdc++ -lm \
-		-lssl -lcrypto -lrt
+		-lssl -lcrypto
+	# Statically linking DPDK + F-Stack + libiperf makes this ~17MB with debug
+	# info; that gets hex-embedded into the SVSM binary (see simple_slick_fs),
+	# so keep the debug in a sidecar and strip the embedded copy (~4MB).
+	objcopy --only-keep-debug $@ $@.debug
+	strip $@
+	objcopy --add-gnu-debuglink=$@.debug $@
 else
 iomgr_trustlet: %: %.c
 	gcc -I../../runtime/client/ -include rte_config.h -I$(DPDK_PATH)/include $(HS_CFLAGS) -O3 -g -mssse3 -o $@ $< \

@@ -1,5 +1,8 @@
+#define _GNU_SOURCE 1  /* cpu_set_t / rte_cpuset_t for the iperf CPU-affinity wrap */
 #include <stdio.h>
 #include <sys/io.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -21,6 +24,8 @@
 
 #ifdef IPERF_WORKLOAD
 #include <rte_ethdev.h>
+#include <rte_lcore.h>
+#include <rte_thread.h>
 #include <ff_api.h>
 // iperf-over-F-Stack entry point (iperf's main() renamed to iperf_main so the
 // trustlet, which has its own main(), can embed it). Provided by
@@ -71,31 +76,48 @@ static void* next_tailq_buf = NULL;
 static void* next_memhdr_buf = NULL;
 
 // when statically linking DPDK, we make DPDK use these wrappers via --wrap compile flag
+// The shared-memory buffers (next_*_buf) are only set while we are building the
+// rings/pool that the driver shares (ring_pair_create / mbuf_pool_create). For
+// the iperf/F-Stack workload, DPDK/F-Stack also perform many *internal*
+// allocations (message pool, timers, ...) that the driver never touches -- those
+// get private trustlet memory instead of failing.
 void *__wrap_rte_zmalloc(const char *type, size_t size, unsigned align) {
-    if (size == TAILQ_ENTRY_SIZE) {
+    if (next_tailq_buf && size == TAILQ_ENTRY_SIZE) {
         return next_tailq_buf;
     }
-    if (size == sizeof(struct rte_mempool_memhdr)) {
+    if (next_memhdr_buf && size == sizeof(struct rte_mempool_memhdr)) {
         return next_memhdr_buf;
     }
+#ifdef IPERF_WORKLOAD
+    return calloc(1, size); // F-Stack internal allocation (private to trustlet)
+#else
     return NULL;
-    /* return calloc(1, size); */
+#endif
 }
 
 static void* next_alloc_buffer = NULL;
 
 const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, size_t len, int socket_id, unsigned flags, unsigned align) {
-    println("rte_memzone_reserve_aligned: name=%s, len=%lu, socket_id=%d, flags=%u, align=%u", name, len, socket_id, flags, align);
     struct rte_memzone *mz = calloc(1, sizeof(struct rte_memzone));
     mz->len = len;
     mz->socket_id = socket_id;
     mz->flags = flags;
-    if (len == RING_BUF_SIZE || len == POOL_PRIV_SIZE) { // sanity check. These are the only two allocations we are expecting
+    if (next_alloc_buffer && (len == RING_BUF_SIZE || len == POOL_PRIV_SIZE)) {
+        // driver-shared ring/pool buffer
         mz->addr = next_alloc_buffer;
     }
-    /* mz->addr = malloc(len); */
+#ifdef IPERF_WORKLOAD
+    else {
+        // F-Stack internal memzone (msg pool backing, etc.): private memory.
+        unsigned a = (align == 0 || align > 4096) ? 64 : align;
+        size_t rounded = (len + a - 1) & ~((size_t)a - 1);
+        mz->addr = aligned_alloc(a, rounded);
+        if (mz->addr)
+            memset(mz->addr, 0, rounded);
+    }
+#endif
     if (!mz->addr) {
-        println("Failed to allocate memory for memzone");
+        println("Failed to allocate memory for memzone (name=%s len=%lu)", name, len);
     }
     return mz;
 }
@@ -104,7 +126,9 @@ const struct rte_memzone *__wrap_rte_memzone_reserve_aligned(const char *name, s
 const struct rte_memzone *__wrap_rte_memzone_reserve(const char *name,
 			size_t len, int socket_id,
 			unsigned flags) {
+#ifndef IPERF_WORKLOAD
 	assert(((len + RTE_MEMPOOL_ALIGN_MASK) & (~RTE_MEMPOOL_ALIGN_MASK)) == POOL_PRIV_SIZE);
+#endif
 	return __wrap_rte_memzone_reserve_aligned(name, len, socket_id, flags, -1);
 }
 
@@ -114,6 +138,88 @@ const struct rte_memzone *__wrap_rte_memzone_reserve(const char *name,
 static struct rte_ring    *g_iperf_ingress = NULL; // driver -> trustlet (RX)
 static struct rte_ring    *g_iperf_egress  = NULL; // trustlet -> driver (TX)
 static struct rte_mempool *g_iperf_pool    = NULL; // driver-visible mbuf pool
+
+// F-Stack derives its EAL args from config.ini, whose vdev support is limited
+// to virtio_user/eth_vhost. Inject a net_null port instead: it satisfies all of
+// F-Stack's rte_eth_dev_* port setup while the rx/tx_burst wraps below carry the
+// real packets over the shared rings.
+// DPDK detects CPUs by stat'ing /sys/devices/system/cpu/cpuN/topology/core_id,
+// which Gramine only exposes for "online" threads. The SVSM PAL publishes no CPU
+// topology, so EAL sees "Detected CPU lcores: 0" and aborts. Present a single
+// logical core -- the trustlet is single-threaded and the monitor pins its
+// thread regardless of DPDK's lcore bookkeeping.
+int __wrap_eal_cpu_detected(unsigned lcore_id) { return lcore_id == 0; }
+unsigned __wrap_eal_cpu_socket_id(unsigned lcore_id) { (void)lcore_id; return 0; }
+unsigned __wrap_eal_cpu_core_id(unsigned lcore_id) { (void)lcore_id; return 0; }
+
+// Setting CPU affinity would fail the same way (Gramine reports the core as
+// offline). This is fatal for the main lcore (eal_thread_init_master) and for
+// EAL's control/interrupt threads (control_thread_init calls the _by_id form
+// directly). Make both no-op successes.
+int __wrap_rte_thread_set_affinity(rte_cpuset_t *cpusetp) { (void)cpusetp; return 0; }
+int __wrap_rte_thread_set_affinity_by_id(rte_thread_t thread_id, const rte_cpuset_t *cpuset) {
+    (void)thread_id; (void)cpuset; return 0;
+}
+
+// The SVSM Gramine PAL cannot create threads (_PalThreadCreate returns
+// NOTIMPLEMENTED), so DPDK's EAL helper threads must not be spawned. With a
+// single lcore and F-Stack driven by ff_pump() we need none of them: the
+// interrupt thread (net_null raises no interrupts) and the multi-process mp
+// channel (single primary) are both skipped. Their failure is otherwise fatal
+// in rte_eal_init().
+int __wrap_rte_mp_channel_init(void) { println("wrap: rte_mp_channel_init skipped"); return 0; }
+
+// All of EAL's helper threads (interrupt, mp handler) funnel through
+// rte_thread_create_internal_control(); no-op it so none are spawned. The rest
+// of each subsystem (interrupt source list, alarm timer fd) still initialises,
+// keeping EAL state consistent -- the threads just never run, which is fine
+// because net_null raises no interrupts and F-Stack pumps timers via ff_pump().
+// Returning success (without touching *id) is what the callers expect.
+int __wrap_rte_thread_create_internal_control(rte_thread_t *id, const char *name,
+        rte_thread_func func, void *arg) {
+    (void)func; (void)arg;
+    println("wrap: skip internal control thread '%s'", name ? name : "?");
+    if (id)
+        id->opaque_id = 0;
+    return 0;
+}
+
+// The SVSM PAL has no timerfd; EAL's alarm subsystem is the only user. The alarm
+// never fires here (its interrupt thread is skipped) and F-Stack doesn't use it,
+// so hand rte_eal_alarm_init() a benign real fd instead of the unsupported call.
+int __wrap_timerfd_create(int clockid, int flags) {
+    (void)clockid; (void)flags;
+    return dup(2);
+}
+
+// rte_vfio_enable() reads /proc/modules via rte_eal_check_module() to see if the
+// vfio kernel module is loaded. The trustlet sandbox has no /proc/modules, so the
+// read errors and EAL aborts with "Cannot init VFIO". Report "module not loaded"
+// (0) instead: net_null is a vdev and needs no kernel module, so VFIO/uio are
+// then cleanly skipped. (rte_vfio_enable itself is @@DPDK_25-versioned and does
+// not intercept via --wrap; rte_eal_check_module is internal and does.)
+int __wrap_rte_eal_check_module(const char *module_name) {
+    (void)module_name;
+    return 0;
+}
+
+extern int __real_rte_eal_init(int argc, char **argv);
+int __wrap_rte_eal_init(int argc, char **argv) {
+    static char *newargv[80];
+    int n = 0;
+    for (int i = 0; i < argc && n < 76; i++)
+        newargv[n++] = argv[i];
+    newargv[n++] = (char *)"--vdev=net_null0";
+    newargv[n++] = (char *)"--no-pci";
+    // No telemetry socket in the sandbox. (Not --in-memory: the config sets
+    // no_huge, which implies legacy-mem, and the two are mutually exclusive.)
+    newargv[n++] = (char *)"--no-telemetry";
+    newargv[n] = NULL;
+    println("EAL init (net_null injected), %d args:", n);
+    for (int i = 0; i < n; i++)
+        println("  eal argv[%d] = %s", i, newargv[i]);
+    return __real_rte_eal_init(n, newargv);
+}
 
 // F-Stack (ff_pump) polls rte_eth_rx_burst()/tx_burst() on its net_null port;
 // route those to the iomgr shared rings so packets reach the driver's real NIC.
@@ -157,6 +263,28 @@ static inline uint64_t clock_monotonic_get(void) {
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
 }
+
+#ifdef IPERF_WORKLOAD
+// The SVSM PAL has no working nanosleep: _PalEventWait reports "Sleep not
+// implemented" and returns EINTR-like, so glibc's retry loop (and thus DPDK's
+// rte_delay_us_sleep) spins forever -- most visibly estimate_tsc_freq()'s 1s
+// sleep during rte_eal_timer_init(). Replace nanosleep with a real busy-wait off
+// the monotonic clock so timed waits actually elapse and the TSC-frequency
+// estimate is meaningful.
+int __wrap_nanosleep(const struct timespec *req, struct timespec *rem) {
+    if (req) {
+        uint64_t ns = (uint64_t)req->tv_sec * 1000000000ULL + req->tv_nsec;
+        uint64_t start = clock_monotonic_get();
+        while (clock_monotonic_get() - start < ns)
+            ;
+    }
+    if (rem) {
+        rem->tv_sec = 0;
+        rem->tv_nsec = 0;
+    }
+    return 0;
+}
+#endif
 
 static inline void nop_loop(uint64_t count) {
     for (volatile uint64_t i = 0; i < count; i++) {
@@ -776,9 +904,55 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
 
     trustlet_exit();
 
-    // F-Stack reads its DPDK/port config from FF_CONF; net_null vdev stands in
-    // for the (absent) NIC so ff_init()'s port setup succeeds.
-    setenv("FF_CONF", "/root/module/example-dpdk/iperf_trustlet.ini", 1);
+    // F-Stack reads its DPDK/port config from a file (FF_CONF). The trustlet's
+    // Gramine manifest only mounts /lib + a writable tmpfs root, so materialise
+    // the config in tmpfs rather than relying on any guest path. Keep this in
+    // sync with module/example-dpdk/iperf_trustlet.ini. net_null (injected by
+    // __wrap_rte_eal_init) stands in for the absent NIC.
+    static const char fstack_conf[] =
+        "[dpdk]\n"
+        "lcore_mask=1\n"
+        "channel=4\n"
+        "promiscuous=1\n"
+        "numa_on=0\n"
+        "no_huge=1\n"
+        "tx_csum_offoad_skip=1\n"
+        "tso=0\n"
+        "vlan_strip=0\n"
+        "rx_csum_trust=1\n"
+        "zc_recv=0\n"
+        "zc_send=0\n"
+        "idle_sleep=0\n"
+        "pkt_tx_delay=0\n"
+        "symmetric_rss=0\n"
+        "port_list=0\n"
+        "nb_vdev=0\n"
+        "nb_bond=0\n"
+        "[pcap]\n"
+        "enable=0\n"
+        "[port0]\n"
+        "addr=192.168.31.2\n"
+        "netmask=255.255.255.0\n"
+        "broadcast=192.168.31.255\n"
+        "gateway=192.168.31.1\n"
+        "lcore_list=0\n";
+    // EAL creates its runtime dir /var/run/dpdk/<prefix> but does not mkdir the
+    // parents; the trustlet's tmpfs root starts empty, so make them here.
+    mkdir("/var", 0755);
+    mkdir("/var/run", 0755);
+    mkdir("/var/run/dpdk", 0755);
+
+    const char *conf_path = "/config.ini";
+    FILE *cf = fopen(conf_path, "w");
+    if (!cf) {
+        println("iperf: failed to open %s for writing", conf_path);
+        notify_monitor();
+        return;
+    }
+    fwrite(fstack_conf, 1, sizeof(fstack_conf) - 1, cf);
+    fclose(cf);
+    setenv("FF_CONF", conf_path, 1);
+
     char *argv[] = { "iperf3", "-c", "192.168.31.1", "-t", "15", "-J", NULL };
     println("Calling iperf_main");
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
