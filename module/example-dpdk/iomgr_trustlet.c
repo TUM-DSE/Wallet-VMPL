@@ -223,21 +223,51 @@ int __wrap_rte_eal_init(int argc, char **argv) {
 
 // F-Stack (ff_pump) polls rte_eth_rx_burst()/tx_burst() on its net_null port;
 // route those to the iomgr shared rings so packets reach the driver's real NIC.
-uint16_t __wrap_rte_eth_rx_burst(uint16_t port_id, uint16_t queue_id,
-                                 struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
-    (void)port_id; (void)queue_id;
+uint64_t g_iperf_rx_pkts = 0, g_iperf_tx_pkts = 0; // DIAG: F-Stack RX/TX counters
+
+// rte_eth_rx_burst()/tx_burst() are static-inline in rte_ethdev.h -- they dispatch
+// through rte_eth_fp_ops[port].{rx,tx}_pkt_burst, so a linker --wrap on them does
+// nothing. Instead we install these (eth_rx_burst_t/eth_tx_burst_t-shaped) handlers
+// into the port's fast-path ops after rte_eth_dev_start(), so F-Stack's ff_pump()
+// RX/TX flows over the iomgr shared rings instead of net_null. (rxq/txq arg unused.)
+static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
+    (void)rxq;
     if (!g_iperf_ingress)
         return 0;
-    return (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
+    uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
+    if (n) {
+        g_iperf_rx_pkts += n;
+        if (g_iperf_rx_pkts <= 30)
+            println("FF RX #%lu: %u pkts (len0=%u)", (unsigned long)g_iperf_rx_pkts, n,
+                    rte_pktmbuf_pkt_len(rx_pkts[0]));
+    }
+    return n;
 }
 
-uint16_t __wrap_rte_eth_tx_burst(uint16_t port_id, uint16_t queue_id,
-                                 struct rte_mbuf **tx_pkts, uint16_t nb_pkts) {
-    (void)port_id; (void)queue_id;
+static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_pkts) {
+    (void)txq;
     if (!g_iperf_egress)
         return 0;
     // DPDK contract: caller owns/frees anything we don't accept.
-    return (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
+    uint16_t n = (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
+    if (nb_pkts) {
+        g_iperf_tx_pkts += n;
+        if (g_iperf_tx_pkts <= 30)
+            println("FF TX #%lu: %u/%u pkts to egress (len0=%u)", (unsigned long)g_iperf_tx_pkts,
+                    n, nb_pkts, rte_pktmbuf_pkt_len(tx_pkts[0]));
+    }
+    return n;
+}
+
+extern int __real_rte_eth_dev_start(uint16_t port_id);
+int __wrap_rte_eth_dev_start(uint16_t port_id) {
+    int ret = __real_rte_eth_dev_start(port_id);
+    // Redirect the port's fast-path RX/TX to the shared rings (net_null's real
+    // rx/tx would otherwise drop/zero everything).
+    rte_eth_fp_ops[port_id].rx_pkt_burst = ring_rx_burst;
+    rte_eth_fp_ops[port_id].tx_pkt_burst = ring_tx_burst;
+    println("iperf: redirected port %u fast-path rx/tx to shared rings (ret=%d)", port_id, ret);
+    return ret;
 }
 
 // F-Stack creates its packet pool via rte_pktmbuf_pool_create(); hand back the
@@ -946,7 +976,20 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "netmask=255.255.255.0\n"
         "broadcast=192.168.31.255\n"
         "gateway=192.168.31.1\n"
-        "lcore_list=0\n";
+        "lcore_list=0\n"
+        // fd_reserve MUST equal FF_FD_BASE (128) in the native iperf's ff_native.h:
+        // it is the fd offset above which the app treats descriptors as F-Stack
+        // sockets. Without it F-Stack fds start at 0 and socket ops go to the real
+        // (non-socket) fd -> "connect: Socket operation on non-socket".
+        "[freebsd.boot]\n"
+        "hz=100\n"
+        "fd_reserve=128\n"
+        "kern.ipc.maxsockets=262144\n"
+        "net.inet.tcp.syncache.hashsize=4096\n"
+        "net.inet.tcp.syncache.bucketlimit=100\n"
+        "net.inet.tcp.tcbhashsize=65536\n"
+        "kern.ncallout=262144\n"
+        "kern.features.inet6=1\n";
     // EAL creates its runtime dir /var/run/dpdk/<prefix> but does not mkdir the
     // parents; the trustlet's tmpfs root starts empty, so make them here.
     mkdir("/var", 0755);
@@ -964,10 +1007,18 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     fclose(cf);
     setenv("FF_CONF", conf_path, 1);
 
-    char *argv[] = { "iperf3", "-c", "192.168.31.1", "-t", "15", "-J", NULL };
-    println("Calling iperf_main");
+    char *argv[] = { "iperf3", "-c", "192.168.31.1", "-t", "10", "--connect-timeout", "30000", NULL };
+    // Route iperf's stderr (where connect errors land) into the trustlet's stdout
+    // so failures show up in /tmp/serial.log; and give F-Stack a moment to ARP.
+    fflush(stdout);
+    dup2(fileno(stdout), fileno(stderr));
+    println("Calling iperf_main (argc=%d)", (int)(sizeof(argv) / sizeof(argv[0])) - 1);
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
-    println("iperf_main returned %d", rc);
+    fflush(stdout);
+    fflush(stderr);
+    extern uint64_t g_iperf_rx_pkts, g_iperf_tx_pkts;
+    println("iperf_main returned %d (F-Stack tx=%lu rx=%lu pkts via rings)",
+            rc, (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts);
 
     notify_monitor();
 }

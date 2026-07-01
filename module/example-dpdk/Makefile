@@ -80,7 +80,7 @@ iomgr_run: %: %.c ../../module/libwallet/libwallet.a
 # not ../../.nix-builds/dpdk, or the DPDK ABIs mismatch.
 IPERF_BASE := $(shell realpath ../../.nix-builds/iperf-fstack)
 IPERF_DPDK := $(IPERF_BASE)/dpdk
-IPERF_WRAPS := -Wl,--wrap=rte_eal_init -Wl,--wrap=rte_eth_rx_burst -Wl,--wrap=rte_eth_tx_burst -Wl,--wrap=rte_pktmbuf_pool_create \
+IPERF_WRAPS := -Wl,--wrap=rte_eal_init -Wl,--wrap=rte_eth_dev_start -Wl,--wrap=rte_pktmbuf_pool_create \
 	-Wl,--wrap=eal_cpu_detected -Wl,--wrap=eal_cpu_socket_id -Wl,--wrap=eal_cpu_core_id \
 	-Wl,--wrap=rte_thread_set_affinity -Wl,--wrap=rte_thread_set_affinity_by_id \
 	-Wl,--wrap=rte_mp_channel_init -Wl,--wrap=rte_thread_create_internal_control \
