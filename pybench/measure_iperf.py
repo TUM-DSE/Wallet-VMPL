@@ -21,6 +21,33 @@ import json
 from os.path import dirname as path_dirname
 from types import SimpleNamespace
 import shlex
+import re
+
+
+def _parse_iperf_serial_gbitps(text: str) -> float:
+    """Scrape the iperf3 client's final throughput out of the SVSM serial log
+    (the iomgr VNFlet runs iperf inside the trustlet, so its human-readable
+    output lands there). Prefer the 'receiver' summary line, fall back to
+    'sender'. Returns GBit/s using the same 1024^3 divisor as summarize()."""
+    unit_mul = {"": 1.0, "K": 1e3, "M": 1e6, "G": 1e9, "T": 1e12}
+    pat = re.compile(r"([\d.]+)\s*([KMGT]?)bits/sec")
+    receiver = sender = None
+    for line in text.splitlines():
+        if "bits/sec" not in line:
+            continue
+        m = pat.search(line)
+        if not m:
+            continue
+        bps = float(m.group(1)) * unit_mul[m.group(2)]
+        if "receiver" in line:
+            receiver = bps
+        elif "sender" in line:
+            sender = bps
+    bps = receiver if receiver is not None else sender
+    if bps is None:
+        raise ValueError("no iperf 'bits/sec' summary line found in serial log")
+    return bps / 1024 / 1024 / 1024
+
 
 @dataclass
 class IperfTest(AbstractBenchTest):
@@ -202,6 +229,34 @@ class IperfTest(AbstractBenchTest):
 
         if self.system in [ "iomgr"]:
             guest.copy_from(remote_mirror_output, local_mirror_output)
+
+        # The iperf client runs *inside* the VNFlet trustlet; its stdout goes to
+        # the host's SVSM serial log, not the guest. Wait for the run to finish
+        # (marker printed by main_iperf) before the enclosing context tears the VM
+        # down, then scrape the throughput and write the per-repetition CSV the
+        # summary step reads (otherwise it FileNotFoundErrors on the missing file).
+        serial_log = "/tmp/serial.log"
+        gbitps = 0.0
+        try:
+            # serial.log is appended across reboots; wait for a *new* completion
+            # marker (count increases) rather than matching a stale one.
+            def _marker_count():
+                out = host.exec(f"sudo grep -c 'iperf_main returned' {serial_log} || true").strip()
+                return int(out) if out.isdigit() else 0
+            baseline = _marker_count()
+            host.wait_for_success(f"test $(sudo grep -c 'iperf_main returned' {serial_log} || echo 0) -gt {baseline}",
+                                  timeout=G.DURATION_S + 60, backoff_sec=1)
+            serial_text = host.exec(f"sudo strings {serial_log}")
+            gbitps = _parse_iperf_serial_gbitps(serial_text)
+            print(f"{gbitps:.2f} GBit/s")
+        except Exception as e:
+            warning(f"iomgr iperf VNFlet did not finish/print a result: {e}")
+            print(traceback.format_exc())
+
+        row = { **asdict(self), "repetition": repetition, "GBit/s": gbitps }
+        local_output_file = self.output_filepath(repetition)
+        os.makedirs(path_dirname(local_output_file), exist_ok=True)
+        DataFrame(data=[row]).to_csv(local_output_file, index=False)
 
 
     def pre_initial_cleanup(self, host):

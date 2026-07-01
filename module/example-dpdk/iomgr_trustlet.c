@@ -26,6 +26,7 @@
 #include <rte_ethdev.h>
 #include <rte_lcore.h>
 #include <rte_thread.h>
+#include <rte_cycles.h>
 #include <ff_api.h>
 // iperf-over-F-Stack entry point (iperf's main() renamed to iperf_main so the
 // trustlet, which has its own main(), can embed it). Provided by
@@ -224,6 +225,8 @@ int __wrap_rte_eal_init(int argc, char **argv) {
 // F-Stack (ff_pump) polls rte_eth_rx_burst()/tx_burst() on its net_null port;
 // route those to the iomgr shared rings so packets reach the driver's real NIC.
 uint64_t g_iperf_rx_pkts = 0, g_iperf_tx_pkts = 0; // DIAG: F-Stack RX/TX counters
+uint64_t g_iperf_tx_drop = 0;                      // DIAG: TX mbufs the egress ring refused
+static uint64_t g_iperf_diag_next = 30;            // next pkt-count threshold to print at
 
 // rte_eth_rx_burst()/tx_burst() are static-inline in rte_ethdev.h -- they dispatch
 // through rte_eth_fp_ops[port].{rx,tx}_pkt_burst, so a linker --wrap on them does
@@ -235,13 +238,22 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
     if (!g_iperf_ingress)
         return 0;
     uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
-    if (n) {
+    if (n)
         g_iperf_rx_pkts += n;
-        if (g_iperf_rx_pkts <= 30)
-            println("FF RX #%lu: %u pkts (len0=%u)", (unsigned long)g_iperf_rx_pkts, n,
-                    rte_pktmbuf_pkt_len(rx_pkts[0]));
-    }
     return n;
+}
+
+// DIAG: print cumulative TX/RX/drop rarely (log-ish thresholds) so we can see
+// whether bulk transfer is sustained or stalling, and how many TX mbufs the
+// egress ring refused -- without the ~11ms console write throttling the hot loop.
+static void iperf_diag_maybe_print(void) {
+    uint64_t seen = g_iperf_tx_pkts + g_iperf_rx_pkts;
+    if (seen < g_iperf_diag_next)
+        return;
+    g_iperf_diag_next = seen + 20000;
+    println("FF DIAG: tx=%lu rx=%lu tx_drop=%lu",
+            (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts,
+            (unsigned long)g_iperf_tx_drop);
 }
 
 static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_pkts) {
@@ -252,9 +264,8 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
     uint16_t n = (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
     if (nb_pkts) {
         g_iperf_tx_pkts += n;
-        if (g_iperf_tx_pkts <= 30)
-            println("FF TX #%lu: %u/%u pkts to egress (len0=%u)", (unsigned long)g_iperf_tx_pkts,
-                    n, nb_pkts, rte_pktmbuf_pkt_len(tx_pkts[0]));
+        g_iperf_tx_drop += (uint64_t)(nb_pkts - n);
+        iperf_diag_maybe_print();
     }
     return n;
 }
@@ -288,9 +299,19 @@ struct rte_mempool *__wrap_rte_pktmbuf_pool_create(const char *name, unsigned n,
 // Returns monotonic time in nanoseconds
 // Note: clock_gettime returns TSC cycles misinterpreted as usec, then converted to nsec
 // Effective value is cycles * 1000, so divide by (CPU_GHZ * 1000) to get real nsec
+#ifdef IPERF_WORKLOAD
+// The IPERF build wraps clock_gettime (see __wrap_clock_gettime below) to hand
+// library/app callers *real* time. This helper needs the RAW value so its own
+// /(CPU_GHZ*1000) correction is not applied twice; go straight to __real.
+extern int __real_clock_gettime(clockid_t clk, struct timespec *ts);
+#endif
 static inline uint64_t clock_monotonic_get(void) {
     struct timespec ts;
+#ifdef IPERF_WORKLOAD
+    __real_clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
     clock_gettime(CLOCK_MONOTONIC, &ts);
+#endif
     return (ts.tv_sec * 1000000000ULL + ts.tv_nsec) / (CPU_GHZ * 1000);
 }
 
@@ -313,6 +334,34 @@ int __wrap_nanosleep(const struct timespec *req, struct timespec *rem) {
         rem->tv_nsec = 0;
     }
     return 0;
+}
+
+// SVSM's CLOCK_MONOTONIC is unusable for the iperf/F-Stack hot path for two
+// reasons, both fixed here by serving CLOCK_MONOTONIC from the TSC (rte_rdtsc):
+//
+//  1. It does not return real time -- it returns raw TSC cycles scaled so that
+//     (tv_sec*1e9 + tv_nsec) == cycles*1000 (see clock_monotonic_get). The native
+//     iperf's ffn_select()/ff_native_drain() and iperf's own interval/duration
+//     timers assume real nanoseconds, so their timeouts fire ~2000x too early --
+//     most fatally the 30s connect timeout elapses in ~15ms (right after the
+//     SYN-ACK, before F-Stack pumps the completing ACK) -> "Connection timed out".
+//  2. The PAL's clock_gettime is a ~11ms monitor round-trip. ffn_select() calls
+//     it every iteration of its zero-timeout ff_select()+ff_pump() spin loop, so
+//     the whole cooperative pump throttles to ~90Hz; TCP ACK-clocking starves and
+//     bulk throughput collapses from Gbit/s to a ~300Kbit/s trickle.
+//
+// rte_rdtsc() is a single instruction and monotonic; dividing by CPU_GHZ yields
+// real nanoseconds. App-side only -- no SVSM/PAL change. Other clocks (REALTIME,
+// PROCESS/THREAD CPUTIME) pass through to __real. clock_monotonic_get() keeps
+// reading __real directly, so the nanosleep busy-wait is unaffected.
+int __wrap_clock_gettime(clockid_t clk, struct timespec *ts) {
+    if (ts && (clk == CLOCK_MONOTONIC || clk == CLOCK_MONOTONIC_RAW)) {
+        uint64_t ns = (uint64_t)((double)rte_rdtsc() / CPU_GHZ); // cycles -> real ns
+        ts->tv_sec  = ns / 1000000000ULL;
+        ts->tv_nsec = ns % 1000000000ULL;
+        return 0;
+    }
+    return __real_clock_gettime(clk, ts);
 }
 #endif
 
@@ -700,6 +749,9 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
     size_t num_deq = 0, num_enq = 0, total_rx = 0, total_tx = 0;
     void *deq_objs[BURST_SIZE];
     void *enq_objs[BURST_SIZE];
+    // DIAG: silent all-or-nothing enqueue failures here drop packets and cause
+    // TCP congestion collapse; count where they happen and print rarely.
+    uint64_t drop_to_vnflet = 0, drop_to_driver = 0, diag_next_iter = 50000000;
     delay(1); // warm up CoW triggered by delay
 
     // Initialize DPDK EAL with --no-huge for environments without hugepages
@@ -787,12 +839,16 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
             debug println("Dequeued %lu objects from ring. First: %p", num_deq, deq_objs[0]);
 
             /* nop_delay(100); // RMPADJUST */
+            // revoke guest access at chain entry -- for every packet in the burst,
+            // not just the first (a multi-packet burst would otherwise leak access).
             if (is_first)
-                rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // revoke guest access at chain entry
+                for (size_t i = 0; i < num_deq; i++)
+                    rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[i]), void *), VMPL3);
 
             // pass buffers to first VNFlet of this segment
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[seg_start]->ingress.ring, deq_objs, num_deq, NULL);
             if (num_enq == 0) {
+                drop_to_vnflet += num_deq; // DIAG: RX (incl. ACKs) dropped -> VNFlet ingress full
                 /* rte_pktmbuf_free_bulk((struct rte_mbuf **)enq_objs, num_deq); */
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
             } else {
@@ -822,12 +878,26 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
         if (num_deq == 0) {
         } else {
             /* nop_delay(100); // RMPADJUST */
+            // restore guest access at chain exit -- for every packet in the burst,
+            // else the driver can't read packets after the first (they stay denied
+            // to VMPL3) and TCP stalls after the handshake.
             if (is_last)
-                rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[0]), void *), VMPL3); // restore guest access at chain exit
+                for (size_t i = 0; i < num_deq; i++)
+                    rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[i]), void *), VMPL3);
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
+                drop_to_driver += num_deq; // DIAG: client TX data dropped -> driver ingress full
                 // TODO: We need to drop the packet now, so don't we have to pass it back to the driver? enqueue_bulk(data_shared_previous->egress) or data_shared_next->ingress with pktsize 0 or so? Actually, we must ensure that this enq never fails though!
             }
+        }
+
+        // DIAG: rarely surface where the iomgr is dropping (the ~11ms console
+        // write must stay out of the per-packet path).
+        if (iterations >= diag_next_iter) {
+            diag_next_iter = iterations + 50000000;
+            println("IOMGR DIAG: iters=%lu rx=%lu tx=%lu drop_to_vnflet=%lu drop_to_driver=%lu",
+                    (unsigned long)iterations, (unsigned long)total_rx, (unsigned long)total_tx,
+                    (unsigned long)drop_to_vnflet, (unsigned long)drop_to_driver);
         }
 
         /* num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL); */
@@ -957,7 +1027,14 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "promiscuous=1\n"
         "numa_on=0\n"
         "no_huge=1\n"
-        "tx_csum_offoad_skip=1\n"
+        // net_null has NO checksum offload, so F-Stack must compute full TCP/IP
+        // checksums in software (skip=0). With skip=1 (assume hardware offload)
+        // bulk data segments leave with only a pseudo-header checksum and are
+        // dropped downstream -> ~500k retransmits and the transfer collapses.
+        // (The handshake/control still completed because those paths differ.)
+        // net_null has no TSO either, so keep tso=0: F-Stack segments in SW and
+        // checksums each ~1500B segment itself.
+        "tx_csum_offoad_skip=0\n"
         "tso=0\n"
         "vlan_strip=0\n"
         "rx_csum_trust=1\n"
@@ -995,6 +1072,11 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     mkdir("/var", 0755);
     mkdir("/var/run", 0755);
     mkdir("/var/run/dpdk", 0755);
+    // iperf3's iperf_new_stream() backs each stream's buffer with a temp file
+    // created via mkstemp("$TMPDIR/iperf3.XXXXXX"), defaulting to /tmp. The
+    // trustlet's tmpfs root starts empty, so /tmp is absent -> mkstemp fails with
+    // ENOENT ("unable to create a new stream: No such file or directory").
+    mkdir("/tmp", 0777);
 
     const char *conf_path = "/config.ini";
     FILE *cf = fopen(conf_path, "w");
