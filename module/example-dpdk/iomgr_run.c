@@ -22,6 +22,53 @@
 #include <rte_errno.h>
 #include <rte_ring.h>
 #include <rte_mbuf.h>
+#include <rte_ether.h>
+#include <rte_ip.h>
+#include <rte_tcp.h>
+
+// DIAG: parse a TCP packet and print (rate-limited) direction/seq/ack/flags/win/
+// payload so we can watch the client<->server TCP conversation from the driver's
+// NIC vantage -- specifically the server's advertised receive window over time
+// (a persist/zero-window deadlock shows win pinning at 0 and never reopening) and
+// tiny client persist probes. dir: "S->C" (NIC RX) or "C->S" (NIC TX).
+static void diag_tcp(const char *dir, struct rte_mbuf *m) {
+    if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
+            sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
+        return;
+    const struct rte_ether_hdr *eth = rte_pktmbuf_mtod(m, const struct rte_ether_hdr *);
+    if (eth->ether_type != rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4))
+        return;
+    const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
+    if (ip->next_proto_id != IPPROTO_TCP)
+        return;
+    uint8_t ihl = (ip->version_ihl & 0x0f) * 4;
+    const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)((const uint8_t *)ip + ihl);
+    uint16_t iplen = rte_be_to_cpu_16(ip->total_length);
+    uint8_t doff = ((tcp->data_off & 0xf0) >> 4) * 4;
+    int payload = (int)iplen - ihl - doff;
+    // Rate-limit per direction: log the first ~40, then only on zero-window,
+    // window reopen, or once per ~200ms; always log tiny (persist) segments.
+    static uint64_t n_sc = 0, n_cs = 0, last_sc_ns = 0, last_cs_ns = 0;
+    static uint32_t last_sc_win = 0xffffffff;
+    int is_sc = (dir[0] == 'S');
+    uint16_t win = rte_be_to_cpu_16(tcp->rx_win);
+    struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t now = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    uint64_t *cnt = is_sc ? &n_sc : &n_cs;
+    uint64_t *last = is_sc ? &last_sc_ns : &last_cs_ns;
+    (*cnt)++;
+    int win_event = is_sc && (win != last_sc_win) && (win == 0 || last_sc_win == 0);
+    int small = payload > 0 && payload <= 4; // persist probe
+    if (*cnt <= 40 || win_event || small || (now - *last) > 200000000ULL) {
+        *last = now;
+        if (is_sc) last_sc_win = win;
+        printf("TCP %s #%lu seq=%u ack=%u win=%u flags=0x%02x payload=%d%s\n",
+               dir, (unsigned long)*cnt, rte_be_to_cpu_32(tcp->sent_seq),
+               rte_be_to_cpu_32(tcp->recv_ack), win, tcp->tcp_flags, payload,
+               win_event ? (win == 0 ? "  <<ZERO-WINDOW" : "  <<WIN-REOPEN") : "");
+        fflush(stdout);
+    }
+}
 
 #include "../include/cpuid.h"
 #include "../example-tests/util.h"
@@ -448,6 +495,7 @@ int main(int argc, char *argv[]) {
                 // Copy received packets into mbufs from the shm pool
                 size_t nb_copied = 0;
                 for (size_t i = 0; i < nb_rx; i++) {
+                    diag_tcp("S->C", bufs[i]); // server->client: watch advertised window
                     enq_objs[nb_copied] = rte_pktmbuf_copy(bufs[i], pool, 0, UINT32_MAX); // TODO not MAX
                     rte_pktmbuf_free(bufs[i]); // return to cvmio_pool
                     if (enq_objs[nb_copied] != NULL)
@@ -491,6 +539,8 @@ int main(int argc, char *argv[]) {
                 }
 
                 if (nb_copied2 > 0) {
+                    for (size_t i = 0; i < nb_copied2; i++)
+                        diag_tcp("C->S", bufs[i]); // client->server: spot persist probes
                     const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
                             bufs, nb_copied2);
 

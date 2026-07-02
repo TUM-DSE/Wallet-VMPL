@@ -27,6 +27,8 @@
 #include <rte_lcore.h>
 #include <rte_thread.h>
 #include <rte_cycles.h>
+#include <rte_ip.h>
+#include <rte_tcp.h>
 #include <ff_api.h>
 // iperf-over-F-Stack entry point (iperf's main() renamed to iperf_main so the
 // trustlet, which has its own main(), can embed it). Provided by
@@ -240,6 +242,39 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
     uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
     if (n)
         g_iperf_rx_pkts += n;
+    // DIAG: parse the TCP ack of each server->client packet AS THE TRUSTLET SEES IT
+    // (after the driver copy + ring + iomgr forward). The driver logs the same
+    // packets with correct acks (~1.64e9). If the trustlet sees a wildly different
+    // ack here, the shared-mem RX path corrupted it (-> TCP desync). This localizes
+    // the corruption to the driver->trustlet path vs F-Stack.
+    for (uint16_t i = 0; i < n; i++) {
+        struct rte_mbuf *m = rx_pkts[i];
+        if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
+                sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
+            continue;
+        const struct rte_ether_hdr *eth = rte_pktmbuf_mtod(m, const struct rte_ether_hdr *);
+        if (eth->ether_type != rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4))
+            continue;
+        const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
+        if (ip->next_proto_id != IPPROTO_TCP)
+            continue;
+        const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)
+            ((const uint8_t *)ip + (ip->version_ihl & 0x0f) * 4);
+        uint32_t ack = rte_be_to_cpu_32(tcp->recv_ack);
+        uint32_t seq = rte_be_to_cpu_32(tcp->sent_seq);
+        static uint64_t rxn = 0, last_ns = 0;
+        rxn++;
+        // ack numbers for the data conn should track ~1.6e9. Flag any ack far above
+        // that (the desync value was ~2.36e9), plus a periodic heartbeat.
+        int suspicious = (ack > 2000000000u);
+        struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t now = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        if (rxn <= 20 || suspicious || (now - last_ns) > 200000000ULL) {
+            last_ns = now;
+            println("RXPKT #%lu seq=%u ack=%u flags=0x%02x%s", (unsigned long)rxn,
+                    seq, ack, tcp->tcp_flags, suspicious ? "  <<SUSPICIOUS-ACK" : "");
+        }
+    }
     // DIAG: ff_pump() calls this every poll, so it keeps ticking even when TX has
     // stalled -- use it to watch the shared pool's free count. If it drains toward
     // 0 at the stall, F-Stack's tcp_output can't allocate mbufs (pool too small),
