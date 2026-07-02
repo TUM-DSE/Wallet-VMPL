@@ -1050,28 +1050,41 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         // it is the fd offset above which the app treats descriptors as F-Stack
         // sockets. Without it F-Stack fds start at 0 and socket ops go to the real
         // (non-socket) fd -> "connect: Socket operation on non-socket".
+        // [freebsd.boot] entries go through kern_setenv (loader tunables); only
+        // RWTUN/TUNABLE oids read them. Plain sysctls (buffer sizes, delayed_ack,
+        // cc.algorithm, hpts.*) MUST live in [freebsd.sysctl] (applied via
+        // kernel_sysctlbyname after boot) or they are silently ignored -- the
+        // earlier revision had them under [freebsd.boot] and ran on defaults.
+        // Mirrors the proven guest client config-vhost-c.ini.
         "[freebsd.boot]\n"
         "hz=100\n"
         "fd_reserve=128\n"
         "kern.ipc.maxsockets=262144\n"
-        // TCP socket-buffer auto-tuning up to 16MB. Without these F-Stack uses a
-        // tiny fixed send buffer (~32KB default) that cannot grow, so only a few
-        // segments are ever in flight -> the transfer is delayed-ACK-clocked at a
-        // ~few-Mbit trickle (pool healthy, zero drops). Matches config-vhost-c.ini.
+        "net.inet.tcp.syncache.hashsize=4096\n"
+        "net.inet.tcp.syncache.bucketlimit=100\n"
+        "net.inet.tcp.tcbhashsize=65536\n"
+        "kern.ncallout=262144\n"
+        "kern.features.inet6=1\n"
+        "[freebsd.sysctl]\n"
+        "kern.ipc.somaxconn=32768\n"
+        // TCP socket-buffer auto-tuning up to 16MB (defaults cap at 2MB).
         "kern.ipc.maxsockbuf=16777216\n"
         "net.inet.tcp.sendspace=16384\n"
         "net.inet.tcp.recvspace=8192\n"
+        "net.inet.tcp.cc.algorithm=cubic\n"
         "net.inet.tcp.sendbuf_max=16777216\n"
         "net.inet.tcp.recvbuf_max=16777216\n"
         "net.inet.tcp.sendbuf_auto=1\n"
         "net.inet.tcp.recvbuf_auto=1\n"
         "net.inet.tcp.sendbuf_inc=16384\n"
+        "net.inet.tcp.sack.enable=1\n"
+        "net.inet.tcp.msl=2000\n"
         "net.inet.tcp.delayed_ack=1\n"
-        "net.inet.tcp.syncache.hashsize=4096\n"
-        "net.inet.tcp.syncache.bucketlimit=100\n"
-        "net.inet.tcp.tcbhashsize=65536\n"
-        "kern.ncallout=262144\n"
-        "kern.features.inet6=1\n";
+        "net.inet.tcp.rfc1323=1\n"
+        "net.inet.tcp.functions_default=freebsd\n"
+        "net.inet.tcp.hpts.skip_swi=1\n"
+        "net.inet.tcp.hpts.minsleep=250\n"
+        "net.inet.tcp.hpts.maxsleep=51200\n";
     // EAL creates its runtime dir /var/run/dpdk/<prefix> but does not mkdir the
     // parents; the trustlet's tmpfs root starts empty, so make them here.
     mkdir("/var", 0755);
