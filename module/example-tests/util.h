@@ -44,6 +44,16 @@
 struct shm_stack {
   uint32_t size;
   uint32_t top;
+  // Spinlock guarding top/objs. This mbuf pool lives in shared memory and is
+  // alloc(pop)/free(push)ed CONCURRENTLY by the guest driver (VMPL3) and the
+  // VNFlet's F-Stack (VMPL2) on different cores. The original code used a plain
+  // non-atomic `top++`/`--top`, so two concurrent pops could read the same top
+  // and hand out the SAME mbuf twice (double allocation); the two owners then
+  // write different packets into one buffer -> a buffer carries a valid checksum
+  // but the wrong/stale packet -> intermittent TCP loss/desync with ZERO ring/
+  // pool drop counters. This lock serializes the stack across VMPLs. Disable with
+  // -DSHM_STACK_NO_LOCK to reproduce the racy behaviour for A/B testing.
+  atomic_flag lock;
   void *objs[SHM_POOL_SIZE];
 };
 

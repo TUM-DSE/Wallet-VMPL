@@ -9,12 +9,68 @@
 
 #include "util.h"
 
+// Cross-VMPL spinlock for the shared mbuf pool stack. The critical sections are a
+// handful of pointer moves, so an uncontended test-and-set is ~free; with
+// cache_size=0 (see create_shm_mbuf_pool) every alloc/free takes it, which is
+// exactly what makes the un-locked version race so pervasively. Define
+// -DSHM_STACK_NO_LOCK to get the old (racy) behaviour for A/B measurement.
+static inline void shm_stack_lock(struct shm_stack *s)
+{
+#ifndef SHM_STACK_NO_LOCK
+	while (atomic_flag_test_and_set_explicit(&s->lock, memory_order_acquire))
+		__asm__ __volatile__("pause");
+#else
+	(void)s;
+#endif
+}
+static inline void shm_stack_unlock(struct shm_stack *s)
+{
+#ifndef SHM_STACK_NO_LOCK
+	atomic_flag_clear_explicit(&s->lock, memory_order_release);
+#else
+	(void)s;
+#endif
+}
+
+// Optional double-alloc / double-free detector -- PROOF that the pool stack is
+// racing. Gated by -DSHM_POOL_DEBUG. Stamps each mbuf's spare dynfield2 with an
+// ALLOC/FREE marker; a pop that finds an object still marked ALLOC (or a push
+// finding it still FREE) means the same buffer has two live references at once --
+// i.e. the cross-VMPL double allocation. The marker lives in the shared mbuf, so
+// this catches the race across the driver<->trustlet boundary. Off by default and
+// independent of the lock, so you can run: (no lock + debug) -> expect reports;
+// (lock + debug) -> expect none.
+#ifdef SHM_POOL_DEBUG
+#define SHM_TAG_ALLOC 0xA110CULL
+#define SHM_TAG_FREE  0xF7EE0ULL
+static inline void shm_dbg_on_alloc(void *o)
+{
+	struct rte_mbuf *m = (struct rte_mbuf *)o;
+	static unsigned long reported;
+	if (m->dynfield2 == SHM_TAG_ALLOC && reported++ < 200)
+		printf("SHM-RACE double-alloc: mbuf %p handed out while still allocated\n", o);
+	m->dynfield2 = SHM_TAG_ALLOC;
+}
+static inline void shm_dbg_on_free(void *o)
+{
+	struct rte_mbuf *m = (struct rte_mbuf *)o;
+	static unsigned long reported;
+	if (m->dynfield2 == SHM_TAG_FREE && reported++ < 200)
+		printf("SHM-RACE double-free: mbuf %p freed while already free\n", o);
+	m->dynfield2 = SHM_TAG_FREE;
+}
+#else
+#define shm_dbg_on_alloc(o) ((void)0)
+#define shm_dbg_on_free(o)  ((void)0)
+#endif
+
 static int
 shm_stack_alloc(struct rte_mempool *mp)
 {
 	struct shm_stack *s = (struct shm_stack *)mp->pool_config;
 	s->size = mp->size;
 	s->top = 0;
+	atomic_flag_clear(&s->lock);
 	mp->pool_data = s;
 	return 0;
 }
@@ -30,10 +86,16 @@ shm_stack_enqueue(struct rte_mempool *mp, void * const *obj_table,
 		  unsigned int n)
 {
 	struct shm_stack *s = (struct shm_stack *)mp->pool_data;
-	if (s->top + n > s->size)
+	shm_stack_lock(s);
+	if (s->top + n > s->size) {
+		shm_stack_unlock(s);
 		return -ENOBUFS;
-	for (unsigned int i = 0; i < n; i++)
+	}
+	for (unsigned int i = 0; i < n; i++) {
+		shm_dbg_on_free(obj_table[i]);
 		s->objs[s->top++] = (void *)obj_table[i];
+	}
+	shm_stack_unlock(s);
 	return 0;
 }
 
@@ -41,10 +103,16 @@ static int
 shm_stack_dequeue(struct rte_mempool *mp, void **obj_table, unsigned int n)
 {
 	struct shm_stack *s = (struct shm_stack *)mp->pool_data;
-	if (s->top < n)
+	shm_stack_lock(s);
+	if (s->top < n) {
+		shm_stack_unlock(s);
 		return -ENOBUFS;
-	for (unsigned int i = 0; i < n; i++)
+	}
+	for (unsigned int i = 0; i < n; i++) {
 		obj_table[i] = s->objs[--s->top];
+		shm_dbg_on_alloc(obj_table[i]);
+	}
+	shm_stack_unlock(s);
 	return 0;
 }
 
