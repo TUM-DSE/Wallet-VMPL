@@ -228,13 +228,17 @@ int __wrap_rte_eal_init(int argc, char **argv) {
 // route those to the iomgr shared rings so packets reach the driver's real NIC.
 uint64_t g_iperf_rx_pkts = 0, g_iperf_tx_pkts = 0; // DIAG: F-Stack RX/TX counters
 uint64_t g_iperf_tx_drop = 0;                      // DIAG: TX mbufs the egress ring refused
-static uint64_t g_iperf_diag_next = 30;            // next pkt-count threshold to print at
 
 // rte_eth_rx_burst()/tx_burst() are static-inline in rte_ethdev.h -- they dispatch
 // through rte_eth_fp_ops[port].{rx,tx}_pkt_burst, so a linker --wrap on them does
 // nothing. Instead we install these (eth_rx_burst_t/eth_tx_burst_t-shaped) handlers
 // into the port's fast-path ops after rte_eth_dev_start(), so F-Stack's ff_pump()
 // RX/TX flows over the iomgr shared rings instead of net_null. (rxq/txq arg unused.)
+// No per-packet logging here: a trustlet console write is a ~11ms PAL round-trip,
+// so even a "rate-limited" print that can fire per packet (as the removed
+// SUSPICIOUS-ACK trace did whenever the connection's random ISN exceeded its
+// threshold -- ~78% of runs across the two iperf connections) throttles the
+// whole client to ~90 pkts/s and reads as a ~2 Mbit/s trickle. Counters only.
 static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
     (void)rxq;
     if (!g_iperf_ingress)
@@ -242,62 +246,7 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
     uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
     if (n)
         g_iperf_rx_pkts += n;
-    // DIAG: parse the TCP ack of each server->client packet AS THE TRUSTLET SEES IT
-    // (after the driver copy + ring + iomgr forward). The driver logs the same
-    // packets with correct acks (~1.64e9). If the trustlet sees a wildly different
-    // ack here, the shared-mem RX path corrupted it (-> TCP desync). This localizes
-    // the corruption to the driver->trustlet path vs F-Stack.
-    for (uint16_t i = 0; i < n; i++) {
-        struct rte_mbuf *m = rx_pkts[i];
-        if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
-                sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
-            continue;
-        const struct rte_ether_hdr *eth = rte_pktmbuf_mtod(m, const struct rte_ether_hdr *);
-        if (eth->ether_type != rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4))
-            continue;
-        const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
-        if (ip->next_proto_id != IPPROTO_TCP)
-            continue;
-        const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)
-            ((const uint8_t *)ip + (ip->version_ihl & 0x0f) * 4);
-        uint32_t ack = rte_be_to_cpu_32(tcp->recv_ack);
-        uint32_t seq = rte_be_to_cpu_32(tcp->sent_seq);
-        static uint64_t rxn = 0, last_ns = 0;
-        rxn++;
-        // ack numbers for the data conn should track ~1.6e9. Flag any ack far above
-        // that (the desync value was ~2.36e9), plus a periodic heartbeat.
-        int suspicious = (ack > 2000000000u);
-        struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
-        uint64_t now = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-        if (rxn <= 20 || suspicious || (now - last_ns) > 200000000ULL) {
-            last_ns = now;
-            println("RXPKT #%lu seq=%u ack=%u flags=0x%02x%s", (unsigned long)rxn,
-                    seq, ack, tcp->tcp_flags, suspicious ? "  <<SUSPICIOUS-ACK" : "");
-        }
-    }
-    // DIAG: ff_pump() calls this every poll, so it keeps ticking even when TX has
-    // stalled -- use it to watch the shared pool's free count. If it drains toward
-    // 0 at the stall, F-Stack's tcp_output can't allocate mbufs (pool too small),
-    // which stalls the sender with no ring-enqueue drop.
-    static uint64_t rx_polls = 0;
-    if ((++rx_polls % 8000000ULL) == 0 && g_iperf_pool)
-        println("FF POOL: avail=%u/%u (tx=%lu rx=%lu tx_drop=%lu)",
-                rte_mempool_avail_count(g_iperf_pool), rte_mempool_in_use_count(g_iperf_pool) + rte_mempool_avail_count(g_iperf_pool),
-                (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts, (unsigned long)g_iperf_tx_drop);
     return n;
-}
-
-// DIAG: print cumulative TX/RX/drop rarely (log-ish thresholds) so we can see
-// whether bulk transfer is sustained or stalling, and how many TX mbufs the
-// egress ring refused -- without the ~11ms console write throttling the hot loop.
-static void iperf_diag_maybe_print(void) {
-    uint64_t seen = g_iperf_tx_pkts + g_iperf_rx_pkts;
-    if (seen < g_iperf_diag_next)
-        return;
-    g_iperf_diag_next = seen + 20000;
-    println("FF DIAG: tx=%lu rx=%lu tx_drop=%lu",
-            (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts,
-            (unsigned long)g_iperf_tx_drop);
 }
 
 static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_pkts) {
@@ -309,7 +258,6 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
     if (nb_pkts) {
         g_iperf_tx_pkts += n;
         g_iperf_tx_drop += (uint64_t)(nb_pkts - n);
-        iperf_diag_maybe_print();
     }
     return n;
 }
@@ -1155,9 +1103,10 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
     fflush(stdout);
     fflush(stderr);
-    extern uint64_t g_iperf_rx_pkts, g_iperf_tx_pkts;
-    println("iperf_main returned %d (F-Stack tx=%lu rx=%lu pkts via rings)",
-            rc, (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts);
+    extern uint64_t g_iperf_rx_pkts, g_iperf_tx_pkts, g_iperf_tx_drop;
+    println("iperf_main returned %d (F-Stack tx=%lu rx=%lu tx_drop=%lu pkts via rings)",
+            rc, (unsigned long)g_iperf_tx_pkts, (unsigned long)g_iperf_rx_pkts,
+            (unsigned long)g_iperf_tx_drop);
 
     notify_monitor();
 }

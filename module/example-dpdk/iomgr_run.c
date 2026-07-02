@@ -26,11 +26,11 @@
 #include <rte_ip.h>
 #include <rte_tcp.h>
 
-// DIAG: parse a TCP packet and print (rate-limited) direction/seq/ack/flags/win/
-// payload so we can watch the client<->server TCP conversation from the driver's
-// NIC vantage -- specifically the server's advertised receive window over time
-// (a persist/zero-window deadlock shows win pinning at 0 and never reopening) and
-// tiny client persist probes. dir: "S->C" (NIC RX) or "C->S" (NIC TX).
+// Per-direction TCP packet counters. The former TIMING-mode trace (printf+fflush
+// for the first 4000 packets) sat in the driver's forwarding hot path and
+// perturbed exactly the handshake/slow-start phase it was meant to observe; the
+// per-packet path must stay print-free. dir: "S->C" (NIC RX) or "C->S" (NIC TX).
+static uint64_t diag_n_sc = 0, diag_n_cs = 0;
 static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
             sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
@@ -41,33 +41,10 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
     if (ip->next_proto_id != IPPROTO_TCP)
         return;
-    uint8_t ihl = (ip->version_ihl & 0x0f) * 4;
-    const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)((const uint8_t *)ip + ihl);
-    uint16_t iplen = rte_be_to_cpu_16(ip->total_length);
-    uint8_t doff = ((tcp->data_off & 0xf0) >> 4) * 4;
-    int payload = (int)iplen - ihl - doff;
-    // Rate-limit per direction: log the first ~40, then only on zero-window,
-    // window reopen, or once per ~200ms; always log tiny (persist) segments.
-    static uint64_t n_sc = 0, n_cs = 0, t0 = 0, logged = 0;
-    int is_sc = (dir[0] == 'S');
-    uint16_t win = rte_be_to_cpu_16(tcp->rx_win);
-    struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t now = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-    if (t0 == 0) t0 = now;
-    uint64_t *cnt = is_sc ? &n_sc : &n_cs;
-    (*cnt)++;
-    // TIMING MODE: log EVERY packet with a ms timestamp (relative to first) so the
-    // ~23ms send/ack cycle can be dissected -- is the gap client-send->server-ack
-    // (delayed ACK on the receiver) or server-ack->client-next-send (client pump/
-    // cwnd stall)? The trickle only moves ~2500 pkts total; cap at 4000 lines.
-    if (logged < 4000) {
-        logged++;
-        double t_ms = (double)(now - t0) / 1e6;
-        printf("T=%.3f TCP %s #%lu seq=%u ack=%u win=%u flags=0x%02x payload=%d\n",
-               t_ms, dir, (unsigned long)*cnt, rte_be_to_cpu_32(tcp->sent_seq),
-               rte_be_to_cpu_32(tcp->recv_ack), win, tcp->tcp_flags, payload);
-        fflush(stdout);
-    }
+    if (dir[0] == 'S')
+        diag_n_sc++;
+    else
+        diag_n_cs++;
 }
 
 #include "../include/cpuid.h"
@@ -480,9 +457,10 @@ int main(int argc, char *argv[]) {
         for (int iter = 0; iter < iterations && !loadgen; iter++) {
             if ((uint64_t)iter >= diag_next) {
                 diag_next = (uint64_t)iter + 20000000;
-                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu\n",
+                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu\n",
                        iter, (unsigned long)drop_rx_copy, (unsigned long)drop_rx_ring,
-                       (unsigned long)drop_tx_copy, (unsigned long)drop_tx_ring);
+                       (unsigned long)drop_tx_copy, (unsigned long)drop_tx_ring,
+                       (unsigned long)diag_n_sc, (unsigned long)diag_n_cs);
                 fflush(stdout);
             }
 
