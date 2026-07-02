@@ -104,6 +104,7 @@ class IperfTest(AbstractBenchTest):
             "-DWORKLOAD_ACCESSES_B=0",
             "-DCHAINING=1",
             "-DIPERF_WORKLOAD=1",
+            os.environ.get("EXTRA_CFLAGS", ""),  # e.g. -DSHM_POOL_DEBUG [-DSHM_STACK_NO_LOCK]
             # f"-DLLC_SIZE={LLC_SIZE}",
         ])
 

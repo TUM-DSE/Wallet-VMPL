@@ -47,17 +47,17 @@ static inline void shm_dbg_on_alloc(void *o)
 {
 	struct rte_mbuf *m = (struct rte_mbuf *)o;
 	static unsigned long reported;
-	if (m->dynfield2 == SHM_TAG_ALLOC && reported++ < 200)
+	if (m->dynfield1[8] == SHM_TAG_ALLOC && reported++ < 200)
 		printf("SHM-RACE double-alloc: mbuf %p handed out while still allocated\n", o);
-	m->dynfield2 = SHM_TAG_ALLOC;
+	m->dynfield1[8] = SHM_TAG_ALLOC;
 }
 static inline void shm_dbg_on_free(void *o)
 {
 	struct rte_mbuf *m = (struct rte_mbuf *)o;
 	static unsigned long reported;
-	if (m->dynfield2 == SHM_TAG_FREE && reported++ < 200)
+	if (m->dynfield1[8] == SHM_TAG_FREE && reported++ < 200)
 		printf("SHM-RACE double-free: mbuf %p freed while already free\n", o);
-	m->dynfield2 = SHM_TAG_FREE;
+	m->dynfield1[8] = SHM_TAG_FREE;
 }
 #else
 #define shm_dbg_on_alloc(o) ((void)0)
