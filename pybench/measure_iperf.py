@@ -258,6 +258,14 @@ class IperfTest(AbstractBenchTest):
         os.makedirs(path_dirname(local_output_file), exist_ok=True)
         DataFrame(data=[row]).to_csv(local_output_file, index=False)
 
+        # DIAG: re-copy the driver log now that the transfer has actually run, so
+        # the driver-side diag_tcp TCP-header trace is captured on the host (the
+        # earlier copy above happens before iperf transfers).
+        try:
+            guest.copy_from(remote_mirror_output, local_mirror_output)
+        except Exception:
+            pass
+
 
     def pre_initial_cleanup(self, host):
         host.exec("sudo pkill iperf || true")

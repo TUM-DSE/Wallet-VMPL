@@ -48,24 +48,24 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     int payload = (int)iplen - ihl - doff;
     // Rate-limit per direction: log the first ~40, then only on zero-window,
     // window reopen, or once per ~200ms; always log tiny (persist) segments.
-    static uint64_t n_sc = 0, n_cs = 0, last_sc_ns = 0, last_cs_ns = 0;
-    static uint32_t last_sc_win = 0xffffffff;
+    static uint64_t n_sc = 0, n_cs = 0, t0 = 0, logged = 0;
     int is_sc = (dir[0] == 'S');
     uint16_t win = rte_be_to_cpu_16(tcp->rx_win);
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t now = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    if (t0 == 0) t0 = now;
     uint64_t *cnt = is_sc ? &n_sc : &n_cs;
-    uint64_t *last = is_sc ? &last_sc_ns : &last_cs_ns;
     (*cnt)++;
-    int win_event = is_sc && (win != last_sc_win) && (win == 0 || last_sc_win == 0);
-    int small = payload > 0 && payload <= 4; // persist probe
-    if (*cnt <= 40 || win_event || small || (now - *last) > 200000000ULL) {
-        *last = now;
-        if (is_sc) last_sc_win = win;
-        printf("TCP %s #%lu seq=%u ack=%u win=%u flags=0x%02x payload=%d%s\n",
-               dir, (unsigned long)*cnt, rte_be_to_cpu_32(tcp->sent_seq),
-               rte_be_to_cpu_32(tcp->recv_ack), win, tcp->tcp_flags, payload,
-               win_event ? (win == 0 ? "  <<ZERO-WINDOW" : "  <<WIN-REOPEN") : "");
+    // TIMING MODE: log EVERY packet with a ms timestamp (relative to first) so the
+    // ~23ms send/ack cycle can be dissected -- is the gap client-send->server-ack
+    // (delayed ACK on the receiver) or server-ack->client-next-send (client pump/
+    // cwnd stall)? The trickle only moves ~2500 pkts total; cap at 4000 lines.
+    if (logged < 4000) {
+        logged++;
+        double t_ms = (double)(now - t0) / 1e6;
+        printf("T=%.3f TCP %s #%lu seq=%u ack=%u win=%u flags=0x%02x payload=%d\n",
+               t_ms, dir, (unsigned long)*cnt, rte_be_to_cpu_32(tcp->sent_seq),
+               rte_be_to_cpu_32(tcp->recv_ack), win, tcp->tcp_flags, payload);
         fflush(stdout);
     }
 }
