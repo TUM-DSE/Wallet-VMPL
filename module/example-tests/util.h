@@ -26,9 +26,17 @@
 #define RING_BUF_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
 #define TAILQ_ENTRY_SIZE sizeof(struct rte_tailq_entry)
 
-// Number of rte_mbuf objects in the shared mempool (>= 2*RING_SIZE so the pool
-// can never be exhausted by both rings' worth of in-flight mbufs)
-#define SHM_POOL_SIZE (RING_SIZE - 1)
+// Number of rte_mbuf objects in the shared mempool: 2*RING_SIZE, so both of a
+// channel's rings can be full without draining the pool. (This was RING_SIZE-1,
+// contradicting this very comment: the iperf VNFlet's C->S path alone -- its
+// egress ring plus the iomgr->driver ring -- holds up to 2*RING_SIZE mbufs, so
+// under a deep TCP send burst the pool fully drained and every alloc failed:
+// the driver dropped RX copies and F-Stack's tcp_output hit ENOBUFS. Page-
+// boundary skips in rte_mempool_populate_iova mean the populated count is
+// ~10% below this figure; the ENOBUFS path is survivable since the
+// ff-veth-transmit-positive-errno F-Stack patch, this sizing just makes it
+// rare. 2048 * 1856B element = ~3.8MB, still within SHARED_SIZE=4MB.)
+#define SHM_POOL_SIZE (2 * RING_SIZE)
 // Packet data buffer size per mbuf (128 bytes headroom + 128 bytes payload)
 #define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 1522)
 // Backing memory for mbuf objects: each element is objhdr + rte_mbuf + data room,

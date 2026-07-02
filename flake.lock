@@ -169,17 +169,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1781392288,
-        "narHash": "sha256-o/OGGHsFdXVfavL1UU46BHyXqT0PRjclafv7zhEZqh4=",
-        "owner": "pogoba",
-        "repo": "fstack-playground",
-        "rev": "6c781b5ac47b47ef8fb9437ff9ce7b4efd00e9f5",
-        "type": "github"
+        "lastModified": 1783031491,
+        "narHash": "sha256-8s/Pk9s71zXKzHu3CVum9OPkWbrnkNHmQ4FruFCBZOA=",
+        "ref": "refs/heads/master",
+        "rev": "cb6ebdb47df501b281eede12ebebf79966bfda9d",
+        "revCount": 40,
+        "type": "git",
+        "url": "file:///home/okelmann/fstack-development"
       },
       "original": {
-        "owner": "pogoba",
-        "repo": "fstack-playground",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/okelmann/fstack-development"
       }
     },
     "iperf-fstack-src": {
