@@ -238,14 +238,100 @@ uint64_t g_iperf_tx_drop = 0;                      // DIAG: TX mbufs the egress 
 // so even a "rate-limited" print that can fire per packet (as the removed
 // SUSPICIOUS-ACK trace did whenever the connection's random ISN exceeded its
 // threshold -- ~78% of runs across the two iperf connections) throttles the
-// whole client to ~90 pkts/s and reads as a ~2 Mbit/s trickle. Counters only.
+// whole client to ~90 pkts/s and reads as a ~2 Mbit/s trickle. Counters only,
+// plus a bogus-ACK detector that prints AT MOST ONCE per connection: it fires
+// only when an incoming ack acks data this client never sent (wraparound-aware,
+// tracked against our own TX side), i.e. exactly the intermittent corruption
+// that desyncs the transfer -- at which point the connection is dead anyway.
+// Pairs with the driver's BOGUS-ACK@NIC / DESYNC detectors (iomgr_run diag_tcp)
+// to localize the corruption: driver clean + trustlet fires = the
+// copy->ring->iomgr->trustlet path corrupted the packet in flight.
+struct ff_tcpconn {
+    uint16_t cli_port;        // network byte order; 0 = free
+    uint32_t max_tx_seq_end;  // highest seq+len we sent (0 = none yet)
+    uint8_t reported;
+};
+static struct ff_tcpconn g_ff_conns[8];
+
+static const struct rte_tcp_hdr *iperf_parse_tcp(struct rte_mbuf *m,
+        const struct rte_ipv4_hdr **ipp, int *payload) {
+    if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
+            sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
+        return NULL;
+    const struct rte_ether_hdr *eth = rte_pktmbuf_mtod(m, const struct rte_ether_hdr *);
+    if (eth->ether_type != rte_cpu_to_be_16(RTE_ETHER_TYPE_IPV4))
+        return NULL;
+    const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
+    if (ip->next_proto_id != IPPROTO_TCP)
+        return NULL;
+    uint8_t ihl = (ip->version_ihl & 0x0f) * 4;
+    const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)((const uint8_t *)ip + ihl);
+    if (payload) {
+        uint8_t doff = ((tcp->data_off & 0xf0) >> 4) * 4;
+        *payload = (int)rte_be_to_cpu_16(ip->total_length) - ihl - doff;
+    }
+    if (ipp)
+        *ipp = ip;
+    return tcp;
+}
+
+static struct ff_tcpconn *iperf_conn_slot(uint16_t cli_port) {
+    struct ff_tcpconn *c = NULL;
+    for (int k = 0; k < 8; k++) {
+        if (g_ff_conns[k].cli_port == cli_port) return &g_ff_conns[k];
+        if (g_ff_conns[k].cli_port == 0 && !c) c = &g_ff_conns[k];
+    }
+    if (c) {
+        c->cli_port = cli_port;
+        c->max_tx_seq_end = 0;
+        c->reported = 0;
+    }
+    return c;
+}
+
 static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
     (void)rxq;
     if (!g_iperf_ingress)
         return 0;
     uint16_t n = (uint16_t)rte_ring_sc_dequeue_burst(g_iperf_ingress, (void **)rx_pkts, nb_pkts, NULL);
-    if (n)
-        g_iperf_rx_pkts += n;
+    if (!n)
+        return 0;
+    g_iperf_rx_pkts += n;
+    for (uint16_t i = 0; i < n; i++) {
+        const struct rte_ipv4_hdr *ip;
+        const struct rte_tcp_hdr *tcp = iperf_parse_tcp(rx_pkts[i], &ip, NULL);
+        if (!tcp)
+            continue;
+        // RSTs are rare and terminal: report each one that reaches the client
+        // through the shared-memory path (compare with the driver's RST@NIC log
+        // to localize where it originated).
+        if (tcp->tcp_flags & RTE_TCP_RST_FLAG) {
+            static int rst_logged = 0;
+            if (rst_logged < 8) {
+                rst_logged++;
+                println("FF RST@TRUSTLET src_port=%u dst_port=%u seq=%u ack=%u flags=0x%02x",
+                        rte_be_to_cpu_16(tcp->src_port), rte_be_to_cpu_16(tcp->dst_port),
+                        rte_be_to_cpu_32(tcp->sent_seq), rte_be_to_cpu_32(tcp->recv_ack),
+                        tcp->tcp_flags);
+            }
+        }
+        if (!(tcp->tcp_flags & RTE_TCP_ACK_FLAG))
+            continue;
+        struct ff_tcpconn *c = iperf_conn_slot(tcp->dst_port);
+        if (!c || c->reported || c->max_tx_seq_end == 0)
+            continue;
+        uint32_t ack = rte_be_to_cpu_32(tcp->recv_ack);
+        if ((int32_t)(ack - c->max_tx_seq_end) > 1448) {
+            c->reported = 1;
+            // csum_ok distinguishes a packet corrupted in flight (bad csum, but
+            // then F-Stack would drop it -- unless the ack+csum are CONSISTENTLY
+            // stale, i.e. buffer reuse) from a wrong-but-well-formed ack.
+            int csum_ok = (rte_ipv4_udptcp_cksum_verify(ip, tcp) == 0);
+            println("FF BOGUS-ACK@TRUSTLET cli_port=%u ack=%u max_tx_seq_end=%u delta=%d flags=0x%02x csum_ok=%d",
+                    rte_be_to_cpu_16(tcp->dst_port), ack, c->max_tx_seq_end,
+                    (int32_t)(ack - c->max_tx_seq_end), tcp->tcp_flags, csum_ok);
+        }
+    }
     return n;
 }
 
@@ -253,6 +339,21 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
     (void)txq;
     if (!g_iperf_egress)
         return 0;
+    // Track our own TX seq high-water mark per connection BEFORE handing the
+    // mbufs off (after enqueue the driver owns them).
+    for (uint16_t i = 0; i < nb_pkts; i++) {
+        int payload = 0;
+        const struct rte_tcp_hdr *tcp = iperf_parse_tcp(tx_pkts[i], NULL, &payload);
+        if (!tcp)
+            continue;
+        struct ff_tcpconn *c = iperf_conn_slot(tcp->src_port);
+        if (!c)
+            continue;
+        uint32_t seq_end = rte_be_to_cpu_32(tcp->sent_seq) +
+            (uint32_t)(payload > 0 ? payload : 0);
+        if (c->max_tx_seq_end == 0 || (int32_t)(seq_end - c->max_tx_seq_end) > 0)
+            c->max_tx_seq_end = seq_end;
+    }
     // DPDK contract: caller owns/frees anything we don't accept.
     uint16_t n = (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
     if (nb_pkts) {
@@ -980,6 +1081,38 @@ void main_iomgr_loadgen(struct shm *data_shared_previous, struct shm *data_share
 }
 
 #ifdef IPERF_WORKLOAD
+// Post-mortem TCP stack statistics. The intermittent failure is the client's
+// OWN stack aborting the connection with RST ~1s into the transfer (EPIPE to
+// the app -> iperf exit(1)); struct tcpstat's drop counters name the exact
+// path (timeoutdrop/keepdrops/persistdrop/...). Registered via atexit() so it
+// runs even on iperf_errexit's exit(1). tcpstat is all-uint64_t counters;
+// print nonzero fields as idx=val (few lines, only at process exit) and decode
+// the indices against freebsd/netinet/tcp_var.h offline.
+static void iperf_dump_tcpstat(void) {
+    static const int mib[4] = {4 /*CTL_NET*/, 2 /*PF_INET*/, 6 /*IPPROTO_TCP*/, 4 /*TCPCTL_STATS*/};
+    static uint64_t st[2048];
+    size_t len = sizeof(st);
+    if (ff_sysctl(mib, 4, st, &len, NULL, 0) != 0) {
+        println("TCPSTAT: ff_sysctl failed (errno=%d)", errno);
+        return;
+    }
+    println("TCPSTAT: %zu bytes, nonzero u64 fields:", len);
+    char line[480];
+    int off = 0;
+    for (size_t i = 0; i < len / 8; i++) {
+        if (!st[i])
+            continue;
+        off += snprintf(line + off, sizeof(line) - off, " %zu=%lu", i, (unsigned long)st[i]);
+        if (off > 380) {
+            println("TCPSTAT:%s", line);
+            off = 0;
+            line[0] = '\0';
+        }
+    }
+    if (off)
+        println("TCPSTAT:%s", line);
+}
+
 // VNFlet workload: run the F-Stack TCP/IP stack + iperf3 client inside the
 // trustlet. Packet I/O flows over the iomgr shared rings (via the rte_eth_*
 // wraps) instead of a real NIC. The host runs the F-Stack iperf server.
@@ -1112,6 +1245,9 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     // so failures show up in /tmp/serial.log; and give F-Stack a moment to ARP.
     fflush(stdout);
     dup2(fileno(stdout), fileno(stderr));
+    // Dump TCP stack drop counters at process exit -- iperf error paths call
+    // exit(1) directly, so atexit is the only hook that always runs.
+    atexit(iperf_dump_tcpstat);
     println("Calling iperf_main (argc=%d)", (int)(sizeof(argv) / sizeof(argv[0])) - 1);
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
     fflush(stdout);

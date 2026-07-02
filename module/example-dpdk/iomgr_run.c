@@ -26,11 +26,67 @@
 #include <rte_ip.h>
 #include <rte_tcp.h>
 
-// Per-direction TCP packet counters. The former TIMING-mode trace (printf+fflush
-// for the first 4000 packets) sat in the driver's forwarding hot path and
-// perturbed exactly the handshake/slow-start phase it was meant to observe; the
-// per-packet path must stay print-free. dir: "S->C" (NIC RX) or "C->S" (NIC TX).
+// Per-direction TCP packet counters plus an ONLINE desync detector for the
+// intermittent "server RSTs mid-transfer with zero drops everywhere" failure
+// (3e501ca's seq-desync). The former TIMING-mode trace (printf+fflush for the
+// first 4000 packets) sat in the driver's forwarding hot path and perturbed
+// exactly the handshake/slow-start phase it was meant to observe; the per-packet
+// path must stay print-free in the steady state. Costs here: one 32B trace-ring
+// store + a few compares per TCP packet; prints/dumps only fire on the first
+// desync event of a connection (which is already dead at that point).
+//
+// Detectors (per connection, keyed by the client's ephemeral port, all seq
+// arithmetic wraparound-aware via int32_t deltas):
+//  - DESYNC: a client data segment whose seq is > 64MB past the last ack the
+//    server sent. 64MB >> the 16MB sendbuf cap, so no false positives; fires at
+//    the moment the client's TCP state has run away (NOT ~700MB later at the RST).
+//  - BOGUS-ACK@NIC: the server acks data the client never sent, as seen at the
+//    NIC boundary -- if this fires, the corruption happened server-side/vhost;
+//    if instead only the trustlet-side detector (ring_rx_burst) fires, the
+//    corruption is in the driver-copy->ring->iomgr->trustlet path; if neither
+//    fires but DESYNC does, the client's F-Stack state corrupted internally.
+// On the first event the driver dumps the trace ring (last TCPTRACE_N TCP
+// headers, both directions, with TSC timestamps) to /tmp/tcptrace.txt.
 static uint64_t diag_n_sc = 0, diag_n_cs = 0;
+
+#define TCPTRACE_N (1u << 16) // 64k entries * 24B = 1.5MB ring
+struct tcpev {
+    uint64_t tsc;
+    uint32_t seq, ack;
+    uint16_t win, len;
+    uint8_t flags, dir; // dir: 1 = S->C, 0 = C->S
+};
+static struct tcpev tcptrace[TCPTRACE_N];
+static uint32_t tcptrace_i = 0;
+
+struct tcpconn {
+    uint16_t cli_port;        // network byte order; 0 = free slot
+    uint32_t last_srv_ack;    // latest ack seen from server (0 = none yet)
+    uint32_t max_cli_seq_end; // highest seq+len the client has sent (0 = none yet)
+    uint8_t desync_reported, bogus_reported;
+};
+static struct tcpconn tcpconns[8];
+
+static void tcptrace_dump(const char *why) {
+    static int dumped = 0;
+    if (dumped++)
+        return;
+    FILE *f = fopen("/tmp/tcptrace.txt", "w");
+    if (!f)
+        return;
+    fprintf(f, "# dump reason: %s\n# tsc dir seq ack win flags len\n", why);
+    for (uint32_t k = 0; k < TCPTRACE_N; k++) {
+        struct tcpev *e = &tcptrace[(tcptrace_i + k) % TCPTRACE_N];
+        if (e->tsc == 0)
+            continue;
+        fprintf(f, "%lu %s %u %u %u 0x%02x %u\n", (unsigned long)e->tsc,
+                e->dir ? "S->C" : "C->S", e->seq, e->ack, e->win, e->flags, e->len);
+    }
+    fclose(f);
+    printf("TCPTRACE dumped to /tmp/tcptrace.txt (%s)\n", why);
+    fflush(stdout);
+}
+
 static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     if (rte_pktmbuf_pkt_len(m) < (int)(sizeof(struct rte_ether_hdr) +
             sizeof(struct rte_ipv4_hdr) + sizeof(struct rte_tcp_hdr)))
@@ -41,10 +97,92 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     const struct rte_ipv4_hdr *ip = (const struct rte_ipv4_hdr *)(eth + 1);
     if (ip->next_proto_id != IPPROTO_TCP)
         return;
-    if (dir[0] == 'S')
+    uint8_t ihl = (ip->version_ihl & 0x0f) * 4;
+    const struct rte_tcp_hdr *tcp = (const struct rte_tcp_hdr *)((const uint8_t *)ip + ihl);
+    uint8_t doff = ((tcp->data_off & 0xf0) >> 4) * 4;
+    int payload = (int)rte_be_to_cpu_16(ip->total_length) - ihl - doff;
+    int is_sc = (dir[0] == 'S');
+    uint32_t seq = rte_be_to_cpu_32(tcp->sent_seq);
+    uint32_t ack = rte_be_to_cpu_32(tcp->recv_ack);
+
+    if (is_sc)
         diag_n_sc++;
     else
         diag_n_cs++;
+
+    // RSTs are rare and terminal: log each (bounded) with the ports, and dump
+    // the trace ring so the history leading up to the reset is preserved. An
+    // RST seen here S->C came from the server/vhost side; if the trustlet
+    // reports processing an RST that never appeared here, the confidential
+    // path manufactured/corrupted it.
+    if (tcp->tcp_flags & RTE_TCP_RST_FLAG) {
+        static int rst_logged = 0;
+        if (rst_logged < 8) {
+            rst_logged++;
+            printf("TCP RST@NIC dir=%s src_port=%u dst_port=%u seq=%u ack=%u flags=0x%02x\n",
+                   dir, rte_be_to_cpu_16(tcp->src_port), rte_be_to_cpu_16(tcp->dst_port),
+                   seq, ack, tcp->tcp_flags);
+            fflush(stdout);
+        }
+        tcptrace_dump("rst-at-nic");
+    }
+
+    struct tcpev *e = &tcptrace[tcptrace_i++ % TCPTRACE_N];
+    e->tsc = rte_rdtsc();
+    e->seq = seq; e->ack = ack;
+    e->win = rte_be_to_cpu_16(tcp->rx_win);
+    e->len = (uint16_t)(payload < 0 ? 0 : payload);
+    e->flags = tcp->tcp_flags;
+    e->dir = (uint8_t)is_sc;
+
+    // per-connection tracking, keyed by client ephemeral port
+    uint16_t key = is_sc ? tcp->dst_port : tcp->src_port;
+    struct tcpconn *c = NULL;
+    for (int k = 0; k < 8; k++) {
+        if (tcpconns[k].cli_port == key) { c = &tcpconns[k]; break; }
+        if (tcpconns[k].cli_port == 0 && !c) c = &tcpconns[k];
+    }
+    if (!c)
+        return;
+    if (c->cli_port == 0) {
+        if (tcp->tcp_flags & RTE_TCP_RST_FLAG)
+            return; // don't resurrect slots for stray RSTs
+        c->cli_port = key;
+        c->last_srv_ack = 0; c->max_cli_seq_end = 0;
+        c->desync_reported = 0; c->bogus_reported = 0;
+    }
+
+    if (is_sc) {
+        if (tcp->tcp_flags & RTE_TCP_ACK_FLAG) {
+            // BOGUS-ACK@NIC: server acks beyond everything the client ever sent
+            // (+1448 margin for FIN/edge cases)
+            if (!c->bogus_reported && c->max_cli_seq_end != 0 &&
+                    (int32_t)(ack - c->max_cli_seq_end) > 1448) {
+                c->bogus_reported = 1;
+                printf("TCP BOGUS-ACK@NIC cli_port=%u ack=%u max_cli_seq_end=%u delta=%d flags=0x%02x\n",
+                       rte_be_to_cpu_16(key), ack, c->max_cli_seq_end,
+                       (int32_t)(ack - c->max_cli_seq_end), tcp->tcp_flags);
+                fflush(stdout);
+                tcptrace_dump("bogus-ack-at-nic");
+            }
+            c->last_srv_ack = ack;
+        }
+    } else {
+        // DESYNC: client data segment far beyond what the server has acked
+        if (!c->desync_reported && payload > 0 && c->last_srv_ack != 0 &&
+                (int32_t)(seq - c->last_srv_ack) > (64 << 20)) {
+            c->desync_reported = 1;
+            printf("TCP DESYNC cli_port=%u seq=%u last_srv_ack=%u delta=%d payload=%d\n",
+                   rte_be_to_cpu_16(key), seq, c->last_srv_ack,
+                   (int32_t)(seq - c->last_srv_ack), payload);
+            fflush(stdout);
+            tcptrace_dump("client-seq-desync");
+        }
+        uint32_t seq_end = seq + (uint32_t)(payload > 0 ? payload : 0);
+        if (c->max_cli_seq_end == 0 ||
+                (int32_t)(seq_end - c->max_cli_seq_end) > 0)
+            c->max_cli_seq_end = seq_end;
+    }
 }
 
 #include "../include/cpuid.h"

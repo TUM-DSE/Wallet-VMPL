@@ -266,6 +266,12 @@ class IperfTest(AbstractBenchTest):
             guest.copy_from(remote_mirror_output, local_mirror_output)
         except Exception:
             pass
+        # If the driver's desync detector fired, it dumped the TCP header trace
+        # ring; fetch it before the VM is torn down (absent in healthy runs).
+        try:
+            guest.copy_from("/tmp/tcptrace.txt", self.output_filepath(repetition, extension="tcptrace"))
+        except Exception:
+            pass
 
 
     def pre_initial_cleanup(self, host):
