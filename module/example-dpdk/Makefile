@@ -87,7 +87,9 @@ IPERF_WRAPS := -Wl,--wrap=rte_eal_init -Wl,--wrap=rte_eth_dev_start -Wl,--wrap=r
 	-Wl,--wrap=timerfd_create -Wl,--wrap=rte_eal_check_module -Wl,--wrap=nanosleep \
 	-Wl,--wrap=clock_gettime \
 	-Wl,--wrap=rte_eth_dev_info_get -Wl,--wrap=rte_eth_dev_configure \
-	-Wl,--wrap=rte_eth_tx_queue_setup -Wl,--wrap=rte_eth_rx_queue_setup
+	-Wl,--wrap=rte_eth_tx_queue_setup -Wl,--wrap=rte_eth_rx_queue_setup \
+	-Wl,--wrap=ff_mbuf_copydata -Wl,--wrap=ff_dpdk_if_send \
+	-Wl,--wrap=ff_zc_send -Wl,--wrap=ff_pump
 # DPDK drivers register via constructors, so their archives must be
 # whole-archived (nothing references them by symbol) — but only the ones F-Stack
 # actually uses. Whole-archiving *all* librte_*.a would drag in unrelated PMDs

@@ -752,13 +752,18 @@ int main(int argc, char *argv[]) {
         for (int iter = 0; iter < iterations && !loadgen; iter++) {
             if ((uint64_t)iter >= diag_next) {
                 diag_next = (uint64_t)iter + 20000000;
-                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu tx_sz=%lu/%lu/%lu/%lu max=%u\n",
+                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu tx_sz=%lu/%lu/%lu/%lu max=%u c2d_ring=%u pool_avail=%u\n",
                        iter, (unsigned long)drop_rx_copy, (unsigned long)drop_rx_ring,
                        (unsigned long)drop_tx_copy, (unsigned long)drop_tx_ring,
                        (unsigned long)diag_n_sc, (unsigned long)diag_n_cs,
                        (unsigned long)diag_cs_sz[0], (unsigned long)diag_cs_sz[1],
                        (unsigned long)diag_cs_sz[2], (unsigned long)diag_cs_sz[3],
-                       diag_cs_max);
+                       diag_cs_max,
+                       // standing-queue locator: C->S ring depth at the driver
+                       // (full => driver/NIC/backend is the slow stage; empty
+                       // => upstream iomgr/vnflet is) and shared-pool avail
+                       rte_ring_count(&shared2->ingress.ring),
+                       rte_mempool_avail_count(pool));
                 fflush(stdout);
             }
 

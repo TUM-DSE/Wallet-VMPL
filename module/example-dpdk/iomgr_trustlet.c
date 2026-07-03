@@ -437,6 +437,80 @@ int __wrap_rte_eth_rx_queue_setup(uint16_t port_id, uint16_t rx_queue_id,
             socket_id, rx_conf ? &conf : NULL, mb_pool);
 }
 
+// CPU frequency in GHz (also defined below for the clock helpers; identical
+// redefinition is benign)
+#define CPU_GHZ 2.0
+
+// --- TX-path cycle profiling (one-shot, printed at iperf_main exit) --------
+// The pipeline is trustlet-bound (~16 of the reference's 35 Gbit/s); these
+// wraps attribute the vnflet core's cycles to the candidate sinks. All four
+// functions are cross-object calls inside libfstack.a, so linker --wrap
+// intercepts them without an F-Stack patch. Nesting (a call's cycles are
+// INCLUDED in its parents'): ff_zc_send > ff_dpdk_if_send > ff_mbuf_copydata;
+// ff_pump is a sibling (RX + timers + TX-queue drain). rdtsc costs ~30 cycles
+// per edge -- noise at the ~100k events/s these fire.
+struct prof_bucket { uint64_t cycles, calls, bytes; };
+static struct prof_bucket prof_copydata, prof_if_send, prof_zc_send, prof_pump;
+
+extern int __real_ff_mbuf_copydata(void *m, void *data, int off, int len);
+int __wrap_ff_mbuf_copydata(void *m, void *data, int off, int len) {
+    uint64_t t0 = rte_rdtsc();
+    int ret = __real_ff_mbuf_copydata(m, data, off, len);
+    prof_copydata.cycles += rte_rdtsc() - t0;
+    prof_copydata.calls++;
+    prof_copydata.bytes += (uint64_t)(len > 0 ? len : 0);
+    return ret;
+}
+
+extern int __real_ff_dpdk_if_send(void *ctx, void *m, int total);
+int __wrap_ff_dpdk_if_send(void *ctx, void *m, int total) {
+    uint64_t t0 = rte_rdtsc();
+    int ret = __real_ff_dpdk_if_send(ctx, m, total);
+    prof_if_send.cycles += rte_rdtsc() - t0;
+    prof_if_send.calls++;
+    prof_if_send.bytes += (uint64_t)(total > 0 ? total : 0);
+    return ret;
+}
+
+extern ssize_t __real_ff_zc_send(int fd, const void *mb, size_t nbytes);
+ssize_t __wrap_ff_zc_send(int fd, const void *mb, size_t nbytes) {
+    uint64_t t0 = rte_rdtsc();
+    ssize_t ret = __real_ff_zc_send(fd, mb, nbytes);
+    prof_zc_send.cycles += rte_rdtsc() - t0;
+    prof_zc_send.calls++;
+    prof_zc_send.bytes += (uint64_t)(ret > 0 ? ret : 0);
+    return ret;
+}
+
+extern int __real_ff_pump(void);
+int __wrap_ff_pump(void) {
+    uint64_t t0 = rte_rdtsc();
+    int ret = __real_ff_pump();
+    prof_pump.cycles += rte_rdtsc() - t0;
+    prof_pump.calls++;
+    return ret;
+}
+
+static void prof_report(uint64_t wall_cycles) {
+    struct { const char *name; struct prof_bucket *b; } rows[] = {
+        { "zc_send(sosend+tcp+ip+xmit)", &prof_zc_send },
+        { "  if_send(alloc+copy+flags)", &prof_if_send },
+        { "    copydata(sendbuf->mbuf)", &prof_copydata },
+        { "pump(rx+timers+txq-drain)  ", &prof_pump },
+    };
+    println("PROF: wall=%lu Mcycles (%.1fs at %.1fGHz)",
+            (unsigned long)(wall_cycles / 1000000), wall_cycles / (CPU_GHZ * 1e9), CPU_GHZ);
+    for (size_t i = 0; i < sizeof(rows) / sizeof(rows[0]); i++) {
+        struct prof_bucket *b = rows[i].b;
+        double share = wall_cycles ? 100.0 * b->cycles / wall_cycles : 0;
+        double gbps = b->cycles ? (double)b->bytes * CPU_GHZ / b->cycles : 0;
+        println("PROF: %s: %5.1f%% wall, %lu Mcycles, %lu calls, %lu MB, %.2f GB/s",
+                rows[i].name, share, (unsigned long)(b->cycles / 1000000),
+                (unsigned long)b->calls, (unsigned long)(b->bytes / 1000000), gbps);
+    }
+}
+// ---------------------------------------------------------------------------
+
 extern int __real_rte_eth_dev_start(uint16_t port_id);
 int __wrap_rte_eth_dev_start(uint16_t port_id) {
     int ret = __real_rte_eth_dev_start(port_id);
@@ -1008,9 +1082,15 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
             /* nop_delay(100); // RMPADJUST */
             // revoke guest access at chain entry -- for every packet in the burst,
             // not just the first (a multi-packet burst would otherwise leak access).
+#ifndef IPERF_WORKLOAD
+            // iperf build: the packet pool is HOST-SHARED (zero-copy NIC TX);
+            // RMPADJUST on hypervisor-owned pages has no VMPL semantics and
+            // TRAPS (#VC -> monitor round-trip) instead of returning an error
+            // -- at per-packet rate that saturates the iomgr core.
             if (is_first)
                 for (size_t i = 0; i < num_deq; i++)
                     rmpadjust_deny((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[i]), void *), VMPL3);
+#endif
 
             // pass buffers to first VNFlet of this segment
             num_enq = rte_ring_sp_enqueue_bulk(&shm_trustlet[seg_start]->ingress.ring, deq_objs, num_deq, NULL);
@@ -1048,9 +1128,12 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
             // restore guest access at chain exit -- for every packet in the burst,
             // else the driver can't read packets after the first (they stay denied
             // to VMPL3) and TCP stalls after the handshake.
+#ifndef IPERF_WORKLOAD
+            // (see chain-entry comment: no-op-but-trapping on host-shared pages)
             if (is_last)
                 for (size_t i = 0; i < num_deq; i++)
                     rmpadjust_allow((unsigned long)rte_pktmbuf_mtod((struct rte_mbuf*)(deq_objs[i]), void *), VMPL3);
+#endif
             num_enq = rte_ring_sp_enqueue_bulk(&data_shared_next->ingress.ring, deq_objs, num_deq, NULL);
             if (num_deq != num_enq) {
                 drop_to_driver += num_deq; // DIAG: client TX data dropped -> driver ingress full
@@ -1062,9 +1145,14 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
         // write must stay out of the per-packet path).
         if (iterations >= diag_next_iter) {
             diag_next_iter = iterations + 50000000;
-            println("IOMGR DIAG: iters=%lu rx=%lu tx=%lu drop_to_vnflet=%lu drop_to_driver=%lu",
+            println("IOMGR DIAG: iters=%lu rx=%lu tx=%lu drop_to_vnflet=%lu drop_to_driver=%lu vnflet_egress=%u out_ring=%u",
                     (unsigned long)iterations, (unsigned long)total_rx, (unsigned long)total_tx,
-                    (unsigned long)drop_to_vnflet, (unsigned long)drop_to_driver);
+                    (unsigned long)drop_to_vnflet, (unsigned long)drop_to_driver,
+                    // standing-queue locator: depth of the vnflet's egress ring
+                    // (full => this iomgr is the slow stage) and of the ring
+                    // toward the driver (full => driver/NIC side is slow)
+                    rte_ring_count(&shm_trustlet[seg_end-1]->egress.ring),
+                    rte_ring_count(&data_shared_next->ingress.ring));
         }
 
         /* num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL); */
@@ -1338,7 +1426,9 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     // exit(1) directly, so atexit is the only hook that always runs.
     atexit(iperf_dump_tcpstat);
     println("Calling iperf_main (argc=%d)", (int)(sizeof(argv) / sizeof(argv[0])) - 1);
+    uint64_t prof_t0 = rte_rdtsc();
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
+    prof_report(rte_rdtsc() - prof_t0);
     fflush(stdout);
     fflush(stderr);
     extern uint64_t g_iperf_rx_pkts, g_iperf_tx_pkts, g_iperf_tx_drop;
