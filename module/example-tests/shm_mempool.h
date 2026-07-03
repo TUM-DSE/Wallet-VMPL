@@ -141,9 +141,14 @@ create_shm_mbuf_pool(char *name, struct shm *shared)
 	unsigned elt_size = sizeof(struct rte_mbuf) + SHM_POOL_DATA_ROOM;
 	unsigned priv_size = sizeof(struct rte_pktmbuf_pool_private);
 
+	/* NO_IOVA_CONTIG: this pool lives in shared memory and is never handed
+	 * to a device for DMA (the driver copies into its NIC pool first), so
+	 * objects may cross page boundaries. Without it, populate refuses to
+	 * split objects across the 4K no-huge pages and fits only ONE ~2.4KB
+	 * element per page -- 888 of 1536 objects, wasting 42% of pool_buf. */
 	struct rte_mempool *mp = rte_mempool_create_empty(
 		name, n, elt_size, 0, priv_size,
-		SOCKET_ID_ANY, 0);
+		SOCKET_ID_ANY, RTE_MEMPOOL_F_NO_IOVA_CONTIG);
 	if (!mp) {
 		printf("Failed to create empty mempool: %s\n",
 		       rte_strerror(rte_errno));

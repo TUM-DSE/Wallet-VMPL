@@ -363,6 +363,78 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
     return n;
 }
 
+// Fake TSO + L4-csum offload capabilities on the injected net_null port so
+// F-Stack's init gates (ff_dpdk_if.c init_port_start) enable hw_features
+// {tx_csum_l4, tx_tso, rx_csum}: the FreeBSD stack then emits ~64KB TSO
+// super-frames with RTE_MBUF_F_TX_TCP_SEG/TCP_CKSUM + tso_segsz set and skips
+// all SW checksum work, exactly like the proven ~33 Gbit/s vhost_user client
+// (whose virtio-pci PMD genuinely advertises these bits). The ol_flags/
+// tx_offload metadata rides the mbufs over the shared rings; the driver's
+// rte_pktmbuf_copy preserves it and the driver's virtio port performs the
+// real offloads. RX capa is L4-only (no IPv4) on purpose: that takes the
+// rx_csum_trust=1 gate, the same path the vhost PMD takes, and F-Stack then
+// marks every inbound packet checksum-valid (the rings are a trusted,
+// lossless transport). No TCP_LRO and no TX IPV4_CKSUM: the reference client
+// had neither (FreeBSD computes the 20B IP header csum in SW; LRO would drag
+// in max_lro_pkt_size handling for an ACK-only RX path).
+extern int __real_rte_eth_dev_info_get(uint16_t port_id, struct rte_eth_dev_info *dev_info);
+int __wrap_rte_eth_dev_info_get(uint16_t port_id, struct rte_eth_dev_info *dev_info) {
+    int ret = __real_rte_eth_dev_info_get(port_id, dev_info);
+    if (ret == 0 && dev_info) {
+        dev_info->tx_offload_capa |= RTE_ETH_TX_OFFLOAD_UDP_CKSUM |
+            RTE_ETH_TX_OFFLOAD_TCP_CKSUM | RTE_ETH_TX_OFFLOAD_TCP_TSO;
+        dev_info->rx_offload_capa |= RTE_ETH_RX_OFFLOAD_UDP_CKSUM |
+            RTE_ETH_RX_OFFLOAD_TCP_CKSUM;
+    }
+    return ret;
+}
+
+// The faked capabilities make F-Stack REQUEST those offloads in
+// rte_eth_dev_configure/queue_setup, but ethdev validates the request against
+// dev_info via an intra-object call inside rte_ethdev.c that --wrap cannot
+// intercept -- it sees net_null's REAL (empty) capabilities and would reject
+// the configure with -EINVAL. Strip all offload bits before calling __real:
+// net_null needs none of them, the ring burst functions installed by
+// __wrap_rte_eth_dev_start are the actual datapath, and F-Stack's hw_features
+// (decided from the wrapped dev_info_get above) stay enabled regardless.
+extern int __real_rte_eth_dev_configure(uint16_t port_id, uint16_t nb_rx_q,
+        uint16_t nb_tx_q, const struct rte_eth_conf *eth_conf);
+int __wrap_rte_eth_dev_configure(uint16_t port_id, uint16_t nb_rx_q,
+        uint16_t nb_tx_q, const struct rte_eth_conf *eth_conf) {
+    struct rte_eth_conf conf = *eth_conf;
+    conf.rxmode.offloads = 0;
+    conf.txmode.offloads = 0;
+    return __real_rte_eth_dev_configure(port_id, nb_rx_q, nb_tx_q, &conf);
+}
+
+extern int __real_rte_eth_tx_queue_setup(uint16_t port_id, uint16_t tx_queue_id,
+        uint16_t nb_tx_desc, unsigned int socket_id, const struct rte_eth_txconf *tx_conf);
+int __wrap_rte_eth_tx_queue_setup(uint16_t port_id, uint16_t tx_queue_id,
+        uint16_t nb_tx_desc, unsigned int socket_id, const struct rte_eth_txconf *tx_conf) {
+    struct rte_eth_txconf conf;
+    if (tx_conf) {
+        conf = *tx_conf;
+        conf.offloads = 0;
+    }
+    return __real_rte_eth_tx_queue_setup(port_id, tx_queue_id, nb_tx_desc,
+            socket_id, tx_conf ? &conf : NULL);
+}
+
+extern int __real_rte_eth_rx_queue_setup(uint16_t port_id, uint16_t rx_queue_id,
+        uint16_t nb_rx_desc, unsigned int socket_id, const struct rte_eth_rxconf *rx_conf,
+        struct rte_mempool *mb_pool);
+int __wrap_rte_eth_rx_queue_setup(uint16_t port_id, uint16_t rx_queue_id,
+        uint16_t nb_rx_desc, unsigned int socket_id, const struct rte_eth_rxconf *rx_conf,
+        struct rte_mempool *mb_pool) {
+    struct rte_eth_rxconf conf;
+    if (rx_conf) {
+        conf = *rx_conf;
+        conf.offloads = 0;
+    }
+    return __real_rte_eth_rx_queue_setup(port_id, rx_queue_id, nb_rx_desc,
+            socket_id, rx_conf ? &conf : NULL, mb_pool);
+}
+
 extern int __real_rte_eth_dev_start(uint16_t port_id);
 int __wrap_rte_eth_dev_start(uint16_t port_id) {
     int ret = __real_rte_eth_dev_start(port_id);
@@ -1152,19 +1224,30 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "promiscuous=1\n"
         "numa_on=0\n"
         "no_huge=1\n"
-        // net_null has NO checksum offload, so F-Stack must compute full TCP/IP
-        // checksums in software (skip=0). With skip=1 (assume hardware offload)
-        // bulk data segments leave with only a pseudo-header checksum and are
-        // dropped downstream -> ~500k retransmits and the transfer collapses.
-        // (The handshake/control still completed because those paths differ.)
-        // net_null has no TSO either, so keep tso=0: F-Stack segments in SW and
-        // checksums each ~1500B segment itself.
+        // Offloads on: __wrap_rte_eth_dev_info_get fakes L4-csum + TSO
+        // capabilities on the net_null port, so with tx_csum_offoad_skip=0
+        // (REQUIRED for TSO: F-Stack's TSO mbuf-flag block is nested inside
+        // the tx_csum_l4 guard) and tso=1, F-Stack emits ~64KB TSO
+        // super-frames with RTE_MBUF_F_TX_TCP_SEG + tso_segsz and computes no
+        // payload checksums; the driver's virtio port does the real offloads.
+        // rx_csum_trust=1 + faked L4-only RX capa make F-Stack trust inbound
+        // checksums (trusted shared-memory transport). zc_recv/zc_send enable
+        // the native iperf's zero-copy socket paths (app<->BSD-mbuf; the
+        // DPDK-side copy into the shared pool remains, which is what keeps
+        // driver-visible buffers in shared memory). Mirrors the ~33 Gbit/s
+        // vhost_user client config.
         "tx_csum_offoad_skip=0\n"
-        "tso=0\n"
+        "tso=1\n"
+        // Clamp TSO super-frames to 32KB (whole IP packet) so each frame fits
+        // ONE mbuf of the driver's 33KB-data-room TXCOPY_POOL: single-segment
+        // mbufs take the virtio can_push TX path. Multi-segment TX is broken
+        // in the guest driver (stale hdr_mz IOVA under --no-huge + the VFIO
+        // PTE-swap hack) -- see iomgr_run.c TXCOPY_POOL.
+        "tso_max=32768\n"
         "vlan_strip=0\n"
         "rx_csum_trust=1\n"
-        "zc_recv=0\n"
-        "zc_send=0\n"
+        "zc_recv=1\n"
+        "zc_send=1\n"
         "idle_sleep=0\n"
         "pkt_tx_delay=0\n"
         "symmetric_rss=0\n"
@@ -1200,12 +1283,19 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "kern.features.inet6=1\n"
         "[freebsd.sysctl]\n"
         "kern.ipc.somaxconn=32768\n"
-        // TCP socket-buffer auto-tuning up to 16MB (defaults cap at 2MB).
         "kern.ipc.maxsockbuf=16777216\n"
         "net.inet.tcp.sendspace=16384\n"
         "net.inet.tcp.recvspace=8192\n"
         "net.inet.tcp.cc.algorithm=cubic\n"
-        "net.inet.tcp.sendbuf_max=16777216\n"
+        // sendbuf cap 2MB, NOT 16MB like the vhost client: with TSO the
+        // sender can burst a full cwnd of ~2KB mbufs into the rings faster
+        // than the driver drains them, and the shared pool holds only ~1530
+        // mbufs (~3MB). A 16MB cap let bursts exhaust the pool -> ENOBUFS ->
+        // cwnd collapse to 1 MSS -> ~1s slow-start rebuild -> collapse again
+        // (measured: ~4MB total in 10s). 2MB of in-flight fits the pool with
+        // headroom for the RX/ACK direction and still covers the sub-ms-RTT
+        // bandwidth-delay product many times over.
+        "net.inet.tcp.sendbuf_max=2097152\n"
         "net.inet.tcp.recvbuf_max=16777216\n"
         "net.inet.tcp.sendbuf_auto=1\n"
         "net.inet.tcp.recvbuf_auto=1\n"

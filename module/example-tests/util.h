@@ -26,19 +26,23 @@
 #define RING_BUF_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
 #define TAILQ_ENTRY_SIZE sizeof(struct rte_tailq_entry)
 
-// Number of rte_mbuf objects in the shared mempool: 2*RING_SIZE, so both of a
-// channel's rings can be full without draining the pool. (This was RING_SIZE-1,
-// contradicting this very comment: the iperf VNFlet's C->S path alone -- its
-// egress ring plus the iomgr->driver ring -- holds up to 2*RING_SIZE mbufs, so
-// under a deep TCP send burst the pool fully drained and every alloc failed:
-// the driver dropped RX copies and F-Stack's tcp_output hit ENOBUFS. Page-
-// boundary skips in rte_mempool_populate_iova mean the populated count is
-// ~10% below this figure; the ENOBUFS path is survivable since the
-// ff-veth-transmit-positive-errno F-Stack patch, this sizing just makes it
-// rare. 2048 * 1856B element = ~3.8MB, still within SHARED_SIZE=4MB.)
-#define SHM_POOL_SIZE (2 * RING_SIZE)
-// Packet data buffer size per mbuf (128 bytes headroom + 128 bytes payload)
-#define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 1522)
+// Number of rte_mbuf objects in the shared mempool. Was 2*RING_SIZE (so both
+// of a channel's rings can be full without draining the pool), reduced to
+// 1536 when the data room grew to 2048 for TSO: the 4MB SHARED_SIZE region
+// fits at most ~1745 of the bigger elements (align64(objhdr + rte_mbuf +
+// 2176) = ~2368B each; pool_buf 1536*2368 = ~3.6MB + rings/stack/priv).
+// Exhaustion under deep TSO bursts (a 64KB frame consumes ~32 mbufs) is
+// expected and SURVIVABLE: F-Stack's tcp_output gets a graceful ENOBUFS
+// (cwnd collapse + retry) since the ff-veth-transmit-positive-errno patch,
+// and the driver counts dropped RX copies in drop_rx_copy. Page-boundary
+// skips in rte_mempool_populate_iova put the populated count ~10% below
+// this figure.
+#define SHM_POOL_SIZE 1536
+// Packet data buffer size per mbuf. MUST be >= RTE_PKTMBUF_HEADROOM +
+// RTE_MBUF_DEFAULT_DATAROOM (2048): F-Stack's ff_dpdk_if_send chops TSO
+// super-frames into segments of exactly RTE_MBUF_DEFAULT_DATAROOM bytes
+// regardless of the pool's actual data room (a smaller room = heap overrun).
+#define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 2048)
 // Backing memory for mbuf objects: each element is objhdr + rte_mbuf + data room,
 // padded to cache line. Use 512 bytes/element to account for alignment variance.
 #define SHM_POOL_ELT_TOTAL RTE_ALIGN(sizeof(struct rte_mempool_objhdr) + sizeof(struct rte_mbuf) + SHM_POOL_DATA_ROOM, RTE_CACHE_LINE_SIZE)
@@ -126,6 +130,10 @@ struct shm {
 
   struct loadgen_results loadgen_results;
 };
+
+// The whole channel struct (incl. pool_buf) must fit the mapped region;
+// catches SHM_POOL_SIZE/DATA_ROOM combinations that overflow SHARED_SIZE.
+_Static_assert(sizeof(struct shm) <= SHARED_SIZE, "struct shm exceeds SHARED_SIZE");
 
 // Trustlet side: wait until we own the buffer, return data length
 static inline size_t trustlet_rx(struct buffer* buf) {

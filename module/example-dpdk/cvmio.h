@@ -110,6 +110,32 @@ port_init(uint16_t port, struct rte_mempool *mbuf_pool)
     if (dev_info.tx_offload_capa & RTE_ETH_TX_OFFLOAD_MBUF_FAST_FREE)
         port_conf.txmode.offloads |= RTE_ETH_TX_OFFLOAD_MBUF_FAST_FREE;
 
+    /* TX offloads for the iperf VNFlet path: the trustlet's F-Stack emits
+     * TSO super-frames with RTE_MBUF_F_TX_TCP_SEG/TCP_CKSUM + tso_segsz set
+     * (metadata survives the rte_pktmbuf_copy into cvmio_pool), so this port
+     * must accept csum/TSO mbufs and multi-segment chains. Gated on the
+     * advertised capability, same as F-Stack's own init gates on the proven
+     * vhost_user client rig (virtio-pci advertises all four here; a missing
+     * one indicates a virtio feature-negotiation problem, hence the loud
+     * warning -- it would otherwise surface only as a perf regression). */
+    {
+        static const struct { uint64_t bit; const char *name; } tx_offloads[] = {
+            { RTE_ETH_TX_OFFLOAD_TCP_CKSUM,  "TCP_CKSUM"  },
+            { RTE_ETH_TX_OFFLOAD_UDP_CKSUM,  "UDP_CKSUM"  },
+            { RTE_ETH_TX_OFFLOAD_TCP_TSO,    "TCP_TSO"    },
+            { RTE_ETH_TX_OFFLOAD_MULTI_SEGS, "MULTI_SEGS" },
+        };
+        for (size_t i = 0; i < sizeof(tx_offloads) / sizeof(tx_offloads[0]); i++) {
+            if (dev_info.tx_offload_capa & tx_offloads[i].bit)
+                port_conf.txmode.offloads |= tx_offloads[i].bit;
+            else
+                printf("WARNING: port %u does not advertise TX offload %s\n",
+                       port, tx_offloads[i].name);
+        }
+        printf("port %u txmode.offloads = 0x%" PRIx64 "\n",
+               port, (uint64_t)port_conf.txmode.offloads);
+    }
+
     /* Configure the Ethernet device. */
     retval = rte_eth_dev_configure(port, rx_rings, tx_rings, &port_conf);
     if (retval != 0)

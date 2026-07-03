@@ -25,6 +25,8 @@
 #include <rte_ether.h>
 #include <rte_ip.h>
 #include <rte_tcp.h>
+#include <rte_vfio.h>
+#include <rte_malloc.h>
 
 // Per-direction TCP packet counters plus an ONLINE desync detector for the
 // intermittent "server RSTs mid-transfer with zero drops everywhere" failure
@@ -48,6 +50,36 @@
 // On the first event the driver dumps the trace ring (last TCPTRACE_N TCP
 // headers, both directions, with TSC timestamps) to /tmp/tcptrace.txt.
 static uint64_t diag_n_sc = 0, diag_n_cs = 0;
+// C->S frame size histogram (per IP total_length): <=1500 / <=4K / <=16K / >16K,
+// plus the largest frame seen -- to pinpoint the size threshold above which
+// TSO super-frames vanish between driver TX and the iperf server.
+static uint64_t diag_cs_sz[4] = {0, 0, 0, 0};
+static uint32_t diag_cs_max = 0;
+// mbuf chain consistency counters: a chain whose segment data_lens don't sum
+// to pkt_len, or whose pkt_len disagrees with the IP total_length, produces a
+// TRUNCATED frame that the server's ip_input drops silently ("tooshort") --
+// which would explain big TSO frames vanishing while single-seg frames pass.
+static uint64_t diag_chain_bad = 0, diag_chain_checked = 0;
+static void diag_chain_check(const char *where, struct rte_mbuf *m, uint16_t iplen) {
+    uint32_t sum = 0;
+    uint16_t nseg = 0;
+    for (struct rte_mbuf *s = m; s != NULL; s = s->next) {
+        sum += s->data_len;
+        nseg++;
+    }
+    diag_chain_checked++;
+    if (sum != m->pkt_len || nseg != m->nb_segs ||
+            (uint32_t)iplen + RTE_ETHER_HDR_LEN != m->pkt_len) {
+        diag_chain_bad++;
+        static int logged = 0;
+        if (logged++ < 8) {
+            printf("CHAIN-BAD %s: pkt_len=%u sum(data_len)=%u nb_segs=%u walked=%u iplen=%u ol_flags=0x%" PRIx64 " tso_segsz=%u\n",
+                   where, m->pkt_len, sum, m->nb_segs, nseg, iplen,
+                   (uint64_t)m->ol_flags, m->tso_segsz);
+            fflush(stdout);
+        }
+    }
+}
 
 #define TCPTRACE_N (1u << 16) // 64k entries * 24B = 1.5MB ring
 struct tcpev {
@@ -105,10 +137,17 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
     uint32_t seq = rte_be_to_cpu_32(tcp->sent_seq);
     uint32_t ack = rte_be_to_cpu_32(tcp->recv_ack);
 
-    if (is_sc)
+    if (is_sc) {
         diag_n_sc++;
-    else
+    } else {
         diag_n_cs++;
+        uint16_t iplen = rte_be_to_cpu_16(ip->total_length);
+        diag_cs_sz[iplen <= 1500 ? 0 : iplen <= 4096 ? 1 : iplen <= 16384 ? 2 : 3]++;
+        if (iplen > diag_cs_max)
+            diag_cs_max = iplen;
+        if (iplen > 1500)
+            diag_chain_check("tx-copy", m, iplen);
+    }
 
     // RSTs are rare and terminal: log each (bounded) with the ports, and dump
     // the trace ring so the history leading up to the reset is preserved. An
@@ -126,6 +165,11 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
         }
         tcptrace_dump("rst-at-nic");
     }
+    // Also preserve the trace at normal test end: the first FIN dumps the full
+    // seq/ack/window history of the run (needed to diagnose sender stalls that
+    // never trigger the RST/desync events).
+    if (tcp->tcp_flags & RTE_TCP_FIN_FLAG)
+        tcptrace_dump("fin");
 
     struct tcpev *e = &tcptrace[tcptrace_i++ % TCPTRACE_N];
     e->tsc = rte_rdtsc();
@@ -254,6 +298,41 @@ static __thread bool use_shm_alloc = false;
 // }
 
 
+// VFIO-map one mempool memory chunk: the guest kernel's VFIO hack replaces the
+// backing pages with ONE physically-contiguous decrypted CMA block (see the
+// TXCOPY_POOL comment in main). The iova argument is ignored by the hack.
+static void txcopy_map_chunk(struct rte_mempool *mp, void *opaque,
+        struct rte_mempool_memhdr *memhdr, unsigned mem_idx) {
+    (void)mp; (void)opaque;
+    if (rte_vfio_container_dma_map(RTE_VFIO_DEFAULT_CONTAINER_FD,
+            (uint64_t)(uintptr_t)memhdr->addr,
+            (rte_iova_t)(uintptr_t)memhdr->addr, memhdr->len))
+        printf("TXCOPY_POOL: vfio dma map failed for chunk %u (%p len %zu)\n",
+               mem_idx, memhdr->addr, memhdr->len);
+    else
+        printf("TXCOPY_POOL: vfio-mapped chunk %u (%p len %zu)\n",
+               mem_idx, memhdr->addr, memhdr->len);
+}
+
+// Re-stamp buf_iova from a live pagemap read (the map above swapped the
+// physical pages, invalidating populate-time IOVAs). Also verify the chunk
+// really is physically contiguous across each object: with one CMA block per
+// chunk this must hold; a mismatch means the hack split the allocation.
+static void txcopy_fix_iova(struct rte_mempool *mp, void *opaque,
+        void *obj, unsigned idx) {
+    (void)mp; (void)opaque;
+    struct rte_mbuf *m = obj;
+    m->buf_iova = rte_mem_virt2phy(m->buf_addr);
+    phys_addr_t tail = rte_mem_virt2phy((char *)m->buf_addr + m->buf_len - 1);
+    if (m->buf_iova == RTE_BAD_IOVA ||
+            tail != m->buf_iova + m->buf_len - 1) {
+        static int warned = 0;
+        if (warned++ < 4)
+            printf("TXCOPY_POOL: obj %u NOT PHYSICALLY CONTIGUOUS (buf_iova=0x%" PRIx64
+                   " tail=0x%" PRIx64 ")\n", idx, (uint64_t)m->buf_iova, (uint64_t)tail);
+    }
+}
+
 int main(int argc, char *argv[]) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -269,8 +348,11 @@ int main(int argc, char *argv[]) {
     // with wallet.Wallet() as w:
     monitor_connect();
 
-    // Initialize DPDK EAL with --no-huge for environments without hugepages
-    char *eal_args[] = {"noiomgr_run", "--no-huge", "-l", "0", "--iova-mode=pa"};
+    // Initialize DPDK EAL with --no-huge for environments without hugepages.
+    // virtio init logs at debug so the negotiated feature set (csum/TSO bits)
+    // is visible in the driver log -- needed to verify the offload path.
+    char *eal_args[] = {"noiomgr_run", "--no-huge", "-l", "0", "--iova-mode=pa",
+                        "--log-level=pmd.net.virtio.init:debug"};
     int eal_argc = sizeof(eal_args) / sizeof(eal_args[0]);
     int ret = rte_eal_init(eal_argc, eal_args);
     if (ret < 0) {
@@ -290,6 +372,78 @@ int main(int argc, char *argv[]) {
     if (!loadgen) {
         cvmio_pool = cvmio_init();
         port = rte_eth_find_next(0);
+
+        // DIAG: verify the virtio PMD's TX header memzone IOVA against a LIVE
+        // pagemap read. Under --no-huge + the guest's VFIO PTE-replacement hack
+        // (hacky_atomic_pool_expand swaps the physical pages backing EAL memory),
+        // any IOVA recorded before/independent of the swap is stale. Mempool
+        // objects get per-page live IOVAs (single-seg TX works), but hdr_mz->iova
+        // feeds the virtio-net header + indirect-table descriptors used ONLY by
+        // multi-seg/TSO packets -- if it is stale, the vhost backend reads
+        // garbage headers and silently drops exactly those frames.
+        const struct rte_memzone *hdr_mz = rte_memzone_lookup("port0_vq1_hdr");
+        if (hdr_mz) {
+            phys_addr_t live = rte_mem_virt2phy(hdr_mz->addr);
+            printf("HDR_MZ: addr=%p iova=0x%" PRIx64 " live_pagemap_pa=0x%" PRIx64 "%s\n",
+                   hdr_mz->addr, (uint64_t)hdr_mz->iova, (uint64_t)live,
+                   (uint64_t)hdr_mz->iova == (uint64_t)live ? " (MATCH)" : " (STALE!)");
+        } else {
+            printf("HDR_MZ: port0_vq1_hdr not found\n");
+        }
+        void *probe = rte_malloc(NULL, 64, 64);
+        if (probe) {
+            printf("HEAP PROBE: addr=%p malloc_iova=0x%" PRIx64 " live_pagemap_pa=0x%" PRIx64 "\n",
+                   probe, (uint64_t)rte_malloc_virt2iova(probe),
+                   (uint64_t)rte_mem_virt2phy(probe));
+            rte_free(probe);
+        }
+        fflush(stdout);
+    }
+
+    // TX-copy pool with a data room big enough for a whole TSO super-frame
+    // (trustlet clamps frames via [dpdk] tso_max=32768 -> eth frame <= 32796B;
+    // 33KB room minus 128B headroom fits it in ONE segment). Single-segment
+    // mbufs take the virtio PMD's can_push path (header in mbuf headroom, one
+    // descriptor from the mbuf's own IOVA); multi-segment frames measurably
+    // vanish end-to-end on this rig while single-segment ones pass.
+    //
+    // The pool needs the same DMA treatment the cvms-DPDK mempool code applies
+    // ONLY to pools named exactly "MBUF_POOL" (lib/mempool/rte_mempool.c):
+    // a VFIO DMA map per chunk, which the guest kernel's
+    // hacky_atomic_pool_expand turns into ONE physically-contiguous DECRYPTED
+    // CMA block behind the same VAs (SEV-SNP: the vhost backend can only read
+    // decrypted/shared pages). We do it by hand with the public API:
+    //  1. create the pool NO_IOVA_CONTIG -> populate accepts 33KB objects as
+    //     one VA-contiguous chunk (pg_sz=0), no per-page IOVA constraints;
+    //  2. one rte_vfio_container_dma_map over the whole chunk -> one
+    //     contiguous decrypted block for everything;
+    //  3. re-stamp every mbuf's buf_iova from a LIVE pagemap read (the swap
+    //     changed the physical pages; populate-time IOVAs are stale).
+    struct rte_mempool *txcopy_pool = NULL;
+    if (!loadgen) {
+        struct rte_pktmbuf_pool_private txpriv = {
+            .mbuf_data_room_size = 33 * 1024,
+            .mbuf_priv_size = 0,
+        };
+        txcopy_pool = rte_mempool_create_empty("TXCOPY_POOL", 512,
+                sizeof(struct rte_mbuf) + 33 * 1024, 32, sizeof(txpriv),
+                rte_socket_id(), RTE_MEMPOOL_F_NO_IOVA_CONTIG);
+        if (!txcopy_pool ||
+                rte_mempool_set_ops_byname(txcopy_pool, "ring_mp_mc", NULL) != 0) {
+            printf("Failed to create TXCOPY_POOL: %s\n", rte_strerror(rte_errno));
+            return -1;
+        }
+        rte_pktmbuf_pool_init(txcopy_pool, &txpriv);
+        if (rte_mempool_populate_default(txcopy_pool) < 0) {
+            printf("Failed to populate TXCOPY_POOL: %s\n", rte_strerror(rte_errno));
+            return -1;
+        }
+        rte_mempool_obj_iter(txcopy_pool, rte_pktmbuf_init, NULL);
+        rte_mempool_mem_iter(txcopy_pool, txcopy_map_chunk, NULL);
+        rte_mempool_obj_iter(txcopy_pool, txcopy_fix_iova, NULL);
+        printf("TXCOPY_POOL: %u objects, data room %u\n",
+               txcopy_pool->populated_size, 33 * 1024);
+        fflush(stdout);
     }
 
     // Ring already initialized. We just cast the shm buffer to a ring.
@@ -595,10 +749,13 @@ int main(int argc, char *argv[]) {
         for (int iter = 0; iter < iterations && !loadgen; iter++) {
             if ((uint64_t)iter >= diag_next) {
                 diag_next = (uint64_t)iter + 20000000;
-                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu\n",
+                printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu tx_sz=%lu/%lu/%lu/%lu max=%u\n",
                        iter, (unsigned long)drop_rx_copy, (unsigned long)drop_rx_ring,
                        (unsigned long)drop_tx_copy, (unsigned long)drop_tx_ring,
-                       (unsigned long)diag_n_sc, (unsigned long)diag_n_cs);
+                       (unsigned long)diag_n_sc, (unsigned long)diag_n_cs,
+                       (unsigned long)diag_cs_sz[0], (unsigned long)diag_cs_sz[1],
+                       (unsigned long)diag_cs_sz[2], (unsigned long)diag_cs_sz[3],
+                       diag_cs_max);
                 fflush(stdout);
             }
 
@@ -643,9 +800,28 @@ int main(int argc, char *argv[]) {
             // Dequeue processed mbufs
             deq_num = rte_ring_sc_dequeue_burst(&shared2->ingress.ring, deq_objs, BURST_SIZE, NULL);
             if (deq_num > 0) {
+                // The virtio TX vq frees transmitted mbufs only lazily, from
+                // inside a LATER tx_burst call. The 1024-desc ring can absorb
+                // the whole TXCOPY pool; once every copy fails for lack of
+                // mbufs, tx_burst is never called again and nothing ever frees
+                // them -> permanent TX wedge (all retransmits dropped). Force
+                // the cleanup whenever the pool runs low.
+                if (rte_mempool_avail_count(txcopy_pool) < 2 * BURST_SIZE)
+                    rte_eth_tx_done_cleanup(port, 0, 0);
                 size_t nb_copied2 = 0;
                 for (size_t i = 0; i < deq_num; i++) {
-                    bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], cvmio_pool, 0, UINT32_MAX); // TODO not MAX
+                    struct rte_mbuf *src = (struct rte_mbuf *)deq_objs[i];
+                    if (src->pkt_len > 1514) // multi-seg TSO frame from the shared rings
+                        diag_chain_check("src", src, (uint16_t)(src->pkt_len - RTE_ETHER_HDR_LEN));
+                    // linearizing copy: single-seg result -> virtio can_push path
+                    // (multi-seg TX is broken here, see TXCOPY_POOL comment)
+                    bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], txcopy_pool, 0, UINT32_MAX);
+                    if (unlikely(bufs[nb_copied2] && bufs[nb_copied2]->nb_segs > 1)) {
+                        // frame larger than the pool's data room -- would take the
+                        // broken multi-seg path; drop it VISIBLY instead
+                        rte_pktmbuf_free(bufs[nb_copied2]);
+                        bufs[nb_copied2] = NULL;
+                    }
                     /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
                     if (bufs[nb_copied2] != NULL)
                         nb_copied2++;
