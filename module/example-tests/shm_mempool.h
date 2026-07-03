@@ -172,7 +172,15 @@ create_shm_mbuf_pool(char *name, struct shm *shared)
 		return NULL;
 	}
 
-	rte_pktmbuf_pool_init(mp, NULL);
+	/* Pass the data room EXPLICITLY: with a NULL opaque, pool_init derives
+	 * it as elt_size - sizeof(rte_mbuf), but the mempool pads elt_size (e.g.
+	 * 65663 -> 65664), and the derived 65536 wraps the uint16_t room to 0 --
+	 * every mbuf then reports buf_len 0 and RX queue setup rejects the pool. */
+	struct rte_pktmbuf_pool_private mbp_priv = {
+		.mbuf_data_room_size = SHM_POOL_DATA_ROOM,
+		.mbuf_priv_size = 0,
+	};
+	rte_pktmbuf_pool_init(mp, &mbp_priv);
 
 	int cnt = rte_mempool_populate_iova(mp, shared->pool_buf,
 					    RTE_BAD_IOVA,

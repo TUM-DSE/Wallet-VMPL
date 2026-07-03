@@ -19,30 +19,32 @@
 
 #define CACHE_LINE_SIZE 64
 
-#define SHARED_SIZE (4*1024*1024)
+// 16MB: the shared mbuf pool holds whole TSO super-frames in SINGLE-SEGMENT
+// mbufs (33KB data room) so the driver can hand them to the NIC without a
+// linearizing copy. 4MB only fit ~115 such mbufs.
+#define SHARED_SIZE (32*1024*1024)
 
 #define NUM_RINGS 2
 #define RING_SIZE 1024
 #define RING_BUF_SIZE RTE_ALIGN(sizeof(struct rte_ring) + (ssize_t)RING_SIZE * sizeof(void*), RTE_CACHE_LINE_SIZE)
 #define TAILQ_ENTRY_SIZE sizeof(struct rte_tailq_entry)
 
-// Number of rte_mbuf objects in the shared mempool. Was 2*RING_SIZE (so both
-// of a channel's rings can be full without draining the pool), reduced to
-// 1536 when the data room grew to 2048 for TSO: the 4MB SHARED_SIZE region
-// fits at most ~1745 of the bigger elements (align64(objhdr + rte_mbuf +
-// 2176) = ~2368B each; pool_buf 1536*2368 = ~3.6MB + rings/stack/priv).
-// Exhaustion under deep TSO bursts (a 64KB frame consumes ~32 mbufs) is
-// expected and SURVIVABLE: F-Stack's tcp_output gets a graceful ENOBUFS
-// (cwnd collapse + retry) since the ff-veth-transmit-positive-errno patch,
-// and the driver counts dropped RX copies in drop_rx_copy. Page-boundary
-// skips in rte_mempool_populate_iova put the populated count ~10% below
-// this figure.
-#define SHM_POOL_SIZE 1536
-// Packet data buffer size per mbuf. MUST be >= RTE_PKTMBUF_HEADROOM +
-// RTE_MBUF_DEFAULT_DATAROOM (2048): F-Stack's ff_dpdk_if_send chops TSO
-// super-frames into segments of exactly RTE_MBUF_DEFAULT_DATAROOM bytes
-// regardless of the pool's actual data room (a smaller room = heap overrun).
-#define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 2048)
+// Number of rte_mbuf objects in the shared mempool. With the 33KB data room
+// (below), 960 * ~34KB elements = ~32.8MB, filling the 32MB SHARED_SIZE
+// region. In-flight demand: sendbuf cap 2MB = ~64 TSO frames + the NIC TX
+// vq's lazily-freed mbufs (bounded by the driver's tx_done_cleanup
+// watermark) + transient RX copies. Exhaustion is SURVIVABLE: F-Stack's
+// tcp_output gets a graceful ENOBUFS (cwnd collapse + retry) since the
+// ff-veth-transmit-positive-errno patch.
+#define SHM_POOL_SIZE 960
+// Packet data buffer size per mbuf: one whole TSO super-frame per mbuf
+// (trustlet clamps frames via [dpdk] tso_max=32768 -> eth frame <= 32796B;
+// tailroom is 33*1024 >= that). Single-segment mbufs are REQUIRED on the TX
+// path: the driver hands them to virtio directly (zero-copy) and only the
+// single-seg can_push encoding works on this rig. F-Stack fills segments to
+// the pool's real tailroom since the ff-send-fill-tailroom patch. (64KB
+// frames / 65535 data room were measured SLOWER: 15.3 vs 16.2 Gbit/s.)
+#define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 33*1024)
 // Backing memory for mbuf objects: each element is objhdr + rte_mbuf + data room,
 // padded to cache line. Use 512 bytes/element to account for alignment variance.
 #define SHM_POOL_ELT_TOTAL RTE_ALIGN(sizeof(struct rte_mempool_objhdr) + sizeof(struct rte_mbuf) + SHM_POOL_DATA_ROOM, RTE_CACHE_LINE_SIZE)
@@ -122,7 +124,10 @@ struct shm {
   } egress __attribute__((aligned(CACHE_LINE_SIZE)));
 
   struct shm_stack pool_stack __attribute__((aligned(CACHE_LINE_SIZE)));
-  char pool_buf[SHM_POOL_BUF_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));
+  // Page-aligned so the driver can VFIO-DMA-map exactly the pool region
+  // (converting those pages to host-shared for zero-copy NIC TX) while the
+  // rings/stack above stay guest-private.
+  char pool_buf[SHM_POOL_BUF_SIZE] __attribute__((aligned(4096)));
 // (size + MASK & MASK) to align for mempool cache size 0
 #define POOL_PRIV_SIZE (((sizeof(struct rte_pktmbuf_pool_private) + RTE_MEMPOOL_HEADER_SIZE((struct rte_mempool*)0x1, 0))+ RTE_MEMPOOL_ALIGN_MASK) & (~RTE_MEMPOOL_ALIGN_MASK))
   char pool_priv[POOL_PRIV_SIZE] __attribute__((aligned(CACHE_LINE_SIZE)));

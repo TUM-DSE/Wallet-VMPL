@@ -169,11 +169,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1783070312,
-        "narHash": "sha256-tkQrlOvdyFGRBYBq23Rj+m94RmwS2w2rucjJmEZLyR0=",
+        "lastModified": 1783085064,
+        "narHash": "sha256-9zTtEux27qQRKYX/omaISCu8PXK32FdiMoSaoE+c9Vg=",
         "ref": "refs/heads/master",
-        "rev": "12b03a5688008a56a53f430473cc2a92b9cbb732",
-        "revCount": 42,
+        "rev": "bed7cc7343f45182dda73cd95747a78a235aecca",
+        "revCount": 43,
         "type": "git",
         "url": "file:///home/okelmann/fstack-development"
       },

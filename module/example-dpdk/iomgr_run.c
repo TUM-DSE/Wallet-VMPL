@@ -298,27 +298,15 @@ static __thread bool use_shm_alloc = false;
 // }
 
 
-// VFIO-map one mempool memory chunk: the guest kernel's VFIO hack replaces the
-// backing pages with ONE physically-contiguous decrypted CMA block (see the
-// TXCOPY_POOL comment in main). The iova argument is ignored by the hack.
-static void txcopy_map_chunk(struct rte_mempool *mp, void *opaque,
-        struct rte_mempool_memhdr *memhdr, unsigned mem_idx) {
-    (void)mp; (void)opaque;
-    if (rte_vfio_container_dma_map(RTE_VFIO_DEFAULT_CONTAINER_FD,
-            (uint64_t)(uintptr_t)memhdr->addr,
-            (rte_iova_t)(uintptr_t)memhdr->addr, memhdr->len))
-        printf("TXCOPY_POOL: vfio dma map failed for chunk %u (%p len %zu)\n",
-               mem_idx, memhdr->addr, memhdr->len);
-    else
-        printf("TXCOPY_POOL: vfio-mapped chunk %u (%p len %zu)\n",
-               mem_idx, memhdr->addr, memhdr->len);
-}
-
-// Re-stamp buf_iova from a live pagemap read (the map above swapped the
-// physical pages, invalidating populate-time IOVAs). Also verify the chunk
-// really is physically contiguous across each object: with one CMA block per
-// chunk this must hold; a mismatch means the hack split the allocation.
-static void txcopy_fix_iova(struct rte_mempool *mp, void *opaque,
+// Re-stamp a shared-pool mbuf's buf_iova from a LIVE pagemap read. The VFIO
+// map of the pool region (see main) swapped the physical pages behind the
+// VAs, so any earlier-derived IOVA is stale; and the trustlet's pool
+// re-creation stamps buf_iova from mempool metadata that is RTE_BAD_IOVA for
+// a NO_IOVA_CONTIG populate. The NIC transmits these mbufs DIRECTLY (zero
+// copy), so buf_iova must be the real post-swap physical address. Also verify
+// the object is physically contiguous: the whole pool is one CMA block (one
+// map call), so a mismatch means the guest hack split the allocation.
+static void shm_fix_iova(struct rte_mempool *mp, void *opaque,
         void *obj, unsigned idx) {
     (void)mp; (void)opaque;
     struct rte_mbuf *m = obj;
@@ -328,7 +316,7 @@ static void txcopy_fix_iova(struct rte_mempool *mp, void *opaque,
             tail != m->buf_iova + m->buf_len - 1) {
         static int warned = 0;
         if (warned++ < 4)
-            printf("TXCOPY_POOL: obj %u NOT PHYSICALLY CONTIGUOUS (buf_iova=0x%" PRIx64
+            printf("SHM pool: obj %u NOT PHYSICALLY CONTIGUOUS (buf_iova=0x%" PRIx64
                    " tail=0x%" PRIx64 ")\n", idx, (uint64_t)m->buf_iova, (uint64_t)tail);
     }
 }
@@ -400,51 +388,6 @@ int main(int argc, char *argv[]) {
         fflush(stdout);
     }
 
-    // TX-copy pool with a data room big enough for a whole TSO super-frame
-    // (trustlet clamps frames via [dpdk] tso_max=32768 -> eth frame <= 32796B;
-    // 33KB room minus 128B headroom fits it in ONE segment). Single-segment
-    // mbufs take the virtio PMD's can_push path (header in mbuf headroom, one
-    // descriptor from the mbuf's own IOVA); multi-segment frames measurably
-    // vanish end-to-end on this rig while single-segment ones pass.
-    //
-    // The pool needs the same DMA treatment the cvms-DPDK mempool code applies
-    // ONLY to pools named exactly "MBUF_POOL" (lib/mempool/rte_mempool.c):
-    // a VFIO DMA map per chunk, which the guest kernel's
-    // hacky_atomic_pool_expand turns into ONE physically-contiguous DECRYPTED
-    // CMA block behind the same VAs (SEV-SNP: the vhost backend can only read
-    // decrypted/shared pages). We do it by hand with the public API:
-    //  1. create the pool NO_IOVA_CONTIG -> populate accepts 33KB objects as
-    //     one VA-contiguous chunk (pg_sz=0), no per-page IOVA constraints;
-    //  2. one rte_vfio_container_dma_map over the whole chunk -> one
-    //     contiguous decrypted block for everything;
-    //  3. re-stamp every mbuf's buf_iova from a LIVE pagemap read (the swap
-    //     changed the physical pages; populate-time IOVAs are stale).
-    struct rte_mempool *txcopy_pool = NULL;
-    if (!loadgen) {
-        struct rte_pktmbuf_pool_private txpriv = {
-            .mbuf_data_room_size = 33 * 1024,
-            .mbuf_priv_size = 0,
-        };
-        txcopy_pool = rte_mempool_create_empty("TXCOPY_POOL", 512,
-                sizeof(struct rte_mbuf) + 33 * 1024, 32, sizeof(txpriv),
-                rte_socket_id(), RTE_MEMPOOL_F_NO_IOVA_CONTIG);
-        if (!txcopy_pool ||
-                rte_mempool_set_ops_byname(txcopy_pool, "ring_mp_mc", NULL) != 0) {
-            printf("Failed to create TXCOPY_POOL: %s\n", rte_strerror(rte_errno));
-            return -1;
-        }
-        rte_pktmbuf_pool_init(txcopy_pool, &txpriv);
-        if (rte_mempool_populate_default(txcopy_pool) < 0) {
-            printf("Failed to populate TXCOPY_POOL: %s\n", rte_strerror(rte_errno));
-            return -1;
-        }
-        rte_mempool_obj_iter(txcopy_pool, rte_pktmbuf_init, NULL);
-        rte_mempool_mem_iter(txcopy_pool, txcopy_map_chunk, NULL);
-        rte_mempool_obj_iter(txcopy_pool, txcopy_fix_iova, NULL);
-        printf("TXCOPY_POOL: %u objects, data room %u\n",
-               txcopy_pool->populated_size, 33 * 1024);
-        fflush(stdout);
-    }
 
     // Ring already initialized. We just cast the shm buffer to a ring.
     // // Initialize DPDK ring
@@ -519,8 +462,49 @@ int main(int argc, char *argv[]) {
     memset(shared, 0, SHARED_SIZE);
     shared->legacy_buffer.data[0] = 'I';
     shared->keep_running = true;
+
+    // Convert the mbuf-pool region of the channel to host-shared DMA memory
+    // BEFORE the monitor maps the channel into the trustlets: the VFIO map
+    // makes the guest kernel's hacky_atomic_pool_expand replace these pages
+    // with ONE physically-contiguous DECRYPTED CMA block behind the same VAs
+    // (SEV-SNP: the vhost backend can only read decrypted pages). The NIC then
+    // transmits shm-pool mbufs DIRECTLY -- no linearizing bounce copy.
+    // Confidentiality note: packet buffers + mbuf headers (and the trailing
+    // pool_priv metadata sharing the region's last pages) become host-visible;
+    // by design the payload is TLS-protected above TCP, so this only exposes
+    // what the NIC would see anyway. The rings and control fields ahead of
+    // pool_buf stay guest-private.
+    size_t shm_shared_off = offsetof(struct shm, pool_buf); // page-aligned (util.h)
+    size_t shm_shared_len = RTE_ALIGN_CEIL(sizeof(struct shm) - shm_shared_off, 4096);
+    if (!loadgen) {
+        uint64_t pb = (uint64_t)shared + shm_shared_off;
+        if (rte_vfio_container_dma_map(RTE_VFIO_DEFAULT_CONTAINER_FD, pb, pb, shm_shared_len)) {
+            printf("Failed to vfio-map shm pool region %p len %zu\n",
+                   (void *)pb, shm_shared_len);
+            return -1;
+        }
+        printf("SHM pool region vfio-mapped (host-shared): off=%zu len=%zu\n",
+               shm_shared_off, shm_shared_len);
+        fflush(stdout);
+    }
+
+    // Map the channel into each trustlet. In NIC mode the pool region was just
+    // converted to host-shared, and the monitor must know: RMPADJUST on
+    // hypervisor-owned pages faults, and their trustlet PTEs need the C-bit
+    // CLEAR. Bit 63 of the size flags the range as host-shared (SVSM
+    // create_shared_memory host-shared support); the ranges before/after are
+    // mapped as regular private channel pages.
+    #define SHM_MAP_HOST_SHARED (1ULL << 63)
     for (int i = 0; i < chain_len; i++) {
-        if (!create_shared_memory(trustlets[i], shared, SHARED_SIZE)) {
+        bool ok;
+        if (loadgen) {
+            ok = create_shared_memory(trustlets[i], shared, SHARED_SIZE) != NULL;
+        } else {
+            ok = create_shared_memory(trustlets[i], shared, shm_shared_off) != NULL &&
+                 create_shared_memory(trustlets[i], (char *)shared + shm_shared_off,
+                                      shm_shared_len | SHM_MAP_HOST_SHARED) != NULL;
+        }
+        if (!ok) {
             printf("Failed to create shared memory to trustlet %d\n", i);
             return -1;
         }
@@ -528,7 +512,15 @@ int main(int argc, char *argv[]) {
     // every iomgr needs CHANNEL_ADDR(0) mapped: it holds the mbuf pool and every
     // iomgr dereferences mbuf headers (for rmpadjust / PTE adjustment).
     for (int k = 0; k < num_iomgr; k++) {
-        if (!create_shared_memory(iomgr_trustlets[k], shared, SHARED_SIZE)) {
+        bool ok;
+        if (loadgen) {
+            ok = create_shared_memory(iomgr_trustlets[k], shared, SHARED_SIZE) != NULL;
+        } else {
+            ok = create_shared_memory(iomgr_trustlets[k], shared, shm_shared_off) != NULL &&
+                 create_shared_memory(iomgr_trustlets[k], (char *)shared + shm_shared_off,
+                                      shm_shared_len | SHM_MAP_HOST_SHARED) != NULL;
+        }
+        if (!ok) {
             printf("Failed to create shared memory to iomgr %d\n", k);
             return -1;
         }
@@ -668,6 +660,17 @@ int main(int argc, char *argv[]) {
             invoke_trustlet_bin(iomgr_trustlets[k], &iocfg, sizeof(iocfg), 0);
         }
 
+        // Re-stamp the shared pool's buf_iova values now that (a) the VFIO map
+        // swapped the physical pages and (b) the iperf VNFlet's config
+        // invocation above re-created the pool (its rte_pktmbuf_init leaves
+        // buf_iova invalid for a NO_IOVA_CONTIG populate). Must precede any
+        // mbuf reaching the NIC -- the PMD DMAs straight from these buffers.
+        if (!loadgen) {
+            rte_mempool_obj_iter(pool, shm_fix_iova, NULL);
+            printf("SHM pool buf_iova re-stamped for zero-copy TX\n");
+            fflush(stdout);
+        }
+
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t startup_launch_trustlets = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
@@ -800,57 +803,45 @@ int main(int argc, char *argv[]) {
             // Dequeue processed mbufs
             deq_num = rte_ring_sc_dequeue_burst(&shared2->ingress.ring, deq_objs, BURST_SIZE, NULL);
             if (deq_num > 0) {
+                // ZERO-COPY TX: the shm-pool mbufs are host-shared DMA memory
+                // with live buf_iova (vfio map + shm_fix_iova above), so hand
+                // them to virtio directly. They are single-segment whole TSO
+                // frames (33KB data room + tso_max clamp) -> can_push path.
                 // The virtio TX vq frees transmitted mbufs only lazily, from
-                // inside a LATER tx_burst call. The 1024-desc ring can absorb
-                // the whole TXCOPY pool; once every copy fails for lack of
-                // mbufs, tx_burst is never called again and nothing ever frees
-                // them -> permanent TX wedge (all retransmits dropped). Force
-                // the cleanup whenever the pool runs low.
-                if (rte_mempool_avail_count(txcopy_pool) < 2 * BURST_SIZE)
+                // inside a LATER tx_burst call; it could absorb the whole
+                // shared pool and starve the trustlet (permanent wedge), so
+                // force the cleanup whenever the pool runs low.
+                if (rte_mempool_avail_count(pool) < SHM_POOL_SIZE / 2)
                     rte_eth_tx_done_cleanup(port, 0, 0);
-                size_t nb_copied2 = 0;
+                size_t nb_tx_ready = 0;
                 for (size_t i = 0; i < deq_num; i++) {
                     struct rte_mbuf *src = (struct rte_mbuf *)deq_objs[i];
-                    if (src->pkt_len > 1514) // multi-seg TSO frame from the shared rings
+                    if (src->pkt_len > 1514) // whole TSO frame from the shared rings
                         diag_chain_check("src", src, (uint16_t)(src->pkt_len - RTE_ETHER_HDR_LEN));
-                    // linearizing copy: single-seg result -> virtio can_push path
-                    // (multi-seg TX is broken here, see TXCOPY_POOL comment)
-                    bufs[nb_copied2] = rte_pktmbuf_copy(deq_objs[i], txcopy_pool, 0, UINT32_MAX);
-                    if (unlikely(bufs[nb_copied2] && bufs[nb_copied2]->nb_segs > 1)) {
-                        // frame larger than the pool's data room -- would take the
-                        // broken multi-seg path; drop it VISIBLY instead
-                        rte_pktmbuf_free(bufs[nb_copied2]);
-                        bufs[nb_copied2] = NULL;
+                    if (unlikely(src->nb_segs > 1)) {
+                        // multi-seg TX is broken on this rig (non-can_push
+                        // descriptor path); should not happen with the 33KB
+                        // data room + tso_max clamp -- drop VISIBLY if it does
+                        rte_pktmbuf_free(src);
+                        drop_tx_copy++;
+                        continue;
                     }
-                    /* rte_pktmbuf_free(deq_objs[i]); // return to last VNFlet's pool (don't, its not thread safe) */
-                    if (bufs[nb_copied2] != NULL)
-                        nb_copied2++;
-                    else
-                        drop_tx_copy++; // cvmio (NIC) pool exhausted -> client TX dropped
-                    rte_pktmbuf_free(deq_objs[i]); // return to pool1
+                    diag_tcp("C->S", src);
+                    bufs[nb_tx_ready++] = src;
                 }
 
-                if (nb_copied2 > 0) {
-                    for (size_t i = 0; i < nb_copied2; i++)
-                        diag_tcp("C->S", bufs[i]); // client->server: spot persist probes
+                if (nb_tx_ready > 0) {
                     const uint16_t nb_tx = rte_eth_tx_burst(port, 0,
-                            bufs, nb_copied2);
-
-                    /* Free any unsent packets */
-                    if (unlikely(nb_tx < nb_copied2)) {
+                            bufs, nb_tx_ready);
+                    // the PMD owns and later frees the accepted mbufs (back to
+                    // the shared pool via mbuf->pool = shm_stack ops)
+                    if (unlikely(nb_tx < nb_tx_ready)) {
                         uint16_t buf;
-                        drop_tx_ring += (nb_copied2 - nb_tx); // NIC TX ring full
-                        for (buf = nb_tx; buf < nb_copied2; buf++)
-                            rte_pktmbuf_free(bufs[buf]); // return to cvmio_pool
+                        drop_tx_ring += (nb_tx_ready - nb_tx); // NIC TX ring full
+                        for (buf = nb_tx; buf < nb_tx_ready; buf++)
+                            rte_pktmbuf_free(bufs[buf]); // back to the shared pool
                     }
                 }
-
-                // i think this is not necessary. We the buffers are from pool1, so we must free them ourselves:
-                // // return empty buffer to previous (our mempool is not atomic, so we have to pass back atomically)
-                // size_t nb_returned = rte_ring_sp_enqueue_bulk(&shared2->egress.ring, (void**)(&(deq_objs[0])), deq_num, NULL);
-                // if (nb_returned != deq_num) {
-                //     printf("Warning: failed to return %lu buffers to shared2->egress\n", deq_num);
-                // }
 
                 num_deqed += deq_num;
 

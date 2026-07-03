@@ -253,7 +253,10 @@ void main_shm(char mode, struct shm *data_shared_previous, struct shm *data_shar
     uint64_t start_time = clock_monotonic_get();
     uint64_t end_time = start_time + duration_ns;
     uint64_t iterations = 0;
-    char local_bufs[BURST_SIZE][SHM_POOL_DATA_ROOM];
+    // Staging bound: noiomgr packets are <= PACKET_SIZE (~1.5KB); do NOT size
+    // this by SHM_POOL_DATA_ROOM -- with the 33KB TSO data room that would be
+    // >1MB of trustlet stack.
+    char local_bufs[BURST_SIZE][RTE_PKTMBUF_HEADROOM + 2048];
     size_t local_buf_lens[BURST_SIZE];
 
     while (likely(atomic_load(&data_shared_previous->keep_running))) {

@@ -62,7 +62,9 @@ extern int iperf_main(int argc, char **argv);
 // number of mbufs the loadgen keeps in flight towards VNFlet 0 (must be < RING_SIZE
 // so re-enqueueing into the ingress ring can never fail)
 #ifndef LOADGEN_INFLIGHT
-#define LOADGEN_INFLIGHT 512
+// must fit the pool (SHM_POOL_SIZE shrank to 480 when the data room grew to
+// 33KB for single-segment TSO frames) and stay < RING_SIZE
+#define LOADGEN_INFLIGHT (SHM_POOL_SIZE < 576 ? SHM_POOL_SIZE - 64 : 512)
 #endif
 
 // #define REAL_WORKLOAD
@@ -983,8 +985,8 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
     uint64_t start_time = clock_monotonic_get();
     uint64_t end_time = start_time + duration_ns;
     uint64_t iterations = 0;
-    char local_bufs[BURST_SIZE][SHM_POOL_DATA_ROOM];
-    size_t local_buf_lens[BURST_SIZE];
+    // (a BURST_SIZE x SHM_POOL_DATA_ROOM staging array used to live here,
+    // unused -- with the 33KB TSO data room it would be >1MB of stack)
 
     while (likely(atomic_load(&data_shared_previous->keep_running))) {
         iterations++;
@@ -1238,11 +1240,12 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         // vhost_user client config.
         "tx_csum_offoad_skip=0\n"
         "tso=1\n"
-        // Clamp TSO super-frames to 32KB (whole IP packet) so each frame fits
-        // ONE mbuf of the driver's 33KB-data-room TXCOPY_POOL: single-segment
-        // mbufs take the virtio can_push TX path. Multi-segment TX is broken
-        // in the guest driver (stale hdr_mz IOVA under --no-huge + the VFIO
-        // PTE-swap hack) -- see iomgr_run.c TXCOPY_POOL.
+        // Clamp TSO super-frames to 32KB (whole IP packet) so each frame
+        // fits ONE shm-pool mbuf (tailroom 33KB): the driver hands them to
+        // virtio ZERO-COPY, and only single-segment can_push TX works on
+        // this rig (multi-seg routes descriptors through memory with stale
+        // IOVAs under --no-huge + the VFIO PTE-swap hack). 64KB frames
+        // measured slightly slower (15.3 vs 16.2 Gbit/s).
         "tso_max=32768\n"
         "vlan_strip=0\n"
         "rx_csum_trust=1\n"
@@ -1287,15 +1290,11 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
         "net.inet.tcp.sendspace=16384\n"
         "net.inet.tcp.recvspace=8192\n"
         "net.inet.tcp.cc.algorithm=cubic\n"
-        // sendbuf cap 2MB, NOT 16MB like the vhost client: with TSO the
-        // sender can burst a full cwnd of ~2KB mbufs into the rings faster
-        // than the driver drains them, and the shared pool holds only ~1530
-        // mbufs (~3MB). A 16MB cap let bursts exhaust the pool -> ENOBUFS ->
-        // cwnd collapse to 1 MSS -> ~1s slow-start rebuild -> collapse again
-        // (measured: ~4MB total in 10s). 2MB of in-flight fits the pool with
-        // headroom for the RX/ACK direction and still covers the sub-ms-RTT
-        // bandwidth-delay product many times over.
-        "net.inet.tcp.sendbuf_max=2097152\n"
+        // sendbuf cap 2MB: bursts must fit the 960 x 33KB shared pool
+        // together with the TX vq's lazily-freed mbufs (bounded by the
+        // driver's tx_done_cleanup watermark). Uncapped 16MB once let
+        // bursts exhaust a much smaller pool -> ENOBUFS cwnd-collapse cycle.
+        "net.inet.tcp.sendbuf_max=4194304\n"
         "net.inet.tcp.recvbuf_max=16777216\n"
         "net.inet.tcp.sendbuf_auto=1\n"
         "net.inet.tcp.recvbuf_auto=1\n"
