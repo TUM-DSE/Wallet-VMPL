@@ -42,8 +42,9 @@
 // tailroom is 33*1024 >= that). Single-segment mbufs are REQUIRED on the TX
 // path: the driver hands them to virtio directly (zero-copy) and only the
 // single-seg can_push encoding works on this rig. F-Stack fills segments to
-// the pool's real tailroom since the ff-send-fill-tailroom patch. (64KB
-// frames / 65535 data room were measured SLOWER: 15.3 vs 16.2 Gbit/s.)
+// the pool's real tailroom since the ff-send-fill-tailroom patch. With the
+// kqueue-select server fix, 64KB frames measured NO better than 32KB
+// (27.4 vs 28.0 Gbit/s) at twice the memory -- keep 32KB.
 #define SHM_POOL_DATA_ROOM (RTE_PKTMBUF_HEADROOM + 33*1024)
 // Backing memory for mbuf objects: each element is objhdr + rte_mbuf + data room,
 // padded to cache line. Use 512 bytes/element to account for alignment variance.
