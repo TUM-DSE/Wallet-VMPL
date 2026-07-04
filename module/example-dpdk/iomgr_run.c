@@ -28,6 +28,10 @@
 #include <rte_vfio.h>
 #include <rte_malloc.h>
 
+// --- per-packet TCP telemetry, gated: -DIPERF_PROF (e.g. via EXTRA_CFLAGS).
+// ~100-200 cycles per TCP packet on the driver core; prints/dumps are
+// event-driven. Compiled out of benchmark builds. ---------------------------
+#ifdef IPERF_PROF
 // Per-direction TCP packet counters plus an ONLINE desync detector for the
 // intermittent "server RSTs mid-transfer with zero drops everywhere" failure
 // (3e501ca's seq-desync). The former TIMING-mode trace (printf+fflush for the
@@ -228,6 +232,10 @@ static void diag_tcp(const char *dir, struct rte_mbuf *m) {
             c->max_cli_seq_end = seq_end;
     }
 }
+#else
+static inline void diag_tcp(const char *dir, struct rte_mbuf *m) { (void)dir; (void)m; }
+static inline void diag_chain_check(const char *w, struct rte_mbuf *m, uint16_t l) { (void)w; (void)m; (void)l; }
+#endif /* IPERF_PROF */
 
 #include "../include/cpuid.h"
 #include "../example-tests/util.h"
@@ -750,6 +758,7 @@ int main(int argc, char *argv[]) {
         uint64_t diag_next = 20000000;
         // for _ in range(iterations):
         for (int iter = 0; iter < iterations && !loadgen; iter++) {
+#ifdef IPERF_PROF
             if ((uint64_t)iter >= diag_next) {
                 diag_next = (uint64_t)iter + 20000000;
                 printf("DRV DIAG: iter=%d drop_rx_copy=%lu drop_rx_ring=%lu drop_tx_copy=%lu drop_tx_ring=%lu tcp_rx=%lu tcp_tx=%lu tx_sz=%lu/%lu/%lu/%lu max=%u c2d_ring=%u pool_avail=%u\n",
@@ -766,6 +775,7 @@ int main(int argc, char *argv[]) {
                        rte_mempool_avail_count(pool));
                 fflush(stdout);
             }
+#endif /* IPERF_PROF */
 
             const uint16_t nb_rx = rte_eth_rx_burst(port, 0,
                     bufs, BURST_SIZE); // bufs in cvmio pool

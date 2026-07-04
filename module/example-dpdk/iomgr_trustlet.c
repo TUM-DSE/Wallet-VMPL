@@ -248,6 +248,7 @@ uint64_t g_iperf_tx_drop = 0;                      // DIAG: TX mbufs the egress 
 // Pairs with the driver's BOGUS-ACK@NIC / DESYNC detectors (iomgr_run diag_tcp)
 // to localize the corruption: driver clean + trustlet fires = the
 // copy->ring->iomgr->trustlet path corrupted the packet in flight.
+#ifdef IPERF_PROF
 struct ff_tcpconn {
     uint16_t cli_port;        // network byte order; 0 = free
     uint32_t max_tx_seq_end;  // highest seq+len we sent (0 = none yet)
@@ -290,6 +291,7 @@ static struct ff_tcpconn *iperf_conn_slot(uint16_t cli_port) {
     }
     return c;
 }
+#endif /* IPERF_PROF */
 
 static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_pkts) {
     (void)rxq;
@@ -299,6 +301,7 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
     if (!n)
         return 0;
     g_iperf_rx_pkts += n;
+#ifdef IPERF_PROF
     for (uint16_t i = 0; i < n; i++) {
         const struct rte_ipv4_hdr *ip;
         const struct rte_tcp_hdr *tcp = iperf_parse_tcp(rx_pkts[i], &ip, NULL);
@@ -334,6 +337,7 @@ static uint16_t ring_rx_burst(void *rxq, struct rte_mbuf **rx_pkts, uint16_t nb_
                     (int32_t)(ack - c->max_tx_seq_end), tcp->tcp_flags, csum_ok);
         }
     }
+#endif /* IPERF_PROF */
     return n;
 }
 
@@ -341,6 +345,7 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
     (void)txq;
     if (!g_iperf_egress)
         return 0;
+#ifdef IPERF_PROF
     // Track our own TX seq high-water mark per connection BEFORE handing the
     // mbufs off (after enqueue the driver owns them).
     for (uint16_t i = 0; i < nb_pkts; i++) {
@@ -356,6 +361,7 @@ static uint16_t ring_tx_burst(void *txq, struct rte_mbuf **tx_pkts, uint16_t nb_
         if (c->max_tx_seq_end == 0 || (int32_t)(seq_end - c->max_tx_seq_end) > 0)
             c->max_tx_seq_end = seq_end;
     }
+#endif /* IPERF_PROF */
     // DPDK contract: caller owns/frees anything we don't accept.
     uint16_t n = (uint16_t)rte_ring_sp_enqueue_burst(g_iperf_egress, (void **)tx_pkts, nb_pkts, NULL);
     if (nb_pkts) {
@@ -437,11 +443,15 @@ int __wrap_rte_eth_rx_queue_setup(uint16_t port_id, uint16_t rx_queue_id,
             socket_id, rx_conf ? &conf : NULL, mb_pool);
 }
 
+// --- TX-path cycle profiling (gated: -DIPERF_PROF, e.g. via EXTRA_CFLAGS;
+// the matching -Wl,--wrap flags are added by the Makefile). The ff_pump wrap
+// alone costs ~6-7% of the vnflet core at ~2M pumps/s -- measurement only,
+// never in benchmark builds. -------------------------------------------------
+#ifdef IPERF_PROF
 // CPU frequency in GHz (also defined below for the clock helpers; identical
 // redefinition is benign)
 #define CPU_GHZ 2.0
 
-// --- TX-path cycle profiling (one-shot, printed at iperf_main exit) --------
 // The pipeline is trustlet-bound (~16 of the reference's 35 Gbit/s); these
 // wraps attribute the vnflet core's cycles to the candidate sinks. All four
 // functions are cross-object calls inside libfstack.a, so linker --wrap
@@ -509,6 +519,7 @@ static void prof_report(uint64_t wall_cycles) {
                 (unsigned long)b->calls, (unsigned long)(b->bytes / 1000000), gbps);
     }
 }
+#endif /* IPERF_PROF */
 // ---------------------------------------------------------------------------
 
 extern int __real_rte_eth_dev_start(uint16_t port_id);
@@ -1143,6 +1154,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
 
         // DIAG: rarely surface where the iomgr is dropping (the ~11ms console
         // write must stay out of the per-packet path).
+#ifdef IPERF_PROF
         if (iterations >= diag_next_iter) {
             diag_next_iter = iterations + 50000000;
             println("IOMGR DIAG: iters=%lu rx=%lu tx=%lu drop_to_vnflet=%lu drop_to_driver=%lu vnflet_egress=%u out_ring=%u",
@@ -1154,6 +1166,7 @@ void main_iomgr(struct shm *data_shared_previous, struct shm *data_shared_next, 
                     rte_ring_count(&shm_trustlet[seg_end-1]->egress.ring),
                     rte_ring_count(&data_shared_next->ingress.ring));
         }
+#endif /* IPERF_PROF */
 
         /* num_enq = rte_ring_sp_enqueue_bulk(&buf->egress.ring, (void**)(&(deq_objs[0])), num_deq, NULL); */
         /* total_tx += num_enq; */
@@ -1426,9 +1439,13 @@ void main_iperf(struct shm *data_shared_iomgr, struct shm *data_shared_pool) {
     // exit(1) directly, so atexit is the only hook that always runs.
     atexit(iperf_dump_tcpstat);
     println("Calling iperf_main (argc=%d)", (int)(sizeof(argv) / sizeof(argv[0])) - 1);
+#ifdef IPERF_PROF
     uint64_t prof_t0 = rte_rdtsc();
+#endif
     int rc = iperf_main((int)(sizeof(argv) / sizeof(argv[0])) - 1, argv);
+#ifdef IPERF_PROF
     prof_report(rte_rdtsc() - prof_t0);
+#endif
     fflush(stdout);
     fflush(stderr);
     extern uint64_t g_iperf_rx_pkts, g_iperf_tx_pkts, g_iperf_tx_drop;
